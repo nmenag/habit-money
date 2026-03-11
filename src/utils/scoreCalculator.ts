@@ -1,4 +1,10 @@
-import { endOfMonth, format, parseISO, startOfMonth, subMonths } from 'date-fns';
+import {
+  endOfMonth,
+  format,
+  parseISO,
+  startOfMonth,
+  subMonths,
+} from 'date-fns';
 import { Transaction } from '../store/useStore';
 
 export interface ScoreData {
@@ -12,7 +18,9 @@ export interface ScoreData {
   insights: string[];
 }
 
-export const calculateFinancialScore = (transactions: Transaction[]): ScoreData => {
+export const calculateFinancialScore = (
+  transactions: Transaction[],
+): ScoreData => {
   const now = new Date();
   const currentMonthStart = startOfMonth(now);
   const currentMonthEnd = endOfMonth(now);
@@ -43,7 +51,8 @@ export const calculateFinancialScore = (transactions: Transaction[]): ScoreData 
         spendingDates.add(format(txDate, 'yyyy-MM-dd'));
 
         if (t.categoryId) {
-          currentCategoryExpense[t.categoryId] = (currentCategoryExpense[t.categoryId] || 0) + amount;
+          currentCategoryExpense[t.categoryId] =
+            (currentCategoryExpense[t.categoryId] || 0) + amount;
         }
       }
     }
@@ -56,7 +65,8 @@ export const calculateFinancialScore = (transactions: Transaction[]): ScoreData 
         lastExpense += amount;
 
         if (t.categoryId) {
-          lastCategoryExpense[t.categoryId] = (lastCategoryExpense[t.categoryId] || 0) + amount;
+          lastCategoryExpense[t.categoryId] =
+            (lastCategoryExpense[t.categoryId] || 0) + amount;
         }
       }
     }
@@ -64,10 +74,14 @@ export const calculateFinancialScore = (transactions: Transaction[]): ScoreData 
 
   // 1. Savings Rate
   // Let's protect against division by zero
-  const savingsRate = currentIncome > 0 ? Math.max(0, (currentIncome - currentExpense) / currentIncome) : 0;
+  const savingsRate =
+    currentIncome > 0
+      ? Math.max(0, (currentIncome - currentExpense) / currentIncome)
+      : 0;
 
   // 2. Expense Growth
-  const expenseGrowth = lastExpense > 0 ? ((currentExpense - lastExpense) / lastExpense) * 100 : 0;
+  const expenseGrowth =
+    lastExpense > 0 ? ((currentExpense - lastExpense) / lastExpense) * 100 : 0;
 
   // 3. Spending Days
   const spendingDays = spendingDates.size;
@@ -80,12 +94,13 @@ export const calculateFinancialScore = (transactions: Transaction[]): ScoreData 
   let score = 50;
 
   // Modify score based on savings rate (+0 to +30)
-  if (savingsRate >= 0.20) score += 30;
-  else if (savingsRate >= 0.10) score += 20;
+  if (savingsRate >= 0.2) score += 30;
+  else if (savingsRate >= 0.1) score += 20;
   else if (savingsRate > 0) score += 10;
 
   // Modifiers for Expense Growth (-20 to +20)
-  if (expenseGrowth < 0) score += 20; // Good! Spent less than last month
+  if (expenseGrowth < 0)
+    score += 20; // Good! Spent less than last month
   else if (expenseGrowth > 10) score -= 15; // Bad, spent a lot more
 
   // Daily spending habits (-15 to 0)
@@ -118,7 +133,7 @@ export const calculateFinancialScore = (transactions: Transaction[]): ScoreData 
     let monthIncome = 0;
     let monthExpense = 0;
 
-    transactions.forEach(t => {
+    transactions.forEach((t) => {
       const d = parseISO(t.date);
       if (d >= monthStart && d <= monthEnd) {
         if (t.type === 'income') monthIncome += t.amount;
@@ -138,13 +153,19 @@ export const calculateFinancialScore = (transactions: Transaction[]): ScoreData 
   // Monthly Insights
   const insights: string[] = [];
   if (expenseGrowth > 0 && lastExpense > 0) {
-    insights.push(`Your overall expenses grew by ${expenseGrowth.toFixed(1)}% compared to last month.`);
+    insights.push(
+      `Your overall expenses grew by ${expenseGrowth.toFixed(1)}% compared to last month.`,
+    );
   } else if (expenseGrowth < 0) {
-    insights.push(`Great job! You spent ${Math.abs(expenseGrowth).toFixed(1)}% less than last month.`);
+    insights.push(
+      `Great job! You spent ${Math.abs(expenseGrowth).toFixed(1)}% less than last month.`,
+    );
   }
 
   if (spendingDays > 25) {
-    insights.push(`You spent money on ${spendingDays} days this month. Try a "no-spend" day challenge!`);
+    insights.push(
+      `You spent money on ${spendingDays} days this month. Try a "no-spend" day challenge!`,
+    );
   }
 
   return {
@@ -155,6 +176,6 @@ export const calculateFinancialScore = (transactions: Transaction[]): ScoreData 
     spendingDays,
     spentMoreThanEarned,
     streak,
-    insights
+    insights,
   };
 };

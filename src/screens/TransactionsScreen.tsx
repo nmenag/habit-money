@@ -1,5 +1,11 @@
 import React from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { TransactionItem } from '../components/TransactionItem';
 import { useStore } from '../store/useStore';
 
@@ -13,7 +19,7 @@ export const TransactionsScreen = ({ navigation }: any) => {
         data={transactions}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
-          const category = categories.find(c => c.id === item.categoryId);
+          const category = categories.find((c) => c.id === item.categoryId);
           return <TransactionItem transaction={item} category={category} />;
         }}
         ListEmptyComponent={
@@ -65,5 +71,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
-  }
+  },
 });

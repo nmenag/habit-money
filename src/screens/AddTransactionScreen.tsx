@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { TransactionType, useStore } from '../store/useStore';
 
 export const AddTransactionScreen = ({ navigation }: any) => {
@@ -12,9 +20,10 @@ export const AddTransactionScreen = ({ navigation }: any) => {
   const [note, setNote] = useState('');
   const [selectedAccount, setSelectedAccount] = useState(accounts[0]?.id || '');
 
-  // Filter categories by selected type
   const availableCategories = categories.filter((c) => c.type === type);
-  const [selectedCategory, setSelectedCategory] = useState(availableCategories[0]?.id || '');
+  const [selectedCategory, setSelectedCategory] = useState(
+    availableCategories[0]?.id || '',
+  );
 
   const handleSave = () => {
     if (!amount || isNaN(Number(amount))) {
@@ -33,7 +42,7 @@ export const AddTransactionScreen = ({ navigation }: any) => {
       categoryId: selectedCategory || null,
       accountId: selectedAccount,
       date: new Date().toISOString(),
-      note
+      note,
     });
 
     navigation.goBack();
@@ -46,13 +55,21 @@ export const AddTransactionScreen = ({ navigation }: any) => {
           style={[styles.typeBtn, type === 'expense' && styles.activeExpense]}
           onPress={() => setType('expense')}
         >
-          <Text style={[styles.typeText, type === 'expense' && styles.activeText]}>Expense</Text>
+          <Text
+            style={[styles.typeText, type === 'expense' && styles.activeText]}
+          >
+            Expense
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.typeBtn, type === 'income' && styles.activeIncome]}
           onPress={() => setType('income')}
         >
-          <Text style={[styles.typeText, type === 'income' && styles.activeText]}>Income</Text>
+          <Text
+            style={[styles.typeText, type === 'income' && styles.activeText]}
+          >
+            Income
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -70,29 +87,49 @@ export const AddTransactionScreen = ({ navigation }: any) => {
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Account</Text>
         <View style={styles.chips}>
-          {accounts.map(acc => (
+          {accounts.map((acc) => (
             <TouchableOpacity
               key={acc.id}
-              style={[styles.chip, selectedAccount === acc.id && styles.activeChip]}
+              style={[
+                styles.chip,
+                selectedAccount === acc.id && styles.activeChip,
+              ]}
               onPress={() => setSelectedAccount(acc.id)}
             >
-              <Text style={[styles.chipText, selectedAccount === acc.id && styles.activeChipText]}>{acc.name}</Text>
+              <Text
+                style={[
+                  styles.chipText,
+                  selectedAccount === acc.id && styles.activeChipText,
+                ]}
+              >
+                {acc.name}
+              </Text>
             </TouchableOpacity>
           ))}
-          {accounts.length === 0 && <Text style={{ color: 'red' }}>Please create an account first</Text>}
+          {accounts.length === 0 && (
+            <Text style={{ color: 'red' }}>Please create an account first</Text>
+          )}
         </View>
       </View>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Category</Text>
         <View style={styles.chips}>
-          {availableCategories.map(cat => (
+          {availableCategories.map((cat) => (
             <TouchableOpacity
               key={cat.id}
-              style={[styles.chip, selectedCategory === cat.id && styles.activeChip]}
+              style={[
+                styles.chip,
+                selectedCategory === cat.id && styles.activeChip,
+              ]}
               onPress={() => setSelectedCategory(cat.id)}
             >
-              <Text style={[styles.chipText, selectedCategory === cat.id && styles.activeChipText]}>
+              <Text
+                style={[
+                  styles.chipText,
+                  selectedCategory === cat.id && styles.activeChipText,
+                ]}
+              >
                 {cat.name}
               </Text>
             </TouchableOpacity>
@@ -207,5 +244,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-  }
+  },
 });

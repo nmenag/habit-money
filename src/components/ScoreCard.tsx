@@ -9,9 +9,12 @@ interface Props {
 export const ScoreCard: React.FC<Props> = ({ scoreData }) => {
   const getStatusColor = () => {
     switch (scoreData.status) {
-      case 'healthy': return '#4caf50';
-      case 'warning': return '#ff9800';
-      case 'overspending': return '#f44336';
+      case 'healthy':
+        return '#4caf50';
+      case 'warning':
+        return '#ff9800';
+      case 'overspending':
+        return '#f44336';
     }
   };
 
@@ -20,17 +23,23 @@ export const ScoreCard: React.FC<Props> = ({ scoreData }) => {
       <Text style={styles.title}>Financial Discipline Score</Text>
 
       <View style={styles.scoreContainer}>
-        <Text style={[styles.score, { color: getStatusColor() }]}>{scoreData.score}</Text>
+        <Text style={[styles.score, { color: getStatusColor() }]}>
+          {scoreData.score}
+        </Text>
         <Text style={styles.outOf}>/ 100</Text>
       </View>
 
       <View style={styles.streakContainer}>
-        <Text style={styles.streakText}>🔥 {scoreData.streak} positive months in a row</Text>
+        <Text style={styles.streakText}>
+          🔥 {scoreData.streak} positive months in a row
+        </Text>
       </View>
 
       <View style={styles.insights}>
         {scoreData.insights.map((insight, index) => (
-          <Text key={index} style={styles.insightText}>• {insight}</Text>
+          <Text key={index} style={styles.insightText}>
+            • {insight}
+          </Text>
         ))}
       </View>
     </View>

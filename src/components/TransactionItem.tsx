@@ -13,15 +13,30 @@ export const TransactionItem: React.FC<Props> = ({ transaction, category }) => {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.iconContainer, { backgroundColor: category?.color || '#eee' }]}>
-        <Text style={styles.icon}>{category?.icon ? category.name[0] : '?'}</Text>
+      <View
+        style={[
+          styles.iconContainer,
+          { backgroundColor: category?.color || '#eee' },
+        ]}
+      >
+        <Text style={styles.icon}>
+          {category?.icon ? category.name[0] : '?'}
+        </Text>
       </View>
       <View style={styles.details}>
-        <Text style={styles.categoryName}>{category?.name || 'Uncategorized'}</Text>
-        <Text style={styles.date}>{format(parseISO(transaction.date), 'MMM d, yyyy')}</Text>
-        {transaction.note && <Text style={styles.note}>{transaction.note}</Text>}
+        <Text style={styles.categoryName}>
+          {category?.name || 'Uncategorized'}
+        </Text>
+        <Text style={styles.date}>
+          {format(parseISO(transaction.date), 'MMM d, yyyy')}
+        </Text>
+        {transaction.note && (
+          <Text style={styles.note}>{transaction.note}</Text>
+        )}
       </View>
-      <Text style={[styles.amount, { color: isIncome ? '#4caf50' : '#f44336' }]}>
+      <Text
+        style={[styles.amount, { color: isIncome ? '#4caf50' : '#f44336' }]}
+      >
         {isIncome ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
       </Text>
     </View>

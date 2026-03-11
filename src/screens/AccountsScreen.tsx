@@ -1,22 +1,20 @@
 import React from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { AccountCard } from '../components/AccountCard';
 import { useStore } from '../store/useStore';
 
-export const AccountsScreen = () => {
+export const AccountsScreen = ({ navigation }: any) => {
   const accounts = useStore((state) => state.accounts);
-  const addAccount = useStore((state) => state.addAccount);
+  const deleteAccount = useStore((state) => state.deleteAccount);
 
-  const handleAddQuickAccount = () => {
-    // For MVP, randomly generated account mock
-    addAccount({
-      id: Date.now().toString(),
-      name: 'New Wallet ' + Math.floor(Math.random() * 100),
-      type: 'cash',
-      initialBalance: 0,
-      currentBalance: 0,
-      color: '#00bcd4'
-    });
+  const handleAddAccount = () => {
+    navigation.navigate('AddAccount');
   };
 
   return (
@@ -24,7 +22,19 @@ export const AccountsScreen = () => {
       <FlatList
         data={accounts}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <AccountCard account={item} />}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('AddAccount', { account: item })}
+          >
+            <AccountCard
+              account={item}
+              onDelete={
+                accounts.length > 1 ? () => deleteAccount(item.id) : undefined
+              }
+            />
+          </TouchableOpacity>
+        )}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyText}>No accounts found.</Text>
@@ -33,8 +43,8 @@ export const AccountsScreen = () => {
       />
 
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddQuickAccount}>
-          <Text style={styles.addButtonText}>Add Demo Account</Text>
+        <TouchableOpacity style={styles.addButton} onPress={handleAddAccount}>
+          <Text style={styles.addButtonText}>Add Account</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -69,5 +79,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
-  }
+  },
 });

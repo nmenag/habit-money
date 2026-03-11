@@ -7,7 +7,6 @@ export const getDb = () => {
 export const initDb = () => {
   const db = getDb();
 
-  // Create tables if they don't exist
   db.execSync(`
     PRAGMA journal_mode = WAL;
     CREATE TABLE IF NOT EXISTS accounts (
@@ -38,28 +37,57 @@ export const initDb = () => {
     );
   `);
 
-  // Seed default categories if none exist
-  const count = db.getFirstSync<{ count: number }>('SELECT COUNT(*) as count FROM categories');
+  const count = db.getFirstSync<{ count: number }>(
+    'SELECT COUNT(*) as count FROM categories',
+  );
   if (count && count.count === 0) {
     const defaultCategories = [
       { id: '1', name: 'Food', type: 'expense', icon: 'fast-food' },
       { id: '2', name: 'Transport', type: 'expense', icon: 'car' },
       { id: '3', name: 'Housing', type: 'expense', icon: 'home' },
-      { id: '4', name: 'Entertainment', type: 'expense', icon: 'game-controller' },
+      {
+        id: '4',
+        name: 'Entertainment',
+        type: 'expense',
+        icon: 'game-controller',
+      },
       { id: '5', name: 'Health', type: 'expense', icon: 'medkit' },
       { id: '6', name: 'Other', type: 'expense', icon: 'list' },
       { id: '7', name: 'Salary', type: 'income', icon: 'cash' },
       { id: '8', name: 'Other Income', type: 'income', icon: 'wallet' },
     ];
 
-    // Using simple statements instead of loops for large production, but this is an MVP seed.
-    const statement = db.prepareSync('INSERT INTO categories (id, name, type, icon) VALUES ($id, $name, $type, $icon)');
+    const statement = db.prepareSync(
+      'INSERT INTO categories (id, name, type, icon) VALUES ($id, $name, $type, $icon)',
+    );
     try {
-      defaultCategories.forEach(cat => {
-        statement.executeSync({ $id: cat.id, $name: cat.name, $type: cat.type, $icon: cat.icon });
+      defaultCategories.forEach((cat) => {
+        statement.executeSync({
+          $id: cat.id,
+          $name: cat.name,
+          $type: cat.type,
+          $icon: cat.icon,
+        });
       });
     } finally {
       statement.finalizeSync();
     }
+  }
+
+  const accountCount = db.getFirstSync<{ count: number }>(
+    'SELECT COUNT(*) as count FROM accounts',
+  );
+  if (accountCount && accountCount.count === 0) {
+    db.runSync(
+      'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color) VALUES ($id, $name, $type, $initialBalance, $currentBalance, $color)',
+      {
+        $id: '1',
+        $name: 'Main',
+        $type: 'cash',
+        $initialBalance: 0,
+        $currentBalance: 0,
+        $color: '#2196f3',
+      } as any,
+    );
   }
 };

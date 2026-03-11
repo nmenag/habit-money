@@ -1,17 +1,41 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Account } from '../store/useStore';
 
 interface Props {
   account: Account;
+  onDelete?: () => void;
 }
 
-export const AccountCard: React.FC<Props> = ({ account }) => {
+export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
+  const handleDelete = () => {
+    if (onDelete) {
+      Alert.alert(
+        'Delete Account',
+        `Are you sure you want to delete ${account.name}? This will also delete all associated transactions.`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: onDelete },
+        ],
+      );
+    }
+  };
+
   return (
-    <View style={[styles.card, { borderLeftColor: account.color || '#4caf50' }]}>
-      <Text style={styles.name}>{account.name}</Text>
-      <Text style={styles.type}>{account.type.toUpperCase()}</Text>
-      <Text style={styles.balance}>${account.currentBalance.toFixed(2)}</Text>
+    <View
+      style={[styles.card, { borderLeftColor: account.color || '#4caf50' }]}
+    >
+      <View style={styles.content}>
+        <Text style={styles.name}>{account.name}</Text>
+        <Text style={styles.type}>{account.type.toUpperCase()}</Text>
+        <Text style={styles.balance}>${account.currentBalance.toFixed(2)}</Text>
+      </View>
+      {onDelete && (
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+          <Ionicons name="trash-outline" size={24} color="#f44336" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -28,6 +52,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  content: {
+    flex: 1,
   },
   name: {
     fontSize: 18,
@@ -44,5 +74,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     marginTop: 8,
+  },
+  deleteButton: {
+    padding: 8,
   },
 });

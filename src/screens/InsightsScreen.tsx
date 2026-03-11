@@ -13,14 +13,22 @@ export const InsightsScreen = () => {
 
       <View style={styles.card}>
         <Text style={styles.label}>Savings Rate</Text>
-        <Text style={styles.value}>{(scoreData.savingsRate * 100).toFixed(1)}%</Text>
+        <Text style={styles.value}>
+          {(scoreData.savingsRate * 100).toFixed(1)}%
+        </Text>
         <Text style={styles.subtext}>Recommendation: Keep it above 20%</Text>
       </View>
 
       <View style={styles.card}>
         <Text style={styles.label}>Expense Growth</Text>
-        <Text style={[styles.value, { color: scoreData.expenseGrowth > 0 ? '#f44336' : '#4caf50' }]}>
-          {scoreData.expenseGrowth > 0 ? '+' : ''}{scoreData.expenseGrowth.toFixed(1)}%
+        <Text
+          style={[
+            styles.value,
+            { color: scoreData.expenseGrowth > 0 ? '#f44336' : '#4caf50' },
+          ]}
+        >
+          {scoreData.expenseGrowth > 0 ? '+' : ''}
+          {scoreData.expenseGrowth.toFixed(1)}%
         </Text>
         <Text style={styles.subtext}>Compared to last month</Text>
       </View>
@@ -36,7 +44,6 @@ export const InsightsScreen = () => {
           <Text style={styles.insightText}>💡 {insight}</Text>
         </View>
       ))}
-
     </ScrollView>
   );
 };
@@ -93,5 +100,5 @@ const styles = StyleSheet.create({
     color: '#1565c0',
     fontSize: 14,
     lineHeight: 20,
-  }
+  },
 });
