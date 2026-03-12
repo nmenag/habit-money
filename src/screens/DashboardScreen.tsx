@@ -9,11 +9,7 @@ import {
   View,
 } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
-import {
-  BannerAd,
-  BannerAdSize,
-  TestIds,
-} from 'react-native-google-mobile-ads';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 import { ScoreCard } from '../components/ScoreCard';
 import { useStore, useTranslation } from '../store/useStore';
 import { calculateFinancialScore } from '../utils/scoreCalculator';
@@ -152,12 +148,7 @@ export const DashboardScreen = ({ navigation }: any) => {
           </View>
         )}
 
-        <View style={styles.adContainer}>
-          <BannerAd
-            unitId={TestIds.BANNER}
-            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          />
-        </View>
+        <BannerAdComponent />
       </ScrollView>
 
       <TouchableOpacity
@@ -259,11 +250,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: 'center',
     color: '#34495e',
-  },
-  adContainer: {
-    marginTop: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   fab: {
     position: 'absolute',

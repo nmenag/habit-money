@@ -2,7 +2,12 @@ import { format, parseISO } from 'date-fns';
 import { enUS, es } from 'date-fns/locale';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Category, Transaction, useStore, useTranslation } from '../store/useStore';
+import {
+  Category,
+  Transaction,
+  useStore,
+  useTranslation,
+} from '../store/useStore';
 
 interface Props {
   transaction: Transaction;

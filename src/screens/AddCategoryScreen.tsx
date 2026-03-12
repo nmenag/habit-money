@@ -10,7 +10,12 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Category, TransactionType, useStore, useTranslation } from '../store/useStore';
+import {
+  Category,
+  TransactionType,
+  useStore,
+  useTranslation,
+} from '../store/useStore';
 
 const COLORS = [
   '#f44336',

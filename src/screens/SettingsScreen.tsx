@@ -3,15 +3,33 @@ import React from 'react';
 import {
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { useStore, useTranslation } from '../store/useStore';
+import { exportTransactionsToCSV } from '../utils/csvExport';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 
 export const SettingsScreen = ({ navigation }: any) => {
-  const { setLanguage } = useStore();
+  const {
+    setLanguage,
+    transactions,
+    accounts,
+    categories,
+    isPremiumUser,
+    setPremium,
+    incrementActionCounter,
+    checkAndShowAd,
+  } = useStore();
   const { t, language } = useTranslation();
+
+  const handleExport = async () => {
+    await exportTransactionsToCSV(transactions, accounts, categories);
+    incrementActionCounter();
+    checkAndShowAd();
+  };
 
   const SETTINGS_LINKS = [
     { name: t('manageAccounts'), icon: 'wallet-outline', screen: 'Accounts' },
@@ -55,6 +73,55 @@ export const SettingsScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('premium')}</Text>
+        <View style={styles.optionsContainer}>
+          <View style={styles.option}>
+            <View style={styles.optionInfo}>
+              <Ionicons
+                name={isPremiumUser ? 'star' : 'star-outline'}
+                size={24}
+                color={isPremiumUser ? '#f1c40f' : '#555'}
+                style={styles.menuIcon}
+              />
+              <Text style={styles.optionText}>
+                {isPremiumUser ? t('premiumVersion') : t('freeVersion')}
+              </Text>
+            </View>
+            <Switch
+              value={isPremiumUser}
+              onValueChange={setPremium}
+              trackColor={{ false: '#767577', true: '#81b0ff' }}
+              thumbColor={isPremiumUser ? '#2196f3' : '#f4f3f4'}
+            />
+          </View>
+        </View>
+        <View style={styles.sectionInfo}>
+          <Text style={styles.sectionInfoText}>{t('premiumDesc')}</Text>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('settings')}</Text>
+        <View style={styles.optionsContainer}>
+          <TouchableOpacity style={styles.option} onPress={handleExport}>
+            <View style={styles.optionInfo}>
+              <Ionicons
+                name="download-outline"
+                size={24}
+                color="#555"
+                style={styles.menuIcon}
+              />
+              <Text style={styles.optionText}>{t('exportData')}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.sectionInfo}>
+          <Text style={styles.sectionInfoText}>{t('exportDataDesc')}</Text>
+        </View>
+      </View>
+
+      <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('language')}</Text>
         <View style={styles.optionsContainer}>
           {LANGUAGES.map((item) => (
@@ -84,6 +151,7 @@ export const SettingsScreen = ({ navigation }: any) => {
       </View>
 
       <View style={{ height: 40 }} />
+      <BannerAdComponent />
     </ScrollView>
   );
 };

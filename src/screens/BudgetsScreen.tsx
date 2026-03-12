@@ -12,8 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Budget, useStore, useTranslation } from '../store/useStore';
 
 export const BudgetsScreen = ({ navigation }: any) => {
-  const { budgets, deleteBudget, transactions, formatCurrency } =
-    useStore();
+  const { budgets, deleteBudget, transactions, formatCurrency } = useStore();
   const { t, language } = useTranslation();
 
   const handleDelete = (budget: Budget) => {

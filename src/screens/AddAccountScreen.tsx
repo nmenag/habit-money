@@ -9,7 +9,12 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Account, AccountType, useStore, useTranslation } from '../store/useStore';
+import {
+  Account,
+  AccountType,
+  useStore,
+  useTranslation,
+} from '../store/useStore';
 
 const COLORS = [
   '#f44336',
@@ -47,7 +52,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
   );
   const [color, setColor] = useState(editingAccount?.color || COLORS[0]);
   const [selectedCurrency, setSelectedCurrency] = useState(
-    editingAccount?.currency || 'USD',
+    editingAccount?.currency || 'COP',
   );
 
   const handleSave = () => {

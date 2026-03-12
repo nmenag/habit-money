@@ -1,5 +1,6 @@
 import * as Localization from 'expo-localization';
 import { create } from 'zustand';
+import { interstitialManager } from '../ads/InterstitialManager';
 import { getDb } from '../database/schema';
 import { Language, translations } from '../i18n/translations';
 
@@ -50,12 +51,15 @@ interface AppState {
   budgets: Budget[];
   language: Language;
   isLoaded: boolean;
+  isPremiumUser: boolean;
+  actionCounter: number;
 
   loadData: () => void;
   setLanguage: (lang: Language) => void;
   addAccount: (account: Account) => void;
   editAccount: (account: Account) => void;
   deleteAccount: (id: string) => void;
+  setPremium: (isPremium: boolean) => void;
 
   addTransaction: (transaction: Transaction) => void;
   editTransaction: (transaction: Transaction) => void;
@@ -74,6 +78,8 @@ interface AppState {
   editBudget: (budget: Budget) => void;
   deleteBudget: (id: string) => void;
 
+  incrementActionCounter: () => void;
+  checkAndShowAd: () => Promise<void>;
   formatCurrency: (amount: number, currencyCode?: string) => string;
 }
 
@@ -84,6 +90,8 @@ export const useStore = create<AppState>((set, get) => ({
   budgets: [],
   language: 'en',
   isLoaded: false,
+  isPremiumUser: false,
+  actionCounter: 0,
 
   loadData: () => {
     const db = getDb();
@@ -95,12 +103,16 @@ export const useStore = create<AppState>((set, get) => ({
     const budgets = db.getAllSync<Budget>('SELECT * FROM budgets');
     let currencySetting;
     let languageSetting;
+    let premiumSetting;
     try {
       currencySetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'currency'",
       );
       languageSetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'language'",
+      );
+      premiumSetting = db.getFirstSync<{ val: string }>(
+        "SELECT val FROM settings WHERE id = 'premium'",
       );
     } catch (e) {
       console.warn('Could not load settings from DB:', e);
@@ -131,6 +143,7 @@ export const useStore = create<AppState>((set, get) => ({
       categories,
       budgets,
       language: finalLanguage,
+      isPremiumUser: premiumSetting?.val === 'true',
       isLoaded: true,
     });
   },
@@ -159,7 +172,7 @@ export const useStore = create<AppState>((set, get) => ({
         account.initialBalance ?? 0,
         account.currentBalance ?? 0,
         account.color ?? null,
-        account.currency ?? 'USD',
+        account.currency ?? 'COP',
       ],
     );
     set((state) => ({ accounts: [...state.accounts, account] }));
@@ -175,7 +188,7 @@ export const useStore = create<AppState>((set, get) => ({
         account.initialBalance ?? 0,
         account.currentBalance ?? 0,
         account.color ?? null,
-        account.currency ?? 'USD',
+        account.currency ?? 'COP',
         account.id ?? null,
       ],
     );
@@ -191,6 +204,19 @@ export const useStore = create<AppState>((set, get) => ({
       accounts: state.accounts.filter((a) => a.id !== id),
       transactions: state.transactions.filter((t) => t.accountId !== id),
     }));
+  },
+
+  setPremium: (isPremium) => {
+    set({ isPremiumUser: isPremium });
+    try {
+      const db = getDb();
+      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+        'premium',
+        String(isPremium),
+      ]);
+    } catch (error) {
+      console.error('setPremium DB Error:', error);
+    }
   },
 
   addTransaction: (transaction) => {
@@ -235,6 +261,9 @@ export const useStore = create<AppState>((set, get) => ({
         accounts: updatedAccounts,
       };
     });
+
+    get().incrementActionCounter();
+    get().checkAndShowAd();
   },
 
   editTransaction: (transaction) => {
@@ -253,9 +282,9 @@ export const useStore = create<AppState>((set, get) => ({
     try {
       // Revert old transaction amount
       const oldModifier =
-          oldTransaction.type === 'income'
-            ? -oldTransaction.amount
-            : oldTransaction.amount;
+        oldTransaction.type === 'income'
+          ? -oldTransaction.amount
+          : oldTransaction.amount;
       db.runSync(
         'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
         [oldModifier ?? 0, oldTransaction.accountId ?? ''],
@@ -263,9 +292,9 @@ export const useStore = create<AppState>((set, get) => ({
 
       // Apply new transaction amount
       const newModifier =
-          transaction.type === 'income'
-            ? transaction.amount
-            : -transaction.amount;
+        transaction.type === 'income'
+          ? transaction.amount
+          : -transaction.amount;
       db.runSync(
         'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
         [newModifier ?? 0, transaction.accountId ?? ''],
@@ -286,6 +315,8 @@ export const useStore = create<AppState>((set, get) => ({
       );
 
       get().loadData();
+      get().incrementActionCounter();
+      get().checkAndShowAd();
     } catch (error) {
       console.error('editTransaction Error:', error);
       throw error;
@@ -318,6 +349,9 @@ export const useStore = create<AppState>((set, get) => ({
         accounts: updatedAccounts,
       };
     });
+
+    get().incrementActionCounter();
+    get().checkAndShowAd();
   },
 
   addCategory: (category) => {
@@ -403,7 +437,7 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   formatCurrency: (amount: number, currencyCode?: string) => {
-    const currency = currencyCode || 'USD';
+    const currency = currencyCode || 'COP';
     const symbols: { [key: string]: string } = {
       USD: '$',
       COP: '$',
@@ -422,6 +456,20 @@ export const useStore = create<AppState>((set, get) => ({
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
+  },
+
+  incrementActionCounter: () => {
+    set((state) => ({ actionCounter: state.actionCounter + 1 }));
+  },
+
+  checkAndShowAd: async () => {
+    const { actionCounter, isPremiumUser } = get();
+    if (isPremiumUser) return;
+
+    if (actionCounter >= 3) {
+      await interstitialManager.show();
+      set({ actionCounter: 0 });
+    }
   },
 }));
 

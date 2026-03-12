@@ -23,7 +23,7 @@ export const initDb = () => {
         initialBalance REAL NOT NULL,
         currentBalance REAL NOT NULL,
         color TEXT,
-        currency TEXT NOT NULL DEFAULT 'USD'
+        currency TEXT NOT NULL DEFAULT 'COP'
       );
     `);
   } catch (e) {
@@ -31,7 +31,9 @@ export const initDb = () => {
   }
 
   try {
-    db.execSync("ALTER TABLE accounts ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD';");
+    db.execSync(
+      "ALTER TABLE accounts ADD COLUMN currency TEXT NOT NULL DEFAULT 'COP';",
+    );
   } catch (e) {
     // Column might already exist
   }
@@ -157,7 +159,7 @@ export const initDb = () => {
   if (accountCount && accountCount.count === 0) {
     db.runSync(
       'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color, currency) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      ['1', 'Main', 'cash', 0, 0, '#2196f3', 'USD'],
+      ['1', 'Main', 'cash', 0, 0, '#2196f3', 'COP'],
     );
   }
 
@@ -167,7 +169,7 @@ export const initDb = () => {
   if (settingsCount && settingsCount.count === 0) {
     db.runSync('INSERT INTO settings (id, val) VALUES (?, ?)', [
       'currency',
-      'USD',
+      'COP',
     ]);
   }
 };

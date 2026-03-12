@@ -2,6 +2,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import mobileAds from 'react-native-google-mobile-ads';
+import { interstitialManager } from './src/ads/InterstitialManager';
 import { initDb } from './src/database/schema';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { useStore } from './src/store/useStore';
@@ -13,10 +15,12 @@ export default function App() {
   useEffect(() => {
     const setup = async () => {
       try {
+        await mobileAds().initialize();
+        interstitialManager.init();
         initDb();
         setDbInitialized(true);
       } catch (e) {
-        console.error('Failed to initialize local DB', e);
+        console.error('Failed to initialize local DB or Ads', e);
       }
     };
     setup();

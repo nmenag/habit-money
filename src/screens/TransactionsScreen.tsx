@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../store/useStore';
 
@@ -80,6 +81,7 @@ export const TransactionsScreen = ({ navigation }: any) => {
           </View>
         }
       />
+      <BannerAdComponent />
       <TouchableOpacity
         style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 8 }]}
         onPress={() => navigation.navigate('AddTransaction')}

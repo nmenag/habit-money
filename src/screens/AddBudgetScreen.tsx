@@ -96,9 +96,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>
-          {t('monthlyLimit')} (USD)
-        </Text>
+        <Text style={styles.label}>{t('monthlyLimit')} (USD)</Text>
         <TextInput
           style={styles.amountInput}
           placeholder="0.00"

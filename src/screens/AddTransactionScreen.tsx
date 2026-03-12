@@ -15,13 +15,8 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
   const editingTransaction = route.params?.transaction;
   const isEditing = !!route.params?.isEditing;
 
-  const {
-    accounts,
-    categories,
-    budgets,
-    addTransaction,
-    editTransaction,
-  } = useStore();
+  const { accounts, categories, budgets, addTransaction, editTransaction } =
+    useStore();
   const { t, language } = useTranslation();
 
   const [type, setType] = useState<TransactionType>(
@@ -84,7 +79,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
   const insets = useSafeAreaInsets();
 
   const activeAccount = accounts.find((acc) => acc.id === selectedAccount);
-  const displayCurrency = activeAccount?.currency || 'USD';
+  const displayCurrency = activeAccount?.currency || 'COP';
 
   return (
     <ScrollView
