@@ -3,6 +3,8 @@ import { create } from 'zustand';
 import { interstitialManager } from '../ads/InterstitialManager';
 import { getDb } from '../database/schema';
 import { Language, translations } from '../i18n/translations';
+import { AnalyticsManager } from '../services/analytics/AnalyticsManager';
+import { AnalyticsReport } from '../services/analytics/types';
 
 export type AccountType = 'cash' | 'bank' | 'credit';
 export type TransactionType = 'income' | 'expense';
@@ -53,6 +55,7 @@ interface AppState {
   isLoaded: boolean;
   isPremiumUser: boolean;
   actionCounter: number;
+  analyticsReport: AnalyticsReport | null;
 
   loadData: () => void;
   setLanguage: (lang: Language) => void;
@@ -81,6 +84,7 @@ interface AppState {
   incrementActionCounter: () => void;
   checkAndShowAd: () => Promise<void>;
   formatCurrency: (amount: number, currencyCode?: string) => string;
+  refreshAnalytics: () => Promise<void>;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -92,6 +96,7 @@ export const useStore = create<AppState>((set, get) => ({
   isLoaded: false,
   isPremiumUser: false,
   actionCounter: 0,
+  analyticsReport: null,
 
   loadData: () => {
     const db = getDb();
@@ -146,6 +151,8 @@ export const useStore = create<AppState>((set, get) => ({
       isPremiumUser: premiumSetting?.val === 'true',
       isLoaded: true,
     });
+
+    get().refreshAnalytics();
   },
 
   setLanguage: (lang: Language) => {
@@ -264,6 +271,7 @@ export const useStore = create<AppState>((set, get) => ({
 
     get().incrementActionCounter();
     get().checkAndShowAd();
+    get().refreshAnalytics();
   },
 
   editTransaction: (transaction) => {
@@ -317,6 +325,7 @@ export const useStore = create<AppState>((set, get) => ({
       get().loadData();
       get().incrementActionCounter();
       get().checkAndShowAd();
+      get().refreshAnalytics();
     } catch (error) {
       console.error('editTransaction Error:', error);
       throw error;
@@ -352,6 +361,7 @@ export const useStore = create<AppState>((set, get) => ({
 
     get().incrementActionCounter();
     get().checkAndShowAd();
+    get().refreshAnalytics();
   },
 
   addCategory: (category) => {
@@ -469,6 +479,15 @@ export const useStore = create<AppState>((set, get) => ({
     if (actionCounter >= 3) {
       await interstitialManager.show();
       set({ actionCounter: 0 });
+    }
+  },
+
+  refreshAnalytics: async () => {
+    try {
+      const report = await AnalyticsManager.generateFullReport();
+      set({ analyticsReport: report });
+    } catch (error) {
+      console.error('refreshAnalytics Error:', error);
     }
   },
 }));
