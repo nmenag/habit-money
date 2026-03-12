@@ -9,17 +9,21 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TransactionType, useStore } from '../store/useStore';
+import { TransactionType, useStore, useTranslation } from '../store/useStore';
 
 export const AddTransactionScreen = ({ route, navigation }: any) => {
   const editingTransaction = route.params?.transaction;
   const isEditing = !!route.params?.isEditing;
 
-  const accounts = useStore((state) => state.accounts);
-  const categories = useStore((state) => state.categories);
-  const budgets = useStore((state) => state.budgets);
-  const addTransaction = useStore((state) => state.addTransaction);
-  const editTransaction = useStore((state) => state.editTransaction);
+  const {
+    accounts,
+    categories,
+    budgets,
+    addTransaction,
+    editTransaction,
+    currency,
+  } = useStore();
+  const { t, language } = useTranslation();
 
   const [type, setType] = useState<TransactionType>(
     editingTransaction?.type || 'expense',
@@ -40,15 +44,13 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
     editingTransaction?.budgetId || '',
   );
 
-  const currency = useStore((state) => state.currency);
-
   const handleSave = () => {
     if (!amount || isNaN(Number(amount))) {
-      Alert.alert('Error', 'Please enter a valid amount.');
+      Alert.alert(t('error'), t('enterValidAmount'));
       return;
     }
     if (!selectedAccount) {
-      Alert.alert('Error', 'Please select an account.');
+      Alert.alert(t('error'), t('selectAccount'));
       return;
     }
 
@@ -98,7 +100,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
           <Text
             style={[styles.typeText, type === 'expense' && styles.activeText]}
           >
-            Expense
+            {t('expense')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -108,13 +110,15 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
           <Text
             style={[styles.typeText, type === 'income' && styles.activeText]}
           >
-            Income
+            {t('income')}
           </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Amount ({currency})</Text>
+        <Text style={styles.label}>
+          {t('amount')} ({currency})
+        </Text>
         <TextInput
           style={styles.amountInput}
           placeholder="0.00"
@@ -125,7 +129,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Account</Text>
+        <Text style={styles.label}>{t('accounts')}</Text>
         <View style={styles.chips}>
           {accounts.map((acc) => (
             <TouchableOpacity
@@ -147,13 +151,13 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
             </TouchableOpacity>
           ))}
           {accounts.length === 0 && (
-            <Text style={{ color: 'red' }}>Please create an account first</Text>
+            <Text style={{ color: 'red' }}>{t('createAccountFirst')}</Text>
           )}
         </View>
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Category</Text>
+        <Text style={styles.label}>{t('categories')}</Text>
         <View style={styles.chips}>
           {availableCategories.map((cat) => (
             <TouchableOpacity
@@ -187,7 +191,9 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Budget (Optional)</Text>
+        <Text style={styles.label}>
+          {t('budgets')} ({t('optional')})
+        </Text>
         <View style={styles.chips}>
           {budgets.map((bud) => (
             <TouchableOpacity
@@ -211,16 +217,18 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
             </TouchableOpacity>
           ))}
           {budgets.length === 0 && (
-            <Text style={{ color: '#888' }}>No budgets created yet.</Text>
+            <Text style={{ color: '#888' }}>{t('noBudgets')}</Text>
           )}
         </View>
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Note (Optional)</Text>
+        <Text style={styles.label}>
+          {t('note')} ({t('optional')})
+        </Text>
         <TextInput
           style={styles.textInput}
-          placeholder="E.g. Groceries at Target"
+          placeholder={t('notePlaceholder')}
           value={note}
           onChangeText={setNote}
         />
@@ -228,7 +236,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
         <Text style={styles.saveBtnText}>
-          {isEditing ? 'Update Transaction' : 'Save Transaction'}
+          {isEditing ? t('updateTransaction') : t('saveTransaction')}
         </Text>
       </TouchableOpacity>
     </ScrollView>

@@ -9,18 +9,17 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TransactionItem } from '../components/TransactionItem';
-import { useStore } from '../store/useStore';
+import { useStore, useTranslation } from '../store/useStore';
 
 export const TransactionsScreen = ({ navigation }: any) => {
-  const transactions = useStore((state) => state.transactions);
-  const categories = useStore((state) => state.categories);
-  const deleteTransaction = useStore((state) => state.deleteTransaction);
+  const { transactions, categories, deleteTransaction } = useStore();
+  const { t, language } = useTranslation();
 
   const handleTransactionPress = (transaction: any) => {
-    Alert.alert('Transaction Options', 'What would you like to do?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('transactionOptions'), t('whatToDo'), [
+      { text: t('cancel'), style: 'cancel' },
       {
-        text: 'Edit',
+        text: t('edit'),
         onPress: () =>
           navigation.navigate('AddTransaction', {
             transaction,
@@ -28,7 +27,7 @@ export const TransactionsScreen = ({ navigation }: any) => {
           }),
       },
       {
-        text: 'Duplicate',
+        text: t('duplicate'),
         onPress: () =>
           navigation.navigate('AddTransaction', {
             transaction,
@@ -36,27 +35,23 @@ export const TransactionsScreen = ({ navigation }: any) => {
           }),
       },
       {
-        text: 'Delete',
+        text: t('delete'),
         style: 'destructive',
         onPress: () =>
-          Alert.alert(
-            'Confirm Delete',
-            'Are you sure you want to delete this transaction?',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Delete',
-                style: 'destructive',
-                onPress: () =>
-                  deleteTransaction(
-                    transaction.id,
-                    transaction.accountId,
-                    transaction.amount,
-                    transaction.type,
-                  ),
-              },
-            ],
-          ),
+          Alert.alert(t('confirmDelete'), t('confirmDeleteTx'), [
+            { text: t('cancel'), style: 'cancel' },
+            {
+              text: t('delete'),
+              style: 'destructive',
+              onPress: () =>
+                deleteTransaction(
+                  transaction.id,
+                  transaction.accountId,
+                  transaction.amount,
+                  transaction.type,
+                ),
+            },
+          ]),
       },
     ]);
   };
@@ -81,7 +76,7 @@ export const TransactionsScreen = ({ navigation }: any) => {
         }}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>No transactions recorded yet.</Text>
+            <Text style={styles.emptyText}>{t('noTransactions')}</Text>
           </View>
         }
       />

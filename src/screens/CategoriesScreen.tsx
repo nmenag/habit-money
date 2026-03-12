@@ -9,30 +9,26 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Category, useStore } from '../store/useStore';
+import { Category, useStore, useTranslation } from '../store/useStore';
 
 export const CategoriesScreen = ({ navigation }: any) => {
-  const categories = useStore((state) => state.categories);
-  const deleteCategory = useStore((state) => state.deleteCategory);
-  const transactions = useStore((state) => state.transactions);
+  const { categories, deleteCategory, transactions } = useStore();
+  const { t, language } = useTranslation();
 
   const handleDelete = (category: Category) => {
     const isUsed = transactions.some((t) => t.categoryId === category.id);
     if (isUsed) {
-      Alert.alert(
-        'Cannot Delete',
-        'This category is used in one or more transactions.',
-      );
+      Alert.alert(t('cannotDelete'), t('categoryUsedError'));
       return;
     }
 
     Alert.alert(
-      'Delete Category',
-      `Are you sure you want to delete ${category.name}?`,
+      t('deleteCategory'),
+      `${t('confirmDelete')} ${category.name}?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: () => deleteCategory(category.id),
         },
@@ -61,7 +57,11 @@ export const CategoriesScreen = ({ navigation }: any) => {
         </View>
         <View style={styles.textContainer}>
           <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.type}>{item.type.toUpperCase()}</Text>
+          <Text style={styles.type}>
+            {item.type === 'income'
+              ? t('income').toUpperCase()
+              : t('expense').toUpperCase()}
+          </Text>
         </View>
       </View>
       <TouchableOpacity
@@ -83,16 +83,18 @@ export const CategoriesScreen = ({ navigation }: any) => {
         renderItem={renderItem}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>No categories found.</Text>
+            <Text style={styles.emptyText}>{t('noCategories')}</Text>
           </View>
         }
       />
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+      <View
+        style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}
+      >
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('AddCategory')}
         >
-          <Text style={styles.addButtonText}>Add Category</Text>
+          <Text style={styles.addButtonText}>{t('addCategory')}</Text>
         </TouchableOpacity>
       </View>
     </View>

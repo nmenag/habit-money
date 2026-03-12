@@ -8,8 +8,7 @@ import { useStore } from './src/store/useStore';
 
 export default function App() {
   const [dbInitialized, setDbInitialized] = useState(false);
-  const loadData = useStore((state) => state.loadData);
-  const isLoaded = useStore((state) => state.isLoaded);
+  const { loadData, isLoaded, language } = useStore();
 
   useEffect(() => {
     const setup = async () => {

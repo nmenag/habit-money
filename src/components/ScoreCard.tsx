@@ -1,12 +1,15 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { ScoreData } from '../utils/scoreCalculator';
+import { useStore, useTranslation } from '../store/useStore';
 
 interface Props {
   scoreData: ScoreData;
 }
 
 export const ScoreCard: React.FC<Props> = ({ scoreData }) => {
+  const { t } = useTranslation();
+
   const getStatusColor = () => {
     switch (scoreData.status) {
       case 'healthy':
@@ -20,7 +23,7 @@ export const ScoreCard: React.FC<Props> = ({ scoreData }) => {
 
   return (
     <View style={[styles.card, { borderTopColor: getStatusColor() }]}>
-      <Text style={styles.title}>Financial Discipline Score</Text>
+      <Text style={styles.title}>{t('financialDisciplineScore')}</Text>
 
       <View style={styles.scoreContainer}>
         <Text style={[styles.score, { color: getStatusColor() }]}>
@@ -31,14 +34,14 @@ export const ScoreCard: React.FC<Props> = ({ scoreData }) => {
 
       <View style={styles.streakContainer}>
         <Text style={styles.streakText}>
-          🔥 {scoreData.streak} positive months in a row
+          🔥 {t('positiveMonthsStreak', { streak: scoreData.streak })}
         </Text>
       </View>
 
       <View style={styles.insights}>
         {scoreData.insights.map((insight, index) => (
           <Text key={index} style={styles.insightText}>
-            • {insight}
+            • {t(insight.key, insight.params)}
           </Text>
         ))}
       </View>

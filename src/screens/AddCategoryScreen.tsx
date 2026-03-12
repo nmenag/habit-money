@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Category, TransactionType, useStore } from '../store/useStore';
+import { Category, TransactionType, useStore, useTranslation } from '../store/useStore';
 
 const COLORS = [
   '#f44336',
@@ -49,8 +49,8 @@ export const AddCategoryScreen = ({ route, navigation }: any) => {
   const editingCategory = route.params?.category as Category | undefined;
   const isEditing = !!editingCategory;
 
-  const addCategory = useStore((state) => state.addCategory);
-  const editCategory = useStore((state) => state.editCategory);
+  const { addCategory, editCategory } = useStore();
+  const { t, language } = useTranslation();
 
   const [name, setName] = useState(editingCategory?.name || '');
   const [type, setType] = useState<TransactionType>(
@@ -61,7 +61,7 @@ export const AddCategoryScreen = ({ route, navigation }: any) => {
 
   const handleSave = () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Please enter a category name.');
+      Alert.alert(t('error'), t('enterCategoryName'));
       return;
     }
 
@@ -97,7 +97,7 @@ export const AddCategoryScreen = ({ route, navigation }: any) => {
       ]}
     >
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Category Name</Text>
+        <Text style={styles.label}>{t('categoryName')}</Text>
         <TextInput
           style={styles.textInput}
           placeholder="e.g. Groceries"
@@ -107,7 +107,7 @@ export const AddCategoryScreen = ({ route, navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Category Type</Text>
+        <Text style={styles.label}>{t('categoryType')}</Text>
         <View style={styles.typeSelector}>
           <TouchableOpacity
             style={[styles.typeBtn, type === 'expense' && styles.activeTypeBtn]}
@@ -119,7 +119,7 @@ export const AddCategoryScreen = ({ route, navigation }: any) => {
                 type === 'expense' && styles.activeTypeText,
               ]}
             >
-              Expense
+              {t('expense')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -132,14 +132,14 @@ export const AddCategoryScreen = ({ route, navigation }: any) => {
                 type === 'income' && styles.activeTypeText,
               ]}
             >
-              Income
+              {t('income')}
             </Text>
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Icon</Text>
+        <Text style={styles.label}>{t('icon')}</Text>
         <View style={styles.iconContainer}>
           {ICONS.map((i) => (
             <TouchableOpacity
@@ -161,7 +161,7 @@ export const AddCategoryScreen = ({ route, navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Color</Text>
+        <Text style={styles.label}>{t('color')}</Text>
         <View style={styles.colorContainer}>
           {COLORS.map((c) => (
             <TouchableOpacity
@@ -179,7 +179,7 @@ export const AddCategoryScreen = ({ route, navigation }: any) => {
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
         <Text style={styles.saveBtnText}>
-          {isEditing ? 'Update Category' : 'Save Category'}
+          {isEditing ? t('updateCategory') : t('saveCategory')}
         </Text>
       </TouchableOpacity>
     </ScrollView>

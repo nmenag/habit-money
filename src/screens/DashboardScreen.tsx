@@ -15,17 +15,14 @@ import {
   TestIds,
 } from 'react-native-google-mobile-ads';
 import { ScoreCard } from '../components/ScoreCard';
-import { useStore } from '../store/useStore';
+import { useStore, useTranslation } from '../store/useStore';
 import { calculateFinancialScore } from '../utils/scoreCalculator';
 
 const screenWidth = Dimensions.get('window').width;
 
 export const DashboardScreen = ({ navigation }: any) => {
-  const transactions = useStore((state) => state.transactions);
-  const accounts = useStore((state) => state.accounts);
-  const categories = useStore((state) => state.categories);
-  const formatCurrency = useStore((state) => state.formatCurrency);
-  const t = useStore((state) => state.t);
+  const { transactions, accounts, categories, formatCurrency } = useStore();
+  const { t, language } = useTranslation();
 
   const scoreData = useMemo(
     () => calculateFinancialScore(transactions),
@@ -83,7 +80,7 @@ export const DashboardScreen = ({ navigation }: any) => {
     });
 
     return { totalIncome: inc, totalExpenses: exp, pieData: pie };
-  }, [transactions, categories, t]);
+  }, [transactions, categories, t, language]);
 
   const totalBalance = accounts.reduce((acc, a) => acc + a.currentBalance, 0);
 
@@ -118,9 +115,7 @@ export const DashboardScreen = ({ navigation }: any) => {
 
         {pieData.length > 0 && (
           <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>
-              {t('chartTitle')}
-            </Text>
+            <Text style={styles.chartTitle}>{t('chartTitle')}</Text>
             <PieChart
               data={pieData}
               width={screenWidth - 32}

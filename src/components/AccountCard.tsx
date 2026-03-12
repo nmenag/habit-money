@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Account, useStore } from '../store/useStore';
+import { Account, useStore, useTranslation } from '../store/useStore';
 
 interface Props {
   account: Account;
@@ -9,16 +9,17 @@ interface Props {
 }
 
 export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
-  const formatCurrency = useStore((state) => state.formatCurrency);
+  const { formatCurrency } = useStore();
+  const { t, language } = useTranslation();
 
   const handleDelete = () => {
     if (onDelete) {
       Alert.alert(
-        'Delete Account',
-        `Are you sure you want to delete ${account.name}? This will also delete all associated transactions.`,
+        t('deleteAccount'),
+        t('deleteAccountConfirm', { name: account.name }),
         [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Delete', style: 'destructive', onPress: onDelete },
+          { text: t('cancel'), style: 'cancel' },
+          { text: t('delete'), style: 'destructive', onPress: onDelete },
         ],
       );
     }
@@ -30,7 +31,7 @@ export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
     >
       <View style={styles.content}>
         <Text style={styles.name}>{account.name}</Text>
-        <Text style={styles.type}>{account.type.toUpperCase()}</Text>
+        <Text style={styles.type}>{t(account.type).toUpperCase()}</Text>
         <Text style={styles.balance}>
           {formatCurrency(account.currentBalance)}
         </Text>

@@ -1,26 +1,27 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useStore } from '../store/useStore';
+import { useStore, useTranslation } from '../store/useStore';
 import { calculateFinancialScore } from '../utils/scoreCalculator';
 
 export const InsightsScreen = () => {
-  const transactions = useStore((state) => state.transactions);
+  const { transactions } = useStore();
+  const { t, language } = useTranslation();
   const scoreData = calculateFinancialScore(transactions);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.headerTitle}>Financial Analysis</Text>
+      <Text style={styles.headerTitle}>{t('financialAnalysis')}</Text>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Savings Rate</Text>
+        <Text style={styles.label}>{t('savingsRateTitle')}</Text>
         <Text style={styles.value}>
           {(scoreData.savingsRate * 100).toFixed(1)}%
         </Text>
-        <Text style={styles.subtext}>Recommendation: Keep it above 20%</Text>
+        <Text style={styles.subtext}>{t('recommendationSavings')}</Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Expense Growth</Text>
+        <Text style={styles.label}>{t('expenseGrowthTitle')}</Text>
         <Text
           style={[
             styles.value,
@@ -30,18 +31,22 @@ export const InsightsScreen = () => {
           {scoreData.expenseGrowth > 0 ? '+' : ''}
           {scoreData.expenseGrowth.toFixed(1)}%
         </Text>
-        <Text style={styles.subtext}>Compared to last month</Text>
+        <Text style={styles.subtext}>{t('comparedToLastMonth')}</Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Spending Frequency</Text>
-        <Text style={styles.value}>{scoreData.spendingDays} days</Text>
-        <Text style={styles.subtext}>Days you spent money this month</Text>
+        <Text style={styles.label}>{t('spendingFrequencyTitle')}</Text>
+        <Text style={styles.value}>
+          {scoreData.spendingDays} {t('daysLabel')}
+        </Text>
+        <Text style={styles.subtext}>{t('daysSpentMoney')}</Text>
       </View>
 
       {scoreData.insights.map((insight, idx) => (
         <View key={idx} style={styles.insightBox}>
-          <Text style={styles.insightText}>💡 {insight}</Text>
+          <Text style={styles.insightText}>
+            💡 {t(insight.key, insight.params)}
+          </Text>
         </View>
       ))}
     </ScrollView>

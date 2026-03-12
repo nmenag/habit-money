@@ -9,43 +9,36 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Budget, useStore } from '../store/useStore';
+import { Budget, useStore, useTranslation } from '../store/useStore';
 
 export const BudgetsScreen = ({ navigation }: any) => {
-  const budgets = useStore((state) => state.budgets);
-  const deleteBudget = useStore((state) => state.deleteBudget);
-  const transactions = useStore((state) => state.transactions);
-  const formatCurrency = useStore((state) => state.formatCurrency);
+  const { budgets, deleteBudget, transactions, formatCurrency, currency } =
+    useStore();
+  const { t, language } = useTranslation();
 
   const handleDelete = (budget: Budget) => {
     const isUsed = transactions.some((t) => t.budgetId === budget.id);
     if (isUsed) {
-      Alert.alert(
-        'Cannot Delete',
-        'This budget is used in one or more transactions. Remove it from those transactions first.',
-      );
+      Alert.alert(t('cannotDelete'), t('budgetUsedError'));
       return;
     }
 
-    Alert.alert(
-      'Delete Budget',
-      `Are you sure you want to delete ${budget.name}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => deleteBudget(budget.id),
-        },
-      ],
-    );
+    Alert.alert(t('deleteBudget'), `${t('confirmDelete')} ${budget.name}?`, [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('delete'),
+        style: 'destructive',
+        onPress: () => deleteBudget(budget.id),
+      },
+    ]);
   };
 
   const renderItem = ({ item }: { item: Budget }) => {
     const spent = transactions
       .filter((t) => {
         const matchesBudget = t.budgetId === item.id;
-        const matchesCategory = item.categoryId && t.categoryId === item.categoryId;
+        const matchesCategory =
+          item.categoryId && t.categoryId === item.categoryId;
         return (matchesBudget || matchesCategory) && t.type === 'expense';
       })
       .reduce((sum, t) => sum + t.amount, 0);
@@ -106,18 +99,18 @@ export const BudgetsScreen = ({ navigation }: any) => {
         renderItem={renderItem}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>
-              No budgets found. Create one to track your spending limits!
-            </Text>
+            <Text style={styles.emptyText}>{t('noBudgets')}</Text>
           </View>
         }
       />
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+      <View
+        style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}
+      >
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('AddBudget')}
         >
-          <Text style={styles.addButtonText}>Add Budget</Text>
+          <Text style={styles.addButtonText}>{t('addBudget')}</Text>
         </TouchableOpacity>
       </View>
     </View>

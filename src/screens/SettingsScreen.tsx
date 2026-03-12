@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useStore } from '../store/useStore';
+import { useStore, useTranslation } from '../store/useStore';
 
 const CURRENCIES = [
   { code: 'USD', name: 'US Dollar', symbol: '$' },
@@ -17,15 +17,16 @@ const CURRENCIES = [
 ];
 
 export const SettingsScreen = ({ navigation }: any) => {
-  const currency = useStore((state) => state.currency);
-  const setCurrency = useStore((state) => state.setCurrency);
-  const language = useStore((state) => state.language);
-  const setLanguage = useStore((state) => state.setLanguage);
-  const t = useStore((state) => state.t);
+  const { currency, setCurrency, setLanguage } = useStore();
+  const { t, language } = useTranslation();
 
   const SETTINGS_LINKS = [
     { name: t('manageAccounts'), icon: 'wallet-outline', screen: 'Accounts' },
-    { name: t('manageCategories'), icon: 'pricetags-outline', screen: 'Categories' },
+    {
+      name: t('manageCategories'),
+      icon: 'pricetags-outline',
+      screen: 'Categories',
+    },
     { name: t('manageBudgets'), icon: 'pie-chart-outline', screen: 'Budgets' },
   ];
 

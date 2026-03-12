@@ -53,7 +53,6 @@ interface AppState {
 
   loadData: () => void;
   setLanguage: (lang: Language) => void;
-  t: (key: keyof typeof translations.en) => string;
   addAccount: (account: Account) => void;
   editAccount: (account: Account) => void;
   deleteAccount: (id: string) => void;
@@ -139,23 +138,17 @@ export const useStore = create<AppState>((set, get) => ({
     });
   },
 
-  setLanguage: (language) => {
-    const db = getDb();
+  setLanguage: (lang: Language) => {
+    set({ language: lang });
     try {
+      const db = getDb();
       db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
         'language',
-        language,
+        lang,
       ]);
-      set({ language });
     } catch (error) {
-      console.error('setLanguage Error:', error);
-      set({ language });
+      console.error('setLanguage DB Error:', error);
     }
-  },
-
-  t: (key) => {
-    const { language } = get();
-    return translations[language][key] || translations.en[key] || key;
   },
 
   addAccount: (account) => {
@@ -195,8 +188,6 @@ export const useStore = create<AppState>((set, get) => ({
   deleteAccount: (id) => {
     const db = getDb();
     db.runSync('DELETE FROM accounts WHERE id = ?', [id ?? null]);
-    // Associated transactions are cascade deleted via SQLite FK Constraints if enabled
-    // But manual cleanup might be needed if PRAGMA foreign_keys = ON is not guaranteed, however we just reload data next time.
     set((state) => ({
       accounts: state.accounts.filter((a) => a.id !== id),
       transactions: state.transactions.filter((t) => t.accountId !== id),
@@ -228,8 +219,6 @@ export const useStore = create<AppState>((set, get) => ({
       [amountModifier ?? 0, transaction.accountId ?? null],
     );
 
-    // Quick reload directly via getting the state is faster,
-    // but we can manually update local state for UI responsiveness
     set((state) => {
       const updatedAccounts = state.accounts.map((acc) => {
         if (acc.id === transaction.accountId) {
@@ -265,9 +254,9 @@ export const useStore = create<AppState>((set, get) => ({
     try {
       // Revert old transaction amount
       const oldModifier =
-        oldTransaction.type === 'income'
-          ? -oldTransaction.amount
-          : oldTransaction.amount;
+          oldTransaction.type === 'income'
+            ? -oldTransaction.amount
+            : oldTransaction.amount;
       db.runSync(
         'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
         [oldModifier ?? 0, oldTransaction.accountId ?? ''],
@@ -275,9 +264,9 @@ export const useStore = create<AppState>((set, get) => ({
 
       // Apply new transaction amount
       const newModifier =
-        transaction.type === 'income'
-          ? transaction.amount
-          : -transaction.amount;
+          transaction.type === 'income'
+            ? transaction.amount
+            : -transaction.amount;
       db.runSync(
         'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
         [newModifier ?? 0, transaction.accountId ?? ''],
@@ -415,17 +404,16 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   setCurrency: (currency) => {
-    const db = getDb();
+    const finalCurrency = currency ?? 'USD';
+    set({ currency: finalCurrency });
     try {
+      const db = getDb();
       db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
         'currency',
-        currency ?? 'USD',
+        finalCurrency,
       ]);
-      set({ currency });
     } catch (error) {
-      console.error('setCurrency Error:', error);
-      // Fallback: update state anyway so the user sees the change
-      set({ currency: currency ?? 'USD' });
+      console.error('setCurrency DB Error:', error);
     }
   },
 
@@ -439,8 +427,6 @@ export const useStore = create<AppState>((set, get) => ({
     };
     const symbol = symbols[currency] || '$';
 
-    // For COP and MXN, sometimes we show the code if it's ambiguous, but usually $ is fine
-    // COP often uses dot as thousands separator: 1.000
     if (currency === 'COP') {
       return `${symbol}${Math.round(amount)
         .toString()
@@ -453,3 +439,23 @@ export const useStore = create<AppState>((set, get) => ({
     })}`;
   },
 }));
+
+export const useTranslation = () => {
+  const language = useStore((state) => state.language);
+  const t = (
+    key: keyof typeof translations.en,
+    params?: Record<string, string | number>,
+  ) => {
+    const langSet = translations[language] || translations.en;
+    let text = langSet[key] || translations.en[key] || String(key);
+
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        text = text.replace(`{{${k}}}`, String(v));
+      });
+    }
+
+    return text;
+  };
+  return { t, language };
+};

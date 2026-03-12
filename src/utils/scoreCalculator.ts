@@ -6,6 +6,12 @@ import {
   subMonths,
 } from 'date-fns';
 import { Transaction } from '../store/useStore';
+import { translations } from '../i18n/translations';
+
+export interface Insight {
+  key: keyof typeof translations.en;
+  params?: Record<string, string | number>;
+}
 
 export interface ScoreData {
   score: number;
@@ -15,7 +21,7 @@ export interface ScoreData {
   spendingDays: number;
   spentMoreThanEarned: boolean;
   streak: number;
-  insights: string[];
+  insights: Insight[];
 }
 
 export const calculateFinancialScore = (
@@ -35,97 +41,61 @@ export const calculateFinancialScore = (
   let lastIncome = 0;
   let lastExpense = 0;
 
-  const currentCategoryExpense: Record<string, number> = {};
-  const lastCategoryExpense: Record<string, number> = {};
-
   transactions.forEach((t) => {
     const txDate = parseISO(t.date);
     const amount = t.amount;
 
-    // Check if it's the current month
     if (txDate >= currentMonthStart && txDate <= currentMonthEnd) {
       if (t.type === 'income') {
         currentIncome += amount;
       } else {
         currentExpense += amount;
         spendingDates.add(format(txDate, 'yyyy-MM-dd'));
-
-        if (t.categoryId) {
-          currentCategoryExpense[t.categoryId] =
-            (currentCategoryExpense[t.categoryId] || 0) + amount;
-        }
       }
     }
 
-    // Check if it's the last month
     if (txDate >= lastMonthStart && txDate <= lastMonthEnd) {
       if (t.type === 'income') {
         lastIncome += amount;
       } else {
         lastExpense += amount;
-
-        if (t.categoryId) {
-          lastCategoryExpense[t.categoryId] =
-            (lastCategoryExpense[t.categoryId] || 0) + amount;
-        }
       }
     }
   });
 
-  // 1. Savings Rate
-  // Let's protect against division by zero
   const savingsRate =
     currentIncome > 0
       ? Math.max(0, (currentIncome - currentExpense) / currentIncome)
       : 0;
 
-  // 2. Expense Growth
   const expenseGrowth =
     lastExpense > 0 ? ((currentExpense - lastExpense) / lastExpense) * 100 : 0;
 
-  // 3. Spending Days
   const spendingDays = spendingDates.size;
-
-  // 4. Overspent Check
   const spentMoreThanEarned = currentExpense > currentIncome;
 
-  // Score Calculation (0 - 100)
-  // Baseline score 50. Modifiers based on good/bad behaviors.
   let score = 50;
-
-  // Modify score based on savings rate (+0 to +30)
   if (savingsRate >= 0.2) score += 30;
   else if (savingsRate >= 0.1) score += 20;
   else if (savingsRate > 0) score += 10;
 
-  // Modifiers for Expense Growth (-20 to +20)
-  if (expenseGrowth < 0)
-    score += 20; // Good! Spent less than last month
-  else if (expenseGrowth > 10) score -= 15; // Bad, spent a lot more
+  if (expenseGrowth < 0) score += 20;
+  else if (expenseGrowth > 10) score -= 15;
 
-  // Daily spending habits (-15 to 0)
-  // Assuming 30 days in a month. If user spent on mostly every day, might be an impulsive spender.
   if (spendingDays > 20) score -= 15;
   else if (spendingDays > 10) score -= 5;
 
-  // Overspending trap! (-30)
-  if (spentMoreThanEarned) {
-    score -= 30;
-  }
+  if (spentMoreThanEarned) score -= 30;
 
-  // Cap Score 0 to 100
   score = Math.max(0, Math.min(100, Math.round(score)));
 
-  // Determine status
   let status: ScoreData['status'] = 'healthy';
   if (score < 40) status = 'overspending';
   else if (score < 70) status = 'warning';
 
-  // Calculate Streak
   let streak = 0;
   let evalDate = subMonths(now, 1);
 
-  // A simple while loop to count previous positive months
   while (true) {
     const monthStart = startOfMonth(evalDate);
     const monthEnd = endOfMonth(evalDate);
@@ -141,7 +111,6 @@ export const calculateFinancialScore = (
       }
     });
 
-    // Check streak condition (Expenses <= Income) and must have some income or expense to be active
     if (monthExpense <= monthIncome && (monthIncome > 0 || monthExpense > 0)) {
       streak++;
       evalDate = subMonths(evalDate, 1);
@@ -150,22 +119,24 @@ export const calculateFinancialScore = (
     }
   }
 
-  // Monthly Insights
-  const insights: string[] = [];
+  const insights: Insight[] = [];
   if (expenseGrowth > 0 && lastExpense > 0) {
-    insights.push(
-      `Your overall expenses grew by ${expenseGrowth.toFixed(1)}% compared to last month.`,
-    );
+    insights.push({
+      key: 'insightExpenseGrew',
+      params: { percentage: expenseGrowth.toFixed(1) },
+    });
   } else if (expenseGrowth < 0) {
-    insights.push(
-      `Great job! You spent ${Math.abs(expenseGrowth).toFixed(1)}% less than last month.`,
-    );
+    insights.push({
+      key: 'insightExpenseLess',
+      params: { percentage: Math.abs(expenseGrowth).toFixed(1) },
+    });
   }
 
   if (spendingDays > 25) {
-    insights.push(
-      `You spent money on ${spendingDays} days this month. Try a "no-spend" day challenge!`,
-    );
+    insights.push({
+      key: 'insightNoSpendChallenge',
+      params: { days: spendingDays },
+    });
   }
 
   return {

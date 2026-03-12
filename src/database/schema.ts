@@ -75,9 +75,9 @@ export const initDb = () => {
     // Migration: If table was created with old names, try to rename columns
     // SQLite doesn't support multiple renames in one go easily, so we check columns
     const columns = db.getAllSync<{ name: string }>(
-      "PRAGMA table_info(settings)"
+      'PRAGMA table_info(settings)',
     );
-    const hasKey = columns.some(c => c.name === 'key');
+    const hasKey = columns.some((c) => c.name === 'key');
     if (hasKey) {
       db.execSync("ALTER TABLE settings RENAME COLUMN 'key' TO 'id'");
       db.execSync("ALTER TABLE settings RENAME COLUMN 'value' TO 'val'");
@@ -158,6 +158,9 @@ export const initDb = () => {
     'SELECT COUNT(*) as count FROM settings',
   );
   if (settingsCount && settingsCount.count === 0) {
-    db.runSync("INSERT INTO settings (id, val) VALUES (?, ?)", ['currency', 'USD']);
+    db.runSync('INSERT INTO settings (id, val) VALUES (?, ?)', [
+      'currency',
+      'USD',
+    ]);
   }
 };

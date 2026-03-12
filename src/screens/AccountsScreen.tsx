@@ -8,11 +8,11 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountCard } from '../components/AccountCard';
-import { useStore } from '../store/useStore';
+import { useStore, useTranslation } from '../store/useStore';
 
 export const AccountsScreen = ({ navigation }: any) => {
-  const accounts = useStore((state) => state.accounts);
-  const deleteAccount = useStore((state) => state.deleteAccount);
+  const { accounts, deleteAccount, currency } = useStore();
+  const { t, language } = useTranslation();
 
   const handleAddAccount = () => {
     navigation.navigate('AddAccount');
@@ -40,14 +40,16 @@ export const AccountsScreen = ({ navigation }: any) => {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>No accounts found.</Text>
+            <Text style={styles.emptyText}>{t('noAccounts')}</Text>
           </View>
         }
       />
 
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+      <View
+        style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}
+      >
         <TouchableOpacity style={styles.addButton} onPress={handleAddAccount}>
-          <Text style={styles.addButtonText}>Add Account</Text>
+          <Text style={styles.addButtonText}>{t('addAccount')}</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -1,7 +1,8 @@
 import { format, parseISO } from 'date-fns';
+import { enUS, es } from 'date-fns/locale';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Category, Transaction, useStore } from '../store/useStore';
+import { Category, Transaction, useStore, useTranslation } from '../store/useStore';
 
 interface Props {
   transaction: Transaction;
@@ -9,8 +10,11 @@ interface Props {
 }
 
 export const TransactionItem: React.FC<Props> = ({ transaction, category }) => {
-  const formatCurrency = useStore((state) => state.formatCurrency);
+  const { formatCurrency, currency } = useStore();
+  const { t, language } = useTranslation();
   const isIncome = transaction.type === 'income';
+
+  const dateLocale = language === 'es' ? es : enUS;
 
   return (
     <View style={styles.container}>
@@ -21,15 +25,17 @@ export const TransactionItem: React.FC<Props> = ({ transaction, category }) => {
         ]}
       >
         <Text style={styles.icon}>
-          {category?.icon ? category.name[0] : '?'}
+          {category?.name ? category.name[0].toUpperCase() : '?'}
         </Text>
       </View>
       <View style={styles.details}>
         <Text style={styles.categoryName}>
-          {category?.name || 'Uncategorized'}
+          {category?.name || t('uncategorized')}
         </Text>
         <Text style={styles.date}>
-          {format(parseISO(transaction.date), 'MMM d, yyyy')}
+          {format(parseISO(transaction.date), 'MMM d, yyyy', {
+            locale: dateLocale,
+          })}
         </Text>
         {transaction.note && (
           <Text style={styles.note}>{transaction.note}</Text>

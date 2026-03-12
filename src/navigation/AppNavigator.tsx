@@ -13,13 +13,13 @@ import { DashboardScreen } from '../screens/DashboardScreen';
 import { InsightsScreen } from '../screens/InsightsScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { TransactionsScreen } from '../screens/TransactionsScreen';
-import { useStore } from '../store/useStore';
+import { useStore, useTranslation } from '../store/useStore';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 const TabNavigator = () => {
-  const t = useStore((state) => state.t);
+  const { t } = useTranslation();
 
   return (
     <Tab.Navigator
@@ -63,7 +63,7 @@ const TabNavigator = () => {
 };
 
 export const AppNavigator = () => {
-  const t = useStore((state) => state.t);
+  const { t } = useTranslation();
 
   return (
     <Stack.Navigator>

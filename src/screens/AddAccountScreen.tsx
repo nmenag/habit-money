@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Account, AccountType, useStore } from '../store/useStore';
+import { Account, AccountType, useStore, useTranslation } from '../store/useStore';
 
 const COLORS = [
   '#f44336',
@@ -30,9 +30,8 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
   const editingAccount = route.params?.account as Account | undefined;
   const isEditing = !!editingAccount;
 
-  const addAccount = useStore((state) => state.addAccount);
-  const editAccount = useStore((state) => state.editAccount);
-  const addTransaction = useStore((state) => state.addTransaction);
+  const { addAccount, editAccount, addTransaction, currency } = useStore();
+  const { t, language } = useTranslation();
 
   const [name, setName] = useState(editingAccount?.name || '');
   const [type, setType] = useState<AccountType>(editingAccount?.type || 'cash');
@@ -41,35 +40,29 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
   );
   const [color, setColor] = useState(editingAccount?.color || COLORS[0]);
 
-  const currency = useStore((state) => state.currency);
-
   const handleSave = () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Please enter an account name.');
+      Alert.alert(t('error'), t('enterAccountName'));
       return;
     }
 
     const balanceNum = parseFloat(balance);
     if (balance !== '' && isNaN(balanceNum)) {
-      Alert.alert('Error', 'Please enter a valid balance.');
+      Alert.alert(t('error'), t('enterValidBalance'));
       return;
     }
 
     const finalBalance = isNaN(balanceNum) ? 0 : balanceNum;
 
     if (isEditing) {
-      // 1. Update account details without modifying internal currentBalance directly initially
       editAccount({
         ...editingAccount,
         name: name.trim(),
         type: type,
         color: color,
-        // We do NOT update the balance here, we let the transaction engine adjust it
-        // to maintain ledger integrity.
         currentBalance: editingAccount.currentBalance,
       });
 
-      // 2. Adjust Balance with a transaction if changed
       if (finalBalance !== editingAccount.currentBalance) {
         const difference = finalBalance - editingAccount.currentBalance;
         const txType = difference > 0 ? 'income' : 'expense';
@@ -78,10 +71,10 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
           id: Date.now().toString(),
           type: txType,
           amount: Math.abs(difference),
-          categoryId: null, // Uncategorized because it's an adjustment
+          categoryId: null,
           accountId: editingAccount.id,
           date: new Date().toISOString(),
-          note: 'Balance Adjustment',
+          note: t('balanceAdjustment'),
         });
       }
     } else {
@@ -109,7 +102,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
       ]}
     >
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Account Name</Text>
+        <Text style={styles.label}>{t('accountName')}</Text>
         <TextInput
           style={styles.textInput}
           placeholder="e.g. Checking Wallet"
@@ -119,55 +112,29 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Account Type</Text>
+        <Text style={styles.label}>{t('accountType')}</Text>
         <View style={styles.typeSelector}>
-          <TouchableOpacity
-            style={[styles.typeBtn, type === 'cash' && styles.activeTypeBtn]}
-            onPress={() => setType('cash')}
-          >
-            <Text
-              style={[
-                styles.typeText,
-                type === 'cash' && styles.activeTypeText,
-              ]}
+          {(['cash', 'bank', 'credit'] as const).map((at) => (
+            <TouchableOpacity
+              key={at}
+              style={[styles.typeBtn, type === at && styles.activeTypeBtn]}
+              onPress={() => setType(at)}
             >
-              Cash
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.typeBtn, type === 'bank' && styles.activeTypeBtn]}
-            onPress={() => setType('bank')}
-          >
-            <Text
-              style={[
-                styles.typeText,
-                type === 'bank' && styles.activeTypeText,
-              ]}
-            >
-              Bank
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.typeBtn, type === 'credit' && styles.activeTypeBtn]}
-            onPress={() => setType('credit')}
-          >
-            <Text
-              style={[
-                styles.typeText,
-                type === 'credit' && styles.activeTypeText,
-              ]}
-            >
-              Credit
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[styles.typeText, type === at && styles.activeTypeText]}
+              >
+                {t(at)}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>
           {isEditing
-            ? `Current Balance (${currency})`
-            : `Initial Balance (${currency})`}
+            ? `${t('currentBalanceLabel')} (${currency})`
+            : `${t('initialBalanceLabel')} (${currency})`}
         </Text>
         <TextInput
           style={styles.textInput}
@@ -179,7 +146,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Color</Text>
+        <Text style={styles.label}>{t('color')}</Text>
         <View style={styles.colorContainer}>
           {COLORS.map((c) => (
             <TouchableOpacity
@@ -197,7 +164,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
         <Text style={styles.saveBtnText}>
-          {isEditing ? 'Update Account' : 'Save Account'}
+          {isEditing ? t('updateAccount') : t('saveAccount')}
         </Text>
       </TouchableOpacity>
     </ScrollView>

@@ -2,7 +2,6 @@ export type Language = 'en' | 'es';
 
 export const translations = {
   en: {
-    // Tabs
     dashboard: 'Dashboard',
     transactions: 'Transactions',
     accounts: 'Accounts',
@@ -12,14 +11,12 @@ export const translations = {
     settings: 'Settings',
     chartTitle: 'Expenses by Category (This Month)',
 
-    // Dashboard
     totalBalance: 'Total Balance',
     monthlyIncome: 'Monthly Income',
     monthlyExpenses: 'Monthly Expenses',
     recentTransactions: 'Recent Transactions',
     noRecentTransactions: 'No recent transactions',
 
-    // Settings
     preferences: 'Preferences',
     manageAccounts: 'Manage Accounts',
     manageCategories: 'Manage Categories',
@@ -27,11 +24,11 @@ export const translations = {
     language: 'Language',
     currency: 'Currency',
     changeLanguageDesc: 'Change the app language to your preference.',
-    changeCurrencyDesc: 'Changing the currency will update how all amounts are displayed across the app.',
+    changeCurrencyDesc:
+      'Changing the currency will update how all amounts are displayed across the app.',
     english: 'English',
     spanish: 'Spanish',
 
-    // Common
     save: 'Save',
     update: 'Update',
     cancel: 'Cancel',
@@ -46,20 +43,50 @@ export const translations = {
     icon: 'Icon',
     none: 'None',
     other: 'Other',
+    uncategorized: 'Uncategorized',
+    error: 'Error',
+    enterValidAmount: 'Please enter a valid amount.',
+    selectAccount: 'Please select an account.',
+    selectCategory: 'Please select a category.',
+    createAccountFirst: 'Please create an account first.',
+    optional: 'Optional',
+    notePlaceholder: 'E.g. Groceries at Target',
+    updateTransaction: 'Update Transaction',
+    saveTransaction: 'Save Transaction',
+    updateAccount: 'Update Account',
+    saveAccount: 'Save Account',
+    updateCategory: 'Update Category',
+    saveCategory: 'Save Category',
+    updateBudget: 'Update Budget',
+    saveBudget: 'Save Budget',
+    balanceAdjustment: 'Balance Adjustment',
+    enterAccountName: 'Please enter an account name.',
+    enterValidBalance: 'Please enter a valid balance.',
+    currentBalanceLabel: 'Current Balance',
+    initialBalanceLabel: 'Initial Balance',
+    enterCategoryName: 'Please enter a category name.',
+    enterBudgetName: 'Please enter a budget name.',
+    deleteAccountConfirm:
+      'Are you sure you want to delete {{name}}? This will also delete all associated transactions.',
+    financialDisciplineScore: 'Financial Discipline Score',
+    positiveMonthsStreak: '{{streak}} positive months in a row',
 
-    // Budgets
     addBudget: 'Add Budget',
     editBudget: 'Edit Budget',
+    deleteBudget: 'Delete Budget',
     budgetName: 'Budget Name',
     monthlyLimit: 'Monthly Limit',
     associatedCategory: 'Associated Category',
     associatedCategoryOpt: 'Associated Category (Optional)',
     spentOf: 'spent of',
     noBudgets: 'No budgets found. Create one to track your spending limits!',
+    cannotDelete: 'Cannot Delete',
+    budgetUsedError:
+      'This budget is used in one or more transactions. Remove it from those transactions first.',
 
-    // Accounts
     addAccount: 'Add Account',
     editAccount: 'Edit Account',
+    deleteAccount: 'Delete Account',
     accountName: 'Account Name',
     accountType: 'Account Type',
     initialBalance: 'Initial Balance',
@@ -68,17 +95,19 @@ export const translations = {
     cash: 'Cash',
     bank: 'Bank',
     credit: 'Credit',
+    accountUsedError:
+      'This account has transactions. You cannot delete it until all transactions are moved or deleted.',
 
-    // Categories
     addCategory: 'Add Category',
     editCategory: 'Edit Category',
+    deleteCategory: 'Delete Category',
     categoryName: 'Category Name',
     categoryType: 'Category Type',
     income: 'Income',
     expense: 'Expense',
     noCategories: 'No categories found.',
+    categoryUsedError: 'This category is used in one or more transactions.',
 
-    // Transactions
     addTransaction: 'Add Transaction',
     editTransaction: 'Edit Transaction',
     noTransactions: 'No transactions recorded yet.',
@@ -87,10 +116,23 @@ export const translations = {
     confirmDeleteTx: 'Are you sure you want to delete this transaction?',
     transactionOptions: 'Transaction Options',
     whatToDo: 'What would you like to do?',
+    financialAnalysis: 'Financial Analysis',
+    savingsRateTitle: 'Savings Rate',
+    expenseGrowthTitle: 'Expense Growth',
+    spendingFrequencyTitle: 'Spending Frequency',
+    recommendationSavings: 'Recommendation: Keep it above 20%',
+    comparedToLastMonth: 'Compared to last month',
+    daysLabel: 'days',
+    daysSpentMoney: 'Days you spent money this month',
+    insightExpenseGrew:
+      'Your overall expenses grew by {{percentage}}% compared to last month.',
+    insightExpenseLess:
+      'Great job! You spent {{percentage}}% less than last month.',
+    insightNoSpendChallenge:
+      'You spent money on {{days}} days this month. Try a "no-spend" day challenge!',
   },
   es: {
-    // Tabs
-    dashboard: 'Tablero',
+    dashboard: 'Inicio',
     transactions: 'Transacciones',
     accounts: 'Cuentas',
     categories: 'Categorías',
@@ -99,14 +141,12 @@ export const translations = {
     settings: 'Ajustes',
     chartTitle: 'Gastos por Categoría (Este Mes)',
 
-    // Dashboard
     totalBalance: 'Balance Total',
     monthlyIncome: 'Ingresos Mensuales',
     monthlyExpenses: 'Gastos Mensuales',
     recentTransactions: 'Transacciones Recientes',
     noRecentTransactions: 'Sin transacciones recientes',
 
-    // Settings
     preferences: 'Preferencias',
     manageAccounts: 'Gestionar Cuentas',
     manageCategories: 'Gestionar Categorías',
@@ -114,11 +154,11 @@ export const translations = {
     language: 'Idioma',
     currency: 'Moneda',
     changeLanguageDesc: 'Cambia el idioma de la aplicación a tu preferencia.',
-    changeCurrencyDesc: 'Cambiar la moneda actualizará cómo se muestran todos los montos en la aplicación.',
+    changeCurrencyDesc:
+      'Cambiar la moneda actualizará cómo se muestran todos los montos en la aplicación.',
     english: 'Inglés',
     spanish: 'Español',
 
-    // Common
     save: 'Guardar',
     update: 'Actualizar',
     cancel: 'Cancelar',
@@ -133,20 +173,51 @@ export const translations = {
     icon: 'Icono',
     none: 'Ninguno',
     other: 'Otro',
+    uncategorized: 'Sin categoría',
+    error: 'Error',
+    enterValidAmount: 'Por favor ingresa un monto válido.',
+    selectAccount: 'Por favor selecciona una cuenta.',
+    selectCategory: 'Por favor selecciona una categoría.',
+    createAccountFirst: 'Por favor crea una cuenta primero.',
+    optional: 'Opcional',
+    notePlaceholder: 'Ej. Supermercado, Alquiler...',
+    updateTransaction: 'Actualizar Transacción',
+    saveTransaction: 'Guardar Transacción',
+    updateAccount: 'Actualizar Cuenta',
+    saveAccount: 'Guardar Cuenta',
+    updateCategory: 'Actualizar Categoría',
+    saveCategory: 'Guardar Categoría',
+    updateBudget: 'Actualizar Presupuesto',
+    saveBudget: 'Guardar Presupuesto',
+    balanceAdjustment: 'Ajuste de Saldo',
+    enterAccountName: 'Por favor ingresa un nombre para la cuenta.',
+    enterValidBalance: 'Por favor ingresa un saldo válido.',
+    currentBalanceLabel: 'Saldo Actual',
+    initialBalanceLabel: 'Saldo Inicial',
+    enterCategoryName: 'Por favor ingresa un nombre para la categoría.',
+    enterBudgetName: 'Por favor ingresa un nombre para el presupuesto.',
+    deleteAccountConfirm:
+      '¿Estás seguro de que quieres eliminar {{name}}? Esto también eliminará todas las transacciones asociadas.',
+    financialDisciplineScore: 'Puntuación de Disciplina Financiera',
+    positiveMonthsStreak: '{{streak}} meses positivos seguidos',
 
-    // Budgets
     addBudget: 'Agregar Presupuesto',
     editBudget: 'Editar Presupuesto',
+    deleteBudget: 'Eliminar Presupuesto',
     budgetName: 'Nombre del Presupuesto',
     monthlyLimit: 'Límite Mensual',
     associatedCategory: 'Categoría Asociada',
     associatedCategoryOpt: 'Categoría Asociada (Opcional)',
     spentOf: 'gastado de',
-    noBudgets: 'No se encontraron presupuestos. ¡Crea uno para rastrear tus límites de gastos!',
+    noBudgets:
+      'No se encontraron presupuestos. ¡Crea uno para rastrear tus límites de gastos!',
+    cannotDelete: 'No se puede eliminar',
+    budgetUsedError:
+      'Este presupuesto se está utilizando en una o más transacciones. Elimínalo de esas transacciones primero.',
 
-    // Accounts
     addAccount: 'Agregar Cuenta',
     editAccount: 'Editar Cuenta',
+    deleteAccount: 'Eliminar Cuenta',
     accountName: 'Nombre de la Cuenta',
     accountType: 'Tipo de Cuenta',
     initialBalance: 'Saldo Inicial',
@@ -155,17 +226,20 @@ export const translations = {
     cash: 'Efectivo',
     bank: 'Banco',
     credit: 'Crédito',
+    accountUsedError:
+      'Esta cuenta tiene transacciones. No puedes eliminarla hasta que todas las transacciones sean movidas o eliminadas.',
 
-    // Categories
     addCategory: 'Agregar Categoría',
     editCategory: 'Editar Categoría',
+    deleteCategory: 'Eliminar Categoría',
     categoryName: 'Nombre de la Categoría',
     categoryType: 'Tipo de Categoría',
     income: 'Ingreso',
     expense: 'Gasto',
     noCategories: 'No se encontraron categorías.',
+    categoryUsedError:
+      'Esta categoría se está utilizando en una o más transacciones.',
 
-    // Transactions
     addTransaction: 'Agregar Transacción',
     editTransaction: 'Editar Transacción',
     noTransactions: 'Aún no hay transacciones registradas.',
@@ -174,5 +248,19 @@ export const translations = {
     confirmDeleteTx: '¿Estás seguro de que deseas eliminar esta transacción?',
     transactionOptions: 'Opciones de Transacción',
     whatToDo: '¿Qué te gustaría hacer?',
+    financialAnalysis: 'Análisis Financiero',
+    savingsRateTitle: 'Tasa de Ahorro',
+    expenseGrowthTitle: 'Crecimiento de Gastos',
+    spendingFrequencyTitle: 'Frecuencia de Gastos',
+    recommendationSavings: 'Recomendación: Mantener por encima del 20%',
+    comparedToLastMonth: 'Comparado con el mes pasado',
+    daysLabel: 'días',
+    daysSpentMoney: 'Días que gastaste dinero este mes',
+    insightExpenseGrew:
+      'Tus gastos generales crecieron un {{percentage}}% en comparación con el mes pasado.',
+    insightExpenseLess:
+      '¡Buen trabajo! Gastaste un {{percentage}}% menos que el mes pasado.',
+    insightNoSpendChallenge:
+      'Gastaste dinero en {{days}} días este mes. ¡Prueba un desafío de "día sin gastos"!',
   },
 };

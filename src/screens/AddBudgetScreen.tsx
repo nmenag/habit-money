@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Budget, useStore } from '../store/useStore';
+import { Budget, useStore, useTranslation } from '../store/useStore';
 
 const COLORS = [
   '#f44336',
@@ -30,8 +30,8 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
   const editingBudget = route.params?.budget as Budget | undefined;
   const isEditing = !!editingBudget;
 
-  const addBudget = useStore((state) => state.addBudget);
-  const editBudget = useStore((state) => state.editBudget);
+  const { addBudget, editBudget, currency, categories } = useStore();
+  const { t, language } = useTranslation();
 
   const [name, setName] = useState(editingBudget?.name || '');
   const [amount, setAmount] = useState(
@@ -42,18 +42,15 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
     editingBudget?.categoryId || null,
   );
 
-  const currency = useStore((state) => state.currency);
-  const categories = useStore((state) => state.categories);
-
   const handleSave = () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Please enter a budget name.');
+      Alert.alert(t('error'), t('enterBudgetName'));
       return;
     }
 
     const amountNum = parseFloat(amount);
     if (!amount || isNaN(amountNum) || amountNum <= 0) {
-      Alert.alert('Error', 'Please enter a valid amount.');
+      Alert.alert(t('error'), t('enterValidAmount'));
       return;
     }
 
@@ -89,7 +86,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
       ]}
     >
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Budget Name</Text>
+        <Text style={styles.label}>{t('budgetName')}</Text>
         <TextInput
           style={styles.textInput}
           placeholder="e.g. Monthly Groceries"
@@ -99,7 +96,9 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Monthly Limit ({currency})</Text>
+        <Text style={styles.label}>
+          {t('monthlyLimit')} ({currency})
+        </Text>
         <TextInput
           style={styles.amountInput}
           placeholder="0.00"
@@ -110,7 +109,9 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Associated Category (Optional)</Text>
+        <Text style={styles.label}>
+          {t('associatedCategory')} ({t('optional')})
+        </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.categoryContainer}>
             <TouchableOpacity
@@ -126,7 +127,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
                   !selectedCategoryId && styles.activeCategoryChipText,
                 ]}
               >
-                None
+                {t('none')}
               </Text>
             </TouchableOpacity>
             {categories.map((cat) => (
@@ -142,7 +143,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
                   style={[
                     styles.categoryChipText,
                     selectedCategoryId === cat.id &&
-                    styles.activeCategoryChipText,
+                      styles.activeCategoryChipText,
                   ]}
                 >
                   {cat.name}
@@ -154,7 +155,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Color</Text>
+        <Text style={styles.label}>{t('color')}</Text>
         <View style={styles.colorContainer}>
           {COLORS.map((c) => (
             <TouchableOpacity
@@ -172,7 +173,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
         <Text style={styles.saveBtnText}>
-          {isEditing ? 'Update Budget' : 'Save Budget'}
+          {isEditing ? t('updateBudget') : t('saveBudget')}
         </Text>
       </TouchableOpacity>
     </ScrollView>
