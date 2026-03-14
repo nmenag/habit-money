@@ -5,7 +5,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
@@ -17,8 +17,6 @@ export const SettingsScreen = ({ navigation }: any) => {
     transactions,
     accounts,
     categories,
-    isPremiumUser,
-    setPremium,
     incrementActionCounter,
     checkAndShowAd,
   } = useStore();
@@ -38,6 +36,7 @@ export const SettingsScreen = ({ navigation }: any) => {
       screen: 'Categories',
     },
     { name: t('manageBudgets'), icon: 'pie-chart-outline', screen: 'Budgets' },
+    { name: t('calendar'), icon: 'calendar-outline', screen: 'Calendar' },
   ];
 
   const LANGUAGES = [

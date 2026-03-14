@@ -50,7 +50,10 @@ export class InsightEngine {
         title: t.insightTopCategoryTitle,
         message: t.insightTopCategoryMessage
           .replace('{{category}}', currentMonth.topCategory.name)
-          .replace('{{amount}}', currentMonth.topCategory.amount.toFixed(2).toString()),
+          .replace(
+            '{{amount}}',
+            currentMonth.topCategory.amount.toFixed(2).toString(),
+          ),
         level: 'info',
         category: 'spending',
         timestamp: new Date().toISOString(),

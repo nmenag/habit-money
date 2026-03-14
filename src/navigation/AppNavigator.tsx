@@ -13,6 +13,7 @@ import { DashboardScreen } from '../screens/DashboardScreen';
 import { InsightsScreen } from '../screens/InsightsScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { TransactionsScreen } from '../screens/TransactionsScreen';
+import { CalendarScreen } from '../screens/CalendarScreen';
 import { useStore, useTranslation } from '../store/useStore';
 
 const Tab = createBottomTabNavigator();
@@ -23,8 +24,8 @@ const TabNavigator = () => {
 
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, size }) => {
+      screenOptions={({ route }: { route: any }) => ({
+        tabBarIcon: ({ color, size }: { color: string; size: number }) => {
           let iconName: keyof typeof Ionicons.glyphMap = 'help-circle';
           if (route.name === 'Dashboard') iconName = 'home';
           else if (route.name === 'Transactions') iconName = 'list';
@@ -106,6 +107,11 @@ export const AppNavigator = () => {
         name="Budgets"
         component={BudgetsScreen}
         options={{ title: t('manageBudgets') }}
+      />
+      <Stack.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={{ title: t('calendar') }}
       />
     </Stack.Navigator>
   );

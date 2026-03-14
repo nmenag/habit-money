@@ -4,7 +4,9 @@ import { InsightEngine } from './InsightEngine';
 import { AnalyticsReport } from './types';
 
 export class AnalyticsManager {
-  static async generateFullReport(language: Language): Promise<AnalyticsReport> {
+  static async generateFullReport(
+    language: Language,
+  ): Promise<AnalyticsReport> {
     const currentMonth = await AnalyticsService.getMonthlyMetrics(0);
     const previousMonth = await AnalyticsService.getMonthlyMetrics(1);
     const categoryExpenses = await AnalyticsService.getCategoryExpenses(0);
