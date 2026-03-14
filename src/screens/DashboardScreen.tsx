@@ -89,12 +89,15 @@ export const DashboardScreen = ({ navigation }: any) => {
             contentContainerStyle={styles.accountsScrollContent}
           >
             {accounts.map((acc) => (
-              <View
+              <TouchableOpacity
                 key={acc.id}
                 style={[
                   styles.accountCard,
                   { borderLeftColor: acc.color || '#2196f3' },
                 ]}
+                onPress={() =>
+                  navigation.navigate('Transactions', { accountId: acc.id })
+                }
               >
                 <Text style={styles.accountCardName}>{acc.name}</Text>
                 <Text style={styles.accountCardBalance}>
@@ -103,7 +106,7 @@ export const DashboardScreen = ({ navigation }: any) => {
                 <Text style={styles.accountCardType}>
                   {t(acc.type).toUpperCase()}
                 </Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         </View>

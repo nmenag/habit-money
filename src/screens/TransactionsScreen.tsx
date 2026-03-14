@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   Alert,
@@ -12,9 +13,18 @@ import { BannerAdComponent } from '../components/BannerAdComponent';
 import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../store/useStore';
 
-export const TransactionsScreen = ({ navigation }: any) => {
-  const { transactions, categories, deleteTransaction } = useStore();
-  const { t, language } = useTranslation();
+export const TransactionsScreen = ({ route, navigation }: any) => {
+  const { transactions, accounts, categories, deleteTransaction } = useStore();
+  const { t } = useTranslation();
+
+  const filterAccountId = route.params?.accountId;
+  const filteredTransactions = filterAccountId
+    ? transactions.filter((t) => t.accountId === filterAccountId)
+    : transactions;
+
+  const activeAccount = filterAccountId
+    ? accounts.find((a) => a.id === filterAccountId)
+    : null;
 
   const handleTransactionPress = (transaction: any) => {
     Alert.alert(t('transactionOptions'), t('whatToDo'), [
@@ -61,8 +71,20 @@ export const TransactionsScreen = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
+      {activeAccount && (
+        <View style={styles.filterHeader}>
+          <Text style={styles.filterText}>
+            {t('accounts')}: {activeAccount.name}
+          </Text>
+          <TouchableOpacity
+            onPress={() => navigation.setParams({ accountId: undefined })}
+          >
+            <Ionicons name="close-circle" size={24} color="#f44336" />
+          </TouchableOpacity>
+        </View>
+      )}
       <FlatList
-        data={transactions}
+        data={filteredTransactions}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
           const category = categories.find((c) => c.id === item.categoryId);
@@ -84,7 +106,11 @@ export const TransactionsScreen = ({ navigation }: any) => {
       <BannerAdComponent />
       <TouchableOpacity
         style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 8 }]}
-        onPress={() => navigation.navigate('AddTransaction')}
+        onPress={() =>
+          navigation.navigate('AddTransaction', {
+            accountId: filterAccountId,
+          })
+        }
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
@@ -96,6 +122,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  filterHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  filterText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2196f3',
   },
   empty: {
     padding: 40,

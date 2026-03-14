@@ -27,7 +27,10 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
   );
   const [note, setNote] = useState(editingTransaction?.note || '');
   const [selectedAccount, setSelectedAccount] = useState(
-    editingTransaction?.accountId || accounts[0]?.id || '',
+    editingTransaction?.accountId ||
+      route.params?.accountId ||
+      accounts[0]?.id ||
+      '',
   );
 
   const availableCategories = categories.filter((c) => c.type === type);
