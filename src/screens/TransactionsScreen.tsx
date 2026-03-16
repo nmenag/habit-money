@@ -1,21 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import {
-  Alert,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FAB, IconButton, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../store/useStore';
 
 export const TransactionsScreen = ({ route, navigation }: any) => {
-  const { transactions, accounts, categories, deleteTransaction } = useStore();
+  const { transactions, accounts, categories } = useStore();
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = defaultStyles(theme);
 
   const filterAccountId = route.params?.accountId;
   const filteredTransactions = filterAccountId
@@ -36,22 +32,26 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       {activeAccount && (
         <View style={styles.filterHeader}>
-          <Text style={styles.filterText}>
+          <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
             {t('accounts')}: {activeAccount.name}
           </Text>
-          <TouchableOpacity
+          <IconButton
+            icon="close-circle"
+            iconColor={theme.colors.error}
+            size={24}
             onPress={() => navigation.setParams({ accountId: undefined })}
-          >
-            <Ionicons name="close-circle" size={24} color="#f44336" />
-          </TouchableOpacity>
+          />
         </View>
       )}
       <FlatList
         data={filteredTransactions}
         keyExtractor={(item) => item.id}
+        contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => {
           const category = categories.find((c) => c.id === item.categoryId);
           return (
@@ -65,71 +65,54 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
         }}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>{t('noTransactions')}</Text>
+            <Ionicons name="receipt-outline" size={64} color="#ccc" />
+            <Text variant="bodyLarge" style={styles.emptyText}>
+              {t('noTransactions')}
+            </Text>
           </View>
         }
       />
       <BannerAdComponent />
-      <TouchableOpacity
-        style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 8 }]}
+      <FAB
+        icon="plus"
+        style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
         onPress={() =>
           navigation.navigate('AddTransaction', {
             accountId: filterAccountId,
           })
         }
-      >
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  filterHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  filterText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2196f3',
-  },
-  empty: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#888',
-    fontSize: 16,
-  },
-  fab: {
-    position: 'absolute',
-    right: 24,
-    bottom: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#2196f3',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-  },
-  fabText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-});
+const defaultStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    filterHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingLeft: 16,
+      paddingRight: 8,
+      backgroundColor: theme.colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(0,0,0,0.05)',
+    },
+    empty: {
+      padding: 60,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    emptyText: {
+      color: theme.colors.onSurfaceVariant,
+      marginTop: 16,
+    },
+    fab: {
+      position: 'absolute',
+      right: 16,
+      borderRadius: 16,
+    },
+  });

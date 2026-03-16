@@ -5,11 +5,19 @@ import {
   Dimensions,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import {
+  Card,
+  FAB,
+  IconButton,
+  Surface,
+  Text,
+  useTheme,
+} from 'react-native-paper';
 import { PieChart } from 'react-native-chart-kit';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { ScoreCard } from '../components/ScoreCard';
 import { useStore, useTranslation } from '../store/useStore';
@@ -21,6 +29,9 @@ export const DashboardScreen = ({ navigation }: any) => {
   const { transactions, accounts, categories, formatCurrency } = useStore();
   const { t, language } = useTranslation();
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const theme = useTheme();
+  const styles = defaultStyles(theme);
+  const insets = useSafeAreaInsets();
 
   const scoreData = useMemo(
     () => calculateFinancialScore(transactions),
@@ -86,314 +97,293 @@ export const DashboardScreen = ({ navigation }: any) => {
   }, [transactions, categories, t, language]);
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.accountsSection}>
-          <Text style={styles.sectionHeader}>{t('accounts')}</Text>
+          <Text
+            variant="labelLarge"
+            style={[styles.sectionHeader, { color: theme.colors.secondary }]}
+          >
+            {t('accounts')}
+          </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.accountsScrollContent}
           >
             {accounts.map((acc) => (
-              <TouchableOpacity
+              <Card
                 key={acc.id}
                 style={[
                   styles.accountCard,
-                  { borderLeftColor: acc.color || '#2196f3' },
+                  { borderLeftColor: acc.color || theme.colors.primary },
                 ]}
                 onPress={() =>
                   navigation.navigate('Transactions', { accountId: acc.id })
                 }
+                mode="elevated"
               >
-                <Text style={styles.accountCardName}>{acc.name}</Text>
-                <Text style={styles.accountCardBalance}>
-                  {formatCurrency(acc.currentBalance, acc.currency)}
-                </Text>
-                <Text style={styles.accountCardType}>
-                  {t(acc.type).toUpperCase()}
-                </Text>
-              </TouchableOpacity>
+                <Card.Content>
+                  <Text variant="labelMedium" style={styles.accountCardName}>
+                    {acc.name}
+                  </Text>
+                  <Text variant="titleMedium" style={styles.accountCardBalance}>
+                    {formatCurrency(acc.currentBalance, acc.currency)}
+                  </Text>
+                  <Text
+                    variant="labelSmall"
+                    style={[
+                      styles.accountCardType,
+                      { color: theme.colors.outline },
+                    ]}
+                  >
+                    {t(acc.type).toUpperCase()}
+                  </Text>
+                </Card.Content>
+              </Card>
             ))}
           </ScrollView>
         </View>
 
         <View style={styles.summaryContainer}>
           <View style={styles.monthlyBox}>
-            <View style={styles.monthlyItem}>
-              <Text style={styles.monthlyLabel}>{t('monthlyIncome')}</Text>
-              <Text style={[styles.monthlyValue, { color: '#4caf50' }]}>
+            <Surface style={styles.monthlyItem} elevation={1}>
+              <Text variant="labelSmall" style={styles.monthlyLabel}>
+                {t('monthlyIncome')}
+              </Text>
+              <Text
+                variant="titleLarge"
+                style={[styles.monthlyValue, { color: '#4caf50' }]}
+              >
                 +{formatCurrency(totalIncome)}
               </Text>
-            </View>
-            <View style={styles.monthlyItem}>
-              <Text style={styles.monthlyLabel}>{t('monthlyExpenses')}</Text>
-              <Text style={[styles.monthlyValue, { color: '#f44336' }]}>
+            </Surface>
+            <Surface style={styles.monthlyItem} elevation={1}>
+              <Text variant="labelSmall" style={styles.monthlyLabel}>
+                {t('monthlyExpenses')}
+              </Text>
+              <Text
+                variant="titleLarge"
+                style={[styles.monthlyValue, { color: theme.colors.error }]}
+              >
                 -{formatCurrency(totalExpenses)}
               </Text>
-            </View>
+            </Surface>
           </View>
         </View>
 
         <ScoreCard scoreData={scoreData} />
 
         {pieData.length > 0 && (
-          <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>{t('chartTitle')}</Text>
-            <View style={styles.pieRow}>
-              <PieChart
-                data={pieData.map((d) => ({
-                  ...d,
-                  name: '', // Hide names to keep only percentages on graph
-                  population: parseFloat(d.percentage),
-                }))}
-                width={screenWidth}
-                height={220}
-                chartConfig={{
-                  backgroundColor: '#fff',
-                  backgroundGradientFrom: '#fff',
-                  backgroundGradientTo: '#fff',
-                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                accessor="population"
-                backgroundColor="transparent"
-                paddingLeft="50"
-                absolute
-                hasLegend={false}
-              />
-            </View>
+          <Card style={styles.chartCard} mode="elevated">
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.chartTitle}>
+                {t('chartTitle')}
+              </Text>
+              <View style={styles.pieRow}>
+                <PieChart
+                  data={pieData.map((d) => ({
+                    ...d,
+                    name: '',
+                    population: parseFloat(d.percentage),
+                  }))}
+                  width={screenWidth - 64}
+                  height={200}
+                  chartConfig={{
+                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  }}
+                  accessor="population"
+                  backgroundColor="transparent"
+                  paddingLeft="50"
+                  absolute
+                  hasLegend={false}
+                />
+              </View>
 
-            <View style={styles.categoryList}>
-              {(showAllCategories ? pieData : pieData.slice(0, 5)).map(
-                (item, idx) => (
-                  <View key={idx} style={styles.categoryInfoRow}>
-                    <View style={styles.categoryLabelGroup}>
-                      <View
-                        style={[
-                          styles.colorDot,
-                          { backgroundColor: item.color },
-                        ]}
-                      />
-                      <Text style={styles.categoryName} numberOfLines={1}>
-                        {item.name}
-                      </Text>
+              <View style={styles.categoryList}>
+                {(showAllCategories ? pieData : pieData.slice(0, 5)).map(
+                  (item, idx) => (
+                    <View key={idx} style={styles.categoryInfoRow}>
+                      <View style={styles.categoryLabelGroup}>
+                        <View
+                          style={[
+                            styles.colorDot,
+                            { backgroundColor: item.color },
+                          ]}
+                        />
+                        <Text variant="bodyMedium" numberOfLines={1}>
+                          {item.name}
+                        </Text>
+                      </View>
+                      <View style={styles.categoryValueGroup}>
+                        <Text
+                          variant="bodyMedium"
+                          style={styles.categoryAmount}
+                        >
+                          {formatCurrency(item.population)}
+                        </Text>
+                        <Text
+                          variant="labelSmall"
+                          style={{ color: theme.colors.outline }}
+                        >
+                          {item.percentage}%
+                        </Text>
+                      </View>
                     </View>
-                    <View style={styles.categoryValueGroup}>
-                      <Text style={styles.categoryAmount}>
-                        {formatCurrency(item.population)}
-                      </Text>
-                      <Text style={styles.categoryPercent}>
-                        {item.percentage}%
-                      </Text>
-                    </View>
-                  </View>
-                ),
-              )}
+                  ),
+                )}
 
-              {pieData.length > 5 && (
-                <TouchableOpacity
-                  onPress={() => setShowAllCategories(!showAllCategories)}
-                  style={styles.showMoreBtn}
-                >
-                  <Text style={styles.showMoreText}>
-                    {showAllCategories
-                      ? t('showLess') || 'Show Less'
-                      : t('showMore') || 'Show More'}
-                  </Text>
-                  <Ionicons
-                    name={showAllCategories ? 'chevron-up' : 'chevron-down'}
-                    size={16}
-                    color="#2196f3"
-                  />
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
+                {pieData.length > 5 && (
+                  <TouchableOpacity
+                    onPress={() => setShowAllCategories(!showAllCategories)}
+                    style={styles.showMoreBtn}
+                  >
+                    <Text
+                      variant="labelLarge"
+                      style={{ color: theme.colors.primary }}
+                    >
+                      {showAllCategories ? t('showLess') : t('showMore')}
+                    </Text>
+                    <Ionicons
+                      name={showAllCategories ? 'chevron-up' : 'chevron-down'}
+                      size={16}
+                      color={theme.colors.primary}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </Card.Content>
+          </Card>
         )}
 
         <BannerAdComponent />
       </ScrollView>
 
-      <TouchableOpacity
-        style={styles.fab}
+      <FAB
+        icon="plus"
+        style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
         onPress={() => navigation.navigate('AddTransaction')}
-      >
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  content: {
-    paddingBottom: 24,
-  },
-  summaryContainer: {
-    padding: 16,
-  },
-  accountsSection: {
-    marginTop: 16,
-    paddingBottom: 8,
-  },
-  sectionHeader: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#34495e',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginLeft: 16,
-    marginBottom: 12,
-  },
-  accountsScrollContent: {
-    paddingHorizontal: 16,
-  },
-  accountCard: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginRight: 12,
-    width: 160,
-    borderLeftWidth: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  accountCardName: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    fontWeight: '600',
-  },
-  accountCardBalance: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginVertical: 4,
-  },
-  accountCardType: {
-    fontSize: 10,
-    color: '#bdc3c7',
-    fontWeight: '700',
-  },
-  monthlyBox: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  monthlyItem: {
-    backgroundColor: '#fff',
-    flex: 1,
-    padding: 16,
-    borderRadius: 12,
-    marginHorizontal: 4,
-    alignItems: 'center',
-  },
-  monthlyLabel: {
-    color: '#7f8c8d',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  monthlyValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 4,
-  },
-  chartContainer: {
-    backgroundColor: '#fff',
-    margin: 16,
-    padding: 16,
-    borderRadius: 12,
-  },
-  chartTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 16,
-    textAlign: 'center',
-    color: '#34495e',
-  },
-  fab: {
-    position: 'absolute',
-    right: 24,
-    bottom: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#2196f3',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-  },
-  fabText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  pieRow: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 200,
-  },
-  categoryList: {
-    marginTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    paddingTop: 10,
-  },
-  categoryInfoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f9f9f9',
-  },
-  categoryLabelGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  colorDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 10,
-  },
-  categoryName: {
-    fontSize: 14,
-    color: '#2c3e50',
-    fontWeight: '500',
-  },
-  categoryValueGroup: {
-    alignItems: 'flex-end',
-  },
-  categoryAmount: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#2c3e50',
-  },
-  categoryPercent: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    marginTop: 2,
-  },
-  showMoreBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    marginTop: 5,
-  },
-  showMoreText: {
-    fontSize: 14,
-    color: '#2196f3',
-    fontWeight: '600',
-    marginRight: 4,
-  },
-});
+const defaultStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    content: {
+      paddingBottom: 100,
+    },
+    summaryContainer: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+    },
+    accountsSection: {
+      marginTop: 16,
+      paddingBottom: 8,
+    },
+    sectionHeader: {
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      marginLeft: 20,
+      marginBottom: 12,
+      fontWeight: '700',
+    },
+    accountsScrollContent: {
+      paddingHorizontal: 16,
+    },
+    accountCard: {
+      marginRight: 12,
+      width: 160,
+      borderLeftWidth: 4,
+      borderRadius: 16,
+    },
+    accountCardName: {
+      color: theme.colors.onSurfaceVariant,
+      fontWeight: '600',
+    },
+    accountCardBalance: {
+      fontWeight: '900',
+      marginVertical: 4,
+    },
+    accountCardType: {
+      fontWeight: '700',
+    },
+    monthlyBox: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    monthlyItem: {
+      flex: 1,
+      padding: 20,
+      borderRadius: 24,
+      marginHorizontal: 4,
+      alignItems: 'center',
+      backgroundColor: theme.colors.surface,
+    },
+    monthlyLabel: {
+      color: theme.colors.onSurfaceVariant,
+      marginBottom: 4,
+    },
+    monthlyValue: {
+      fontWeight: '900',
+    },
+    chartCard: {
+      margin: 16,
+      borderRadius: 24,
+      backgroundColor: theme.colors.surface,
+    },
+    chartTitle: {
+      fontWeight: '700',
+      textAlign: 'center',
+      marginBottom: 8,
+    },
+    pieRow: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: 180,
+    },
+    categoryList: {
+      marginTop: 8,
+    },
+    categoryInfoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(0,0,0,0.03)',
+    },
+    categoryLabelGroup: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    colorDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      marginRight: 12,
+    },
+    categoryValueGroup: {
+      alignItems: 'flex-end',
+    },
+    categoryAmount: {
+      fontWeight: '700',
+    },
+    showMoreBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 16,
+    },
+    fab: {
+      position: 'absolute',
+      right: 16,
+      borderRadius: 16,
+    },
+  });

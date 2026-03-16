@@ -1,12 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Card, Divider, List, Text, useTheme } from 'react-native-paper';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
 import { exportTransactionsToCSV } from '../utils/csvExport';
@@ -21,6 +15,8 @@ export const SettingsScreen = ({ navigation }: any) => {
     checkAndShowAd,
   } = useStore();
   const { t, language } = useTranslation();
+  const theme = useTheme();
+  const styles = defaultStyles(theme);
 
   const handleExport = async () => {
     await exportTransactionsToCSV(transactions, accounts, categories);
@@ -32,11 +28,12 @@ export const SettingsScreen = ({ navigation }: any) => {
     { name: t('manageAccounts'), icon: 'wallet-outline', screen: 'Accounts' },
     {
       name: t('manageCategories'),
-      icon: 'pricetags-outline',
+      icon: 'tag-multiple-outline',
       screen: 'Categories',
     },
-    { name: t('manageBudgets'), icon: 'pie-chart-outline', screen: 'Budgets' },
-    { name: t('calendar'), icon: 'calendar-outline', screen: 'Calendar' },
+    { name: t('manageBudgets'), icon: 'chart-pie', screen: 'Budgets' },
+    { name: t('manageGoals'), icon: 'flag-outline', screen: 'Goals' },
+    { name: t('calendar'), icon: 'calendar-blank-outline', screen: 'Calendar' },
   ];
 
   const LANGUAGES = [
@@ -45,107 +42,82 @@ export const SettingsScreen = ({ navigation }: any) => {
   ];
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('preferences')}</Text>
-        <View style={styles.optionsContainer}>
-          {SETTINGS_LINKS.map((item) => (
-            <TouchableOpacity
-              key={item.screen}
-              style={styles.option}
-              onPress={() => navigation.navigate(item.screen)}
-            >
-              <View style={styles.optionInfo}>
-                <Ionicons
-                  name={item.icon as any}
-                  size={24}
-                  color="#555"
-                  style={styles.menuIcon}
-                />
-                <Text style={styles.optionText}>{item.name}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#ccc" />
-            </TouchableOpacity>
+        <Text variant="labelLarge" style={styles.sectionTitle}>
+          {t('preferences')}
+        </Text>
+        <Card style={styles.card} mode="contained">
+          {SETTINGS_LINKS.map((item, index) => (
+            <View key={item.screen}>
+              <List.Item
+                title={item.name}
+                left={(props) => <List.Icon {...props} icon={item.icon} />}
+                right={(props) => <List.Icon {...props} icon="chevron-right" />}
+                onPress={() => navigation.navigate(item.screen)}
+              />
+              {index < SETTINGS_LINKS.length - 1 && <Divider />}
+            </View>
           ))}
-        </View>
-      </View>
-
-      {/* <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('premium')}</Text>
-        <View style={styles.optionsContainer}>
-          <View style={styles.option}>
-            <View style={styles.optionInfo}>
-              <Ionicons
-                name={isPremiumUser ? 'star' : 'star-outline'}
-                size={24}
-                color={isPremiumUser ? '#f1c40f' : '#555'}
-                style={styles.menuIcon}
-              />
-              <Text style={styles.optionText}>
-                {isPremiumUser ? t('premiumVersion') : t('freeVersion')}
-              </Text>
-            </View>
-            <Switch
-              value={isPremiumUser}
-              onValueChange={setPremium}
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={isPremiumUser ? '#2196f3' : '#f4f3f4'}
-            />
-          </View>
-        </View>
-        <View style={styles.sectionInfo}>
-          <Text style={styles.sectionInfoText}>{t('premiumDesc')}</Text>
-        </View>
-      </View> */}
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('settings')}</Text>
-        <View style={styles.optionsContainer}>
-          <TouchableOpacity style={styles.option} onPress={handleExport}>
-            <View style={styles.optionInfo}>
-              <Ionicons
-                name="download-outline"
-                size={24}
-                color="#555"
-                style={styles.menuIcon}
-              />
-              <Text style={styles.optionText}>{t('exportData')}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.sectionInfo}>
-          <Text style={styles.sectionInfoText}>{t('exportDataDesc')}</Text>
-        </View>
+        </Card>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('language')}</Text>
-        <View style={styles.optionsContainer}>
-          {LANGUAGES.map((item) => (
-            <TouchableOpacity
-              key={item.code}
-              style={[
-                styles.option,
-                language === item.code && styles.activeOption,
-              ]}
-              onPress={() => setLanguage(item.code as any)}
-            >
-              <View style={styles.optionInfo}>
-                <Text style={styles.languageLabel}>{item.label}</Text>
-                <View>
-                  <Text style={styles.optionText}>{item.name}</Text>
-                </View>
-              </View>
-              {language === item.code && (
-                <Ionicons name="checkmark-circle" size={24} color="#2196f3" />
-              )}
-            </TouchableOpacity>
+        <Text variant="labelLarge" style={styles.sectionTitle}>
+          {t('settings')}
+        </Text>
+        <Card style={styles.card} mode="contained">
+          <List.Item
+            title={t('exportData')}
+            description={t('exportDataDesc')}
+            left={(props) => <List.Icon {...props} icon="download-outline" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={handleExport}
+          />
+        </Card>
+      </View>
+
+      <View style={styles.section}>
+        <Text variant="labelLarge" style={styles.sectionTitle}>
+          {t('language')}
+        </Text>
+        <Card style={styles.card} mode="contained">
+          {LANGUAGES.map((item, index) => (
+            <View key={item.code}>
+              <List.Item
+                title={item.name}
+                left={(props) => (
+                  <View style={styles.languageIndicator}>
+                    <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>
+                      {item.label}
+                    </Text>
+                  </View>
+                )}
+                right={(props) =>
+                  language === item.code ? (
+                    <List.Icon
+                      {...props}
+                      icon="check-circle"
+                      color={theme.colors.primary}
+                    />
+                  ) : null
+                }
+                onPress={() => setLanguage(item.code as any)}
+                style={
+                  language === item.code
+                    ? { backgroundColor: theme.colors.primaryContainer }
+                    : undefined
+                }
+              />
+              {index < LANGUAGES.length - 1 && <Divider />}
+            </View>
           ))}
-        </View>
-        <View style={styles.sectionInfo}>
-          <Text style={styles.sectionInfoText}>{t('changeLanguageDesc')}</Text>
-        </View>
+        </Card>
+        <Text variant="bodySmall" style={styles.sectionInfoText}>
+          {t('changeLanguageDesc')}
+        </Text>
       </View>
 
       <View style={{ height: 40 }} />
@@ -154,68 +126,39 @@ export const SettingsScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  section: {
-    marginTop: 24,
-    paddingHorizontal: 16,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#888',
-    textTransform: 'uppercase',
-    marginBottom: 12,
-    marginLeft: 4,
-  },
-  optionsContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  activeOption: {
-    backgroundColor: '#f0f7ff',
-  },
-  optionInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  languageLabel: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    width: 40,
-    textAlign: 'center',
-    marginRight: 16,
-  },
-  optionText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-  },
-  menuIcon: {
-    marginRight: 16,
-    width: 24,
-    textAlign: 'center',
-  },
-  sectionInfo: {
-    padding: 16,
-    paddingTop: 8,
-  },
-  sectionInfoText: {
-    color: '#888',
-    fontSize: 13,
-    lineHeight: 18,
-  },
-});
+const defaultStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    section: {
+      marginTop: 24,
+      paddingHorizontal: 16,
+    },
+    sectionTitle: {
+      fontWeight: '900',
+      color: theme.colors.onSurfaceVariant,
+      textTransform: 'uppercase',
+      marginBottom: 12,
+      marginLeft: 8,
+      letterSpacing: 1.5,
+    },
+    card: {
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+    languageIndicator: {
+      width: 48,
+      height: 48,
+      borderRadius: 12,
+      backgroundColor: 'rgba(0,0,0,0.05)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 8,
+    },
+    sectionInfoText: {
+      color: theme.colors.onSurfaceVariant,
+      marginTop: 8,
+      paddingHorizontal: 8,
+    },
+  });

@@ -1,12 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { Card, FAB, ProgressBar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Goal, useStore, useTranslation } from '../store/useStore';
 
@@ -14,194 +9,229 @@ export const GoalsScreen = ({ navigation }: any) => {
   const { goals, formatCurrency } = useStore();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const styles = defaultStyles(theme);
 
   const renderItem = ({ item }: { item: Goal }) => {
-    const progress = Math.min(
-      (item.currentAmount / item.targetAmount) * 100,
-      100,
-    );
+    const progress =
+      item.targetAmount > 0
+        ? Math.min((item.currentAmount / item.targetAmount) * 100, 100)
+        : 0;
     const isCompleted = item.status === 'completed';
 
     return (
-      <TouchableOpacity
+      <Card
         style={styles.card}
-        onPress={() => navigation.navigate('AddGoal', { goal: item })}
-        activeOpacity={0.7}
+        onPress={() => navigation.navigate('GoalDetail', { goalId: item.id })}
+        mode="elevated"
       >
-        <View style={styles.cardContent}>
-          <View
-            style={[
-              styles.iconContainer,
-              { backgroundColor: item.color || '#ccc' },
-            ]}
-          >
-            <Ionicons
-              name={(item.icon as any) || 'trophy'}
-              size={24}
-              color="#fff"
-            />
-          </View>
-          <View style={styles.textContainer}>
-            <Text style={styles.name}>{item.name}</Text>
-            <Text style={styles.amountText}>
-              {formatCurrency(item.currentAmount)} /{' '}
-              {formatCurrency(item.targetAmount)}
-            </Text>
-          </View>
-          {isCompleted && (
-            <View style={styles.completedBadge}>
-              <Ionicons name="checkmark-circle" size={20} color="#4caf50" />
+        <Card.Content style={styles.cardContent}>
+          <View style={styles.cardHeader}>
+            <View
+              style={[
+                styles.iconContainer,
+                { backgroundColor: item.color || theme.colors.primary },
+              ]}
+            >
+              <Ionicons
+                name={(item.icon as any) || 'trophy'}
+                size={24}
+                color="#fff"
+              />
             </View>
-          )}
-        </View>
+            <View style={styles.textContainer}>
+              <Text variant="titleMedium" style={styles.name}>
+                {item.name}
+              </Text>
+              <Text
+                variant="labelMedium"
+                style={[styles.amountText, { color: theme.colors.outline }]}
+              >
+                {formatCurrency(item.currentAmount)} /{' '}
+                {formatCurrency(item.targetAmount)}
+              </Text>
+            </View>
+            <View style={styles.percentageContainer}>
+              <Text
+                variant="titleMedium"
+                style={[
+                  styles.percentageText,
+                  { color: item.color || theme.colors.primary },
+                ]}
+              >
+                {Math.round(progress)}%
+              </Text>
+            </View>
+          </View>
 
-        <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              {
-                width: `${progress}%`,
-                backgroundColor: item.color || '#2196f3',
-              },
-            ]}
-          />
-        </View>
-
-        <View style={styles.footerRow}>
-          <Text style={styles.percentageText}>{Math.round(progress)}%</Text>
-          {item.deadline && (
-            <Text style={styles.deadlineText}>
-              {new Date(item.deadline).toLocaleDateString()}
-            </Text>
-          )}
-        </View>
-      </TouchableOpacity>
+          <View style={styles.progressSection}>
+            <ProgressBar
+              progress={progress / 100}
+              color={item.color || theme.colors.primary}
+              style={styles.progressBar}
+            />
+            {item.deadline && (
+              <View style={styles.deadlineRow}>
+                <Ionicons
+                  name="calendar-outline"
+                  size={12}
+                  color={theme.colors.outline}
+                />
+                <Text
+                  variant="labelSmall"
+                  style={[styles.deadlineText, { color: theme.colors.outline }]}
+                >
+                  {new Date(item.deadline).toLocaleDateString()}
+                </Text>
+              </View>
+            )}
+          </View>
+        </Card.Content>
+      </Card>
     );
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <FlatList
         data={goals}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={[
           styles.listContent,
-          { paddingBottom: insets.bottom + 80 },
+          { paddingBottom: insets.bottom + 100 },
         ]}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Ionicons name="flag-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyText}>{t('noGoals')}</Text>
+            <View
+              style={[
+                styles.emptyIconContainer,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
+            >
+              <Ionicons
+                name="flag-outline"
+                size={48}
+                color={theme.colors.primary}
+              />
+            </View>
+            <Text variant="titleLarge" style={styles.emptyTitle}>
+              {t('noGoals')}
+            </Text>
+            <Text
+              variant="bodyMedium"
+              style={[styles.emptySubtitle, { color: theme.colors.outline }]}
+            >
+              {t('noGoalsSubtitle') ||
+                'Set your first financial goal and start saving today!'}
+            </Text>
           </View>
         }
       />
-      <TouchableOpacity
-        style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 16 }]}
+      <FAB
+        icon="plus"
+        style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
         onPress={() => navigation.navigate('AddGoal')}
-      >
-        <Ionicons name="add" size={30} color="#fff" />
-      </TouchableOpacity>
+      />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  listContent: {
-    padding: 16,
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  cardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  textContainer: {
-    flex: 1,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  amountText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
-  },
-  completedBadge: {
-    marginLeft: 8,
-  },
-  progressTrack: {
-    height: 10,
-    backgroundColor: '#eee',
-    borderRadius: 5,
-    overflow: 'hidden',
-    marginBottom: 8,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 5,
-  },
-  footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  percentageText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#333',
-  },
-  deadlineText: {
-    fontSize: 12,
-    color: '#888',
-  },
-  empty: {
-    padding: 40,
-    alignItems: 'center',
-    marginTop: 100,
-  },
-  emptyText: {
-    color: '#888',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 16,
-  },
-  fab: {
-    position: 'absolute',
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#2196f3',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-  },
-});
+const defaultStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    listContent: {
+      padding: 16,
+    },
+    card: {
+      marginBottom: 16,
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+    cardContent: {
+      padding: 16,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    iconContainer: {
+      width: 48,
+      height: 48,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 16,
+      elevation: 2,
+      shadowColor: theme.colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
+    textContainer: {
+      flex: 1,
+    },
+    name: {
+      fontWeight: '700',
+      letterSpacing: 0.2,
+    },
+    amountText: {
+      marginTop: 2,
+      fontWeight: '500',
+    },
+    percentageContainer: {
+      alignItems: 'flex-end',
+    },
+    percentageText: {
+      fontWeight: '800',
+    },
+    progressSection: {
+      marginTop: 4,
+    },
+    progressBar: {
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: 'rgba(0,0,0,0.05)',
+    },
+    deadlineRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    deadlineText: {
+      marginLeft: 4,
+      fontWeight: '500',
+    },
+    empty: {
+      padding: 40,
+      alignItems: 'center',
+      marginTop: 80,
+    },
+    emptyIconContainer: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    emptyTitle: {
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginBottom: 8,
+    },
+    emptySubtitle: {
+      textAlign: 'center',
+      paddingHorizontal: 20,
+    },
+    fab: {
+      position: 'absolute',
+      right: 16,
+      borderRadius: 16,
+    },
+  });

@@ -16,6 +16,7 @@ import { TransactionsScreen } from '../screens/TransactionsScreen';
 import { CalendarScreen } from '../screens/CalendarScreen';
 import { GoalsScreen } from '../screens/GoalsScreen';
 import { AddGoalScreen } from '../screens/AddGoalScreen';
+import { GoalDetailScreen } from '../screens/GoalDetailScreen';
 import { useStore, useTranslation } from '../store/useStore';
 
 const Tab = createBottomTabNavigator();
@@ -124,6 +125,11 @@ export const AppNavigator = () => {
         name="AddGoal"
         component={AddGoalScreen}
         options={{ title: t('addGoal'), presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="GoalDetail"
+        component={GoalDetailScreen}
+        options={{ title: t('goalDetail') || 'Goal Details' }}
       />
     </Stack.Navigator>
   );

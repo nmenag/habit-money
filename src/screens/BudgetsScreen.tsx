@@ -1,20 +1,28 @@
-import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   Alert,
   FlatList,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import {
+  Card,
+  FAB,
+  IconButton,
+  ProgressBar,
+  Text,
+  useTheme,
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Budget, useStore, useTranslation } from '../store/useStore';
 
 export const BudgetsScreen = ({ navigation }: any) => {
   const { budgets, deleteBudget, transactions, formatCurrency, categories } =
     useStore();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = defaultStyles(theme);
 
   const handleDelete = (budget: Budget) => {
     const isUsed = transactions.some((t) => t.budgetId === budget.id);
@@ -49,169 +57,125 @@ export const BudgetsScreen = ({ navigation }: any) => {
         return (matchesBudget || matchesCategory) && t.type === 'expense';
       })
       .reduce((sum, t) => sum + t.amount, 0);
-    const progress = Math.min((spent / item.amount) * 100, 100);
+    const progress = Math.min(spent / item.amount, 1);
+    const category = categories.find((c) => c.id === item.categoryId);
 
     return (
-      <TouchableOpacity
+      <Card
         style={styles.card}
         onPress={() => navigation.navigate('AddBudget', { budget: item })}
-        activeOpacity={0.7}
+        mode="elevated"
       >
-        <View style={styles.cardContent}>
-          <View
-            style={[
-              styles.iconContainer,
-              { backgroundColor: item.color || '#ccc' },
-            ]}
-          >
-            <Ionicons name="pie-chart" size={24} color="#fff" />
+        <Card.Content>
+          <View style={styles.cardHeader}>
+            <View style={styles.textContainer}>
+              <Text variant="titleLarge" style={styles.name}>
+                {category?.name || t('budgets')}
+              </Text>
+              <Text variant="bodyMedium" style={styles.limitText}>
+                {formatCurrency(spent)} / {formatCurrency(item.amount)}
+              </Text>
+            </View>
+            <IconButton
+              icon="trash-can-outline"
+              iconColor={theme.colors.error}
+              size={24}
+              onPress={() => handleDelete(item)}
+            />
           </View>
-          <View style={styles.textContainer}>
-            <Text style={styles.name}>
-              {categories.find((c) => c.id === item.categoryId)?.name ||
-                t('budgets')}
-            </Text>
-            <Text style={styles.type}>
-              {formatCurrency(spent)} / {formatCurrency(item.amount)}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              {
-                width: `${progress}%`,
-                backgroundColor: item.color || '#2196f3',
-              },
-            ]}
+
+          <ProgressBar
+            progress={progress}
+            color={item.color || theme.colors.primary}
+            style={styles.progressBar}
           />
-        </View>
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={() => handleDelete(item)}
-          >
-            <Ionicons name="trash-outline" size={24} color="#f44336" />
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
+
+          <Text variant="labelSmall" style={styles.percentageText}>
+            {Math.round(progress * 100)}%
+          </Text>
+        </Card.Content>
+      </Card>
     );
   };
 
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <FlatList
         data={budgets}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
+        contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>{t('noBudgets')}</Text>
+            <Text variant="bodyLarge" style={styles.emptyText}>
+              {t('noBudgets')}
+            </Text>
           </View>
         }
       />
-      <View
-        style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}
-      >
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate('AddBudget')}
-        >
-          <Text style={styles.addButtonText}>{t('addBudget')}</Text>
-        </TouchableOpacity>
-      </View>
+
+      <FAB
+        icon="plus"
+        style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
+        onPress={() => navigation.navigate('AddBudget')}
+      />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  cardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  textContainer: {
-    flex: 1,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  type: {
-    fontSize: 14,
-    color: '#888',
-    marginTop: 4,
-    fontWeight: '600',
-  },
-  progressTrack: {
-    height: 8,
-    backgroundColor: '#eee',
-    borderRadius: 4,
-    marginBottom: 12,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  deleteButton: {
-    padding: 4,
-  },
-  empty: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#888',
-    textAlign: 'center',
-  },
-  footer: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderColor: '#eee',
-  },
-  addButton: {
-    backgroundColor: '#4caf50',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-});
+const defaultStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    card: {
+      marginVertical: 8,
+      marginHorizontal: 16,
+      borderRadius: 16,
+      backgroundColor: theme.colors.surface,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    textContainer: {
+      flex: 1,
+    },
+    name: {
+      fontWeight: '900',
+      color: theme.colors.onSurface,
+    },
+    limitText: {
+      color: theme.colors.onSurface,
+      marginTop: 4,
+      fontWeight: '700',
+    },
+    progressBar: {
+      height: 12,
+      borderRadius: 6,
+    },
+    percentageText: {
+      alignSelf: 'flex-end',
+      marginTop: 4,
+      fontWeight: '700',
+      color: theme.colors.onSurfaceVariant,
+    },
+    empty: {
+      padding: 60,
+      alignItems: 'center',
+    },
+    emptyText: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    fab: {
+      position: 'absolute',
+      right: 16,
+      borderRadius: 16,
+    },
+  });

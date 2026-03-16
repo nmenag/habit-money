@@ -1,17 +1,11 @@
+import { format, isSameDay } from 'date-fns';
 import React, { useState } from 'react';
-import {
-  Alert,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FAB, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarView } from '../components/CalendarView';
 import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../store/useStore';
-import { format, isSameDay } from 'date-fns';
 
 // Helper function for formatting amounts
 const formatAmount = (amount: number, formatCurrency: any) => {
@@ -21,9 +15,10 @@ const formatAmount = (amount: number, formatCurrency: any) => {
 };
 
 export const CalendarScreen = ({ navigation }: any) => {
-  const { transactions, categories, deleteTransaction, formatCurrency } =
-    useStore();
+  const { transactions, categories, formatCurrency } = useStore();
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = defaultStyles(theme);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const insets = useSafeAreaInsets();
@@ -51,7 +46,9 @@ export const CalendarScreen = ({ navigation }: any) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <FlatList
         data={dayTransactions}
         keyExtractor={(item) => item.id}
@@ -63,28 +60,29 @@ export const CalendarScreen = ({ navigation }: any) => {
             />
             <View style={styles.listTitleContainer}>
               <View>
-                <Text style={styles.listTitle}>
+                <Text variant="titleMedium" style={styles.listTitle}>
                   {format(selectedDate, 'PP')}
                 </Text>
-                <Text style={styles.transactionCount}>
+                <Text variant="labelSmall" style={styles.transactionCount}>
                   {dayTransactions.length} {t('transactions')}
                 </Text>
               </View>
               <View style={styles.totalsContainer}>
                 {dayTotals.income > 0 && (
-                  <Text style={styles.incomeTotal}>
+                  <Text variant="labelLarge" style={styles.incomeTotal}>
                     +{formatAmount(dayTotals.income, formatCurrency)}
                   </Text>
                 )}
                 {dayTotals.expense > 0 && (
-                  <Text style={styles.expenseTotal}>
+                  <Text variant="labelLarge" style={styles.expenseTotal}>
                     -{formatAmount(dayTotals.expense, formatCurrency)}
                   </Text>
                 )}
                 <Text
+                  variant="labelSmall"
                   style={[
                     styles.netTotal,
-                    dailyNet < 0 ? styles.expenseTotal : styles.incomeTotal,
+                    { color: dailyNet < 0 ? theme.colors.error : '#4caf50' },
                   ]}
                 >
                   Sum: {formatCurrency(dailyNet)}
@@ -106,100 +104,81 @@ export const CalendarScreen = ({ navigation }: any) => {
         }}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>{t('noTransactions')}</Text>
+            <Text variant="bodyMedium" style={styles.emptyText}>
+              {t('noTransactions')}
+            </Text>
           </View>
         }
-        contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
       />
-      <TouchableOpacity
-        style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 16 }]}
+      <FAB
+        icon="plus"
+        style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
         onPress={() =>
           navigation.navigate('AddTransaction', {
             date: selectedDate.toISOString(),
           })
         }
-      >
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-  },
-  listTitleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    marginBottom: 8,
-  },
-  listTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  transactionCount: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2,
-  },
-  totalsContainer: {
-    alignItems: 'flex-end',
-  },
-  incomeTotal: {
-    fontSize: 14,
-    color: '#4caf50',
-    fontWeight: 'bold',
-  },
-  expenseTotal: {
-    fontSize: 14,
-    color: '#f44336',
-    fontWeight: 'bold',
-  },
-  netTotal: {
-    fontSize: 12,
-    marginTop: 2,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 2,
-  },
-  empty: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#888',
-    fontSize: 16,
-  },
-  fab: {
-    position: 'absolute',
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#2196f3',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-  },
-  fabText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-});
+const defaultStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 8,
+    },
+    listTitleContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(0,0,0,0.05)',
+      marginBottom: 8,
+    },
+    listTitle: {
+      fontWeight: '900',
+      color: theme.colors.onSurface,
+    },
+    transactionCount: {
+      color: theme.colors.onSurfaceVariant,
+      marginTop: 2,
+    },
+    totalsContainer: {
+      alignItems: 'flex-end',
+    },
+    incomeTotal: {
+      color: '#4caf50',
+      fontWeight: 'bold',
+    },
+    expenseTotal: {
+      color: '#f44336',
+      fontWeight: 'bold',
+    },
+    netTotal: {
+      marginTop: 2,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(0,0,0,0.05)',
+      paddingTop: 2,
+      fontWeight: '700',
+    },
+    empty: {
+      padding: 60,
+      alignItems: 'center',
+    },
+    emptyText: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    fab: {
+      position: 'absolute',
+      right: 16,
+      borderRadius: 16,
+    },
+  });

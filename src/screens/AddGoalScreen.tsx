@@ -1,16 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
-  Alert,
-  ScrollView,
-  StyleSheet,
+  Button,
+  Card,
+  HelperText,
   Text,
   TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+  useTheme,
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Goal, useStore, useTranslation } from '../store/useStore';
+import { useStore, useTranslation } from '../store/useStore';
 import { formatNumber } from '../utils/formatters';
 
 const COLORS = [
@@ -40,13 +40,13 @@ const ICONS = [
 ];
 
 export const AddGoalScreen = ({ route, navigation }: any) => {
-  const editingGoal = route.params?.goal as Goal | undefined;
+  const editingGoal = route.params?.goal;
   const isEditing = !!editingGoal;
 
-  const { addGoal, editGoal, deleteGoal, contributeToGoal, formatCurrency } =
-    useStore();
+  const { addGoal, editGoal, formatCurrency } = useStore();
   const { t, language } = useTranslation();
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
 
   const [name, setName] = useState(editingGoal?.name || '');
   const [targetAmount, setTargetAmount] = useState(
@@ -55,219 +55,164 @@ export const AddGoalScreen = ({ route, navigation }: any) => {
   const [displayTargetAmount, setDisplayTargetAmount] = useState(
     editingGoal ? formatNumber(editingGoal.targetAmount, language) : '',
   );
-  const [currentAmount, setCurrentAmount] = useState(
-    editingGoal?.currentAmount || 0,
-  );
-  const [displayCurrentAmount, setDisplayCurrentAmount] = useState(
-    editingGoal ? formatNumber(editingGoal.currentAmount, language) : '0',
-  );
   const [color, setColor] = useState(editingGoal?.color || COLORS[0]);
   const [icon, setIcon] = useState(editingGoal?.icon || ICONS[0]);
-  const [contribution, setContribution] = useState('');
+  const [deadline, setDeadline] = useState(editingGoal?.deadline || '');
 
   const handleSave = () => {
-    if (!name.trim()) {
-      Alert.alert(t('error'), t('enterGoalName'));
-      return;
-    }
-    if (targetAmount <= 0) {
-      Alert.alert(t('error'), t('enterTargetAmount'));
-      return;
-    }
+    if (!name.trim()) return;
+    if (targetAmount <= 0) return;
 
-    const goalData: Goal = {
-      id: isEditing ? editingGoal!.id : Date.now().toString(),
-      name: name.trim(),
+    const goalData = {
+      name,
       targetAmount,
-      currentAmount,
+      currentAmount: editingGoal?.currentAmount || 0,
       color,
       icon,
-      status: currentAmount >= targetAmount ? 'completed' : 'active',
-      deadline: editingGoal?.deadline || null,
+      deadline,
+      status: ((editingGoal?.currentAmount || 0) >= targetAmount
+        ? 'completed'
+        : 'active') as 'active' | 'completed',
     };
 
     if (isEditing) {
-      editGoal(goalData);
+      editGoal({ ...goalData, id: editingGoal.id });
     } else {
       addGoal(goalData);
     }
     navigation.goBack();
   };
 
-  const handleDelete = () => {
-    Alert.alert(t('deleteGoal'), t('confirmDelete'), [
-      { text: t('cancel'), style: 'cancel' },
-      {
-        text: t('delete'),
-        style: 'destructive',
-        onPress: () => {
-          deleteGoal(editingGoal!.id);
-          navigation.goBack();
-        },
-      },
-    ]);
-  };
-
-  const handleContribute = () => {
-    const amount = parseFloat(contribution.replace(/[^0-9]/g, ''));
-    if (isNaN(amount) || amount <= 0) {
-      Alert.alert(t('error'), t('enterValidAmount'));
-      return;
-    }
-
-    contributeToGoal(editingGoal!.id, amount);
-    setContribution('');
-    Alert.alert(t('success'), t('contributionAdded'));
-  };
-
-  const handleAmountChange = (
-    text: string,
-    setter: (val: number) => void,
-    displaySetter: (val: string) => void,
-  ) => {
+  const handleAmountChange = (text: string) => {
     const onlyDigits = text.replace(/\D/g, '');
     if (onlyDigits === '') {
-      displaySetter('');
-      setter(0);
+      setDisplayTargetAmount('');
+      setTargetAmount(0);
       return;
     }
-    const num = parseInt(onlyDigits, 10);
-    setter(num);
-    displaySetter(formatNumber(num, language));
+    const val = parseInt(onlyDigits);
+    setTargetAmount(val);
+    setDisplayTargetAmount(formatNumber(val, language));
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: insets.bottom + 20 },
+          { paddingBottom: insets.bottom + 40 },
         ]}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>{t('goalName')}</Text>
-          <TextInput
-            style={styles.textInput}
-            value={name}
-            onChangeText={setName}
-            placeholder={t('goalNamePlaceholder') || 'E.g. New Car'}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>{t('targetAmount')}</Text>
-          <TextInput
-            style={styles.textInput}
-            value={displayTargetAmount}
-            onChangeText={(text) =>
-              handleAmountChange(text, setTargetAmount, setDisplayTargetAmount)
-            }
-            keyboardType="numeric"
-            placeholder="0.00"
-          />
-        </View>
-
-        {!isEditing && (
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('currentAmount')}</Text>
+        <Card style={styles.mainCard} mode="contained">
+          <Card.Content>
             <TextInput
-              style={styles.textInput}
-              value={displayCurrentAmount}
-              onChangeText={(text) =>
-                handleAmountChange(
-                  text,
-                  setCurrentAmount,
-                  setDisplayCurrentAmount,
-                )
-              }
-              keyboardType="numeric"
-              placeholder="0.00"
+              label={t('goalName')}
+              value={name}
+              onChangeText={setName}
+              mode="outlined"
+              style={styles.input}
+              placeholder={t('goalNamePlaceholder')}
+              outlineStyle={styles.inputOutline}
             />
-          </View>
-        )}
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>{t('icon')}</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.iconScroll}
-          >
-            {ICONS.map((i) => (
-              <TouchableOpacity
-                key={i}
-                style={[
-                  styles.iconChip,
-                  icon === i && { backgroundColor: color },
-                ]}
-                onPress={() => setIcon(i)}
-              >
-                <Ionicons
-                  name={i as any}
-                  size={24}
-                  color={icon === i ? '#fff' : '#666'}
+            <TextInput
+              label={t('targetAmount')}
+              value={displayTargetAmount}
+              onChangeText={handleAmountChange}
+              mode="outlined"
+              keyboardType="numeric"
+              style={styles.input}
+              left={
+                <TextInput.Affix
+                  text={formatCurrency(0).replace(/[0.,]/g, '')}
                 />
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+              }
+              outlineStyle={styles.inputOutline}
+            />
+
+            <TextInput
+              label={t('deadline') + ' (YYYY-MM-DD)'}
+              value={deadline}
+              onChangeText={setDeadline}
+              mode="outlined"
+              style={styles.input}
+              placeholder="2026-12-31"
+              outlineStyle={styles.inputOutline}
+              right={<TextInput.Icon icon="calendar" />}
+            />
+          </Card.Content>
+        </Card>
+
+        <Text variant="titleMedium" style={styles.sectionTitle}>
+          {t('selectIcon')}
+        </Text>
+        <View style={styles.iconGrid}>
+          {ICONS.map((i) => (
+            <TouchableOpacity
+              key={i}
+              style={[
+                styles.iconItem,
+                icon === i && { backgroundColor: color, borderColor: color },
+                {
+                  backgroundColor:
+                    icon === i ? color : theme.colors.surfaceVariant,
+                },
+              ]}
+              onPress={() => setIcon(i)}
+            >
+              <Ionicons
+                name={i as any}
+                size={24}
+                color={icon === i ? '#fff' : theme.colors.onSurfaceVariant}
+              />
+            </TouchableOpacity>
+          ))}
         </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>{t('color')}</Text>
-          <View style={styles.colorGrid}>
-            {COLORS.map((c) => (
-              <TouchableOpacity
-                key={c}
-                style={[
-                  styles.colorCircle,
-                  { backgroundColor: c },
-                  color === c && styles.activeColor,
-                ]}
-                onPress={() => setColor(c)}
-              />
-            ))}
-          </View>
+        <Text variant="titleMedium" style={styles.sectionTitle}>
+          {t('selectColor')}
+        </Text>
+        <View style={styles.colorRow}>
+          {COLORS.map((c) => (
+            <TouchableOpacity
+              key={c}
+              style={[
+                styles.colorCircle,
+                { backgroundColor: c },
+                color === c && {
+                  borderColor: theme.colors.primary,
+                  borderWidth: 3,
+                },
+              ]}
+              onPress={() => setColor(c)}
+            >
+              {color === c && (
+                <Ionicons name="checkmark" size={20} color="#fff" />
+              )}
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {isEditing && (
-          <View style={styles.contributionSection}>
-            <Text style={styles.label}>{t('contribute')}</Text>
-            <View style={styles.contributionInputRow}>
-              <TextInput
-                style={[styles.textInput, { flex: 1, marginBottom: 0 }]}
-                value={contribution}
-                onChangeText={(text) =>
-                  setContribution(text.replace(/[^0-9]/g, ''))
-                }
-                keyboardType="numeric"
-                placeholder="0.00"
-              />
-              <TouchableOpacity
-                style={[styles.contributeBtn, { backgroundColor: color }]}
-                onPress={handleContribute}
-              >
-                <Text style={styles.contributeBtnText}>
-                  {t('add') || 'Add'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        <TouchableOpacity
-          style={[styles.saveBtn, { backgroundColor: color }]}
+        <Button
+          mode="contained"
           onPress={handleSave}
+          style={[styles.saveBtn, { backgroundColor: color }]}
+          contentStyle={styles.saveBtnContent}
+          labelStyle={styles.saveBtnLabel}
         >
-          <Text style={styles.saveBtnText}>
-            {isEditing ? t('update') : t('save')}
-          </Text>
-        </TouchableOpacity>
+          {isEditing ? t('updateGoal') : t('saveGoal')}
+        </Button>
 
-        {isEditing && (
-          <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
-            <Text style={styles.deleteBtnText}>{t('deleteGoal')}</Text>
-          </TouchableOpacity>
-        )}
+        <Button
+          mode="text"
+          onPress={() => navigation.goBack()}
+          style={styles.cancelBtn}
+        >
+          {t('cancel')}
+        </Button>
       </ScrollView>
     </View>
   );
@@ -276,98 +221,67 @@ export const AddGoalScreen = ({ route, navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   content: {
-    padding: 20,
+    padding: 16,
   },
-  inputGroup: {
-    marginBottom: 20,
+  mainCard: {
+    borderRadius: 24,
+    marginBottom: 24,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#555',
-    marginBottom: 8,
+  input: {
+    marginBottom: 16,
+    backgroundColor: 'transparent',
   },
-  textInput: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#eee',
-    marginBottom: 4,
+  inputOutline: {
+    borderRadius: 16,
   },
-  iconScroll: {
-    flexDirection: 'row',
-    paddingVertical: 4,
+  sectionTitle: {
+    marginBottom: 16,
+    fontWeight: '700',
+    marginLeft: 4,
   },
-  iconChip: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  colorGrid: {
+  iconGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 24,
   },
-  colorCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    marginRight: 12,
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  activeColor: {
-    borderColor: '#333',
-  },
-  contributionSection: {
-    marginTop: 10,
-    marginBottom: 30,
-    padding: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-  },
-  contributionInputRow: {
-    flexDirection: 'row',
+  iconItem: {
+    width: '22%',
+    aspectRatio: 1,
+    borderRadius: 16,
+    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 12,
   },
-  contributeBtn: {
-    marginLeft: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
+  colorRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 32,
     justifyContent: 'center',
   },
-  contributeBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  colorCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    margin: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   saveBtn: {
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
+    borderRadius: 16,
+    marginTop: 8,
+    elevation: 4,
   },
-  saveBtnText: {
-    color: '#fff',
+  saveBtnContent: {
+    height: 56,
+  },
+  saveBtnLabel: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
-  deleteBtn: {
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  deleteBtnText: {
-    color: '#f44336',
-    fontWeight: '600',
+  cancelBtn: {
+    marginTop: 8,
   },
 });

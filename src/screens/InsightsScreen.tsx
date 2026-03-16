@@ -1,5 +1,6 @@
 import React from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { Card, Surface, Text, useTheme } from 'react-native-paper';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { useStore, useTranslation } from '../store/useStore';
 
@@ -8,10 +9,14 @@ const screenWidth = Dimensions.get('window').width;
 export const InsightsScreen = () => {
   const { analyticsReport, formatCurrency, currencySymbol } = useStore();
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = defaultStyles(theme);
 
   if (!analyticsReport) {
     return (
-      <View style={styles.container}>
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
         <Text style={styles.subtext}>Loading analytics...</Text>
       </View>
     );
@@ -55,77 +60,112 @@ export const InsightsScreen = () => {
   }));
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.headerTitle}>{t('financialAnalysis')}</Text>
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      contentContainerStyle={styles.content}
+    >
+      <Text variant="headlineSmall" style={styles.headerTitle}>
+        {t('financialAnalysis')}
+      </Text>
 
       {/* Summary Section */}
       <View style={styles.summaryContainer}>
-        <View style={[styles.miniCard, { backgroundColor: '#e8f5e9' }]}>
-          <Text style={styles.miniLabel}>{t('income')}</Text>
-          <Text style={[styles.miniValue, { color: '#2e7d32' }]}>
+        <Surface
+          style={[styles.miniCard, { backgroundColor: '#e8f5e9' }]}
+          elevation={1}
+        >
+          <Text variant="labelSmall" style={styles.miniLabel}>
+            {t('income')}
+          </Text>
+          <Text
+            variant="titleMedium"
+            style={[styles.miniValue, { color: '#2e7d32' }]}
+          >
             {formatCurrency(currentMonth.income)}
           </Text>
-        </View>
-        <View style={[styles.miniCard, { backgroundColor: '#ffebee' }]}>
-          <Text style={styles.miniLabel}>{t('expenses')}</Text>
-          <Text style={[styles.miniValue, { color: '#c62828' }]}>
+        </Surface>
+        <Surface
+          style={[styles.miniCard, { backgroundColor: '#ffebee' }]}
+          elevation={1}
+        >
+          <Text variant="labelSmall" style={styles.miniLabel}>
+            {t('expenses')}
+          </Text>
+          <Text
+            variant="titleMedium"
+            style={[styles.miniValue, { color: theme.colors.error }]}
+          >
             {formatCurrency(currentMonth.expenses)}
           </Text>
-        </View>
+        </Surface>
       </View>
 
       {/* Bar Chart: Expenses Comparison */}
-      <View style={styles.card}>
-        <Text style={styles.chartTitle}>{t('expenseGrowthTitle')}</Text>
-        <BarChart
-          data={barData}
-          width={screenWidth - 64}
-          height={220}
-          yAxisLabel={currencySymbol}
-          yAxisSuffix=""
-          chartConfig={chartConfig}
-          verticalLabelRotation={0}
-          fromZero
-          withCustomBarColorFromData
-          flatColor
-          style={styles.chart}
-        />
-        <View style={styles.growthContainer}>
-          <Text
-            style={[
-              styles.growthValue,
-              { color: expenseGrowth > 0 ? '#f44336' : '#4caf50' },
-            ]}
-          >
-            {expenseGrowth > 0 ? '+' : ''}
-            {expenseGrowth.toFixed(1)}%
+      <Card style={styles.card} mode="elevated">
+        <Card.Content>
+          <Text variant="titleMedium" style={styles.chartTitle}>
+            {t('expenseGrowthTitle')}
           </Text>
-          <Text style={styles.subtext}>{t('comparedToLastMonth')}</Text>
-        </View>
-      </View>
+          <BarChart
+            data={barData}
+            width={screenWidth - 64}
+            height={220}
+            yAxisLabel={currencySymbol}
+            yAxisSuffix=""
+            chartConfig={chartConfig}
+            verticalLabelRotation={0}
+            fromZero
+            withCustomBarColorFromData
+            flatColor
+            style={styles.chart}
+          />
+          <View style={styles.growthContainer}>
+            <Text
+              variant="headlineMedium"
+              style={[
+                styles.growthValue,
+                { color: expenseGrowth > 0 ? theme.colors.error : '#4caf50' },
+              ]}
+            >
+              {expenseGrowth > 0 ? '+' : ''}
+              {expenseGrowth.toFixed(1)}%
+            </Text>
+            <Text variant="labelSmall" style={styles.subtext}>
+              {t('comparedToLastMonth')}
+            </Text>
+          </View>
+        </Card.Content>
+      </Card>
 
       {/* Pie Chart: Expenses by Category */}
       {categoryExpenses.length > 0 && (
-        <View style={styles.card}>
-          <Text style={styles.chartTitle}>{t('chartTitle')}</Text>
-          <PieChart
-            data={pieData}
-            width={screenWidth - 64}
-            height={200}
-            chartConfig={chartConfig}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="15"
-          />
-        </View>
+        <Card style={styles.card} mode="elevated">
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.chartTitle}>
+              {t('chartTitle')}
+            </Text>
+            <PieChart
+              data={pieData}
+              width={screenWidth - 64}
+              height={200}
+              chartConfig={chartConfig}
+              accessor="population"
+              backgroundColor="transparent"
+              paddingLeft="15"
+            />
+          </Card.Content>
+        </Card>
       )}
 
       {/* Insights Section */}
-      <Text style={[styles.headerTitle, { marginTop: 16, fontSize: 20 }]}>
+      <Text
+        variant="titleLarge"
+        style={[styles.headerTitle, { marginTop: 16 }]}
+      >
         {t('insights')}
       </Text>
       {insights.map((insight) => (
-        <View
+        <Surface
           key={insight.id}
           style={[
             styles.insightBox,
@@ -133,114 +173,97 @@ export const InsightsScreen = () => {
             insight.level === 'warning' && styles.warningBox,
             insight.level === 'critical' && styles.criticalBox,
           ]}
+          elevation={1}
         >
-          <Text style={styles.insightTitle}>{insight.title}</Text>
-          <Text style={styles.insightText}>{insight.message}</Text>
-        </View>
+          <Text variant="titleSmall" style={styles.insightTitle}>
+            {insight.title}
+          </Text>
+          <Text variant="bodyMedium" style={styles.insightText}>
+            {insight.message}
+          </Text>
+        </Surface>
       ))}
       <View style={{ height: 40 }} />
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  content: {
-    padding: 16,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    color: '#333',
-  },
-  summaryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  miniCard: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 12,
-    marginHorizontal: 4,
-  },
-  miniLabel: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  miniValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 4,
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  chartTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
-  },
-  chart: {
-    marginVertical: 8,
-    borderRadius: 16,
-  },
-  growthContainer: {
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  growthValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  subtext: {
-    fontSize: 12,
-    color: '#888',
-  },
-  insightBox: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderLeftWidth: 5,
-    borderLeftColor: '#2196f3',
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 5,
-    elevation: 1,
-  },
-  positiveBox: {
-    borderLeftColor: '#4caf50',
-  },
-  warningBox: {
-    borderLeftColor: '#ff9800',
-  },
-  criticalBox: {
-    borderLeftColor: '#f44336',
-  },
-  insightTitle: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  insightText: {
-    color: '#666',
-    fontSize: 14,
-    lineHeight: 20,
-  },
-});
+const defaultStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    content: {
+      padding: 16,
+    },
+    headerTitle: {
+      fontWeight: 'bold',
+      marginBottom: 16,
+    },
+    summaryContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 16,
+    },
+    miniCard: {
+      flex: 1,
+      padding: 16,
+      borderRadius: 16,
+      marginHorizontal: 4,
+    },
+    miniLabel: {
+      fontWeight: '700',
+      textTransform: 'uppercase',
+    },
+    miniValue: {
+      fontWeight: '900',
+      marginTop: 4,
+    },
+    card: {
+      borderRadius: 24,
+      marginBottom: 16,
+      backgroundColor: theme.colors.surface,
+    },
+    chartTitle: {
+      fontWeight: '700',
+      marginBottom: 16,
+    },
+    chart: {
+      marginVertical: 8,
+      borderRadius: 16,
+    },
+    growthContainer: {
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    growthValue: {
+      fontWeight: '900',
+    },
+    subtext: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    insightBox: {
+      padding: 16,
+      borderRadius: 16,
+      marginBottom: 12,
+      borderLeftWidth: 6,
+      backgroundColor: theme.colors.surface,
+    },
+    positiveBox: {
+      borderLeftColor: '#4caf50',
+    },
+    warningBox: {
+      borderLeftColor: '#ff9800',
+    },
+    criticalBox: {
+      borderLeftColor: '#f44336',
+    },
+    insightTitle: {
+      fontWeight: '700',
+      marginBottom: 4,
+    },
+    insightText: {
+      color: theme.colors.onSurface,
+      lineHeight: 20,
+    },
+  });

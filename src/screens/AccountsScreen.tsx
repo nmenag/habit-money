@@ -1,18 +1,15 @@
 import React from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FAB, IconButton, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountCard } from '../components/AccountCard';
 import { useStore, useTranslation } from '../store/useStore';
 
 export const AccountsScreen = ({ navigation }: any) => {
-  const { accounts, deleteAccount, currency } = useStore();
-  const { t, language } = useTranslation();
+  const { accounts, deleteAccount } = useStore();
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = defaultStyles(theme);
 
   const handleAddAccount = () => {
     navigation.navigate('AddAccount');
@@ -21,10 +18,13 @@ export const AccountsScreen = ({ navigation }: any) => {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <FlatList
         data={accounts}
         keyExtractor={(item) => item.id}
+        contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.7}
@@ -40,49 +40,37 @@ export const AccountsScreen = ({ navigation }: any) => {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>{t('noAccounts')}</Text>
+            <Text variant="bodyLarge" style={styles.emptyText}>
+              {t('noAccounts')}
+            </Text>
           </View>
         }
       />
 
-      <View
-        style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}
-      >
-        <TouchableOpacity style={styles.addButton} onPress={handleAddAccount}>
-          <Text style={styles.addButtonText}>{t('addAccount')}</Text>
-        </TouchableOpacity>
-      </View>
+      <FAB
+        icon="plus"
+        style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
+        onPress={handleAddAccount}
+      />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  empty: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#888',
-  },
-  footer: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderColor: '#eee',
-  },
-  addButton: {
-    backgroundColor: '#4caf50',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-});
+const defaultStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    empty: {
+      padding: 60,
+      alignItems: 'center',
+    },
+    emptyText: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    fab: {
+      position: 'absolute',
+      right: 16,
+      borderRadius: 16,
+    },
+  });

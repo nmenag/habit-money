@@ -95,7 +95,7 @@ interface AppState {
   editBudget: (budget: Budget) => void;
   deleteBudget: (id: string) => void;
 
-  addGoal: (goal: Goal) => void;
+  addGoal: (goal: Omit<Goal, 'id'>) => void;
   editGoal: (goal: Goal) => void;
   deleteGoal: (id: string) => void;
   contributeToGoal: (id: string, amount: number) => void;
@@ -473,8 +473,11 @@ export const useStore = create<AppState>((set, get) => ({
     }));
   },
 
-  addGoal: (goal) => {
+  addGoal: (goalData) => {
     const db = getDb();
+    const id = Math.random().toString(36).substring(2, 9);
+    const goal: Goal = { ...goalData, id };
+
     db.runSync(
       'INSERT INTO goals (id, name, targetAmount, currentAmount, color, icon, deadline, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [

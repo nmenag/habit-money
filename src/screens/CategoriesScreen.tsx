@@ -1,19 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
+import { Alert, SectionList, StyleSheet, View } from 'react-native';
 import {
-  Alert,
-  SectionList,
-  StyleSheet,
+  Avatar,
+  Card,
+  FAB,
+  IconButton,
+  List,
   Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+  useTheme,
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Category, useStore, useTranslation } from '../store/useStore';
 
 export const CategoriesScreen = ({ navigation }: any) => {
   const { categories, deleteCategory, transactions } = useStore();
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = defaultStyles(theme);
 
   const handleDelete = (category: Category) => {
     const isUsed = transactions.some((t) => t.categoryId === category.id);
@@ -37,35 +41,35 @@ export const CategoriesScreen = ({ navigation }: any) => {
   };
 
   const renderItem = ({ item }: { item: Category }) => (
-    <TouchableOpacity
+    <Card
       style={styles.card}
       onPress={() => navigation.navigate('AddCategory', { category: item })}
-      activeOpacity={0.7}
+      mode="elevated"
     >
-      <View style={styles.cardContent}>
-        <View
-          style={[
-            styles.iconContainer,
-            { backgroundColor: item.color || '#ccc' },
-          ]}
-        >
-          <Ionicons
-            name={(item.icon as any) || 'list'}
-            size={24}
+      <List.Item
+        title={item.name}
+        titleStyle={styles.categoryName}
+        left={(props) => (
+          <Avatar.Icon
+            {...props}
+            icon={(item.icon as any) || 'folder'}
+            size={44}
+            style={{
+              backgroundColor: item.color || theme.colors.surfaceVariant,
+            }}
             color="#fff"
           />
-        </View>
-        <View style={styles.textContainer}>
-          <Text style={styles.name}>{item.name}</Text>
-        </View>
-      </View>
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => handleDelete(item)}
-      >
-        <Ionicons name="trash-outline" size={24} color="#f44336" />
-      </TouchableOpacity>
-    </TouchableOpacity>
+        )}
+        right={(props) => (
+          <IconButton
+            {...props}
+            icon="trash-can-outline"
+            iconColor={theme.colors.error}
+            onPress={() => handleDelete(item)}
+          />
+        )}
+      />
+    </Card>
   );
 
   const insets = useSafeAreaInsets();
@@ -79,7 +83,9 @@ export const CategoriesScreen = ({ navigation }: any) => {
   ];
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id}
@@ -87,111 +93,68 @@ export const CategoriesScreen = ({ navigation }: any) => {
         renderSectionHeader={({ section: { title, data } }) =>
           data.length > 0 ? (
             <View style={styles.header}>
-              <Text style={styles.headerTitle}>{title}</Text>
+              <Text variant="labelLarge" style={styles.headerTitle}>
+                {title}
+              </Text>
             </View>
           ) : null
         }
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: 100 }]}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>{t('noCategories')}</Text>
+            <Text variant="bodyLarge" style={styles.emptyText}>
+              {t('noCategories')}
+            </Text>
           </View>
         }
       />
-      <View
-        style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}
-      >
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate('AddCategory')}
-        >
-          <Text style={styles.addButtonText}>{t('addCategory')}</Text>
-        </TouchableOpacity>
-      </View>
+      <FAB
+        icon="plus"
+        style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
+        onPress={() => navigation.navigate('AddCategory')}
+      />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  listContent: {
-    paddingBottom: 20,
-  },
-  header: {
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#666',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 8,
-    marginHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  cardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  textContainer: {
-    flex: 1,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  deleteButton: {
-    padding: 8,
-  },
-  empty: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#888',
-  },
-  footer: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderColor: '#eee',
-  },
-  addButton: {
-    backgroundColor: '#2196f3',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-});
+const defaultStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    listContent: {
+      paddingTop: 8,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+    },
+    headerTitle: {
+      fontWeight: '900',
+      color: theme.colors.onSurface,
+      textTransform: 'uppercase',
+      letterSpacing: 1.5,
+    },
+    card: {
+      marginBottom: 8,
+      marginHorizontal: 16,
+      borderRadius: 16,
+      backgroundColor: theme.colors.surface,
+    },
+    categoryName: {
+      fontWeight: '700',
+      fontSize: 16,
+    },
+    empty: {
+      padding: 60,
+      alignItems: 'center',
+    },
+    emptyText: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    fab: {
+      position: 'absolute',
+      right: 16,
+      borderRadius: 16,
+    },
+  });
