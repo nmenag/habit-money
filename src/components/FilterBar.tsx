@@ -8,8 +8,6 @@ import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
 import { FilterType } from '../utils/dateFilters';
 
-// ─── Types & constants ────────────────────────────────────────────────────────
-
 interface FilterOption {
   type: FilterType;
   labelKey: string;
@@ -17,25 +15,23 @@ interface FilterOption {
 }
 
 const FILTER_OPTIONS: FilterOption[] = [
-  { type: 'today',     labelKey: 'filterToday',     short: 'Today'    },
-  { type: 'week',      labelKey: 'filterWeek',      short: 'Week'     },
-  { type: 'month',     labelKey: 'filterMonth',     short: 'Month'    },
+  { type: 'allTime', labelKey: 'filterAllTime', short: 'All' },
+  { type: 'today', labelKey: 'filterToday', short: 'Today' },
+  { type: 'week', labelKey: 'filterWeek', short: 'Week' },
+  { type: 'month', labelKey: 'filterMonth', short: 'Month' },
   { type: 'lastMonth', labelKey: 'filterLastMonth', short: 'Last Mo.' },
-  { type: 'year',      labelKey: 'filterYear',      short: 'Year'     },
-  { type: 'custom',    labelKey: 'filterCustom',    short: 'Custom'   },
+  { type: 'year', labelKey: 'filterYear', short: 'Year' },
+  { type: 'custom', labelKey: 'filterCustom', short: 'Custom' },
 ];
 
-// ─── FilterBar ────────────────────────────────────────────────────────────────
-
 export const FilterBar: React.FC = () => {
-  const theme  = useTheme();
-  const { t }  = useTranslation();
+  const theme = useTheme();
+  const { t } = useTranslation();
   const language = useStore((s) => s.language);
-  const { selectedRange, setFilter, setCustomRange } = useFilterStore();
+  const { selectedRange, setFilter, setCustomRange, clearFilter } =
+    useFilterStore();
 
   const [pickerOpen, setPickerOpen] = useState(false);
-
-  // ── Callbacks ──────────────────────────────────────────────────────────────
 
   const handleSelect = (option: FilterOption) => {
     if (option.type === 'custom') {
@@ -50,11 +46,16 @@ export const FilterBar: React.FC = () => {
   }, []);
 
   const onConfirm = useCallback(
-    ({ startDate, endDate }: { startDate: Date | undefined; endDate: Date | undefined }) => {
+    ({
+      startDate,
+      endDate,
+    }: {
+      startDate: Date | undefined;
+      endDate: Date | undefined;
+    }) => {
       setPickerOpen(false);
       if (startDate) {
         const end = endDate ?? startDate;
-        // Extend end to 23:59:59 so the full day is included
         const endFull = new Date(end);
         endFull.setHours(23, 59, 59, 999);
         setCustomRange(startDate, endFull);
@@ -63,14 +64,13 @@ export const FilterBar: React.FC = () => {
     [setCustomRange],
   );
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
   const getLabel = (option: FilterOption): string => {
     const raw = t(option.labelKey as any);
     return raw === option.labelKey ? option.short : raw;
   };
 
   const activeType = selectedRange.type;
+  const isFiltered = activeType !== 'allTime';
 
   const customSummary =
     activeType === 'custom'
@@ -80,10 +80,7 @@ export const FilterBar: React.FC = () => {
         )}`
       : null;
 
-  // react-native-paper-dates wants locale as 'en' | 'es' etc.
   const locale = language === 'es' ? 'es' : 'en';
-
-  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <View
@@ -95,7 +92,6 @@ export const FilterBar: React.FC = () => {
         },
       ]}
     >
-      {/* Chip strip */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -103,6 +99,8 @@ export const FilterBar: React.FC = () => {
       >
         {FILTER_OPTIONS.map((option) => {
           const isActive = activeType === option.type;
+          const isAllTime = option.type === 'allTime';
+
           return (
             <TouchableOpacity
               key={option.type}
@@ -117,6 +115,8 @@ export const FilterBar: React.FC = () => {
                   borderColor: isActive
                     ? theme.colors.primary
                     : theme.colors.outlineVariant,
+                  ...(isAllTime &&
+                    !isActive && { borderStyle: 'dashed' as const }),
                 },
               ]}
             >
@@ -128,6 +128,15 @@ export const FilterBar: React.FC = () => {
                   style={{ marginRight: 4 }}
                 />
               )}
+              {isAllTime && (
+                <Ionicons
+                  name="infinite-outline"
+                  size={12}
+                  color={isActive ? '#fff' : theme.colors.onSurfaceVariant}
+                  style={{ marginRight: 4 }}
+                />
+              )}
+
               <Text
                 variant="labelSmall"
                 style={{
@@ -138,12 +147,28 @@ export const FilterBar: React.FC = () => {
               >
                 {getLabel(option)}
               </Text>
+
+              {isActive && isFiltered && (
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    clearFilter();
+                  }}
+                  hitSlop={6}
+                  style={styles.chipClose}
+                >
+                  <Ionicons
+                    name="close-circle"
+                    size={14}
+                    color="rgba(255,255,255,0.9)"
+                  />
+                </TouchableOpacity>
+              )}
             </TouchableOpacity>
           );
         })}
       </ScrollView>
 
-      {/* Custom range badge – tap to reopen picker */}
       {customSummary && (
         <TouchableOpacity
           onPress={() => setPickerOpen(true)}
@@ -177,28 +202,25 @@ export const FilterBar: React.FC = () => {
         </TouchableOpacity>
       )}
 
-      {/* react-native-paper-dates range picker */}
       <DatePickerModal
         locale={locale}
         mode="range"
         visible={pickerOpen}
         onDismiss={onDismiss}
-        startDate={activeType === 'custom' ? selectedRange.startDate : undefined}
+        startDate={
+          activeType === 'custom' ? selectedRange.startDate : undefined
+        }
         endDate={activeType === 'custom' ? selectedRange.endDate : undefined}
         onConfirm={onConfirm}
-        // Labels
         label={t('filterCustomRange' as any)}
         startLabel={t('filterStartDate' as any)}
         endLabel={t('filterEndDate' as any)}
         saveLabel={t('filterApply' as any)}
-        // Allow inline text input as an alternative to tapping days
         inputEnabled
       />
     </View>
   );
 };
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -218,6 +240,11 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
+  },
+  chipClose: {
+    marginLeft: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   customBadge: {
     flexDirection: 'row',

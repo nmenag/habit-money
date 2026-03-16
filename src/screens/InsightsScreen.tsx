@@ -12,12 +12,26 @@ import { isInRange } from '../utils/dateFilters';
 const screenWidth = Dimensions.get('window').width;
 
 const CHART_COLORS = [
-  '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
-  '#2196f3', '#00bcd4', '#009688', '#4caf50', '#ff9800',
+  '#f44336',
+  '#e91e63',
+  '#9c27b0',
+  '#673ab7',
+  '#3f51b5',
+  '#2196f3',
+  '#00bcd4',
+  '#009688',
+  '#4caf50',
+  '#ff9800',
 ];
 
 export const InsightsScreen = () => {
-  const { transactions, categories, analyticsReport, formatCurrency, currencySymbol } = useStore();
+  const {
+    transactions,
+    categories,
+    analyticsReport,
+    formatCurrency,
+    currencySymbol,
+  } = useStore();
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
@@ -25,7 +39,9 @@ export const InsightsScreen = () => {
 
   // ── Filtered analytics computed from raw transactions ────────────────────
   const filtered = useMemo(() => {
-    const inRange = transactions.filter((tx) => isInRange(tx.date, selectedRange));
+    const inRange = transactions.filter((tx) =>
+      isInRange(tx.date, selectedRange),
+    );
 
     let totalIncome = 0;
     let totalExpenses = 0;
@@ -37,7 +53,8 @@ export const InsightsScreen = () => {
       } else {
         totalExpenses += tx.amount;
         if (tx.categoryId) {
-          catExpMap[tx.categoryId] = (catExpMap[tx.categoryId] || 0) + tx.amount;
+          catExpMap[tx.categoryId] =
+            (catExpMap[tx.categoryId] || 0) + tx.amount;
         }
       }
     });
@@ -49,7 +66,8 @@ export const InsightsScreen = () => {
     const categoryBreakdown = Object.entries(catExpMap)
       .map(([catId, amount]) => {
         const cat = categories.find((c) => c.id === catId);
-        const color = cat?.color || CHART_COLORS[colorIdx++ % CHART_COLORS.length];
+        const color =
+          cat?.color || CHART_COLORS[colorIdx++ % CHART_COLORS.length];
         const pct = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0;
         return {
           id: catId,
@@ -63,10 +81,20 @@ export const InsightsScreen = () => {
 
     const txCount = inRange.length;
     const spendingDays = new Set(
-      inRange.filter((tx) => tx.type === 'expense').map((tx) => tx.date.substring(0, 10)),
+      inRange
+        .filter((tx) => tx.type === 'expense')
+        .map((tx) => tx.date.substring(0, 10)),
     ).size;
 
-    return { totalIncome, totalExpenses, savings, savingsRate, categoryBreakdown, txCount, spendingDays };
+    return {
+      totalIncome,
+      totalExpenses,
+      savings,
+      savingsRate,
+      categoryBreakdown,
+      txCount,
+      spendingDays,
+    };
   }, [transactions, categories, selectedRange, t]);
 
   // ── Month-over-month data (from existing analyticsReport) ────────────────
@@ -75,7 +103,10 @@ export const InsightsScreen = () => {
         labels: [t('previousMonth'), t('currentMonth')],
         datasets: [
           {
-            data: [analyticsReport.previousMonth.expenses, analyticsReport.currentMonth.expenses],
+            data: [
+              analyticsReport.previousMonth.expenses,
+              analyticsReport.currentMonth.expenses,
+            ],
             colors: [(_opacity = 1) => '#90caf9', (_opacity = 1) => '#2196f3'],
           },
         ],
@@ -114,71 +145,133 @@ export const InsightsScreen = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       {/* Filter Bar */}
       <FilterBar />
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Range Indicator */}
-        <View style={[styles.rangeBadge, { backgroundColor: theme.colors.primaryContainer }]}>
-          <Ionicons name="calendar" size={14} color={theme.colors.onPrimaryContainer} />
+        <View
+          style={[
+            styles.rangeBadge,
+            { backgroundColor: theme.colors.primaryContainer },
+          ]}
+        >
+          <Ionicons
+            name="calendar"
+            size={14}
+            color={theme.colors.onPrimaryContainer}
+          />
           <Text
             variant="labelSmall"
-            style={{ color: theme.colors.onPrimaryContainer, marginLeft: 6, fontWeight: '700' }}
+            style={{
+              color: theme.colors.onPrimaryContainer,
+              marginLeft: 6,
+              fontWeight: '700',
+            }}
           >
             {rangeLabel}
           </Text>
-          <Text variant="labelSmall" style={{ color: theme.colors.onPrimaryContainer, marginLeft: 4 }}>
-            · {filtered.txCount} {filtered.txCount === 1 ? 'transaction' : 'transactions'}
+          <Text
+            variant="labelSmall"
+            style={{ color: theme.colors.onPrimaryContainer, marginLeft: 4 }}
+          >
+            · {filtered.txCount}{' '}
+            {filtered.txCount === 1 ? 'transaction' : 'transactions'}
           </Text>
         </View>
 
         {/* Summary Cards */}
         <View style={styles.summaryContainer}>
-          <Surface style={[styles.miniCard, { backgroundColor: '#e8f5e9' }]} elevation={1}>
+          <Surface
+            style={[styles.miniCard, { backgroundColor: '#e8f5e9' }]}
+            elevation={1}
+          >
             <Ionicons name="arrow-up-circle" size={20} color="#2e7d32" />
-            <Text variant="labelSmall" style={[styles.miniLabel, { color: '#388e3c' }]}>
+            <Text
+              variant="labelSmall"
+              style={[styles.miniLabel, { color: '#388e3c' }]}
+            >
               {t('income')}
             </Text>
-            <Text variant="titleMedium" style={[styles.miniValue, { color: '#2e7d32' }]}>
+            <Text
+              variant="titleMedium"
+              style={[styles.miniValue, { color: '#2e7d32' }]}
+            >
               {formatCurrency(filtered.totalIncome)}
             </Text>
           </Surface>
-          <Surface style={[styles.miniCard, { backgroundColor: '#ffebee' }]} elevation={1}>
-            <Ionicons name="arrow-down-circle" size={20} color={theme.colors.error} />
-            <Text variant="labelSmall" style={[styles.miniLabel, { color: theme.colors.error }]}>
+          <Surface
+            style={[styles.miniCard, { backgroundColor: '#ffebee' }]}
+            elevation={1}
+          >
+            <Ionicons
+              name="arrow-down-circle"
+              size={20}
+              color={theme.colors.error}
+            />
+            <Text
+              variant="labelSmall"
+              style={[styles.miniLabel, { color: theme.colors.error }]}
+            >
               {t('expenses')}
             </Text>
-            <Text variant="titleMedium" style={[styles.miniValue, { color: theme.colors.error }]}>
+            <Text
+              variant="titleMedium"
+              style={[styles.miniValue, { color: theme.colors.error }]}
+            >
               {formatCurrency(filtered.totalExpenses)}
             </Text>
           </Surface>
         </View>
 
         {/* Savings Row */}
-        <Surface style={[styles.savingsRow, { backgroundColor: theme.colors.surface }]} elevation={1}>
+        <Surface
+          style={[styles.savingsRow, { backgroundColor: theme.colors.surface }]}
+          elevation={1}
+        >
           <View style={styles.savingsItem}>
-            <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            <Text
+              variant="labelSmall"
+              style={{ color: theme.colors.onSurfaceVariant }}
+            >
               {t('savingsRateTitle')}
             </Text>
             <Text
               variant="titleLarge"
               style={{
                 fontWeight: '900',
-                color: filtered.savingsRate >= 0 ? '#4caf50' : theme.colors.error,
+                color:
+                  filtered.savingsRate >= 0 ? '#4caf50' : theme.colors.error,
               }}
             >
               {filtered.savingsRate.toFixed(1)}%
             </Text>
           </View>
-          <View style={[styles.savingsDivider, { backgroundColor: theme.colors.outlineVariant }]} />
+          <View
+            style={[
+              styles.savingsDivider,
+              { backgroundColor: theme.colors.outlineVariant },
+            ]}
+          />
           <View style={styles.savingsItem}>
-            <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            <Text
+              variant="labelSmall"
+              style={{ color: theme.colors.onSurfaceVariant }}
+            >
               {t('spendingFrequencyTitle')}
             </Text>
-            <Text variant="titleLarge" style={{ fontWeight: '900', color: theme.colors.onSurface }}>
+            <Text
+              variant="titleLarge"
+              style={{ fontWeight: '900', color: theme.colors.onSurface }}
+            >
               {filtered.spendingDays}{' '}
-              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              <Text
+                variant="bodySmall"
+                style={{ color: theme.colors.onSurfaceVariant }}
+              >
                 {t('daysLabel')}
               </Text>
             </Text>
@@ -215,14 +308,32 @@ export const InsightsScreen = () => {
               <View style={styles.legendList}>
                 {filtered.categoryBreakdown.map((item, i) => (
                   <View key={i} style={styles.legendRow}>
-                    <View style={[styles.legendDot, { backgroundColor: item.color }]} />
-                    <Text variant="bodySmall" style={styles.legendName} numberOfLines={1}>
+                    <View
+                      style={[
+                        styles.legendDot,
+                        { backgroundColor: item.color },
+                      ]}
+                    />
+                    <Text
+                      variant="bodySmall"
+                      style={styles.legendName}
+                      numberOfLines={1}
+                    >
                       {item.name}
                     </Text>
-                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                    <Text
+                      variant="bodySmall"
+                      style={{ color: theme.colors.onSurfaceVariant }}
+                    >
                       {item.percentage}%
                     </Text>
-                    <Text variant="bodySmall" style={[styles.legendAmount, { color: theme.colors.onSurface }]}>
+                    <Text
+                      variant="bodySmall"
+                      style={[
+                        styles.legendAmount,
+                        { color: theme.colors.onSurface },
+                      ]}
+                    >
                       {formatCurrency(item.amount)}
                     </Text>
                   </View>
@@ -239,7 +350,13 @@ export const InsightsScreen = () => {
               <Text variant="titleMedium" style={styles.chartTitle}>
                 {t('expenseGrowthTitle')}
               </Text>
-              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 8 }}>
+              <Text
+                variant="labelSmall"
+                style={{
+                  color: theme.colors.onSurfaceVariant,
+                  marginBottom: 8,
+                }}
+              >
                 (Based on last 2 full months)
               </Text>
               <BarChart
@@ -260,7 +377,9 @@ export const InsightsScreen = () => {
                   variant="headlineMedium"
                   style={[
                     styles.growthValue,
-                    { color: expenseGrowth > 0 ? theme.colors.error : '#4caf50' },
+                    {
+                      color: expenseGrowth > 0 ? theme.colors.error : '#4caf50',
+                    },
                   ]}
                 >
                   {expenseGrowth > 0 ? '+' : ''}
@@ -277,7 +396,10 @@ export const InsightsScreen = () => {
         {/* Insights */}
         {analyticsReport && analyticsReport.insights.length > 0 && (
           <>
-            <Text variant="titleLarge" style={[styles.sectionTitle, { marginTop: 8 }]}>
+            <Text
+              variant="titleLarge"
+              style={[styles.sectionTitle, { marginTop: 8 }]}
+            >
               {t('insights')}
             </Text>
             {analyticsReport.insights.map((insight) => (
@@ -305,8 +427,18 @@ export const InsightsScreen = () => {
         {/* Empty state */}
         {filtered.txCount === 0 && (
           <View style={styles.emptyContainer}>
-            <Ionicons name="bar-chart-outline" size={56} color={theme.colors.outlineVariant} />
-            <Text variant="bodyLarge" style={[styles.emptyText, { color: theme.colors.onSurfaceVariant }]}>
+            <Ionicons
+              name="bar-chart-outline"
+              size={56}
+              color={theme.colors.outlineVariant}
+            />
+            <Text
+              variant="bodyLarge"
+              style={[
+                styles.emptyText,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
               No data for this period
             </Text>
           </View>

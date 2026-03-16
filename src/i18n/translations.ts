@@ -198,6 +198,7 @@ export const translations = {
       'Excellent! You spent {{percentage}}% less than last month.',
 
     // Date Filters
+    filterAllTime: 'All',
     filterToday: 'Today',
     filterWeek: 'Week',
     filterMonth: 'Month',
@@ -212,6 +213,14 @@ export const translations = {
     filterEndBeforeStart: 'End date must be after start date.',
     filterActiveRange: 'Filtering:',
     filterClear: 'Clear',
+    // Search & secondary filters
+    searchTransactions: 'Search transactions...',
+    filterByAccount: 'Account',
+    filterByCategory: 'Category',
+    allAccounts: 'All Accounts',
+    allCategories: 'All Categories',
+    filters: 'Filters',
+    clearFilters: 'Clear',
   },
   es: {
     dashboard: 'Inicio',
@@ -412,7 +421,7 @@ export const translations = {
     insightExpenseReductionMessage:
       '¡Excelente! Gastaste un {{percentage}}% menos que el mes pasado.',
 
-    // Filtros de fecha
+    filterAllTime: 'Todo',
     filterToday: 'Hoy',
     filterWeek: 'Semana',
     filterMonth: 'Mes',
@@ -427,5 +436,12 @@ export const translations = {
     filterEndBeforeStart: 'La fecha de fin debe ser posterior a la de inicio.',
     filterActiveRange: 'Filtrando:',
     filterClear: 'Limpiar',
+    searchTransactions: 'Buscar transacciones...',
+    filterByAccount: 'Cuenta',
+    filterByCategory: 'Categoría',
+    allAccounts: 'Todas las Cuentas',
+    allCategories: 'Todas las Categorías',
+    filters: 'Filtros',
+    clearFilters: 'Limpiar',
   },
 };

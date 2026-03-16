@@ -24,7 +24,6 @@ import {
 registerTranslation('en', paperDatesEn);
 registerTranslation('es', paperDatesEs);
 
-
 const { LightTheme, DarkTheme } = adaptNavigationTheme({
   reactNavigationLight: NavigationDefaultTheme,
   reactNavigationDark: NavigationDarkTheme,
