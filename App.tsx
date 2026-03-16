@@ -14,6 +14,16 @@ import { useStore } from './src/store/useStore';
 
 import { adaptNavigationTheme, PaperProvider } from 'react-native-paper';
 import { darkTheme, lightTheme } from './src/theme/theme';
+import {
+  registerTranslation,
+  en as paperDatesEn,
+  es as paperDatesEs,
+} from 'react-native-paper-dates';
+
+// Register locales for the date picker
+registerTranslation('en', paperDatesEn);
+registerTranslation('es', paperDatesEs);
+
 
 const { LightTheme, DarkTheme } = adaptNavigationTheme({
   reactNavigationLight: NavigationDefaultTheme,

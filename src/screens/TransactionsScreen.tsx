@@ -1,22 +1,33 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import { format, parseISO } from 'date-fns';
+import React, { useMemo } from 'react';
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { FAB, IconButton, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
+import { FilterBar } from '../components/FilterBar';
 import { TransactionItem } from '../components/TransactionItem';
+import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
+import { isInRange } from '../utils/dateFilters';
 
 export const TransactionsScreen = ({ route, navigation }: any) => {
   const { transactions, accounts, categories } = useStore();
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
+  const { selectedRange } = useFilterStore();
 
   const filterAccountId = route.params?.accountId;
-  const filteredTransactions = filterAccountId
-    ? transactions.filter((t) => t.accountId === filterAccountId)
-    : transactions;
+
+  // Apply both account filter AND date range filter
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((tx) => {
+      const inAccount = filterAccountId ? tx.accountId === filterAccountId : true;
+      const inRange = isInRange(tx.date, selectedRange);
+      return inAccount && inRange;
+    });
+  }, [transactions, filterAccountId, selectedRange]);
 
   const activeAccount = filterAccountId
     ? accounts.find((a) => a.id === filterAccountId)
@@ -31,12 +42,32 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
 
   const insets = useSafeAreaInsets();
 
+  // Group transactions by date for section headers
+  const groupedTransactions = useMemo(() => {
+    const groups: { date: string; items: typeof filteredTransactions }[] = [];
+    const dateMap: Record<string, typeof filteredTransactions> = {};
+
+    filteredTransactions.forEach((tx) => {
+      const dateKey = tx.date.substring(0, 10); // YYYY-MM-DD
+      if (!dateMap[dateKey]) {
+        dateMap[dateKey] = [];
+        groups.push({ date: dateKey, items: dateMap[dateKey] });
+      }
+      dateMap[dateKey].push(tx);
+    });
+
+    // Sort groups newest first
+    groups.sort((a, b) => b.date.localeCompare(a.date));
+    return groups;
+  }, [filteredTransactions]);
+
   return (
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
+      {/* Account filter badge */}
       {activeAccount && (
-        <View style={styles.filterHeader}>
+        <View style={styles.accountHeader}>
           <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
             {t('accounts')}: {activeAccount.name}
           </Text>
@@ -48,26 +79,46 @@ export const TransactionsScreen = ({ route, navigation }: any) => {
           />
         </View>
       )}
+
+      {/* Date Range Filter Bar */}
+      <FilterBar />
+
       <FlatList
-        data={filteredTransactions}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 100 }}
-        renderItem={({ item }) => {
-          const category = categories.find((c) => c.id === item.categoryId);
-          return (
-            <TouchableOpacity
-              onPress={() => handleTransactionPress(item)}
-              activeOpacity={0.7}
-            >
-              <TransactionItem transaction={item} category={category} />
-            </TouchableOpacity>
-          );
-        }}
+        data={groupedTransactions}
+        keyExtractor={(item) => item.date}
+        contentContainerStyle={{ paddingBottom: 120 }}
+        renderItem={({ item: group }) => (
+          <View>
+            {/* Date Section Header */}
+            <View style={[styles.sectionHeader, { backgroundColor: theme.colors.background }]}>
+              <Text variant="labelSmall" style={[styles.sectionHeaderText, { color: theme.colors.onSurfaceVariant }]}>
+                {format(parseISO(group.date), 'EEEE, MMMM d')}
+              </Text>
+            </View>
+            {group.items.map((tx) => {
+              const category = categories.find((c) => c.id === tx.categoryId);
+              return (
+                <TouchableOpacity
+                  key={tx.id}
+                  onPress={() => handleTransactionPress(tx)}
+                  activeOpacity={0.7}
+                >
+                  <TransactionItem transaction={tx} category={category} />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Ionicons name="receipt-outline" size={64} color="#ccc" />
             <Text variant="bodyLarge" style={styles.emptyText}>
               {t('noTransactions')}
+            </Text>
+            <Text variant="bodySmall" style={[styles.emptySubText, { color: theme.colors.outline }]}>
+              {t('filterActiveRange')} {selectedRange.type !== 'custom'
+                ? selectedRange.type
+                : `${format(selectedRange.startDate, 'MMM d')} – ${format(selectedRange.endDate, 'MMM d, yyyy')}`}
             </Text>
           </View>
         }
@@ -91,7 +142,7 @@ const defaultStyles = (theme: any) =>
     container: {
       flex: 1,
     },
-    filterHeader: {
+    accountHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -101,6 +152,16 @@ const defaultStyles = (theme: any) =>
       borderBottomWidth: 1,
       borderBottomColor: 'rgba(0,0,0,0.05)',
     },
+    sectionHeader: {
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      paddingBottom: 4,
+    },
+    sectionHeaderText: {
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+      fontWeight: '700',
+    },
     empty: {
       padding: 60,
       alignItems: 'center',
@@ -109,6 +170,11 @@ const defaultStyles = (theme: any) =>
     emptyText: {
       color: theme.colors.onSurfaceVariant,
       marginTop: 16,
+      fontWeight: '600',
+    },
+    emptySubText: {
+      marginTop: 6,
+      textAlign: 'center',
     },
     fab: {
       position: 'absolute',

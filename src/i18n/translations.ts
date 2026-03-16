@@ -196,6 +196,22 @@ export const translations = {
     insightExpenseReductionTitle: 'Spending Reduction',
     insightExpenseReductionMessage:
       'Excellent! You spent {{percentage}}% less than last month.',
+
+    // Date Filters
+    filterToday: 'Today',
+    filterWeek: 'Week',
+    filterMonth: 'Month',
+    filterLastMonth: 'Last Mo.',
+    filterYear: 'Year',
+    filterCustom: 'Custom',
+    filterCustomRange: 'Custom Date Range',
+    filterStartDate: 'Start Date',
+    filterEndDate: 'End Date',
+    filterApply: 'Apply',
+    filterDateInvalid: 'Invalid date. Use YYYY-MM-DD.',
+    filterEndBeforeStart: 'End date must be after start date.',
+    filterActiveRange: 'Filtering:',
+    filterClear: 'Clear',
   },
   es: {
     dashboard: 'Inicio',
@@ -395,5 +411,21 @@ export const translations = {
     insightExpenseReductionTitle: 'Reducción de Gastos',
     insightExpenseReductionMessage:
       '¡Excelente! Gastaste un {{percentage}}% menos que el mes pasado.',
+
+    // Filtros de fecha
+    filterToday: 'Hoy',
+    filterWeek: 'Semana',
+    filterMonth: 'Mes',
+    filterLastMonth: 'Mes Ant.',
+    filterYear: 'Año',
+    filterCustom: 'Personalizado',
+    filterCustomRange: 'Rango de Fechas',
+    filterStartDate: 'Fecha de Inicio',
+    filterEndDate: 'Fecha de Fin',
+    filterApply: 'Aplicar',
+    filterDateInvalid: 'Fecha inválida. Usa YYYY-MM-DD.',
+    filterEndBeforeStart: 'La fecha de fin debe ser posterior a la de inicio.',
+    filterActiveRange: 'Filtrando:',
+    filterClear: 'Limpiar',
   },
 };

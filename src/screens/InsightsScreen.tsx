@@ -1,190 +1,320 @@
-import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { format } from 'date-fns';
+import React, { useMemo } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { Card, Surface, Text, useTheme } from 'react-native-paper';
 import { BarChart, PieChart } from 'react-native-chart-kit';
+import { FilterBar } from '../components/FilterBar';
+import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
+import { isInRange } from '../utils/dateFilters';
 
 const screenWidth = Dimensions.get('window').width;
 
+const CHART_COLORS = [
+  '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
+  '#2196f3', '#00bcd4', '#009688', '#4caf50', '#ff9800',
+];
+
 export const InsightsScreen = () => {
-  const { analyticsReport, formatCurrency, currencySymbol } = useStore();
+  const { transactions, categories, analyticsReport, formatCurrency, currencySymbol } = useStore();
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
+  const { selectedRange } = useFilterStore();
 
-  if (!analyticsReport) {
-    return (
-      <View
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-      >
-        <Text style={styles.subtext}>Loading analytics...</Text>
-      </View>
-    );
-  }
+  // ── Filtered analytics computed from raw transactions ────────────────────
+  const filtered = useMemo(() => {
+    const inRange = transactions.filter((tx) => isInRange(tx.date, selectedRange));
 
-  const {
-    currentMonth,
-    previousMonth,
-    insights,
-    spendingDays,
-    expenseGrowth,
-    categoryExpenses,
-  } = analyticsReport;
+    let totalIncome = 0;
+    let totalExpenses = 0;
+    const catExpMap: Record<string, number> = {};
+
+    inRange.forEach((tx) => {
+      if (tx.type === 'income') {
+        totalIncome += tx.amount;
+      } else {
+        totalExpenses += tx.amount;
+        if (tx.categoryId) {
+          catExpMap[tx.categoryId] = (catExpMap[tx.categoryId] || 0) + tx.amount;
+        }
+      }
+    });
+
+    const savings = totalIncome - totalExpenses;
+    const savingsRate = totalIncome > 0 ? (savings / totalIncome) * 100 : 0;
+
+    let colorIdx = 0;
+    const categoryBreakdown = Object.entries(catExpMap)
+      .map(([catId, amount]) => {
+        const cat = categories.find((c) => c.id === catId);
+        const color = cat?.color || CHART_COLORS[colorIdx++ % CHART_COLORS.length];
+        const pct = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0;
+        return {
+          id: catId,
+          name: cat?.name || t('other'),
+          amount,
+          color,
+          percentage: pct.toFixed(1),
+        };
+      })
+      .sort((a, b) => b.amount - a.amount);
+
+    const txCount = inRange.length;
+    const spendingDays = new Set(
+      inRange.filter((tx) => tx.type === 'expense').map((tx) => tx.date.substring(0, 10)),
+    ).size;
+
+    return { totalIncome, totalExpenses, savings, savingsRate, categoryBreakdown, txCount, spendingDays };
+  }, [transactions, categories, selectedRange, t]);
+
+  // ── Month-over-month data (from existing analyticsReport) ────────────────
+  const barData = analyticsReport
+    ? {
+        labels: [t('previousMonth'), t('currentMonth')],
+        datasets: [
+          {
+            data: [analyticsReport.previousMonth.expenses, analyticsReport.currentMonth.expenses],
+            colors: [(_opacity = 1) => '#90caf9', (_opacity = 1) => '#2196f3'],
+          },
+        ],
+      }
+    : null;
+
+  const expenseGrowth = analyticsReport?.expenseGrowth ?? 0;
+
+  const pieData = filtered.categoryBreakdown.map((ce) => ({
+    name: ce.name,
+    population: ce.amount,
+    color: ce.color,
+    legendFontColor: theme.colors.onSurfaceVariant,
+    legendFontSize: 11,
+  }));
+
+  // ── Range label ──────────────────────────────────────────────────────────
+  const rangeLabel = useMemo(() => {
+    const { type, startDate, endDate } = selectedRange;
+    if (type === 'today') return t('filterToday');
+    if (type === 'week') return t('filterWeek');
+    if (type === 'month') return t('filterMonth');
+    if (type === 'lastMonth') return t('filterLastMonth');
+    if (type === 'year') return t('filterYear');
+    return `${format(startDate, 'MMM d')} – ${format(endDate, 'MMM d, yyyy')}`;
+  }, [selectedRange, t]);
 
   const chartConfig = {
-    backgroundGradientFrom: '#fff',
-    backgroundGradientTo: '#fff',
+    backgroundGradientFrom: theme.colors.surface,
+    backgroundGradientTo: theme.colors.surface,
     color: (opacity = 1) => `rgba(33, 150, 243, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
     strokeWidth: 2,
     barPercentage: 0.6,
     useShadowColorFromDataset: false,
   };
 
-  const barData = {
-    labels: [t('previousMonth'), t('currentMonth')],
-    datasets: [
-      {
-        data: [previousMonth.expenses, currentMonth.expenses],
-        colors: [(opacity = 1) => '#90caf9', (opacity = 1) => '#2196f3'],
-      },
-    ],
-  };
-
-  const pieData = categoryExpenses.map((ce) => ({
-    name: `${ce.categoryName}: ${formatCurrency(ce.amount)}`,
-    population: ce.amount,
-    color: ce.color || '#ccc',
-    legendFontColor: '#7F7F7F',
-    legendFontSize: 12,
-  }));
-
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={styles.content}
-    >
-      <Text variant="headlineSmall" style={styles.headerTitle}>
-        {t('financialAnalysis')}
-      </Text>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      {/* Filter Bar */}
+      <FilterBar />
 
-      {/* Summary Section */}
-      <View style={styles.summaryContainer}>
-        <Surface
-          style={[styles.miniCard, { backgroundColor: '#e8f5e9' }]}
-          elevation={1}
-        >
-          <Text variant="labelSmall" style={styles.miniLabel}>
-            {t('income')}
-          </Text>
+      <ScrollView contentContainerStyle={styles.content}>
+        {/* Range Indicator */}
+        <View style={[styles.rangeBadge, { backgroundColor: theme.colors.primaryContainer }]}>
+          <Ionicons name="calendar" size={14} color={theme.colors.onPrimaryContainer} />
           <Text
-            variant="titleMedium"
-            style={[styles.miniValue, { color: '#2e7d32' }]}
+            variant="labelSmall"
+            style={{ color: theme.colors.onPrimaryContainer, marginLeft: 6, fontWeight: '700' }}
           >
-            {formatCurrency(currentMonth.income)}
+            {rangeLabel}
           </Text>
-        </Surface>
-        <Surface
-          style={[styles.miniCard, { backgroundColor: '#ffebee' }]}
-          elevation={1}
-        >
-          <Text variant="labelSmall" style={styles.miniLabel}>
-            {t('expenses')}
+          <Text variant="labelSmall" style={{ color: theme.colors.onPrimaryContainer, marginLeft: 4 }}>
+            · {filtered.txCount} {filtered.txCount === 1 ? 'transaction' : 'transactions'}
           </Text>
-          <Text
-            variant="titleMedium"
-            style={[styles.miniValue, { color: theme.colors.error }]}
-          >
-            {formatCurrency(currentMonth.expenses)}
-          </Text>
-        </Surface>
-      </View>
+        </View>
 
-      {/* Bar Chart: Expenses Comparison */}
-      <Card style={styles.card} mode="elevated">
-        <Card.Content>
-          <Text variant="titleMedium" style={styles.chartTitle}>
-            {t('expenseGrowthTitle')}
-          </Text>
-          <BarChart
-            data={barData}
-            width={screenWidth - 64}
-            height={220}
-            yAxisLabel={currencySymbol}
-            yAxisSuffix=""
-            chartConfig={chartConfig}
-            verticalLabelRotation={0}
-            fromZero
-            withCustomBarColorFromData
-            flatColor
-            style={styles.chart}
-          />
-          <View style={styles.growthContainer}>
-            <Text
-              variant="headlineMedium"
-              style={[
-                styles.growthValue,
-                { color: expenseGrowth > 0 ? theme.colors.error : '#4caf50' },
-              ]}
-            >
-              {expenseGrowth > 0 ? '+' : ''}
-              {expenseGrowth.toFixed(1)}%
+        {/* Summary Cards */}
+        <View style={styles.summaryContainer}>
+          <Surface style={[styles.miniCard, { backgroundColor: '#e8f5e9' }]} elevation={1}>
+            <Ionicons name="arrow-up-circle" size={20} color="#2e7d32" />
+            <Text variant="labelSmall" style={[styles.miniLabel, { color: '#388e3c' }]}>
+              {t('income')}
             </Text>
-            <Text variant="labelSmall" style={styles.subtext}>
-              {t('comparedToLastMonth')}
+            <Text variant="titleMedium" style={[styles.miniValue, { color: '#2e7d32' }]}>
+              {formatCurrency(filtered.totalIncome)}
+            </Text>
+          </Surface>
+          <Surface style={[styles.miniCard, { backgroundColor: '#ffebee' }]} elevation={1}>
+            <Ionicons name="arrow-down-circle" size={20} color={theme.colors.error} />
+            <Text variant="labelSmall" style={[styles.miniLabel, { color: theme.colors.error }]}>
+              {t('expenses')}
+            </Text>
+            <Text variant="titleMedium" style={[styles.miniValue, { color: theme.colors.error }]}>
+              {formatCurrency(filtered.totalExpenses)}
+            </Text>
+          </Surface>
+        </View>
+
+        {/* Savings Row */}
+        <Surface style={[styles.savingsRow, { backgroundColor: theme.colors.surface }]} elevation={1}>
+          <View style={styles.savingsItem}>
+            <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              {t('savingsRateTitle')}
+            </Text>
+            <Text
+              variant="titleLarge"
+              style={{
+                fontWeight: '900',
+                color: filtered.savingsRate >= 0 ? '#4caf50' : theme.colors.error,
+              }}
+            >
+              {filtered.savingsRate.toFixed(1)}%
             </Text>
           </View>
-        </Card.Content>
-      </Card>
-
-      {/* Pie Chart: Expenses by Category */}
-      {categoryExpenses.length > 0 && (
-        <Card style={styles.card} mode="elevated">
-          <Card.Content>
-            <Text variant="titleMedium" style={styles.chartTitle}>
-              {t('chartTitle')}
+          <View style={[styles.savingsDivider, { backgroundColor: theme.colors.outlineVariant }]} />
+          <View style={styles.savingsItem}>
+            <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              {t('spendingFrequencyTitle')}
             </Text>
-            <PieChart
-              data={pieData}
-              width={screenWidth - 64}
-              height={200}
-              chartConfig={chartConfig}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="15"
-            />
-          </Card.Content>
-        </Card>
-      )}
-
-      {/* Insights Section */}
-      <Text
-        variant="titleLarge"
-        style={[styles.headerTitle, { marginTop: 16 }]}
-      >
-        {t('insights')}
-      </Text>
-      {insights.map((insight) => (
-        <Surface
-          key={insight.id}
-          style={[
-            styles.insightBox,
-            insight.level === 'positive' && styles.positiveBox,
-            insight.level === 'warning' && styles.warningBox,
-            insight.level === 'critical' && styles.criticalBox,
-          ]}
-          elevation={1}
-        >
-          <Text variant="titleSmall" style={styles.insightTitle}>
-            {insight.title}
-          </Text>
-          <Text variant="bodyMedium" style={styles.insightText}>
-            {insight.message}
-          </Text>
+            <Text variant="titleLarge" style={{ fontWeight: '900', color: theme.colors.onSurface }}>
+              {filtered.spendingDays}{' '}
+              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                {t('daysLabel')}
+              </Text>
+            </Text>
+          </View>
         </Surface>
-      ))}
-      <View style={{ height: 40 }} />
-    </ScrollView>
+
+        {/* Category Pie Chart */}
+        {pieData.length > 0 && (
+          <Card style={styles.card} mode="elevated">
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.chartTitle}>
+                {t('chartTitle')}
+              </Text>
+              <PieChart
+                data={pieData.map((d) => ({
+                  ...d,
+                  name: '',
+                  population: parseFloat(
+                    ((d.population / filtered.totalExpenses) * 100).toFixed(1),
+                  ),
+                }))}
+                width={screenWidth - 64}
+                height={200}
+                chartConfig={{
+                  color: (opacity = 1) => `rgba(0,0,0,${opacity})`,
+                }}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="50"
+                absolute
+                hasLegend={false}
+              />
+              {/* Category Legend */}
+              <View style={styles.legendList}>
+                {filtered.categoryBreakdown.map((item, i) => (
+                  <View key={i} style={styles.legendRow}>
+                    <View style={[styles.legendDot, { backgroundColor: item.color }]} />
+                    <Text variant="bodySmall" style={styles.legendName} numberOfLines={1}>
+                      {item.name}
+                    </Text>
+                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                      {item.percentage}%
+                    </Text>
+                    <Text variant="bodySmall" style={[styles.legendAmount, { color: theme.colors.onSurface }]}>
+                      {formatCurrency(item.amount)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </Card.Content>
+          </Card>
+        )}
+
+        {/* Month-over-month Bar Chart (always shows global data) */}
+        {barData && (
+          <Card style={styles.card} mode="elevated">
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.chartTitle}>
+                {t('expenseGrowthTitle')}
+              </Text>
+              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 8 }}>
+                (Based on last 2 full months)
+              </Text>
+              <BarChart
+                data={barData}
+                width={screenWidth - 64}
+                height={220}
+                yAxisLabel={currencySymbol}
+                yAxisSuffix=""
+                chartConfig={chartConfig}
+                verticalLabelRotation={0}
+                fromZero
+                withCustomBarColorFromData
+                flatColor
+                style={styles.chart}
+              />
+              <View style={styles.growthContainer}>
+                <Text
+                  variant="headlineMedium"
+                  style={[
+                    styles.growthValue,
+                    { color: expenseGrowth > 0 ? theme.colors.error : '#4caf50' },
+                  ]}
+                >
+                  {expenseGrowth > 0 ? '+' : ''}
+                  {expenseGrowth.toFixed(1)}%
+                </Text>
+                <Text variant="labelSmall" style={styles.subtext}>
+                  {t('comparedToLastMonth')}
+                </Text>
+              </View>
+            </Card.Content>
+          </Card>
+        )}
+
+        {/* Insights */}
+        {analyticsReport && analyticsReport.insights.length > 0 && (
+          <>
+            <Text variant="titleLarge" style={[styles.sectionTitle, { marginTop: 8 }]}>
+              {t('insights')}
+            </Text>
+            {analyticsReport.insights.map((insight) => (
+              <Surface
+                key={insight.id}
+                style={[
+                  styles.insightBox,
+                  insight.level === 'positive' && styles.positiveBox,
+                  insight.level === 'warning' && styles.warningBox,
+                  insight.level === 'critical' && styles.criticalBox,
+                ]}
+                elevation={1}
+              >
+                <Text variant="titleSmall" style={styles.insightTitle}>
+                  {insight.title}
+                </Text>
+                <Text variant="bodyMedium" style={styles.insightText}>
+                  {insight.message}
+                </Text>
+              </Surface>
+            ))}
+          </>
+        )}
+
+        {/* Empty state */}
+        {filtered.txCount === 0 && (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="bar-chart-outline" size={56} color={theme.colors.outlineVariant} />
+            <Text variant="bodyLarge" style={[styles.emptyText, { color: theme.colors.onSurfaceVariant }]}>
+              No data for this period
+            </Text>
+          </View>
+        )}
+
+        <View style={{ height: 40 }} />
+      </ScrollView>
+    </View>
   );
 };
 
@@ -196,41 +326,91 @@ const defaultStyles = (theme: any) =>
     content: {
       padding: 16,
     },
-    headerTitle: {
-      fontWeight: 'bold',
+    rangeBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 20,
       marginBottom: 16,
     },
     summaryContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginBottom: 16,
+      marginBottom: 12,
+      gap: 8,
     },
     miniCard: {
       flex: 1,
-      padding: 16,
+      padding: 14,
       borderRadius: 16,
-      marginHorizontal: 4,
+      alignItems: 'flex-start',
+      gap: 4,
     },
     miniLabel: {
       fontWeight: '700',
       textTransform: 'uppercase',
+      fontSize: 10,
     },
     miniValue: {
       fontWeight: '900',
-      marginTop: 4,
+    },
+    savingsRow: {
+      flexDirection: 'row',
+      borderRadius: 16,
+      marginBottom: 16,
+      overflow: 'hidden',
+    },
+    savingsItem: {
+      flex: 1,
+      padding: 16,
+      alignItems: 'center',
+    },
+    savingsDivider: {
+      width: 1,
+      marginVertical: 12,
+    },
+    sectionTitle: {
+      fontWeight: 'bold',
+      marginBottom: 12,
     },
     card: {
-      borderRadius: 24,
+      borderRadius: 20,
       marginBottom: 16,
       backgroundColor: theme.colors.surface,
     },
     chartTitle: {
       fontWeight: '700',
-      marginBottom: 16,
+      marginBottom: 8,
     },
     chart: {
       marginVertical: 8,
       borderRadius: 16,
+    },
+    legendList: {
+      marginTop: 12,
+    },
+    legendRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(0,0,0,0.04)',
+    },
+    legendDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      marginRight: 10,
+    },
+    legendName: {
+      flex: 1,
+      color: theme.colors.onSurface,
+    },
+    legendAmount: {
+      fontWeight: '700',
+      marginLeft: 8,
     },
     growthContainer: {
       alignItems: 'center',
@@ -249,21 +429,17 @@ const defaultStyles = (theme: any) =>
       borderLeftWidth: 6,
       backgroundColor: theme.colors.surface,
     },
-    positiveBox: {
-      borderLeftColor: '#4caf50',
+    positiveBox: { borderLeftColor: '#4caf50' },
+    warningBox: { borderLeftColor: '#ff9800' },
+    criticalBox: { borderLeftColor: '#f44336' },
+    insightTitle: { fontWeight: '700', marginBottom: 4 },
+    insightText: { color: theme.colors.onSurface, lineHeight: 20 },
+    emptyContainer: {
+      alignItems: 'center',
+      paddingVertical: 40,
+      gap: 12,
     },
-    warningBox: {
-      borderLeftColor: '#ff9800',
-    },
-    criticalBox: {
-      borderLeftColor: '#f44336',
-    },
-    insightTitle: {
-      fontWeight: '700',
-      marginBottom: 4,
-    },
-    insightText: {
-      color: theme.colors.onSurface,
-      lineHeight: 20,
+    emptyText: {
+      fontWeight: '500',
     },
   });

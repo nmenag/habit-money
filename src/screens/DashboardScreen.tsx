@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { endOfMonth, parseISO, startOfMonth } from 'date-fns';
+import { parseISO } from 'date-fns';
 import React, { useMemo, useState } from 'react';
 import {
   Dimensions,
@@ -19,7 +19,9 @@ import {
 import { PieChart } from 'react-native-chart-kit';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
+import { FilterBar } from '../components/FilterBar';
 import { ScoreCard } from '../components/ScoreCard';
+import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
 import { calculateFinancialScore } from '../utils/scoreCalculator';
 
@@ -38,10 +40,12 @@ export const DashboardScreen = ({ navigation }: any) => {
     [transactions],
   );
 
+  const { selectedRange } = useFilterStore();
+
   const { totalIncome, totalExpenses, pieData } = useMemo(() => {
     const now = new Date();
-    const start = startOfMonth(now);
-    const end = endOfMonth(now);
+    const start = selectedRange.startDate;
+    const end = selectedRange.endDate;
 
     let inc = 0;
     let exp = 0;
@@ -94,7 +98,7 @@ export const DashboardScreen = ({ navigation }: any) => {
       .sort((a, b) => b.population - a.population);
 
     return { totalIncome: inc, totalExpenses: exp, pieData: pie };
-  }, [transactions, categories, t, language]);
+  }, [transactions, categories, t, language, selectedRange]);
 
   return (
     <View
@@ -147,11 +151,14 @@ export const DashboardScreen = ({ navigation }: any) => {
           </ScrollView>
         </View>
 
+        {/* Date Range Filter Bar */}
+        <FilterBar />
+
         <View style={styles.summaryContainer}>
           <View style={styles.monthlyBox}>
             <Surface style={styles.monthlyItem} elevation={1}>
               <Text variant="labelSmall" style={styles.monthlyLabel}>
-                {t('monthlyIncome')}
+                {t('income')}
               </Text>
               <Text
                 variant="titleLarge"
