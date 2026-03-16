@@ -224,7 +224,7 @@ export const initDb = () => {
   if (accountCount && accountCount.count === 0) {
     db.runSync(
       'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color, currency) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      ['1', 'Main', 'cash', 0, 0, '#2196f3', 'COP'],
+      ['1', 'Bank', 'bank', 0, 0, '#2196f3', 'COP'],
     );
   }
 

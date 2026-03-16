@@ -144,7 +144,7 @@ const defaultStyles = (theme: any) =>
       marginBottom: 8,
     },
     listTitle: {
-      fontWeight: '900',
+      fontWeight: '800',
       color: theme.colors.onSurface,
     },
     transactionCount: {
@@ -179,6 +179,7 @@ const defaultStyles = (theme: any) =>
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 16,
+      borderRadius: 20,
+      elevation: 4,
     },
   });

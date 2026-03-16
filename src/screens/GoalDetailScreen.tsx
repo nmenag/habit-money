@@ -236,12 +236,10 @@ export const GoalDetailScreen = ({ route, navigation }: any) => {
           <Button
             mode="contained"
             onPress={() => setVisible(true)}
-            style={[
-              styles.actionButton,
-              { backgroundColor: goal.color || theme.colors.primary },
-            ]}
+            style={styles.actionButton}
             icon="plus-circle"
             contentStyle={styles.mainActionBtn}
+            labelStyle={styles.mainActionLabel}
           >
             {t('addFunds') || 'Add Funds'}
           </Button>
@@ -252,6 +250,7 @@ export const GoalDetailScreen = ({ route, navigation }: any) => {
               onPress={() => navigation.navigate('AddGoal', { goal })}
               style={styles.secondaryButton}
               icon="pencil"
+              labelStyle={styles.secondaryActionLabel}
             >
               {t('edit')}
             </Button>
@@ -261,6 +260,7 @@ export const GoalDetailScreen = ({ route, navigation }: any) => {
               style={styles.secondaryButton}
               textColor={theme.colors.error}
               icon="trash-can"
+              labelStyle={styles.secondaryActionLabel}
             >
               {t('delete')}
             </Button>
@@ -440,11 +440,15 @@ const defaultStyles = (theme: any) =>
     },
     actionButton: {
       marginBottom: 16,
-      borderRadius: 16,
+      borderRadius: 20,
       elevation: 4,
     },
     mainActionBtn: {
       height: 56,
+    },
+    mainActionLabel: {
+      fontSize: 16,
+      fontWeight: '700',
     },
     secondaryActions: {
       flexDirection: 'row',
@@ -452,9 +456,13 @@ const defaultStyles = (theme: any) =>
     },
     secondaryButton: {
       flex: 0.48,
-      borderRadius: 12,
+      borderRadius: 16,
       backgroundColor: theme.colors.surface,
       elevation: 1,
+    },
+    secondaryActionLabel: {
+      fontSize: 13,
+      fontWeight: '600',
     },
     dialog: {
       borderRadius: 24,

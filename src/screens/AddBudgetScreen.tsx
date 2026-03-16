@@ -108,6 +108,7 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
             mode="outlined"
             keyboardType="numeric"
             style={styles.amountInput}
+            outlineStyle={styles.inputOutline}
             placeholder="0.00"
             left={<TextInput.Icon icon="cash" />}
           />
@@ -171,11 +172,9 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
         <Button
           mode="contained"
           onPress={handleSave}
-          style={[
-            styles.saveBtn,
-            { backgroundColor: color || theme.colors.primary },
-          ]}
+          style={styles.saveBtn}
           contentStyle={styles.saveBtnContent}
+          labelStyle={styles.saveBtnLabel}
         >
           {isEditing ? t('updateBudget') : t('saveBudget')}
         </Button>
@@ -195,12 +194,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     marginBottom: 24,
   },
+  inputOutline: {
+    borderRadius: 16,
+  },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
-    fontWeight: '700',
-    marginBottom: 12,
+    fontWeight: '800',
+    marginBottom: 16,
     marginLeft: 4,
   },
   chipsRow: {
@@ -226,10 +228,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveBtn: {
-    borderRadius: 16,
-    marginTop: 8,
+    borderRadius: 20,
+    marginTop: 32,
+    elevation: 2,
   },
   saveBtnContent: {
     height: 56,
+  },
+  saveBtnLabel: {
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

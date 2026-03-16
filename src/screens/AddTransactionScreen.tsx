@@ -202,6 +202,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
               mode="outlined"
               keyboardType="numeric"
               style={styles.amountInput}
+              outlineStyle={styles.inputOutline}
               left={<TextInput.Affix text={displayCurrency + ' '} />}
             />
 
@@ -211,6 +212,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
               onChangeText={setNote}
               mode="outlined"
               style={styles.input}
+              outlineStyle={styles.inputOutline}
               placeholder={t('notePlaceholder')}
             />
           </View>
@@ -290,6 +292,7 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
           onPress={handleSave}
           style={styles.saveBtn}
           contentStyle={styles.saveBtnContent}
+          labelStyle={styles.saveBtnLabel}
         >
           {isEditing ? t('updateTransaction') : t('saveTransaction')}
         </Button>
@@ -340,12 +343,15 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: 'transparent',
   },
+  inputOutline: {
+    borderRadius: 16,
+  },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
-    fontWeight: '700',
-    marginBottom: 12,
+    fontWeight: '800',
+    marginBottom: 16,
     marginLeft: 4,
   },
   chipsRow: {
@@ -358,12 +364,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   saveBtn: {
-    borderRadius: 16,
-    marginTop: 8,
-    elevation: 4,
+    borderRadius: 20,
+    marginTop: 32,
+    elevation: 2,
   },
   saveBtnContent: {
     height: 56,
+  },
+  saveBtnLabel: {
+    fontSize: 16,
+    fontWeight: '700',
   },
   editActions: {
     flexDirection: 'row',

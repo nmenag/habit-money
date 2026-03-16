@@ -196,7 +196,7 @@ export const AddGoalScreen = ({ route, navigation }: any) => {
         <Button
           mode="contained"
           onPress={handleSave}
-          style={[styles.saveBtn, { backgroundColor: color }]}
+          style={styles.saveBtn}
           contentStyle={styles.saveBtnContent}
           labelStyle={styles.saveBtnLabel}
         >
@@ -207,6 +207,7 @@ export const AddGoalScreen = ({ route, navigation }: any) => {
           mode="text"
           onPress={() => navigation.goBack()}
           style={styles.cancelBtn}
+          labelStyle={styles.cancelBtnLabel}
         >
           {t('cancel')}
         </Button>
@@ -234,7 +235,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginBottom: 16,
-    fontWeight: '700',
+    fontWeight: '800',
     marginLeft: 4,
   },
   iconGrid: {
@@ -266,18 +267,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveBtn: {
-    borderRadius: 16,
-    marginTop: 8,
-    elevation: 4,
+    borderRadius: 20,
+    marginTop: 32,
+    elevation: 2,
   },
   saveBtnContent: {
     height: 56,
   },
   saveBtnLabel: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
   },
   cancelBtn: {
     marginTop: 8,
+  },
+  cancelBtnLabel: {
+    fontWeight: '600',
   },
 });

@@ -552,8 +552,9 @@ const defaultStyles = (theme: any) =>
       marginVertical: 12,
     },
     sectionTitle: {
-      fontWeight: 'bold',
-      marginBottom: 12,
+      fontWeight: '800',
+      marginBottom: 16,
+      marginLeft: 4,
     },
     card: {
       borderRadius: 20,
@@ -561,7 +562,7 @@ const defaultStyles = (theme: any) =>
       backgroundColor: theme.colors.surface,
     },
     chartTitle: {
-      fontWeight: '700',
+      fontWeight: '800',
       marginBottom: 8,
     },
     chart: {

@@ -40,7 +40,10 @@ export const AccountsScreen = ({ navigation }: any) => {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text variant="bodyLarge" style={styles.emptyText}>
+            <Text
+              variant="bodyLarge"
+              style={[styles.emptyText, { color: theme.colors.outline }]}
+            >
               {t('noAccounts')}
             </Text>
           </View>
@@ -62,15 +65,18 @@ const defaultStyles = (theme: any) =>
       flex: 1,
     },
     empty: {
-      padding: 60,
+      padding: 40,
       alignItems: 'center',
+      marginTop: 80,
     },
     emptyText: {
-      color: theme.colors.onSurfaceVariant,
+      textAlign: 'center',
+      paddingHorizontal: 20,
     },
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 16,
+      borderRadius: 20,
+      elevation: 4,
     },
   });

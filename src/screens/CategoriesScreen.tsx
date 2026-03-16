@@ -104,7 +104,10 @@ export const CategoriesScreen = ({ navigation }: any) => {
         contentContainerStyle={[styles.listContent, { paddingBottom: 100 }]}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text variant="bodyLarge" style={styles.emptyText}>
+            <Text
+              variant="bodyLarge"
+              style={[styles.emptyText, { color: theme.colors.outline }]}
+            >
               {t('noCategories')}
             </Text>
           </View>
@@ -132,7 +135,7 @@ const defaultStyles = (theme: any) =>
       paddingVertical: 12,
     },
     headerTitle: {
-      fontWeight: '900',
+      fontWeight: '800',
       color: theme.colors.onSurface,
       textTransform: 'uppercase',
       letterSpacing: 1.5,
@@ -157,15 +160,18 @@ const defaultStyles = (theme: any) =>
       fontSize: 16,
     },
     empty: {
-      padding: 60,
+      padding: 40,
       alignItems: 'center',
+      marginTop: 80,
     },
     emptyText: {
-      color: theme.colors.onSurfaceVariant,
+      textAlign: 'center',
+      paddingHorizontal: 20,
     },
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 16,
+      borderRadius: 20,
+      elevation: 4,
     },
   });

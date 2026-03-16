@@ -144,6 +144,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
               onChangeText={setName}
               mode="outlined"
               style={styles.input}
+              outlineStyle={styles.inputOutline}
               placeholder={t('accountNamePlaceholder')}
             />
 
@@ -168,6 +169,7 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
               mode="outlined"
               keyboardType="numeric"
               style={styles.input}
+              outlineStyle={styles.inputOutline}
               left={<TextInput.Affix text={selectedCurrency + ' '} />}
             />
           </View>
@@ -221,11 +223,9 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
         <Button
           mode="contained"
           onPress={handleSave}
-          style={[
-            styles.saveBtn,
-            { backgroundColor: color || theme.colors.primary },
-          ]}
+          style={styles.saveBtn}
           contentStyle={styles.saveBtnContent}
+          labelStyle={styles.saveBtnLabel}
         >
           {isEditing ? t('updateAccount') : t('saveAccount')}
         </Button>
@@ -248,6 +248,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     backgroundColor: 'transparent',
   },
+  inputOutline: {
+    borderRadius: 16,
+  },
   segmentedContainer: {
     marginBottom: 16,
   },
@@ -255,8 +258,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionTitle: {
-    fontWeight: '700',
-    marginBottom: 12,
+    fontWeight: '800',
+    marginBottom: 16,
     marginLeft: 4,
   },
   chipsContainer: {
@@ -282,10 +285,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveBtn: {
-    borderRadius: 16,
-    marginTop: 8,
+    borderRadius: 20,
+    marginTop: 32,
+    elevation: 2,
   },
   saveBtnContent: {
     height: 56,
+  },
+  saveBtnLabel: {
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

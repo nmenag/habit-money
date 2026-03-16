@@ -105,23 +105,8 @@ export const GoalsScreen = ({ navigation }: any) => {
         ]}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <View
-              style={[
-                styles.emptyIconContainer,
-                { backgroundColor: theme.colors.surfaceVariant },
-              ]}
-            >
-              <Ionicons
-                name="flag-outline"
-                size={48}
-                color={theme.colors.primary}
-              />
-            </View>
-            <Text variant="titleLarge" style={styles.emptyTitle}>
-              {t('noGoals')}
-            </Text>
             <Text
-              variant="bodyMedium"
+              variant="bodyLarge"
               style={[styles.emptySubtitle, { color: theme.colors.outline }]}
             >
               {t('noGoalsSubtitle') ||
@@ -177,7 +162,7 @@ const defaultStyles = (theme: any) =>
       flex: 1,
     },
     name: {
-      fontWeight: '700',
+      fontWeight: '800',
       letterSpacing: 0.2,
     },
     amountText: {
@@ -232,6 +217,7 @@ const defaultStyles = (theme: any) =>
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 16,
+      borderRadius: 20,
+      elevation: 4,
     },
   });

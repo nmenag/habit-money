@@ -367,7 +367,7 @@ const defaultStyles = (theme: any) =>
     sectionHeaderText: {
       textTransform: 'uppercase',
       letterSpacing: 0.8,
-      fontWeight: '700',
+      fontWeight: '800',
     },
     empty: {
       padding: 60,
@@ -385,6 +385,7 @@ const defaultStyles = (theme: any) =>
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 16,
+      borderRadius: 20,
+      elevation: 4,
     },
   });

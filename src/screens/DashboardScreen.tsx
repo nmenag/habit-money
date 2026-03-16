@@ -288,10 +288,10 @@ const defaultStyles = (theme: any) =>
     },
     sectionHeader: {
       textTransform: 'uppercase',
-      letterSpacing: 1,
+      letterSpacing: 1.5,
       marginLeft: 20,
       marginBottom: 12,
-      fontWeight: '700',
+      fontWeight: '800',
     },
     accountsScrollContent: {
       paddingHorizontal: 16,
@@ -384,6 +384,7 @@ const defaultStyles = (theme: any) =>
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 16,
+      borderRadius: 20,
+      elevation: 4,
     },
   });
