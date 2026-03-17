@@ -74,12 +74,14 @@ export class AnalyticsService {
       categoryId: string;
       categoryName: string;
       amount: number;
+      color: string;
     }>(
       `
       SELECT 
         c.id as categoryId, 
         c.name as categoryName, 
-        SUM(t.amount) as amount
+        SUM(t.amount) as amount,
+        MAX(c.color) as color
       FROM transactions t
       JOIN categories c ON t.categoryId = c.id
       WHERE t.type = 'expense' AND t.date >= ? AND t.date <= ?
@@ -111,5 +113,37 @@ export class AnalyticsService {
     );
 
     return result?.count || 0;
+  }
+
+  static async getBudgetAdherence() {
+    const db = getDb();
+    const { start, end } = this.getMonthDateRange(0);
+
+    const rows = db.getAllSync<{
+      categoryId: string;
+      categoryName: string;
+      amount: number;
+      spent: number;
+    }>(
+      `
+      SELECT 
+        b.categoryId, 
+        c.name as categoryName, 
+        b.amount,
+        COALESCE(SUM(t.amount), 0) as spent
+      FROM budgets b
+      JOIN categories c ON b.categoryId = c.id
+      LEFT JOIN transactions t ON t.categoryId = b.categoryId 
+        AND t.type = 'expense' 
+        AND t.date >= ? AND t.date <= ?
+      GROUP BY b.categoryId
+    `,
+      [start, end],
+    );
+
+    return rows.map((r) => ({
+      ...r,
+      exceeded: r.spent > r.amount,
+    }));
   }
 }

@@ -11,6 +11,7 @@ export class AnalyticsManager {
     const previousMonth = await AnalyticsService.getMonthlyMetrics(1);
     const categoryExpenses = await AnalyticsService.getCategoryExpenses(0);
     const spendingDays = await AnalyticsService.getSpendingDays(0);
+    const budgets = await AnalyticsService.getBudgetAdherence();
 
     let expenseGrowth = 0;
     if (previousMonth.expenses > 0) {
@@ -24,6 +25,7 @@ export class AnalyticsManager {
       currentMonth,
       previousMonth,
       categoryExpenses,
+      budgets,
       spendingDays,
       expenseGrowth,
       insights: [],

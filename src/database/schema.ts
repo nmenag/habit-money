@@ -1,4 +1,6 @@
+import * as Localization from 'expo-localization';
 import * as SQLite from 'expo-sqlite';
+import { translations } from '../i18n/translations';
 
 let cachedDb: SQLite.SQLiteDatabase | null = null;
 
@@ -35,7 +37,6 @@ export const initDb = () => {
       "ALTER TABLE accounts ADD COLUMN currency TEXT NOT NULL DEFAULT 'COP';",
     );
   } catch (e) {
-    // Column might already exist
   }
 
   try {
@@ -70,7 +71,6 @@ export const initDb = () => {
   try {
     db.execSync('ALTER TABLE budgets ADD COLUMN categoryId TEXT;');
   } catch (e) {
-    // Column might already exist
   }
 
   try {
@@ -115,38 +115,107 @@ export const initDb = () => {
   }
 
   try {
-    // Standard ALTER TABLE ADD COLUMN in SQLite is simple
     db.execSync('ALTER TABLE transactions ADD COLUMN budgetId TEXT;');
   } catch (e) {
     // Column might already exist
   }
+
+  try {
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS goals (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        targetAmount REAL NOT NULL,
+        currentAmount REAL NOT NULL DEFAULT 0,
+        color TEXT,
+        icon TEXT,
+        deadline TEXT,
+        status TEXT DEFAULT 'active'
+      );
+    `);
+  } catch (e) {
+    console.error('Error creating goals table:', e);
+  }
+
+  const locales = Localization.getLocales();
+  const langCode = locales[0]?.languageCode === 'es' ? 'es' : 'en';
+  const t = (translations as any)[langCode];
 
   const count = db.getFirstSync<{ count: number }>(
     'SELECT COUNT(*) as count FROM categories',
   );
   if (count && count.count === 0) {
     const defaultCategories = [
-      { id: '1', name: 'Food', type: 'expense', icon: 'fast-food' },
-      { id: '2', name: 'Transport', type: 'expense', icon: 'car' },
-      { id: '3', name: 'Housing', type: 'expense', icon: 'home' },
+      {
+        id: '1',
+        name: t.catFood,
+        type: 'expense',
+        icon: 'fast-food',
+        color: '#f44336',
+      },
+      {
+        id: '2',
+        name: t.catTransport,
+        type: 'expense',
+        icon: 'car',
+        color: '#2196f3',
+      },
+      {
+        id: '3',
+        name: t.catHousing,
+        type: 'expense',
+        icon: 'home',
+        color: '#9c27b0',
+      },
       {
         id: '4',
-        name: 'Entertainment',
+        name: t.catEntertainment,
         type: 'expense',
         icon: 'game-controller',
+        color: '#ff9800',
       },
-      { id: '5', name: 'Health', type: 'expense', icon: 'medkit' },
-      { id: '6', name: 'Other', type: 'expense', icon: 'list' },
-      { id: '7', name: 'Salary', type: 'income', icon: 'cash' },
-      { id: '8', name: 'Other Income', type: 'income', icon: 'wallet' },
+      {
+        id: '5',
+        name: t.catHealth,
+        type: 'expense',
+        icon: 'medkit',
+        color: '#e91e63',
+      },
+      {
+        id: '6',
+        name: t.catOther,
+        type: 'expense',
+        icon: 'list',
+        color: '#607d8b',
+      },
+      {
+        id: '7',
+        name: t.catSalary,
+        type: 'income',
+        icon: 'cash',
+        color: '#4caf50',
+      },
+      {
+        id: '8',
+        name: t.catOtherIncome,
+        type: 'income',
+        icon: 'wallet',
+        color: '#009688',
+      },
     ];
 
     const statement = db.prepareSync(
-      'INSERT INTO categories (id, name, type, icon) VALUES (?, ?, ?, ?)',
+      'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
     );
     try {
       defaultCategories.forEach((cat) => {
-        statement.executeSync([cat.id, cat.name, cat.type, cat.icon]);
+        statement.executeSync([
+          cat.id,
+          cat.name,
+          cat.type,
+          cat.icon,
+          cat.color,
+        ]);
       });
     } finally {
       statement.finalizeSync();
@@ -159,7 +228,7 @@ export const initDb = () => {
   if (accountCount && accountCount.count === 0) {
     db.runSync(
       'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color, currency) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      ['1', 'Main', 'cash', 0, 0, '#2196f3', 'COP'],
+      ['1', t.defaultAccountName, 'bank', 0, 0, '#2196f3', 'COP'],
     );
   }
 

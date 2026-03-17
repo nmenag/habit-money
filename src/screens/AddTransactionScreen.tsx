@@ -1,15 +1,24 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
   Alert,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import {
+  Button,
+  Chip,
+  IconButton,
+  SegmentedButtons,
+  Text,
+  TextInput,
+  useTheme,
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TransactionType, useStore, useTranslation } from '../store/useStore';
+import { formatNumber } from '../utils/formatters';
 
 export const AddTransactionScreen = ({ route, navigation }: any) => {
   const editingTransaction = route.params?.transaction;
@@ -23,16 +32,15 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
     editTransaction,
     deleteTransaction,
   } = useStore();
-  const { t, language } = useTranslation();
+  const { t, language, translateName } = useTranslation();
+  const theme = useTheme();
 
   const [type, setType] = useState<TransactionType>(
     editingTransaction?.type || 'expense',
   );
   const [displayAmount, setDisplayAmount] = useState(
     editingTransaction
-      ? Math.abs(editingTransaction.amount).toLocaleString(
-          language === 'es' ? 'es-CO' : 'en-US',
-        )
+      ? formatNumber(Math.abs(editingTransaction.amount), language)
       : '',
   );
   const [amount, setAmount] = useState(
@@ -50,8 +58,8 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
   const [selectedCategory, setSelectedCategory] = useState(
     editingTransaction?.categoryId || availableCategories[0]?.id || '',
   );
-  const [selectedBudget, setSelectedBudget] = useState(
-    editingTransaction?.budgetId || '',
+  const [selectedBudget, setSelectedBudget] = useState<string>(
+    editingTransaction?.budgetId ?? '',
   );
 
   const handleSave = () => {
@@ -83,7 +91,6 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
         categoryId: selectedCategory || null,
         accountId: selectedAccount,
         budgetId: selectedBudget || null,
-        // When duplicating, record as a new date
         date: new Date().toISOString(),
         note,
       });
@@ -136,329 +143,248 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
   };
 
   const handleAmountChange = (text: string) => {
-    // 1. Get only digits from the input
     const onlyDigits = text.replace(/\D/g, '');
-
     if (onlyDigits === '') {
       setDisplayAmount('');
       setAmount(0);
       return;
     }
-
-    // 2. Convert to number for storage
     const num = parseInt(onlyDigits, 10);
     setAmount(num);
-
-    // 3. Format integer with thousands separator (Dot for ES, Comma for EN)
     const separator = language === 'es' ? '.' : ',';
     const formatted = onlyDigits.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
-
     setDisplayAmount(formatted);
   };
 
   const insets = useSafeAreaInsets();
-
   const activeAccount = accounts.find((acc) => acc.id === selectedAccount);
   const displayCurrency = activeAccount?.currency || 'COP';
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={[
-        styles.content,
-        { paddingBottom: Math.max(insets.bottom, 20) },
-      ]}
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <View style={styles.typeSelector}>
-        <TouchableOpacity
-          style={[styles.typeBtn, type === 'expense' && styles.activeExpense]}
-          onPress={() => setType('expense')}
-        >
-          <Text
-            style={[styles.typeText, type === 'expense' && styles.activeText]}
-          >
-            {t('expense')}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.typeBtn, type === 'income' && styles.activeIncome]}
-          onPress={() => setType('income')}
-        >
-          <Text
-            style={[styles.typeText, type === 'income' && styles.activeText]}
-          >
-            {t('income')}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>
-          {t('amount')} ({displayCurrency})
-        </Text>
-        <TextInput
-          style={styles.amountInput}
-          placeholder="0.00"
-          value={displayAmount}
-          onChangeText={handleAmountChange}
-          keyboardType="numeric"
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>{t('accounts')}</Text>
-        <View style={styles.chips}>
-          {accounts.map((acc) => (
-            <TouchableOpacity
-              key={acc.id}
-              style={[
-                styles.chip,
-                selectedAccount === acc.id && styles.activeChip,
-              ]}
-              onPress={() => setSelectedAccount(acc.id)}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  selectedAccount === acc.id && styles.activeChipText,
-                ]}
-              >
-                {acc.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-          {accounts.length === 0 && (
-            <Text style={{ color: 'red' }}>{t('createAccountFirst')}</Text>
-          )}
-        </View>
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>{t('categories')}</Text>
-        <View style={styles.chips}>
-          {availableCategories.map((cat) => (
-            <TouchableOpacity
-              key={cat.id}
-              style={[
-                styles.chip,
-                selectedCategory === cat.id && styles.activeChip,
-              ]}
-              onPress={() => {
-                setSelectedCategory(cat.id);
-                // Auto-select budget if category matches
-                const matchingBudget = budgets.find(
-                  (b) => b.categoryId === cat.id,
-                );
-                if (matchingBudget) {
-                  setSelectedBudget(matchingBudget.id);
-                }
-              }}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  selectedCategory === cat.id && styles.activeChipText,
-                ]}
-              >
-                {cat.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>
-          {t('budgets')} ({t('optional')})
-        </Text>
-        <View style={styles.chips}>
-          {budgets.map((bud) => (
-            <TouchableOpacity
-              key={bud.id}
-              style={[
-                styles.chip,
-                selectedBudget === bud.id && styles.activeChip,
-              ]}
-              onPress={() =>
-                setSelectedBudget(selectedBudget === bud.id ? '' : bud.id)
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: Math.max(insets.bottom, 20) + 40 },
+        ]}
+      >
+        <View style={styles.segmentedContainer}>
+          <SegmentedButtons
+            value={type}
+            onValueChange={(v) => {
+              setType(v as TransactionType);
+              // Reset category if not valid for new type
+              const newAvailable = categories.filter(
+                (c) => c.type === (v as any),
+              );
+              if (newAvailable.length > 0) {
+                setSelectedCategory(newAvailable[0].id);
               }
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  selectedBudget === bud.id && styles.activeChipText,
-                ]}
+            }}
+            buttons={[
+              {
+                value: 'expense',
+                label: t('expense'),
+                checkedColor: theme.colors.error,
+              },
+              { value: 'income', label: t('income'), checkedColor: '#4caf50' },
+            ]}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+            <TextInput
+              label={t('amount')}
+              value={displayAmount}
+              onChangeText={handleAmountChange}
+              mode="outlined"
+              keyboardType="numeric"
+              style={styles.amountInput}
+              outlineStyle={styles.inputOutline}
+              left={<TextInput.Affix text={displayCurrency + ' '} />}
+            />
+
+            <TextInput
+              label={t('note') + ' (' + t('optional') + ')'}
+              value={note}
+              onChangeText={setNote}
+              mode="outlined"
+              style={styles.input}
+              outlineStyle={styles.inputOutline}
+              placeholder={t('notePlaceholder')}
+            />
+          </View>
+
+        <View style={styles.section}>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            {t('accounts')}
+          </Text>
+          <View style={styles.chipsRow}>
+            {accounts.map((acc) => (
+              <Chip
+                key={acc.id}
+                selected={selectedAccount === acc.id}
+                onPress={() => setSelectedAccount(acc.id)}
+                style={styles.chip}
+                mode="flat"
+                selectedColor={theme.colors.primary}
               >
-                {categories.find((c) => c.id === bud.categoryId)?.name ||
-                  t('budgets')}
-              </Text>
-            </TouchableOpacity>
-          ))}
-          {budgets.length === 0 && (
-            <Text style={{ color: '#888' }}>{t('noBudgets')}</Text>
-          )}
+                {translateName(acc.name)}
+              </Chip>
+            ))}
+          </View>
         </View>
-      </View>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>
-          {t('note')} ({t('optional')})
-        </Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder={t('notePlaceholder')}
-          value={note}
-          onChangeText={setNote}
-        />
-      </View>
+        <View style={styles.section}>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            {t('categories')}
+          </Text>
+          <View style={styles.chipsRow}>
+            {availableCategories.map((cat) => (
+              <Chip
+                key={cat.id}
+                selected={selectedCategory === cat.id}
+                onPress={() => {
+                  setSelectedCategory(cat.id);
+                  const matchingBudget = budgets.find(
+                    (b) => b.categoryId === cat.id,
+                  );
+                  if (matchingBudget) setSelectedBudget(matchingBudget.id);
+                }}
+                style={styles.chip}
+                mode="flat"
+                selectedColor={cat.color || undefined}
+              >
+                {translateName(cat.name)}
+              </Chip>
+            ))}
+          </View>
+        </View>
 
-      <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-        <Text style={styles.saveBtnText}>
-          {isEditing ? t('updateTransaction') : t('saveTransaction')}
-        </Text>
-      </TouchableOpacity>
-
-      {isEditing && (
-        <View style={styles.editActions}>
-          <TouchableOpacity
-            style={styles.duplicateBtn}
-            onPress={handleDuplicate}
-          >
-            <Text style={styles.duplicateBtnText}>{t('duplicate')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
-            <Text style={styles.deleteBtnText}>
-              {t('deleteTransaction') || t('delete')}
+        {budgets.length > 0 && (
+          <View style={styles.section}>
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              {t('budgets')}
             </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </ScrollView>
+            <View style={styles.chipsRow}>
+              {budgets.map((bud) => (
+                <Chip
+                  key={bud.id}
+                  selected={selectedBudget === bud.id}
+                  onPress={() =>
+                    setSelectedBudget(selectedBudget === bud.id ? '' : bud.id)
+                  }
+                  style={styles.chip}
+                  mode="flat"
+                >
+                  {translateName(
+                    categories.find((c) => c.id === bud.categoryId)?.name ||
+                      t('budgets'),
+                  )}
+                </Chip>
+              ))}
+            </View>
+          </View>
+        )}
+
+        <Button
+          mode="contained"
+          onPress={handleSave}
+          style={styles.saveBtn}
+          contentStyle={styles.saveBtnContent}
+          labelStyle={styles.saveBtnLabel}
+        >
+          {isEditing ? t('updateTransaction') : t('saveTransaction')}
+        </Button>
+
+        {isEditing && (
+          <View style={styles.editActions}>
+            <Button
+              mode="outlined"
+              onPress={handleDuplicate}
+              style={styles.actionBtn}
+              icon="content-copy"
+            >
+              {t('duplicate')}
+            </Button>
+            <Button
+              mode="outlined"
+              onPress={handleDelete}
+              style={styles.actionBtn}
+              textColor={theme.colors.error}
+              icon="trash-can"
+            >
+              {t('delete')}
+            </Button>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   content: {
-    padding: 20,
+    padding: 16,
   },
-  typeSelector: {
-    flexDirection: 'row',
+  segmentedContainer: {
     marginBottom: 24,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-    overflow: 'hidden',
-  },
-  typeBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  activeExpense: {
-    backgroundColor: '#f44336',
-  },
-  activeIncome: {
-    backgroundColor: '#4caf50',
-  },
-  typeText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#888',
-  },
-  activeText: {
-    color: '#fff',
   },
   inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#555',
-    marginBottom: 8,
+    marginBottom: 24,
   },
   amountInput: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    borderBottomWidth: 2,
-    borderBottomColor: '#2196f3',
-    paddingVertical: 8,
+    marginBottom: 16,
+    backgroundColor: 'transparent',
   },
-  textInput: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#eee',
+  input: {
+    backgroundColor: 'transparent',
   },
-  chips: {
+  inputOutline: {
+    borderRadius: 16,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontWeight: '800',
+    marginBottom: 16,
+    marginLeft: 4,
+  },
+  chipsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
     marginRight: 8,
     marginBottom: 8,
-  },
-  activeChip: {
-    backgroundColor: '#2196f3',
-  },
-  chipText: {
-    color: '#555',
-  },
-  activeChipText: {
-    color: '#fff',
+    borderRadius: 12,
   },
   saveBtn: {
-    backgroundColor: '#2196f3',
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 20,
+    borderRadius: 20,
+    marginTop: 32,
+    elevation: 2,
   },
-  saveBtnText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+  saveBtnContent: {
+    height: 56,
   },
-  deleteBtnText: {
-    color: '#f44336',
+  saveBtnLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   editActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 12,
+    marginTop: 16,
   },
-  duplicateBtn: {
+  actionBtn: {
     flex: 1,
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: '#2196f3',
-  },
-  duplicateBtnText: {
-    color: '#2196f3',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  deleteBtn: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginLeft: 8,
-    borderWidth: 1,
-    borderColor: '#f44336',
+    marginHorizontal: 4,
+    borderRadius: 16,
   },
 });

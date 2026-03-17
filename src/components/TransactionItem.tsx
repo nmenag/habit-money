@@ -1,7 +1,8 @@
 import { format, parseISO } from 'date-fns';
 import { enUS, es } from 'date-fns/locale';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { Avatar, List, Text, useTheme } from 'react-native-paper';
 import {
   Category,
   Transaction,
@@ -16,90 +17,73 @@ interface Props {
 
 export const TransactionItem: React.FC<Props> = ({ transaction, category }) => {
   const { accounts, formatCurrency } = useStore();
-  const { t, language } = useTranslation();
+  const { t, language, translateName } = useTranslation();
+  const theme = useTheme();
   const isIncome = transaction.type === 'income';
 
   const account = accounts.find((a) => a.id === transaction.accountId);
-  const accountCurrency = account?.currency || 'USD';
+  const accountCurrency = account?.currency || 'COP';
 
   const dateLocale = language === 'es' ? es : enUS;
 
-  return (
-    <View style={styles.container}>
-      <View
+  const LeftContent = (props: any) => {
+    const displayName = category?.name ? translateName(category.name) : '?';
+    return (
+      <Avatar.Text
+        {...props}
+        size={40}
+        label={displayName[0].toUpperCase()}
         style={[
-          styles.iconContainer,
-          { backgroundColor: category?.color || '#eee' },
+          styles.avatar,
+          { backgroundColor: category?.color || theme.colors.surfaceVariant },
         ]}
-      >
-        <Text style={styles.icon}>
-          {category?.name ? category.name[0].toUpperCase() : '?'}
-        </Text>
-      </View>
-      <View style={styles.details}>
-        <Text style={styles.categoryName}>
-          {category?.name || t('uncategorized')}
-        </Text>
-        <Text style={styles.date}>
-          {format(parseISO(transaction.date), 'MMM d, yyyy', {
-            locale: dateLocale,
-          })}
-        </Text>
-        {transaction.note && (
-          <Text style={styles.note}>{transaction.note}</Text>
-        )}
-      </View>
-      <Text
-        style={[styles.amount, { color: isIncome ? '#4caf50' : '#f44336' }]}
-      >
-        {isIncome ? '+' : '-'}
-        {formatCurrency(transaction.amount, accountCurrency)}
-      </Text>
-    </View>
+        labelStyle={{ color: '#fff' }}
+      />
+    );
+  };
+
+  const RightContent = () => (
+    <Text
+      variant="titleMedium"
+      style={[
+        styles.amount,
+        { color: isIncome ? '#4caf50' : theme.colors.error },
+      ]}
+    >
+      {isIncome ? '+' : '-'}
+      {formatCurrency(transaction.amount, accountCurrency)}
+    </Text>
+  );
+
+  return (
+    <List.Item
+      title={category?.name ? translateName(category.name) : t('uncategorized')}
+      description={`${format(parseISO(transaction.date), 'MMM d, yyyy', {
+        locale: dateLocale,
+      })}${transaction.note ? ` • ${transaction.note}` : ''}`}
+      left={LeftContent}
+      right={RightContent}
+      style={styles.listItem}
+      titleStyle={styles.capitalize}
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    padding: 16,
-    alignItems: 'center',
-    backgroundColor: '#fff',
+  listItem: {
+    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'rgba(0,0,0,0.05)',
   },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  icon: {
-    fontWeight: 'bold',
-    color: '#555',
-  },
-  details: {
-    flex: 1,
-  },
-  categoryName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  date: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2,
-  },
-  note: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
+  avatar: {
+    borderRadius: 12,
   },
   amount: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    alignSelf: 'center',
+    fontWeight: '700',
+  },
+  capitalize: {
+    textTransform: 'capitalize',
+    fontWeight: '700',
   },
 });

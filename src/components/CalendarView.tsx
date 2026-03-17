@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import {
   addMonths,
   eachDayOfInterval,
@@ -12,13 +11,14 @@ import {
   subMonths,
 } from 'date-fns';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { IconButton, Text, useTheme } from 'react-native-paper';
 import { useStore } from '../store/useStore';
 
-const formatAmount = (amount: number) => {
+const formatAmount = (amount: number, formatCurrency: any) => {
   if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M';
   if (amount >= 1000) return (amount / 1000).toFixed(1) + 'k';
-  return Math.round(amount).toString();
+  return formatCurrency(amount);
 };
 
 interface CalendarViewProps {
@@ -30,7 +30,9 @@ export const CalendarView = ({
   selectedDate,
   onDayPress,
 }: CalendarViewProps) => {
-  const { transactions } = useStore();
+  const { transactions, formatCurrency } = useStore();
+  const theme = useTheme();
+  const styles = defaultStyles(theme);
   const [currentDate, setCurrentDate] = useState(selectedDate || new Date());
 
   const monthStart = startOfMonth(currentDate);
@@ -64,18 +66,16 @@ export const CalendarView = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={handlePrevMonth} style={styles.navButton}>
-          <Ionicons name="chevron-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.monthText}>{format(currentDate, 'MMMM yyyy')}</Text>
-        <TouchableOpacity onPress={handleNextMonth} style={styles.navButton}>
-          <Ionicons name="chevron-forward" size={24} color="#333" />
-        </TouchableOpacity>
+        <IconButton icon="chevron-left" size={24} onPress={handlePrevMonth} />
+        <Text variant="titleMedium" style={styles.monthText}>
+          {format(currentDate, 'MMMM yyyy')}
+        </Text>
+        <IconButton icon="chevron-right" size={24} onPress={handleNextMonth} />
       </View>
 
       <View style={styles.weekDays}>
         {weekDays.map((day) => (
-          <Text key={day} style={styles.weekDayText}>
+          <Text key={day} variant="labelSmall" style={styles.weekDayText}>
             {day}
           </Text>
         ))}
@@ -96,16 +96,22 @@ export const CalendarView = ({
               style={[
                 styles.dayCell,
                 !isCurrentMonth && styles.notCurrentMonth,
-                isTodayDate && styles.todayCell,
-                isSelected && styles.selectedCell,
+                isTodayDate && {
+                  backgroundColor: theme.colors.primaryContainer,
+                },
+                isSelected && { backgroundColor: theme.colors.primary },
               ]}
             >
               <Text
+                variant="labelMedium"
                 style={[
                   styles.dayText,
                   !isCurrentMonth && styles.notCurrentMonthText,
-                  isTodayDate && styles.todayText,
-                  isSelected && styles.selectedText,
+                  isTodayDate && {
+                    color: theme.colors.primary,
+                    fontWeight: 'bold',
+                  },
+                  isSelected && { color: '#fff', fontWeight: 'bold' },
                 ]}
               >
                 {format(day, 'd')}
@@ -113,12 +119,12 @@ export const CalendarView = ({
               <View style={styles.amountsContainer}>
                 {(dayData?.income || 0) > 0 && (
                   <Text style={styles.incomeAmount} numberOfLines={1}>
-                    +{formatAmount(dayData!.income)}
+                    +{formatAmount(dayData!.income, formatCurrency)}
                   </Text>
                 )}
                 {(dayData?.expense || 0) > 0 && (
                   <Text style={styles.expenseAmount} numberOfLines={1}>
-                    -{formatAmount(dayData!.expense)}
+                    -{formatAmount(dayData!.expense, formatCurrency)}
                   </Text>
                 )}
               </View>
@@ -130,92 +136,77 @@ export const CalendarView = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginVertical: 12,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  navButton: {
-    padding: 4,
-  },
-  monthText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-    textTransform: 'capitalize',
-  },
-  weekDays: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 8,
-  },
-  weekDayText: {
-    width: 40,
-    textAlign: 'center',
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#888',
-  },
-  daysGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-  },
-  dayCell: {
-    width: '14.28%',
-    minHeight: 60,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  selectedCell: {
-    backgroundColor: '#2196f3',
-  },
-  todayCell: {
-    backgroundColor: '#f0f7ff',
-  },
-  notCurrentMonth: {
-    opacity: 0.4,
-  },
-  dayText: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
-  },
-  selectedText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  notCurrentMonthText: {
-    color: '#ccc',
-  },
-  todayText: {
-    color: '#2196f3',
-    fontWeight: 'bold',
-  },
-  amountsContainer: {
-    marginTop: 2,
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 2,
-  },
-  incomeAmount: {
-    fontSize: 10,
-    color: '#4caf50',
-    fontWeight: 'bold',
-  },
-  expenseAmount: {
-    fontSize: 10,
-    color: '#f44336',
-    fontWeight: 'bold',
-  },
-});
+const defaultStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 24,
+      padding: 12,
+      marginVertical: 12,
+      elevation: 2,
+      shadowColor: theme.colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 10,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    monthText: {
+      fontWeight: '900',
+      color: theme.colors.onSurface,
+      textTransform: 'capitalize',
+    },
+    weekDays: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginBottom: 8,
+    },
+    weekDayText: {
+      width: 40,
+      textAlign: 'center',
+      fontWeight: '700',
+      color: theme.colors.onSurfaceVariant,
+    },
+    daysGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-around',
+    },
+    dayCell: {
+      width: '14.28%',
+      minHeight: 56,
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      paddingVertical: 6,
+      borderRadius: 16,
+    },
+    notCurrentMonth: {
+      opacity: 0.3,
+    },
+    dayText: {
+      color: theme.colors.onSurface,
+    },
+    notCurrentMonthText: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    amountsContainer: {
+      marginTop: 2,
+      alignItems: 'center',
+      width: '100%',
+      paddingHorizontal: 2,
+    },
+    incomeAmount: {
+      fontSize: 9,
+      color: '#4caf50',
+      fontWeight: '900',
+    },
+    expenseAmount: {
+      fontSize: 9,
+      color: '#f44336',
+      fontWeight: '900',
+    },
+  });

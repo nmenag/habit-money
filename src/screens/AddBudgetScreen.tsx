@@ -1,15 +1,22 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
   Alert,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import {
+  Button,
+  Chip,
+  Text,
+  TextInput,
+  useTheme,
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Budget, useStore, useTranslation } from '../store/useStore';
+import { formatNumber } from '../utils/formatters';
 
 const COLORS = [
   '#f44336',
@@ -31,14 +38,11 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
   const isEditing = !!editingBudget;
 
   const { addBudget, editBudget, categories } = useStore();
-  const { t, language } = useTranslation();
+  const { t, language, translateName } = useTranslation();
+  const theme = useTheme();
 
   const [displayAmount, setDisplayAmount] = useState(
-    editingBudget
-      ? editingBudget.amount.toLocaleString(
-          language === 'es' ? 'es-CO' : 'en-US',
-        )
-      : '',
+    editingBudget ? formatNumber(editingBudget.amount, language) : '',
   );
   const [amount, setAmount] = useState(editingBudget?.amount || 0);
   const [color, setColor] = useState(editingBudget?.color || COLORS[0]);
@@ -88,179 +92,151 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
   const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={[
-        styles.content,
-        { paddingBottom: Math.max(insets.bottom, 20) },
-      ]}
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>{t('monthlyLimit')}</Text>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: Math.max(insets.bottom, 20) + 40 },
+        ]}
+      >
         <TextInput
-          style={styles.amountInput}
-          placeholder="0.00"
-          value={displayAmount}
-          onChangeText={handleAmountChange}
-          keyboardType="numeric"
-        />
-      </View>
+            label={t('monthlyLimit')}
+            value={displayAmount}
+            onChangeText={handleAmountChange}
+            mode="outlined"
+            keyboardType="numeric"
+            style={styles.amountInput}
+            outlineStyle={styles.inputOutline}
+            placeholder="0.00"
+            left={<TextInput.Icon icon="cash" />}
+          />
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>
-          {t('associatedCategory')} ({t('optional')})
-        </Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.categoryContainer}>
-            <TouchableOpacity
-              style={[
-                styles.categoryChip,
-                !selectedCategoryId && styles.activeCategoryChip,
-              ]}
+        <View style={styles.section}>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            {t('associatedCategory')} ({t('optional')})
+          </Text>
+          <View style={styles.chipsRow}>
+            <Chip
+              selected={!selectedCategoryId}
               onPress={() => setSelectedCategoryId(null)}
+              style={styles.chip}
+              mode="flat"
+              showSelectedOverlay
             >
-              <Text
-                style={[
-                  styles.categoryChipText,
-                  !selectedCategoryId && styles.activeCategoryChipText,
-                ]}
-              >
-                {t('none')}
-              </Text>
-            </TouchableOpacity>
+              {t('none')}
+            </Chip>
             {categories.map((cat) => (
-              <TouchableOpacity
+              <Chip
                 key={cat.id}
-                style={[
-                  styles.categoryChip,
-                  selectedCategoryId === cat.id && styles.activeCategoryChip,
-                ]}
+                selected={selectedCategoryId === cat.id}
                 onPress={() => setSelectedCategoryId(cat.id)}
+                style={styles.chip}
+                mode="flat"
+                selectedColor={cat.color || theme.colors.primary}
+                showSelectedOverlay
               >
-                <Text
-                  style={[
-                    styles.categoryChipText,
-                    selectedCategoryId === cat.id &&
-                      styles.activeCategoryChipText,
-                  ]}
-                >
-                  {cat.name}
-                </Text>
+                {translateName(cat.name)}
+              </Chip>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            {t('color')}
+          </Text>
+          <View style={styles.colorRow}>
+            {COLORS.map((c) => (
+              <TouchableOpacity
+                key={c}
+                style={[
+                  styles.colorCircle,
+                  { backgroundColor: c },
+                  color === c && {
+                    borderColor: theme.colors.primary,
+                    borderWidth: 3,
+                  },
+                ]}
+                onPress={() => setColor(c)}
+              >
+                {color === c && (
+                  <Ionicons name="checkmark" size={20} color="#fff" />
+                )}
               </TouchableOpacity>
             ))}
           </View>
-        </ScrollView>
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>{t('color')}</Text>
-        <View style={styles.colorContainer}>
-          {COLORS.map((c) => (
-            <TouchableOpacity
-              key={c}
-              style={[
-                styles.colorCircle,
-                { backgroundColor: c },
-                color === c && styles.activeColorCircle,
-              ]}
-              onPress={() => setColor(c)}
-            />
-          ))}
         </View>
-      </View>
 
-      <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-        <Text style={styles.saveBtnText}>
+        <Button
+          mode="contained"
+          onPress={handleSave}
+          style={styles.saveBtn}
+          contentStyle={styles.saveBtnContent}
+          labelStyle={styles.saveBtnLabel}
+        >
           {isEditing ? t('updateBudget') : t('saveBudget')}
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+        </Button>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   content: {
-    padding: 20,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#555',
-    marginBottom: 8,
-  },
-  textInput: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#eee',
+    padding: 16,
   },
   amountInput: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    borderBottomWidth: 2,
-    borderBottomColor: '#2196f3',
-    paddingVertical: 8,
+    backgroundColor: 'transparent',
+    marginBottom: 24,
   },
-  categoryContainer: {
-    flexDirection: 'row',
-    paddingVertical: 8,
+  inputOutline: {
+    borderRadius: 16,
   },
-  categoryChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: '#eee',
+  section: {
+    marginBottom: 24,
   },
-  activeCategoryChip: {
-    backgroundColor: '#2196f3',
-    borderColor: '#2196f3',
+  sectionTitle: {
+    fontWeight: '800',
+    marginBottom: 16,
+    marginLeft: 4,
   },
-  categoryChipText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  activeCategoryChipText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  colorContainer: {
+  chipsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
-  colorCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-    marginBottom: 10,
-    borderWidth: 2,
-    borderColor: 'transparent',
+  chip: {
+    marginRight: 8,
+    marginBottom: 8,
+    borderRadius: 12,
   },
-  activeColorCircle: {
-    borderColor: '#333',
+  colorRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  colorCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    margin: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   saveBtn: {
-    backgroundColor: '#2196f3',
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 20,
+    borderRadius: 20,
+    marginTop: 32,
+    elevation: 2,
   },
-  saveBtnText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+  saveBtnContent: {
+    height: 56,
+  },
+  saveBtnLabel: {
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

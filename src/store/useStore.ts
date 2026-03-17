@@ -2,9 +2,14 @@ import * as Localization from 'expo-localization';
 import { create } from 'zustand';
 import { interstitialManager } from '../ads/InterstitialManager';
 import { getDb } from '../database/schema';
-import { Language, translations } from '../i18n/translations';
+import {
+  getTranslatedName,
+  Language,
+  translations,
+} from '../i18n/translations';
 import { AnalyticsManager } from '../services/analytics/AnalyticsManager';
 import { AnalyticsReport } from '../services/analytics/types';
+import { formatCurrency as formatCurrencyUtil } from '../utils/formatters';
 
 export type AccountType = 'cash' | 'bank' | 'credit';
 export type TransactionType = 'income' | 'expense';
@@ -45,12 +50,26 @@ export interface Transaction {
   note?: string | null;
 }
 
+export interface Goal {
+  id: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  color?: string | null;
+  icon?: string | null;
+  deadline?: string | null;
+  status: 'active' | 'completed';
+}
+
 interface AppState {
   accounts: Account[];
   transactions: Transaction[];
   categories: Category[];
   budgets: Budget[];
+  goals: Goal[];
   language: Language;
+  currency: string;
+  currencySymbol: string;
   isLoaded: boolean;
   isPremiumUser: boolean;
   actionCounter: number;
@@ -80,6 +99,11 @@ interface AppState {
   editBudget: (budget: Budget) => void;
   deleteBudget: (id: string) => void;
 
+  addGoal: (goal: Omit<Goal, 'id'>) => void;
+  editGoal: (goal: Goal) => void;
+  deleteGoal: (id: string) => void;
+  contributeToGoal: (id: string, amount: number) => void;
+
   incrementActionCounter: () => void;
   checkAndShowAd: () => Promise<void>;
   formatCurrency: (amount: number, currencyCode?: string) => string;
@@ -92,10 +116,13 @@ export const useStore = create<AppState>((set, get) => ({
   categories: [],
   budgets: [],
   language: 'en',
+  currency: 'COP',
+  currencySymbol: '$',
   isLoaded: false,
   isPremiumUser: false,
   actionCounter: 0,
   analyticsReport: null,
+  goals: [],
 
   loadData: () => {
     const db = getDb();
@@ -105,6 +132,7 @@ export const useStore = create<AppState>((set, get) => ({
     );
     const categories = db.getAllSync<Category>('SELECT * FROM categories');
     const budgets = db.getAllSync<Budget>('SELECT * FROM budgets');
+    const goals = db.getAllSync<Goal>('SELECT * FROM goals');
     let currencySetting;
     let languageSetting;
     let premiumSetting;
@@ -146,7 +174,10 @@ export const useStore = create<AppState>((set, get) => ({
       transactions,
       categories,
       budgets,
+      goals,
       language: finalLanguage,
+      currency: currencySetting?.val || 'COP',
+      currencySymbol: currencySetting?.val === 'EUR' ? '€' : '$',
       isPremiumUser: premiumSetting?.val === 'true',
       isLoaded: true,
     });
@@ -446,26 +477,83 @@ export const useStore = create<AppState>((set, get) => ({
     }));
   },
 
-  formatCurrency: (amount: number, currencyCode?: string) => {
-    const currency = currencyCode || 'COP';
-    const symbols: { [key: string]: string } = {
-      USD: '$',
-      COP: '$',
-      MXN: '$',
-      EUR: '€',
-    };
-    const symbol = symbols[currency] || '$';
+  addGoal: (goalData) => {
+    const db = getDb();
+    const id = Math.random().toString(36).substring(2, 9);
+    const goal: Goal = { ...goalData, id };
 
-    if (currency === 'COP') {
-      return `${symbol}${Math.round(amount)
-        .toString()
-        .replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+    db.runSync(
+      'INSERT INTO goals (id, name, targetAmount, currentAmount, color, icon, deadline, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        goal.id,
+        goal.name,
+        goal.targetAmount,
+        goal.currentAmount,
+        goal.color ?? null,
+        goal.icon ?? null,
+        goal.deadline ?? null,
+        goal.status,
+      ],
+    );
+    set((state) => ({ goals: [...state.goals, goal] }));
+  },
+
+  editGoal: (goal) => {
+    const db = getDb();
+    db.runSync(
+      'UPDATE goals SET name = ?, targetAmount = ?, currentAmount = ?, color = ?, icon = ?, deadline = ?, status = ? WHERE id = ?',
+      [
+        goal.name,
+        goal.targetAmount,
+        goal.currentAmount,
+        goal.color ?? null,
+        goal.icon ?? null,
+        goal.deadline ?? null,
+        goal.status,
+        goal.id,
+      ],
+    );
+    set((state) => ({
+      goals: state.goals.map((g) => (g.id === goal.id ? goal : g)),
+    }));
+  },
+
+  deleteGoal: (id) => {
+    const db = getDb();
+    db.runSync('DELETE FROM goals WHERE id = ?', [id]);
+    set((state) => ({
+      goals: state.goals.filter((g) => g.id !== id),
+    }));
+  },
+
+  contributeToGoal: (id, amount) => {
+    const db = getDb();
+    const goals = get().goals;
+    const goal = goals.find((g) => g.id === id);
+    if (goal) {
+      const newAmount = goal.currentAmount + amount;
+      const newStatus = newAmount >= goal.targetAmount ? 'completed' : 'active';
+      db.runSync(
+        'UPDATE goals SET currentAmount = ?, status = ? WHERE id = ?',
+        [newAmount, newStatus, id],
+      );
+      set((state) => ({
+        goals: state.goals.map((g) =>
+          g.id === id
+            ? { ...g, currentAmount: newAmount, status: newStatus }
+            : g,
+        ),
+      }));
     }
+  },
 
-    return `${symbol}${amount.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+  formatCurrency: (amount: number, currencyCode?: string) => {
+    const { language, currency: defaultCurrency } = get();
+    return formatCurrencyUtil(
+      amount,
+      currencyCode || defaultCurrency,
+      language,
+    );
   },
 
   incrementActionCounter: () => {
@@ -510,5 +598,10 @@ export const useTranslation = () => {
 
     return text;
   };
-  return { t, language };
+
+  const translateName = (name: string) => {
+    return getTranslatedName(name, language);
+  };
+
+  return { t, language, translateName };
 };
