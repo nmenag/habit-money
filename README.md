@@ -34,6 +34,7 @@ FinHabit is a modern, high-performance personal finance tracker built with **Rea
 ## 🚀 Getting Started
 
 1. **Clone & Install**
+
    ```bash
    git clone <repo-url>
    cd fin-habit
