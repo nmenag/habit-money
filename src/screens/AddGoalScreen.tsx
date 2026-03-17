@@ -106,42 +106,40 @@ export const AddGoalScreen = ({ route, navigation }: any) => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.inputGroup}>
-            <TextInput
-              label={t('goalName')}
-              value={name}
-              onChangeText={setName}
-              mode="outlined"
-              style={styles.input}
-              placeholder={t('goalNamePlaceholder')}
-              outlineStyle={styles.inputOutline}
-            />
+          <TextInput
+            label={t('goalName')}
+            value={name}
+            onChangeText={setName}
+            mode="outlined"
+            style={styles.input}
+            placeholder={t('goalNamePlaceholder')}
+            outlineStyle={styles.inputOutline}
+          />
 
-            <TextInput
-              label={t('targetAmount')}
-              value={displayTargetAmount}
-              onChangeText={handleAmountChange}
-              mode="outlined"
-              keyboardType="numeric"
-              style={styles.input}
-              left={
-                <TextInput.Affix
-                  text={formatCurrency(0).replace(/[0.,]/g, '')}
-                />
-              }
-              outlineStyle={styles.inputOutline}
-            />
+          <TextInput
+            label={t('targetAmount')}
+            value={displayTargetAmount}
+            onChangeText={handleAmountChange}
+            mode="outlined"
+            keyboardType="numeric"
+            style={styles.input}
+            left={
+              <TextInput.Affix text={formatCurrency(0).replace(/[0.,]/g, '')} />
+            }
+            outlineStyle={styles.inputOutline}
+          />
 
-            <TextInput
-              label={t('deadline') + ' (YYYY-MM-DD)'}
-              value={deadline}
-              onChangeText={setDeadline}
-              mode="outlined"
-              style={styles.input}
-              placeholder="2026-12-31"
-              outlineStyle={styles.inputOutline}
-              right={<TextInput.Icon icon="calendar" />}
-            />
-          </View>
+          <TextInput
+            label={t('deadline') + ' (YYYY-MM-DD)'}
+            value={deadline}
+            onChangeText={setDeadline}
+            mode="outlined"
+            style={styles.input}
+            placeholder="2026-12-31"
+            outlineStyle={styles.inputOutline}
+            right={<TextInput.Icon icon="calendar" />}
+          />
+        </View>
 
         <Text variant="titleMedium" style={styles.sectionTitle}>
           {t('selectIcon')}

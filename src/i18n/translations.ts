@@ -233,20 +233,25 @@ export const translations = {
     insightExpenseGrowthTitle: 'Expense Growth',
     insightExpenseGrowthMessage:
       'Your total expenses increased by {{percentage}}% compared to last month.',
-    insightExpenseGrowthRec: 'Consider reviewing your recent transactions for anomalies.',
+    insightExpenseGrowthRec:
+      'Consider reviewing your recent transactions for anomalies.',
     insightExpenseReductionTitle: 'Spending Reduction',
     insightExpenseReductionMessage:
       'Excellent! You spent {{percentage}}% less than last month.',
     insightHighSpendingCategoryTitle: 'High spending in {{category}}',
     insightHighSpendingCategoryMessage:
       '{{category}} accounts for {{percentage}}% of your total spending.',
-    insightHighSpendingCategoryRec: 'Consider setting a budget for this category.',
+    insightHighSpendingCategoryRec:
+      'Consider setting a budget for this category.',
     insightBudgetExceededTitle: 'Budget Exceeded',
     insightBudgetExceededMessage: 'You exceeded your budget in {{category}}.',
-    insightBudgetExceededRec: 'Consider reducing expenses in this category next month.',
+    insightBudgetExceededRec:
+      'Consider reducing expenses in this category next month.',
     insightSavingsOpportunityTitle: 'Savings Opportunity',
-    insightSavingsOpportunityMessage: 'You saved money this month ({{amount}})!',
-    insightSavingsOpportunityRec: 'Consider moving some funds to a savings goal.',
+    insightSavingsOpportunityMessage:
+      'You saved money this month ({{amount}})!',
+    insightSavingsOpportunityRec:
+      'Consider moving some funds to a savings goal.',
 
     // Date Filters
     filterAllTime: 'All',
@@ -477,20 +482,26 @@ export const translations = {
     insightExpenseGrowthTitle: 'Crecimiento de Gastos',
     insightExpenseGrowthMessage:
       'Tus gastos totales aumentaron un {{percentage}}% en comparación con el mes pasado.',
-    insightExpenseGrowthRec: 'Considera revisar tus transacciones recientes para detectar anomalías.',
+    insightExpenseGrowthRec:
+      'Considera revisar tus transacciones recientes para detectar anomalías.',
     insightExpenseReductionTitle: 'Reducción de Gastos',
     insightExpenseReductionMessage:
       '¡Excelente! Gastaste un {{percentage}}% menos que el mes pasado.',
     insightHighSpendingCategoryTitle: 'Alto gasto en {{category}}',
     insightHighSpendingCategoryMessage:
       '{{category}} representa el {{percentage}}% de tus gastos totales.',
-    insightHighSpendingCategoryRec: 'Considera establecer un presupuesto para esta categoría.',
+    insightHighSpendingCategoryRec:
+      'Considera establecer un presupuesto para esta categoría.',
     insightBudgetExceededTitle: 'Presupuesto Excedido',
-    insightBudgetExceededMessage: 'Has superado tu presupuesto en {{category}}.',
-    insightBudgetExceededRec: 'Considera reducir los gastos en esta categoría el próximo mes.',
+    insightBudgetExceededMessage:
+      'Has superado tu presupuesto en {{category}}.',
+    insightBudgetExceededRec:
+      'Considera reducir los gastos en esta categoría el próximo mes.',
     insightSavingsOpportunityTitle: 'Oportunidad de Ahorro',
-    insightSavingsOpportunityMessage: '¡Has ahorrado dinero este mes ({{amount}})!',
-    insightSavingsOpportunityRec: 'Considera mover algunos fondos a una meta de ahorro.',
+    insightSavingsOpportunityMessage:
+      '¡Has ahorrado dinero este mes ({{amount}})!',
+    insightSavingsOpportunityRec:
+      'Considera mover algunos fondos a una meta de ahorro.',
 
     filterAllTime: 'Todo',
     filterToday: 'Hoy',

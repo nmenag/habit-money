@@ -7,13 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {
-  Button,
-  Chip,
-  Text,
-  TextInput,
-  useTheme,
-} from 'react-native-paper';
+import { Button, Chip, Text, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Budget, useStore, useTranslation } from '../store/useStore';
 import { formatNumber } from '../utils/formatters';
@@ -102,16 +96,16 @@ export const AddBudgetScreen = ({ route, navigation }: any) => {
         ]}
       >
         <TextInput
-            label={t('monthlyLimit')}
-            value={displayAmount}
-            onChangeText={handleAmountChange}
-            mode="outlined"
-            keyboardType="numeric"
-            style={styles.amountInput}
-            outlineStyle={styles.inputOutline}
-            placeholder="0.00"
-            left={<TextInput.Icon icon="cash" />}
-          />
+          label={t('monthlyLimit')}
+          value={displayAmount}
+          onChangeText={handleAmountChange}
+          mode="outlined"
+          keyboardType="numeric"
+          style={styles.amountInput}
+          outlineStyle={styles.inputOutline}
+          placeholder="0.00"
+          left={<TextInput.Icon icon="cash" />}
+        />
 
         <View style={styles.section}>
           <Text variant="titleMedium" style={styles.sectionTitle}>

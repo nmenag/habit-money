@@ -138,41 +138,41 @@ export const AddAccountScreen = ({ route, navigation }: any) => {
         ]}
       >
         <View style={styles.inputGroup}>
-            <TextInput
-              label={t('accountName')}
-              value={name}
-              onChangeText={setName}
-              mode="outlined"
-              style={styles.input}
-              outlineStyle={styles.inputOutline}
-              placeholder={t('accountNamePlaceholder')}
-            />
+          <TextInput
+            label={t('accountName')}
+            value={name}
+            onChangeText={setName}
+            mode="outlined"
+            style={styles.input}
+            outlineStyle={styles.inputOutline}
+            placeholder={t('accountNamePlaceholder')}
+          />
 
-            <View style={styles.segmentedContainer}>
-              <SegmentedButtons
-                value={type}
-                onValueChange={(v) => setType(v as AccountType)}
-                buttons={[
-                  { value: 'cash', label: t('cash') },
-                  { value: 'bank', label: t('bank') },
-                  { value: 'credit', label: t('credit') },
-                ]}
-              />
-            </View>
-
-            <TextInput
-              label={
-                isEditing ? t('currentBalanceLabel') : t('initialBalanceLabel')
-              }
-              value={displayBalance}
-              onChangeText={handleBalanceChange}
-              mode="outlined"
-              keyboardType="numeric"
-              style={styles.input}
-              outlineStyle={styles.inputOutline}
-              left={<TextInput.Affix text={selectedCurrency + ' '} />}
+          <View style={styles.segmentedContainer}>
+            <SegmentedButtons
+              value={type}
+              onValueChange={(v) => setType(v as AccountType)}
+              buttons={[
+                { value: 'cash', label: t('cash') },
+                { value: 'bank', label: t('bank') },
+                { value: 'credit', label: t('credit') },
+              ]}
             />
           </View>
+
+          <TextInput
+            label={
+              isEditing ? t('currentBalanceLabel') : t('initialBalanceLabel')
+            }
+            value={displayBalance}
+            onChangeText={handleBalanceChange}
+            mode="outlined"
+            keyboardType="numeric"
+            style={styles.input}
+            outlineStyle={styles.inputOutline}
+            left={<TextInput.Affix text={selectedCurrency + ' '} />}
+          />
+        </View>
 
         <View style={styles.section}>
           <Text variant="titleMedium" style={styles.sectionTitle}>

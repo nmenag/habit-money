@@ -111,14 +111,14 @@ export const AddCategoryScreen = ({ route, navigation }: any) => {
         ]}
       >
         <TextInput
-            label={t('categoryName')}
-            placeholder={t('categoryNamePlaceholder')}
-            value={name}
-            onChangeText={setName}
-            mode="outlined"
-            style={styles.textInput}
-            outlineStyle={styles.inputOutline}
-          />
+          label={t('categoryName')}
+          placeholder={t('categoryNamePlaceholder')}
+          value={name}
+          onChangeText={setName}
+          mode="outlined"
+          style={styles.textInput}
+          outlineStyle={styles.inputOutline}
+        />
 
         <View style={styles.section}>
           <Text variant="titleMedium" style={styles.sectionTitle}>

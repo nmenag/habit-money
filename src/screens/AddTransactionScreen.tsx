@@ -195,27 +195,27 @@ export const AddTransactionScreen = ({ route, navigation }: any) => {
         </View>
 
         <View style={styles.inputGroup}>
-            <TextInput
-              label={t('amount')}
-              value={displayAmount}
-              onChangeText={handleAmountChange}
-              mode="outlined"
-              keyboardType="numeric"
-              style={styles.amountInput}
-              outlineStyle={styles.inputOutline}
-              left={<TextInput.Affix text={displayCurrency + ' '} />}
-            />
+          <TextInput
+            label={t('amount')}
+            value={displayAmount}
+            onChangeText={handleAmountChange}
+            mode="outlined"
+            keyboardType="numeric"
+            style={styles.amountInput}
+            outlineStyle={styles.inputOutline}
+            left={<TextInput.Affix text={displayCurrency + ' '} />}
+          />
 
-            <TextInput
-              label={t('note') + ' (' + t('optional') + ')'}
-              value={note}
-              onChangeText={setNote}
-              mode="outlined"
-              style={styles.input}
-              outlineStyle={styles.inputOutline}
-              placeholder={t('notePlaceholder')}
-            />
-          </View>
+          <TextInput
+            label={t('note') + ' (' + t('optional') + ')'}
+            value={note}
+            onChangeText={setNote}
+            mode="outlined"
+            style={styles.input}
+            outlineStyle={styles.inputOutline}
+            placeholder={t('notePlaceholder')}
+          />
+        </View>
 
         <View style={styles.section}>
           <Text variant="titleMedium" style={styles.sectionTitle}>

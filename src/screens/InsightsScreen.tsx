@@ -98,17 +98,17 @@ export const InsightsScreen = () => {
 
   const barData = analyticsReport
     ? {
-      labels: [t('previousMonth'), t('currentMonth')],
-      datasets: [
-        {
-          data: [
-            analyticsReport.previousMonth.expenses,
-            analyticsReport.currentMonth.expenses,
-          ],
-          colors: [(_opacity = 1) => '#90caf9', (_opacity = 1) => '#2196f3'],
-        },
-      ],
-    }
+        labels: [t('previousMonth'), t('currentMonth')],
+        datasets: [
+          {
+            data: [
+              analyticsReport.previousMonth.expenses,
+              analyticsReport.currentMonth.expenses,
+            ],
+            colors: [(_opacity = 1) => '#90caf9', (_opacity = 1) => '#2196f3'],
+          },
+        ],
+      }
     : null;
 
   const expenseGrowth = analyticsReport?.expenseGrowth ?? 0;
@@ -174,7 +174,10 @@ export const InsightsScreen = () => {
               </Text>
               <Text
                 variant="labelSmall"
-                style={{ color: theme.colors.onPrimaryContainer, marginLeft: 4 }}
+                style={{
+                  color: theme.colors.onPrimaryContainer,
+                  marginLeft: 4,
+                }}
               >
                 ·{' '}
               </Text>

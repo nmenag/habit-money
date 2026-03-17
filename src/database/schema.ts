@@ -36,8 +36,7 @@ export const initDb = () => {
     db.execSync(
       "ALTER TABLE accounts ADD COLUMN currency TEXT NOT NULL DEFAULT 'COP';",
     );
-  } catch (e) {
-  }
+  } catch (e) {}
 
   try {
     db.execSync(`
@@ -70,8 +69,7 @@ export const initDb = () => {
 
   try {
     db.execSync('ALTER TABLE budgets ADD COLUMN categoryId TEXT;');
-  } catch (e) {
-  }
+  } catch (e) {}
 
   try {
     db.execSync(`

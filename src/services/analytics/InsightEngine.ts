@@ -72,7 +72,10 @@ export class InsightEngine {
 
     // Rule 3: Budget Exceeded
     report.budgets.forEach((budget) => {
-      const translatedCatName = getTranslatedName(budget.categoryName, language);
+      const translatedCatName = getTranslatedName(
+        budget.categoryName,
+        language,
+      );
       if (budget.exceeded) {
         insights.push({
           id: `budget-exceeded-${budget.categoryId}`,
@@ -90,7 +93,10 @@ export class InsightEngine {
     });
 
     // Rule 4: Savings Opportunity (Income > Expenses)
-    if (currentMonth.income > currentMonth.expenses && currentMonth.expenses > 0) {
+    if (
+      currentMonth.income > currentMonth.expenses &&
+      currentMonth.expenses > 0
+    ) {
       insights.push({
         id: 'rule-savings-opportunity',
         title: t.insightSavingsOpportunityTitle,
