@@ -1,4 +1,5 @@
 import { format, isSameDay } from 'date-fns';
+import { enUS, es as esLocale } from 'date-fns/locale';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -8,7 +9,6 @@ import { CalendarView } from '../components/CalendarView';
 import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../store/useStore';
 
-// Helper function for formatting amounts
 const formatAmount = (amount: number, formatCurrency: any) => {
   if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M';
   if (amount >= 1000) return (amount / 1000).toFixed(1) + 'k';
@@ -17,7 +17,7 @@ const formatAmount = (amount: number, formatCurrency: any) => {
 
 export const CalendarScreen = () => {
   const { transactions, categories, formatCurrency } = useStore();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -65,7 +65,9 @@ export const CalendarScreen = () => {
             <View style={styles.listTitleContainer}>
               <View>
                 <Text variant="titleMedium" style={styles.listTitle}>
-                  {format(selectedDate, 'PP')}
+                  {format(selectedDate, 'PP', {
+                    locale: language === 'es' ? esLocale : enUS,
+                  })}
                 </Text>
                 <Text variant="labelSmall" style={styles.transactionCount}>
                   {dayTransactions.length} {t('transactions')}

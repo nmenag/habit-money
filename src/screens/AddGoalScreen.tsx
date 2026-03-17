@@ -1,8 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { format, isValid, parseISO } from 'date-fns';
+import { enUS, es as esLocale } from 'date-fns/locale';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Button, Text, TextInput, useTheme } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -82,8 +89,14 @@ export const AddGoalScreen = () => {
   }, []);
 
   const handleSave = () => {
-    if (!name.trim()) return;
-    if (targetAmount <= 0) return;
+    if (!name.trim()) {
+      Alert.alert(t('error'), t('enterGoalName'));
+      return;
+    }
+    if (targetAmount <= 0) {
+      Alert.alert(t('error'), t('enterTargetAmount'));
+      return;
+    }
 
     const goalData = {
       name,
@@ -157,7 +170,9 @@ export const AddGoalScreen = () => {
               label={t('deadline')}
               value={
                 selectedDate && isValid(selectedDate)
-                  ? format(selectedDate, 'PPP')
+                  ? format(selectedDate, 'PPP', {
+                      locale: language === 'es' ? esLocale : enUS,
+                    })
                   : ''
               }
               mode="outlined"

@@ -1,4 +1,5 @@
 import {
+  addDays,
   addMonths,
   eachDayOfInterval,
   endOfMonth,
@@ -10,10 +11,11 @@ import {
   startOfWeek,
   subMonths,
 } from 'date-fns';
-import React, { useState } from 'react';
+import { enUS, es as esLocale } from 'date-fns/locale';
+import React, { useMemo, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { IconButton, Text, useTheme } from 'react-native-paper';
-import { useStore } from '../store/useStore';
+import { useStore, useTranslation } from '../store/useStore';
 
 const formatAmount = (amount: number, formatCurrency: any) => {
   if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M';
@@ -31,6 +33,7 @@ export const CalendarView = ({
   onDayPress,
 }: CalendarViewProps) => {
   const { transactions, formatCurrency } = useStore();
+  const { language } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const [currentDate, setCurrentDate] = useState(selectedDate || new Date());
@@ -45,7 +48,16 @@ export const CalendarView = ({
   const handlePrevMonth = () => setCurrentDate(subMonths(currentDate, 1));
   const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
 
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dateLocale = language === 'es' ? esLocale : enUS;
+
+  // Generate weekday names based on locale
+  const weekDays = useMemo(() => {
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      days.push(format(addDays(startDate, i), 'eee', { locale: dateLocale }));
+    }
+    return days;
+  }, [dateLocale, startDate]);
 
   const transactionsByDate = transactions.reduce(
     (acc, current) => {
@@ -68,14 +80,18 @@ export const CalendarView = ({
       <View style={styles.header}>
         <IconButton icon="chevron-left" size={24} onPress={handlePrevMonth} />
         <Text variant="titleMedium" style={styles.monthText}>
-          {format(currentDate, 'MMMM yyyy')}
+          {format(currentDate, 'MMMM yyyy', { locale: dateLocale })}
         </Text>
         <IconButton icon="chevron-right" size={24} onPress={handleNextMonth} />
       </View>
 
       <View style={styles.weekDays}>
-        {weekDays.map((day) => (
-          <Text key={day} variant="labelSmall" style={styles.weekDayText}>
+        {weekDays.map((day, index) => (
+          <Text
+            key={`${day}-${index}`}
+            variant="labelSmall"
+            style={styles.weekDayText}
+          >
             {day}
           </Text>
         ))}
