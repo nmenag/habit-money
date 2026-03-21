@@ -21,6 +21,8 @@ export const nameToKeyMapping: Record<string, string> = {
   Salario: 'catSalary',
   'Other Income': 'catOtherIncome',
   'Otros Ingresos': 'catOtherIncome',
+  Investments: 'catInvestments',
+  Inversiones: 'catInvestments',
   Bank: 'defaultAccountName',
   Banco: 'defaultAccountName',
   Main: 'defaultAccountName',

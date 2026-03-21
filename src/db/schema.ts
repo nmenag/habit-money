@@ -233,6 +233,13 @@ export const initDb = () => {
         icon: 'wallet',
         color: '#009688',
       },
+      {
+        id: '9',
+        name: t.catInvestments,
+        type: 'expense',
+        icon: 'chart-line',
+        color: '#3f51b5',
+      },
     ];
 
     const statement = db.prepareSync(
@@ -250,6 +257,17 @@ export const initDb = () => {
       });
     } finally {
       statement.finalizeSync();
+    }
+  } else {
+    // Check if Investments category (ID 9) exists, if not, add it
+    const checkInvestments = db.getFirstSync<{ id: string }>(
+      "SELECT id FROM categories WHERE id = '9'",
+    );
+    if (!checkInvestments) {
+      db.runSync(
+        'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
+        ['9', t.catInvestments, 'expense', 'chart-line', '#3f51b5'],
+      );
     }
   }
 

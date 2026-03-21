@@ -55,6 +55,8 @@ const ICONS = [
   'coffee',
   'dumbbell',
   'music-note',
+  'chart-line',
+  'trending-up',
 ];
 
 export const AddCategoryScreen = () => {

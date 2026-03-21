@@ -79,6 +79,7 @@ export const en = {
   catOther: 'Other',
   catSalary: 'Salary',
   catOtherIncome: 'Other Income',
+  catInvestments: 'Investments',
   error: 'Error',
   enterValidAmount: 'Please enter a valid amount.',
   selectAccount: 'Please select an account.',
