@@ -397,7 +397,9 @@ export const DashboardScreen = () => {
                           variant="labelSmall"
                           style={{ color: theme.colors.outline }}
                         >
-                          {format(parseISO(tr.date), 'MMM dd, yyyy')}
+                          {format(parseISO(tr.date), 'MMM dd, yyyy', {
+                            locale: language === 'es' ? esLocale : enUS,
+                          })}
                         </Text>
                       </View>
                       <Text

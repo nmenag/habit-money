@@ -146,6 +146,12 @@ export const initDb = () => {
   }
 
   try {
+    db.execSync('ALTER TABLE transactions ADD COLUMN toAccountId TEXT;');
+  } catch (e) {
+    // Column might already exist
+  }
+
+  try {
     db.execSync(`
       CREATE TABLE IF NOT EXISTS goals (
         id TEXT PRIMARY KEY,

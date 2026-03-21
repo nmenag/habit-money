@@ -12,7 +12,7 @@ import { AnalyticsReport } from '../services/analytics/types';
 import { formatCurrency as formatCurrencyUtil } from '../utils/formatters';
 
 export type AccountType = 'cash' | 'bank' | 'credit';
-export type TransactionType = 'income' | 'expense';
+export type TransactionType = 'income' | 'expense' | 'transfer';
 
 export interface Account {
   id: string;
@@ -48,6 +48,7 @@ export interface Transaction {
   budgetId?: string | null;
   date: string;
   note?: string | null;
+  toAccountId?: string | null;
 }
 
 export interface Goal {
@@ -263,7 +264,7 @@ export const useStore = create<AppState>((set, get) => ({
     const amountModifier = isIncome ? transaction.amount : -transaction.amount;
 
     db.runSync(
-      'INSERT INTO transactions (id, type, amount, categoryId, accountId, budgetId, date, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO transactions (id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         transaction.id ?? '',
         transaction.type ?? '',
@@ -273,18 +274,43 @@ export const useStore = create<AppState>((set, get) => ({
         transaction.budgetId ?? null,
         transaction.date ?? '',
         transaction.note ?? null,
+        transaction.toAccountId ?? null,
       ],
     );
 
-    // Update account balance
-    db.runSync(
-      'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-      [amountModifier ?? 0, transaction.accountId ?? null],
-    );
+    // Update account balances
+    if (transaction.type === 'transfer' && transaction.toAccountId) {
+      db.runSync(
+        'UPDATE accounts SET currentBalance = currentBalance - ? WHERE id = ?',
+        [transaction.amount ?? 0, transaction.accountId ?? null],
+      );
+      db.runSync(
+        'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+        [transaction.amount ?? 0, transaction.toAccountId ?? null],
+      );
+    } else {
+      db.runSync(
+        'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+        [amountModifier ?? 0, transaction.accountId ?? null],
+      );
+    }
 
     set((state) => {
       const updatedAccounts = state.accounts.map((acc) => {
-        if (acc.id === transaction.accountId) {
+        if (transaction.type === 'transfer' && transaction.toAccountId) {
+          if (acc.id === transaction.accountId) {
+            return {
+              ...acc,
+              currentBalance: acc.currentBalance - transaction.amount,
+            };
+          }
+          if (acc.id === transaction.toAccountId) {
+            return {
+              ...acc,
+              currentBalance: acc.currentBalance + transaction.amount,
+            };
+          }
+        } else if (acc.id === transaction.accountId) {
           return {
             ...acc,
             currentBalance: acc.currentBalance + amountModifier,
@@ -320,27 +346,49 @@ export const useStore = create<AppState>((set, get) => ({
 
     try {
       // Revert old transaction amount
-      const oldModifier =
-        oldTransaction.type === 'income'
-          ? -oldTransaction.amount
-          : oldTransaction.amount;
-      db.runSync(
-        'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-        [oldModifier ?? 0, oldTransaction.accountId ?? ''],
-      );
+      if (oldTransaction.type === 'transfer' && oldTransaction.toAccountId) {
+        db.runSync(
+          'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+          [oldTransaction.amount ?? 0, oldTransaction.accountId ?? ''],
+        );
+        db.runSync(
+          'UPDATE accounts SET currentBalance = currentBalance - ? WHERE id = ?',
+          [oldTransaction.amount ?? 0, oldTransaction.toAccountId ?? ''],
+        );
+      } else {
+        const oldModifier =
+          oldTransaction.type === 'income'
+            ? -oldTransaction.amount
+            : oldTransaction.amount;
+        db.runSync(
+          'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+          [oldModifier ?? 0, oldTransaction.accountId ?? ''],
+        );
+      }
 
       // Apply new transaction amount
-      const newModifier =
-        transaction.type === 'income'
-          ? transaction.amount
-          : -transaction.amount;
-      db.runSync(
-        'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-        [newModifier ?? 0, transaction.accountId ?? ''],
-      );
+      if (transaction.type === 'transfer' && transaction.toAccountId) {
+        db.runSync(
+          'UPDATE accounts SET currentBalance = currentBalance - ? WHERE id = ?',
+          [transaction.amount ?? 0, transaction.accountId ?? ''],
+        );
+        db.runSync(
+          'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+          [transaction.amount ?? 0, transaction.toAccountId ?? ''],
+        );
+      } else {
+        const newModifier =
+          transaction.type === 'income'
+            ? transaction.amount
+            : -transaction.amount;
+        db.runSync(
+          'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+          [newModifier ?? 0, transaction.accountId ?? ''],
+        );
+      }
 
       db.runSync(
-        'UPDATE transactions SET type = ?, amount = ?, categoryId = ?, accountId = ?, budgetId = ?, date = ?, note = ? WHERE id = ?',
+        'UPDATE transactions SET type = ?, amount = ?, categoryId = ?, accountId = ?, budgetId = ?, date = ?, note = ?, toAccountId = ? WHERE id = ?',
         [
           transaction.type ?? '',
           transaction.amount ?? 0,
@@ -349,6 +397,7 @@ export const useStore = create<AppState>((set, get) => ({
           transaction.budgetId ?? null,
           transaction.date ?? '',
           transaction.note ?? null,
+          transaction.toAccountId ?? null,
           transaction.id ?? '',
         ],
       );
@@ -369,14 +418,40 @@ export const useStore = create<AppState>((set, get) => ({
     const amountModifier = isIncome ? -amount : amount;
 
     db.runSync('DELETE FROM transactions WHERE id = ?', [id ?? null]);
-    db.runSync(
-      'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-      [amountModifier ?? 0, accountId ?? null],
-    );
+
+    const oldTransaction = get().transactions.find((t) => t.id === id);
+    if (oldTransaction?.type === 'transfer' && oldTransaction.toAccountId) {
+      db.runSync(
+        'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+        [amount ?? 0, accountId ?? null],
+      );
+      db.runSync(
+        'UPDATE accounts SET currentBalance = currentBalance - ? WHERE id = ?',
+        [amount ?? 0, oldTransaction.toAccountId ?? null],
+      );
+    } else {
+      db.runSync(
+        'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+        [amountModifier ?? 0, accountId ?? null],
+      );
+    }
 
     set((state) => {
       const updatedAccounts = state.accounts.map((acc) => {
-        if (acc.id === accountId) {
+        if (oldTransaction?.type === 'transfer' && oldTransaction.toAccountId) {
+          if (acc.id === accountId) {
+            return {
+              ...acc,
+              currentBalance: acc.currentBalance + amount,
+            };
+          }
+          if (acc.id === oldTransaction.toAccountId) {
+            return {
+              ...acc,
+              currentBalance: acc.currentBalance - amount,
+            };
+          }
+        } else if (acc.id === accountId) {
           return {
             ...acc,
             currentBalance: acc.currentBalance + amountModifier,
