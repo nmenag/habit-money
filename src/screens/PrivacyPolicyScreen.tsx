@@ -85,12 +85,6 @@ export const PrivacyPolicyScreen = () => {
           )}
         </View>
       ))}
-
-      <View style={styles.footer}>
-        <Text variant="bodySmall" style={styles.footerText}>
-          {t('privacyPolicyDesc') || 'We value your privacy.'}
-        </Text>
-      </View>
     </ScrollView>
   );
 };

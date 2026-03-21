@@ -411,25 +411,20 @@ export const InsightsScreen = () => {
             {analyticsReport.insights.map((insight) => {
               let iconName: any = 'information-circle-outline';
               let iconColor = '#2196f3';
-              let backgroundColor = '#e3f2fd';
+              let backgroundColor = 'rgba(33, 150, 243, 0.1)';
 
-              if (insight.level === 'critical') {
+              if (insight.level === 'critical' || insight.level === 'warning') {
                 iconName = 'alert-circle-outline';
-                iconColor = theme.colors.error;
-                backgroundColor = '#ffebee';
-              } else if (insight.level === 'warning') {
-                iconName = 'warning-outline';
-                iconColor = '#ff9800';
-                backgroundColor = '#fff3e0';
+                iconColor =
+                  insight.level === 'critical' ? theme.colors.error : '#ff9800';
+                backgroundColor =
+                  insight.level === 'critical'
+                    ? 'rgba(186, 26, 26, 0.1)'
+                    : 'rgba(255, 152, 0, 0.1)';
               } else if (insight.level === 'positive') {
                 iconName = 'checkmark-circle-outline';
                 iconColor = '#4caf50';
-                backgroundColor = '#e8f5e9';
-              } else {
-                // info
-                iconName = 'bulb-outline';
-                iconColor = '#2196f3';
-                backgroundColor = '#e3f2fd';
+                backgroundColor = 'rgba(76, 175, 80, 0.1)';
               }
 
               return (

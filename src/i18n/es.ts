@@ -196,46 +196,31 @@ export const es = {
   comparedToLastMonth: 'Comparado con el mes pasado',
   daysLabel: 'días',
   daysSpentMoney: 'Días que gastaste dinero este mes',
-  insightExpenseGrew:
-    'Tus gastos generales crecieron un {{percentage}}% en comparación con el mes pasado.',
-  insightExpenseLess:
-    '¡Buen trabajo! Gastaste un {{percentage}}% menos que el mes pasado.',
+  insightMonthlyComparisonTitle: 'Comparación Mensual',
+  insightSpentMoreThanLastMonth:
+    'Gastaste un {{percentage}}% más que el mes pasado',
+  insightSpentLessThanLastMonth:
+    '¡Buen trabajo! Gastaste un {{percentage}}% menos que el mes pasado',
+  insightTopCategoryTitle: 'Categoría Top',
+  insightTopCategoryMessage:
+    'El {{percentage}}% de tus gastos es en {{category}}',
+  insightCategoryGrowthTitle: 'Crecimiento por Categoría',
+  insightCategoryGrowthMessage:
+    'El gasto en {{category}} aumentó un {{percentage}}%',
+  insightBalancePositiveTitle: 'Consejo de Ahorro',
+  insightBalancePositiveMessage: '¡Has ahorrado dinero este mes!',
+  insightBalanceNegativeTitle: 'Alerta de Saldo',
+  insightBalanceNegativeMessage: 'Estás en déficit este mes',
+  insightProjectionTitle: 'Proyección de Gastos',
+  insightProjectionMessage: 'A este ritmo, gastarás {{amount}} este mes',
   insightNoSpendChallenge:
     'Gastaste dinero en {{days}} días este mes. ¡Prueba un desafío de "día sin gastos"!',
-  insightOverspendingTitle: 'Alerta de Gastos Excesivos',
-  insightOverspendingMessage:
-    'Gastaste más de lo que ganaste este mes. Considera revisar tus gastos variables.',
-  insightHighSavingsTitle: 'Alta Tasa de Ahorro',
-  insightHighSavingsMessage:
-    '¡Excelente trabajo! Ahorraste el {{percentage}}% de tus ingresos este mes.',
-  insightTopCategoryTitle: 'Categoría de Mayor Gasto',
-  insightTopCategoryMessage:
-    'Tu categoría de mayor gasto es {{category}}, con un total de {{amount}}.',
   insightNoIncomeTitle: 'Sin Ingresos Registrados',
   insightNoIncomeMessage:
     'Has registrado gastos pero aún no tienes ingresos este mes.',
-  insightExpenseGrowthTitle: 'Crecimiento de Gastos',
-  insightExpenseGrowthMessage:
-    'Tus gastos totales aumentaron un {{percentage}}% en comparación con el mes pasado.',
-  insightExpenseGrowthRec:
-    'Considera revisar tus transacciones recientes para detectar anomalías.',
-  insightExpenseReductionTitle: 'Reducción de Gastos',
-  insightExpenseReductionMessage:
-    '¡Excelente! Gastaste un {{percentage}}% menos que el mes pasado.',
-  insightHighSpendingCategoryTitle: 'Alto gasto en {{category}}',
-  insightHighSpendingCategoryMessage:
-    '{{category}} representa el {{percentage}}% de tus gastos totales.',
-  insightHighSpendingCategoryRec:
-    'Considera establecer un presupuesto para esta categoría.',
-  insightBudgetExceededTitle: 'Presupuesto Excedido',
-  insightBudgetExceededMessage: 'Has superado tu presupuesto en {{category}}.',
-  insightBudgetExceededRec:
-    'Considera reducir los gastos en esta categoría el próximo mes.',
-  insightSavingsOpportunityTitle: 'Oportunidad de Ahorro',
-  insightSavingsOpportunityMessage:
-    '¡Has ahorrado dinero este mes ({{amount}})!',
-  insightSavingsOpportunityRec:
-    'Considera mover algunos fondos a una meta de ahorro.',
+  insightNoDataTitle: 'Sigue Registrando',
+  insightNoDataMessage:
+    'Agrega más transacciones para obtener consejos personalizados.',
 
   filterAllTime: 'Todo',
   filterToday: 'Hoy',
@@ -286,7 +271,6 @@ export const es = {
   contactInfoContent:
     'Si tienes alguna pregunta sobre esta política de privacidad, puedes contactarnos en: nmena.garzon@gmail.com',
   lastUpdated: 'Última actualización',
-  privacyPolicyDesc: 'Valoramos tu privacidad.',
   app: 'App',
   website: 'Sitio Web',
   adMobPrivacyUrl: 'https://policies.google.com/privacy',
@@ -305,4 +289,8 @@ export const es = {
   insightSpentMore: 'Has gastado un {{percent}}% más que el mes pasado',
   insightSavingMoney: '¡Estás ahorrando dinero este mes!',
   insightKeepGoing: '¡Sigue registrando para obtener consejos!',
+  feedback: 'Feedback',
+  feedbackDesc: 'Ayúdanos a mejorar FinHabit con tus sugerencias',
+  feedbackPlaceholder: 'Cuéntanos qué piensas o reporta un error...',
+  sendFeedback: 'Enviar Feedback',
 };

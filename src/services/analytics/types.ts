@@ -35,6 +35,7 @@ export interface AnalyticsReport {
   currentMonth: MonthlyMetrics;
   previousMonth: MonthlyMetrics;
   categoryExpenses: CategoryExpense[];
+  previousCategoryExpenses: CategoryExpense[];
   budgets: {
     categoryId: string;
     categoryName: string;

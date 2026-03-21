@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import React from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { Card, Divider, List, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
@@ -22,6 +22,11 @@ export const SettingsScreen = () => {
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
+
+  const handleOpenEmail = () => {
+    const subject = `FinHabit Feedback (${language})`;
+    Linking.openURL(`mailto:nmena.garzon@gmail.com?subject=${subject}`);
+  };
 
   const handleExportCSV = async () => {
     await exportTransactionsToCSV(transactions, accounts, categories);
@@ -172,6 +177,21 @@ export const SettingsScreen = () => {
         <Text variant="bodySmall" style={styles.sectionInfoText}>
           {t('changeLanguageDesc')}
         </Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text variant="labelLarge" style={styles.sectionTitle}>
+          {t('feedback')}
+        </Text>
+        <Card style={styles.card} mode="contained">
+          <List.Item
+            title={t('sendFeedback')}
+            description={t('feedbackDesc')}
+            left={(props) => <List.Icon {...props} icon="message-outline" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={handleOpenEmail}
+          />
+        </Card>
       </View>
 
       <View style={styles.section}>

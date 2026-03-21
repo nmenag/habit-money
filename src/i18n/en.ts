@@ -191,44 +191,31 @@ export const en = {
   comparedToLastMonth: 'Compared to last month',
   daysLabel: 'days',
   daysSpentMoney: 'Days you spent money this month',
-  insightExpenseGrew:
-    'Your overall expenses grew by {{percentage}}% compared to last month.',
-  insightExpenseLess:
-    'Great job! You spent {{percentage}}% less than last month.',
+  insightMonthlyComparisonTitle: 'Monthly Comparison',
+  insightSpentMoreThanLastMonth:
+    'You spent {{percentage}}% more than last month',
+  insightSpentLessThanLastMonth:
+    'Great job! You spent {{percentage}}% less than last month',
+  insightTopCategoryTitle: 'Top Category',
+  insightTopCategoryMessage:
+    '{{percentage}}% of your spending is on {{category}}',
+  insightCategoryGrowthTitle: 'Category Growth',
+  insightCategoryGrowthMessage:
+    '{{category}} spending increased {{percentage}}%',
+  insightBalancePositiveTitle: 'Savings Insight',
+  insightBalancePositiveMessage: 'You saved money this month!',
+  insightBalanceNegativeTitle: 'Balance Warning',
+  insightBalanceNegativeMessage: 'You are in deficit this month',
+  insightProjectionTitle: 'Spending Projection',
+  insightProjectionMessage:
+    'At this rate, you will spend {{amount}} this month',
   insightNoSpendChallenge:
     'You spent money on {{days}} days this month. Try a "no-spend" day challenge!',
-  insightOverspendingTitle: 'Overspending Alert',
-  insightOverspendingMessage:
-    'You spent more than you earned this month. Consider reviewing your variable expenses.',
-  insightHighSavingsTitle: 'High Savings Rate',
-  insightHighSavingsMessage:
-    'Great job! You saved {{percentage}}% of your income this month.',
-  insightTopCategoryTitle: 'Top Spending Category',
-  insightTopCategoryMessage:
-    'Your biggest spending category is {{category}}, totaling {{amount}}.',
   insightNoIncomeTitle: 'No Income Recorded',
   insightNoIncomeMessage:
     'You have recorded expenses but no income yet this month.',
-  insightExpenseGrowthTitle: 'Expense Growth',
-  insightExpenseGrowthMessage:
-    'Your total expenses increased by {{percentage}}% compared to last month.',
-  insightExpenseGrowthRec:
-    'Consider reviewing your recent transactions for anomalies.',
-  insightExpenseReductionTitle: 'Spending Reduction',
-  insightExpenseReductionMessage:
-    'Excellent! You spent {{percentage}}% less than last month.',
-  insightHighSpendingCategoryTitle: 'High spending in {{category}}',
-  insightHighSpendingCategoryMessage:
-    '{{category}} accounts for {{percentage}}% of your total spending.',
-  insightHighSpendingCategoryRec:
-    'Consider setting a budget for this category.',
-  insightBudgetExceededTitle: 'Budget Exceeded',
-  insightBudgetExceededMessage: 'You exceeded your budget in {{category}}.',
-  insightBudgetExceededRec:
-    'Consider reducing expenses in this category next month.',
-  insightSavingsOpportunityTitle: 'Savings Opportunity',
-  insightSavingsOpportunityMessage: 'You saved money this month ({{amount}})!',
-  insightSavingsOpportunityRec: 'Consider moving some funds to a savings goal.',
+  insightNoDataTitle: 'Keep Tracking',
+  insightNoDataMessage: 'Add more transactions to get personalized insights.',
   filterAllTime: 'All',
   filterToday: 'Today',
   filterWeek: 'Week',
@@ -279,7 +266,6 @@ export const en = {
   contactInfoContent:
     'If you have any questions regarding this privacy policy, you can contact us at: nmena.garzon@gmail.com',
   lastUpdated: 'Last Updated',
-  privacyPolicyDesc: 'We value your privacy.',
   app: 'App',
   adMobPrivacyUrl: 'https://policies.google.com/privacy',
   viewAdMobPrivacy: 'View Google/AdMob Privacy Policy',
@@ -297,4 +283,8 @@ export const en = {
   insightSpentMore: 'You spent {{percent}}% more than last month',
   insightSavingMoney: 'You are saving money this month!',
   insightKeepGoing: 'Keep tracking to get insights!',
+  feedback: 'Feedback',
+  feedbackDesc: 'Help us improve FinHabit with your suggestions',
+  feedbackPlaceholder: 'Tell us what you think or report a bug...',
+  sendFeedback: 'Send Feedback',
 };
