@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import React from 'react';
 import {
   Linking,
@@ -16,8 +17,8 @@ export const AboutScreen = () => {
   const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
 
-  const appName = 'FinHabit';
-  const version = '1.0.0';
+  const appName = Constants.expoConfig?.name || 'FinHabit';
+  const version = Constants.expoConfig?.version || '1.0.0';
   const contactEmail = 'nmena.garzon@gmail.com';
 
   const handleOpenLink = (url: string) => {
