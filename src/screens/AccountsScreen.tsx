@@ -1,7 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
-import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { FAB, IconButton, Text, useTheme } from 'react-native-paper';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { FAB, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountCard } from '../components/AccountCard';
 import { useStore, useTranslation } from '../store/useStore';
@@ -25,27 +26,28 @@ export const AccountsScreen = () => {
       <FlatList
         data={accounts}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}
+        contentContainerStyle={{ paddingBottom: 100, paddingTop: 12 }}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            activeOpacity={0.7}
+          <AccountCard
+            account={item}
+            onDelete={
+              accounts.length > 1 ? () => deleteAccount(item.id) : undefined
+            }
             onPress={() =>
               router.push({
                 pathname: '/add-account',
                 params: { account: JSON.stringify(item) },
               })
             }
-          >
-            <AccountCard
-              account={item}
-              onDelete={
-                accounts.length > 1 ? () => deleteAccount(item.id) : undefined
-              }
-            />
-          </TouchableOpacity>
+          />
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
+            <Ionicons
+              name="wallet-outline"
+              size={64}
+              color={theme.colors.outlineVariant}
+            />
             <Text
               variant="bodyLarge"
               style={[styles.emptyText, { color: theme.colors.outline }]}
