@@ -18,7 +18,7 @@ export const SettingsScreen = () => {
     incrementActionCounter,
     checkAndShowAd,
   } = useStore();
-  const { t, language } = useTranslation();
+  const { t, language, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
@@ -33,7 +33,13 @@ export const SettingsScreen = () => {
   };
 
   const handleExportCSV = async () => {
-    await exportTransactionsToCSV(transactions, accounts, categories);
+    await exportTransactionsToCSV(
+      transactions,
+      accounts,
+      categories,
+      t,
+      translateName,
+    );
     incrementActionCounter();
     checkAndShowAd();
   };
