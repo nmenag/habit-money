@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { format, parseISO } from 'date-fns';
+import { enUS, es } from 'date-fns/locale';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
@@ -20,7 +21,7 @@ import { isInRange } from '../utils/dateFilters';
 
 export const TransactionsScreen = () => {
   const params = useLocalSearchParams<{ accountId?: string }>();
-  const { transactions, accounts, categories } = useStore();
+  const { transactions, accounts, categories, language } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
@@ -271,7 +272,9 @@ export const TransactionsScreen = () => {
                   { color: theme.colors.onSurfaceVariant },
                 ]}
               >
-                {format(parseISO(group.date), 'EEEE, MMMM d')}
+                {format(parseISO(group.date), 'EEEE, MMMM d', {
+                  locale: language === 'es' ? es : enUS,
+                })}
               </Text>
             </View>
             {group.items.map((tx) => {

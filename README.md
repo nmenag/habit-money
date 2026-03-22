@@ -18,7 +18,12 @@ FinHabit is a modern, high-performance personal finance tracker built with **Rea
 - **Accessibility & UX**:
   - **Safe Area Aware**: Optimized for all device sizes (notches, dynamic islands, etc.).
   - **Dark Mode Ready**: Premium look and feel in any lighting.
-- **Data Mobility**: Export full transaction history to **CSV** for external spreadsheet analysis.
+- **Data Mobility & Security**:
+  - **Export to CSV**: Download full transaction history for external spreadsheet analysis.
+  - **JSON Backup & Restore**: Securely export and import all application data to local JSON files for long-term data protection.
+- **Compliance & Privacy**:
+  - **About the App**: Dedicated section for app information, versioning, and developer contact.
+  - **Privacy Policy**: Built-in, professional privacy policy compliant with Google Play Store requirements, highlighting local data storage.
 - **Monetization**: Seamlessly integrated Google Mobile Ads (Banner and Interstitial) with test mode for development.
 
 ## 🛠️ Tech Stack

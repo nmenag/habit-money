@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import { enUS, es } from 'date-fns/locale';
 import React, { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
@@ -74,10 +75,11 @@ export const FilterBar: React.FC = () => {
 
   const customSummary =
     activeType === 'custom'
-      ? `${format(selectedRange.startDate, 'MMM d')} – ${format(
-          selectedRange.endDate,
-          'MMM d, yyyy',
-        )}`
+      ? `${format(selectedRange.startDate, 'MMM d', {
+          locale: language === 'es' ? es : enUS,
+        })} – ${format(selectedRange.endDate, 'MMM d, yyyy', {
+          locale: language === 'es' ? es : enUS,
+        })}`
       : null;
 
   const locale = language === 'es' ? 'es' : 'en';

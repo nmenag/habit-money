@@ -11,26 +11,47 @@ export const exportTransactionsToCSV = async (
   transactions: Transaction[],
   accounts: Account[],
   categories: Category[],
+  t: any,
+  translateName: (name: string) => string,
 ) => {
-  const header = 'Date,Type,Amount,Currency,Account,Category,Note\n';
+  const header = `${t('date')},${t('type')},${t('amount')},${t('currency')},${t('accounts')},${t('categories')},${t('note')}\n`;
   const rows = transactions
-    .map((t) => {
-      const account = accounts.find((a) => a.id === t.accountId);
-      const category = categories.find((c) => c.id === t.categoryId);
+    .map((tX) => {
+      const account = accounts.find((a) => a.id === tX.accountId);
+      const toAccount = tX.toAccountId
+        ? accounts.find((a) => a.id === tX.toAccountId)
+        : null;
+      const category = categories.find((c) => c.id === tX.categoryId);
 
-      const date = t.date.split('T')[0];
-      const type = t.type;
-      const amount = t.amount;
+      const date = tX.date.split('T')[0];
+      let type = '';
+      if (tX.type === 'income') type = t('income');
+      else if (tX.type === 'expense') type = t('expense');
+      else if (tX.type === 'transfer') type = t('transfer');
+
+      const amount = tX.amount;
       const currency = account?.currency || 'COP';
-      const accountName = account?.name || 'Unknown';
-      const categoryName = category?.name || 'Uncategorized';
-      const note = t.note ? `"${t.note.replace(/"/g, '""')}"` : '';
 
-      return `${date},${type},${amount},${currency},"${accountName}","${categoryName}",${note}`;
+      const accountName = account?.name
+        ? translateName(account.name)
+        : t('unknown') || 'Unknown';
+
+      let destinationName = '';
+      if (tX.type === 'transfer' && toAccount) {
+        destinationName = translateName(toAccount.name);
+      } else if (category) {
+        destinationName = translateName(category.name);
+      } else {
+        destinationName = t('uncategorized');
+      }
+
+      const note = tX.note ? `"${tX.note.replace(/"/g, '""')}"` : '';
+
+      return `${date},${type},${amount},${currency},"${accountName}","${destinationName}",${note}`;
     })
     .join('\n');
 
-  const csvContent = header + rows;
+  const csvContent = '\uFEFF' + header + rows;
   const fileName = `finhabit_transactions_${new Date().toISOString().split('T')[0]}.csv`;
   const fileUri = `${documentDirectory}${fileName}`;
 

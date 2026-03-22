@@ -48,8 +48,35 @@ export const initDb = () => {
         color TEXT
       );
     `);
+
+    // Migration for icons from Ionicons to MaterialCommunityIcons
+    db.execSync(
+      "UPDATE categories SET icon = 'controller-classic' WHERE icon = 'game-controller';",
+    );
+    db.execSync(
+      "UPDATE categories SET icon = 'food' WHERE icon = 'fast-food';",
+    );
+    db.execSync(
+      "UPDATE categories SET icon = 'medical-bag' WHERE icon = 'medkit';",
+    );
+    db.execSync(
+      "UPDATE categories SET icon = 'format-list-bulleted' WHERE icon = 'list';",
+    );
+    db.execSync(
+      "UPDATE categories SET icon = 'briefcase' WHERE icon = 'business';",
+    );
+    db.execSync(
+      "UPDATE categories SET icon = 'tshirt-crew' WHERE icon = 'shirt';",
+    );
+    db.execSync("UPDATE categories SET icon = 'coffee' WHERE icon = 'cafe';");
+    db.execSync(
+      "UPDATE categories SET icon = 'dumbbell' WHERE icon = 'fitness';",
+    );
+    db.execSync(
+      "UPDATE categories SET icon = 'music-note' WHERE icon = 'musical-notes';",
+    );
   } catch (e) {
-    console.error('Error creating categories table:', e);
+    console.error('Error creating/migrating categories table:', e);
   }
 
   try {
@@ -119,6 +146,12 @@ export const initDb = () => {
   }
 
   try {
+    db.execSync('ALTER TABLE transactions ADD COLUMN toAccountId TEXT;');
+  } catch (e) {
+    // Column might already exist
+  }
+
+  try {
     db.execSync(`
       CREATE TABLE IF NOT EXISTS goals (
         id TEXT PRIMARY KEY,
@@ -148,7 +181,7 @@ export const initDb = () => {
         id: '1',
         name: t.catFood,
         type: 'expense',
-        icon: 'fast-food',
+        icon: 'food',
         color: '#f44336',
       },
       {
@@ -169,21 +202,21 @@ export const initDb = () => {
         id: '4',
         name: t.catEntertainment,
         type: 'expense',
-        icon: 'game-controller',
+        icon: 'controller-classic',
         color: '#ff9800',
       },
       {
         id: '5',
         name: t.catHealth,
         type: 'expense',
-        icon: 'medkit',
+        icon: 'medical-bag',
         color: '#e91e63',
       },
       {
         id: '6',
         name: t.catOther,
         type: 'expense',
-        icon: 'list',
+        icon: 'format-list-bulleted',
         color: '#607d8b',
       },
       {
@@ -199,6 +232,13 @@ export const initDb = () => {
         type: 'income',
         icon: 'wallet',
         color: '#009688',
+      },
+      {
+        id: '9',
+        name: t.catInvestments,
+        type: 'expense',
+        icon: 'chart-line',
+        color: '#3f51b5',
       },
     ];
 
@@ -217,6 +257,17 @@ export const initDb = () => {
       });
     } finally {
       statement.finalizeSync();
+    }
+  } else {
+    // Check if Investments category (ID 9) exists, if not, add it
+    const checkInvestments = db.getFirstSync<{ id: string }>(
+      "SELECT id FROM categories WHERE id = '9'",
+    );
+    if (!checkInvestments) {
+      db.runSync(
+        'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
+        ['9', t.catInvestments, 'expense', 'chart-line', '#3f51b5'],
+      );
     }
   }
 

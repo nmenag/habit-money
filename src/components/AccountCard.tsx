@@ -1,14 +1,19 @@
 import React from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
-import { Card, IconButton, Text, useTheme } from 'react-native-paper';
+import { Avatar, Card, IconButton, Text, useTheme } from 'react-native-paper';
 import { Account, useStore, useTranslation } from '../store/useStore';
 
 interface Props {
   account: Account;
   onDelete?: () => void;
+  onPress?: () => void;
 }
 
-export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
+export const AccountCard: React.FC<Props> = ({
+  account,
+  onDelete,
+  onPress,
+}) => {
   const { formatCurrency } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
@@ -27,6 +32,19 @@ export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
     }
   };
 
+  const getAccountIcon = (type: string) => {
+    switch (type) {
+      case 'cash':
+        return 'cash';
+      case 'bank':
+        return 'bank';
+      case 'credit':
+        return 'credit-card-outline';
+      default:
+        return 'wallet';
+    }
+  };
+
   return (
     <Card
       style={[
@@ -34,28 +52,43 @@ export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
         { borderLeftColor: account.color || theme.colors.primary },
       ]}
       mode="elevated"
+      onPress={onPress}
     >
       <Card.Content style={styles.cardContent}>
+        <Avatar.Icon
+          size={44}
+          icon={getAccountIcon(account.type)}
+          style={[
+            styles.avatar,
+            { backgroundColor: account.color || theme.colors.primaryContainer },
+          ]}
+          color="#fff"
+        />
         <View style={styles.content}>
           <Text variant="labelMedium" style={styles.type}>
             {t(account.type).toUpperCase()}
           </Text>
-          <Text variant="titleLarge" style={styles.name}>
+          <Text variant="titleMedium" style={styles.name}>
             {translateName(account.name)}
           </Text>
-          <Text variant="headlineSmall" style={styles.balance}>
+        </View>
+        <View style={styles.rightSection}>
+          <Text variant="titleLarge" style={styles.balance}>
             {formatCurrency(account.currentBalance, account.currency)}
           </Text>
+          {onDelete && (
+            <IconButton
+              icon="trash-can-outline"
+              iconColor={theme.colors.error}
+              size={20}
+              onPress={(e) => {
+                e.stopPropagation();
+                handleDelete();
+              }}
+              style={styles.deleteButton}
+            />
+          )}
         </View>
-        {onDelete && (
-          <IconButton
-            icon="trash-can-outline"
-            iconColor={theme.colors.error}
-            size={24}
-            onPress={handleDelete}
-            style={styles.deleteButton}
-          />
-        )}
       </Card.Content>
     </Card>
   );
@@ -64,7 +97,7 @@ export const AccountCard: React.FC<Props> = ({ account, onDelete }) => {
 const defaultStyles = (theme: any) =>
   StyleSheet.create({
     card: {
-      marginVertical: 8,
+      marginVertical: 4,
       marginHorizontal: 16,
       borderLeftWidth: 6,
       borderRadius: 16,
@@ -73,13 +106,16 @@ const defaultStyles = (theme: any) =>
     cardContent: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 16,
+      paddingVertical: 12,
+    },
+    avatar: {
+      marginRight: 12,
     },
     content: {
       flex: 1,
     },
     name: {
-      fontWeight: '900',
+      fontWeight: '700',
       color: theme.colors.onSurface,
       marginVertical: 2,
     },
@@ -88,9 +124,11 @@ const defaultStyles = (theme: any) =>
       color: theme.colors.onSurfaceVariant,
       fontWeight: '700',
     },
+    rightSection: {
+      alignItems: 'flex-end',
+    },
     balance: {
       fontWeight: '900',
-      marginTop: 8,
       color: theme.colors.onSurface,
     },
     deleteButton: {

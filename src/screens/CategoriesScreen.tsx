@@ -1,23 +1,30 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React from 'react';
-import { Alert, SectionList, StyleSheet, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import {
   Card,
   FAB,
   IconButton,
   List,
+  SegmentedButtons,
   Text,
   useTheme,
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Category, useStore, useTranslation } from '../store/useStore';
+import {
+  Category,
+  TransactionType,
+  useStore,
+  useTranslation,
+} from '../store/useStore';
 
 export const CategoriesScreen = () => {
   const { categories, deleteCategory, transactions } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
+  const [activeTab, setActiveTab] = useState<TransactionType>('expense');
 
   const handleDelete = (category: Category) => {
     const isUsed = transactions.some((t) => t.categoryId === category.id);
@@ -61,8 +68,8 @@ export const CategoriesScreen = () => {
               { backgroundColor: item.color || theme.colors.surfaceVariant },
             ]}
           >
-            <Ionicons
-              name={(item.icon as any) || 'pricetag'}
+            <MaterialCommunityIcons
+              name={(item.icon as any) || 'tag'}
               size={22}
               color="#fff"
             />
@@ -82,34 +89,44 @@ export const CategoriesScreen = () => {
 
   const insets = useSafeAreaInsets();
 
-  const expenseCategories = categories.filter((c) => c.type === 'expense');
-  const incomeCategories = categories.filter((c) => c.type === 'income');
-
-  const sections = [
-    { title: t('expenses'), data: expenseCategories },
-    { title: t('income'), data: incomeCategories },
-  ];
+  const filteredCategories = categories.filter((c) => c.type === activeTab);
 
   return (
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <SectionList
-        sections={sections}
+      <View style={styles.topBar}>
+        <SegmentedButtons
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as TransactionType)}
+          buttons={[
+            {
+              value: 'expense',
+              label: t('expenses'),
+              icon: 'minus-circle-outline',
+            },
+            {
+              value: 'income',
+              label: t('income'),
+              icon: 'plus-circle-outline',
+            },
+          ]}
+          style={styles.segmentedButtons}
+        />
+      </View>
+
+      <FlatList
+        data={filteredCategories}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        renderSectionHeader={({ section: { title, data } }) =>
-          data.length > 0 ? (
-            <View style={styles.header}>
-              <Text variant="labelLarge" style={styles.headerTitle}>
-                {title}
-              </Text>
-            </View>
-          ) : null
-        }
         contentContainerStyle={[styles.listContent, { paddingBottom: 100 }]}
         ListEmptyComponent={
           <View style={styles.empty}>
+            <Ionicons
+              name={activeTab === 'expense' ? 'cart-outline' : 'cash-outline'}
+              size={64}
+              color={theme.colors.outlineVariant}
+            />
             <Text
               variant="bodyLarge"
               style={[styles.emptyText, { color: theme.colors.outline }]}
@@ -133,18 +150,16 @@ const defaultStyles = (theme: any) =>
     container: {
       flex: 1,
     },
-    listContent: {
-      paddingTop: 8,
-    },
-    header: {
-      paddingHorizontal: 20,
+    topBar: {
+      paddingHorizontal: 16,
       paddingVertical: 12,
+      backgroundColor: theme.colors.background,
     },
-    headerTitle: {
-      fontWeight: '800',
-      color: theme.colors.onSurface,
-      textTransform: 'uppercase',
-      letterSpacing: 1.5,
+    segmentedButtons: {
+      borderRadius: 12,
+    },
+    listContent: {
+      paddingTop: 4,
     },
     card: {
       marginBottom: 8,
@@ -173,6 +188,7 @@ const defaultStyles = (theme: any) =>
     emptyText: {
       textAlign: 'center',
       paddingHorizontal: 20,
+      marginTop: 12,
     },
     fab: {
       position: 'absolute',

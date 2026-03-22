@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
@@ -39,22 +39,24 @@ const COLORS = [
 ];
 
 const ICONS = [
-  'fast-food',
+  'food',
   'car',
   'home',
-  'game-controller',
-  'medkit',
-  'list',
+  'controller-classic',
+  'medical-bag',
+  'format-list-bulleted',
   'cash',
   'wallet',
   'cart',
   'airplane',
-  'business',
+  'briefcase',
   'school',
-  'shirt',
-  'cafe',
-  'fitness',
-  'musical-notes',
+  'tshirt-crew',
+  'coffee',
+  'dumbbell',
+  'music-note',
+  'chart-line',
+  'trending-up',
 ];
 
 export const AddCategoryScreen = () => {
@@ -165,7 +167,7 @@ export const AddCategoryScreen = () => {
                 ]}
                 onPress={() => setIcon(i)}
               >
-                <Ionicons
+                <MaterialCommunityIcons
                   name={i as any}
                   size={24}
                   color={icon === i ? '#fff' : theme.colors.onSurfaceVariant}
@@ -194,7 +196,7 @@ export const AddCategoryScreen = () => {
                 onPress={() => setColor(c)}
               >
                 {color === c && (
-                  <Ionicons name="checkmark" size={20} color="#fff" />
+                  <MaterialCommunityIcons name="check" size={20} color="#fff" />
                 )}
               </TouchableOpacity>
             ))}

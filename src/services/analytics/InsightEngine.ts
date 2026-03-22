@@ -12,117 +12,159 @@ export class InsightEngine {
     language: Language,
   ): Insight[] {
     const insights: Insight[] = [];
-    const { currentMonth, previousMonth, categoryExpenses } = report;
+    const {
+      currentMonth,
+      previousMonth,
+      categoryExpenses,
+      previousCategoryExpenses,
+    } = report;
     const t = translations[language] || translations.en;
 
-    // Rule 1: High spending category (> 30% of total)
-    categoryExpenses.forEach((cat) => {
-      const translatedCatName = getTranslatedName(cat.categoryName, language);
-      if (cat.percentage > 30) {
-        insights.push({
-          id: `high-spending-${cat.categoryId}`,
-          title: t.insightHighSpendingCategoryTitle.replace(
-            '{{category}}',
-            translatedCatName,
-          ),
-          message: t.insightHighSpendingCategoryMessage
-            .replace('{{category}}', translatedCatName)
-            .replace('{{percentage}}', cat.percentage.toFixed(0)),
-          recommendation: t.insightHighSpendingCategoryRec,
-          level: 'warning',
-          category: 'spending',
-          timestamp: new Date().toISOString(),
-        });
-      }
-    });
-
-    // Rule 2: Spending Increase (> 20%)
+    // A. Monthly Comparison
     if (previousMonth.expenses > 0) {
       const growth =
         ((currentMonth.expenses - previousMonth.expenses) /
           previousMonth.expenses) *
         100;
-      if (growth > 20) {
+
+      if (growth > 10) {
         insights.push({
-          id: 'rule-spending-increase',
-          title: t.insightExpenseGrowthTitle,
-          message: t.insightExpenseGrowthMessage.replace(
+          id: 'monthly-comparison-warning',
+          title: t.insightMonthlyComparisonTitle,
+          message: t.insightSpentMoreThanLastMonth.replace(
             '{{percentage}}',
-            growth.toFixed(1),
+            growth.toFixed(0),
           ),
-          recommendation: t.insightExpenseGrowthRec,
           level: 'warning',
-          category: 'spending',
+          category: 'comparison',
           timestamp: new Date().toISOString(),
         });
-      } else if (growth < -10) {
+      } else if (growth < 0) {
         insights.push({
-          id: 'rule-spending-decrease',
-          title: t.insightExpenseReductionTitle,
-          message: t.insightExpenseReductionMessage.replace(
+          id: 'monthly-comparison-positive',
+          title: t.insightMonthlyComparisonTitle,
+          message: t.insightSpentLessThanLastMonth.replace(
             '{{percentage}}',
-            Math.abs(growth).toFixed(1),
+            Math.abs(growth).toFixed(0),
           ),
           level: 'positive',
-          category: 'spending',
+          category: 'comparison',
           timestamp: new Date().toISOString(),
         });
       }
     }
 
-    // Rule 3: Budget Exceeded
-    report.budgets.forEach((budget) => {
-      const translatedCatName = getTranslatedName(
-        budget.categoryName,
-        language,
-      );
-      if (budget.exceeded) {
-        insights.push({
-          id: `budget-exceeded-${budget.categoryId}`,
-          title: t.insightBudgetExceededTitle,
-          message: t.insightBudgetExceededMessage.replace(
-            '{{category}}',
-            translatedCatName,
-          ),
-          recommendation: t.insightBudgetExceededRec,
-          level: 'warning',
-          category: 'budget',
-          timestamp: new Date().toISOString(),
-        });
-      }
-    });
-
-    // Rule 4: Savings Opportunity (Income > Expenses)
-    if (
-      currentMonth.income > currentMonth.expenses &&
-      currentMonth.expenses > 0
-    ) {
+    // B. Top Category
+    if (categoryExpenses.length > 0) {
+      const topCat = categoryExpenses[0]; // Sorted by amount in service
+      const translatedName = getTranslatedName(topCat.categoryName, language);
       insights.push({
-        id: 'rule-savings-opportunity',
-        title: t.insightSavingsOpportunityTitle,
-        message: t.insightSavingsOpportunityMessage.replace(
-          '{{amount}}',
-          formatCurrency(currentMonth.savings),
-        ),
-        recommendation: t.insightSavingsOpportunityRec,
-        level: 'positive',
-        category: 'savings',
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    // Additional check: Low income
-    if (currentMonth.income === 0 && currentMonth.expenses > 0) {
-      insights.push({
-        id: 'rule-no-income',
-        title: t.insightNoIncomeTitle,
-        message: t.insightNoIncomeMessage,
+        id: 'top-category',
+        title: t.insightTopCategoryTitle,
+        message: t.insightTopCategoryMessage
+          .replace('{{percentage}}', topCat.percentage.toFixed(0))
+          .replace('{{category}}', translatedName),
         level: 'info',
-        category: 'earnings',
+        category: 'spending',
         timestamp: new Date().toISOString(),
       });
     }
 
-    return insights;
+    // C. Category Growth
+    if (previousCategoryExpenses.length > 0) {
+      let maxIncrease = 0;
+      let targetCat: (typeof categoryExpenses)[0] | null = null;
+
+      categoryExpenses.forEach((cat) => {
+        const prev = previousCategoryExpenses.find(
+          (p) => p.categoryId === cat.categoryId,
+        );
+        if (prev && prev.amount > 0) {
+          const inc = ((cat.amount - prev.amount) / prev.amount) * 100;
+          if (inc > maxIncrease) {
+            maxIncrease = inc;
+            targetCat = cat;
+          }
+        }
+      });
+
+      if (targetCat && maxIncrease > 15) {
+        const translatedName = getTranslatedName(
+          (targetCat as any).categoryName,
+          language,
+        );
+        insights.push({
+          id: 'category-growth',
+          title: t.insightCategoryGrowthTitle,
+          message: t.insightCategoryGrowthMessage
+            .replace('{{category}}', translatedName)
+            .replace('{{percentage}}', maxIncrease.toFixed(0)),
+          level: 'warning',
+          category: 'comparison',
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+
+    // D. Balance Insight
+    if (currentMonth.income > 0 || currentMonth.expenses > 0) {
+      if (currentMonth.income > currentMonth.expenses) {
+        insights.push({
+          id: 'balance-positive',
+          title: t.insightBalancePositiveTitle,
+          message: t.insightBalancePositiveMessage,
+          level: 'positive',
+          category: 'balance',
+          timestamp: new Date().toISOString(),
+        });
+      } else if (currentMonth.expenses > currentMonth.income) {
+        insights.push({
+          id: 'balance-negative',
+          title: t.insightBalanceNegativeTitle,
+          message: t.insightBalanceNegativeMessage,
+          level: 'warning',
+          category: 'balance',
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+
+    // E. Spending Projection
+    const now = new Date();
+    const currentDay = now.getDate();
+    const daysInMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+    ).getDate();
+
+    if (currentMonth.expenses > 0 && currentDay > 3) {
+      const projection = (currentMonth.expenses / currentDay) * daysInMonth;
+      insights.push({
+        id: 'spending-projection',
+        title: t.insightProjectionTitle,
+        message: t.insightProjectionMessage.replace(
+          '{{amount}}',
+          formatCurrency(projection),
+        ),
+        level: 'info',
+        category: 'projection',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Default if few insights
+    if (insights.length === 0) {
+      insights.push({
+        id: 'no-data',
+        title: t.insightNoDataTitle,
+        message: t.insightNoDataMessage,
+        level: 'info',
+        category: 'general',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    return insights.slice(0, 5); // Max 5 insights
   }
 }

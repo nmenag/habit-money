@@ -1,20 +1,13 @@
-import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Button,
   Chip,
-  IconButton,
   SegmentedButtons,
   Text,
   TextInput,
+  Tooltip,
   useTheme,
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -48,6 +41,7 @@ export const AddTransactionScreen = () => {
     addTransaction,
     editTransaction,
     deleteTransaction,
+    formatCurrency,
   } = useStore();
   const { t, language, translateName } = useTranslation();
   const theme = useTheme();
@@ -75,6 +69,13 @@ export const AddTransactionScreen = () => {
   const [selectedBudget, setSelectedBudget] = useState<string>(
     editingTransaction?.budgetId ?? '',
   );
+  const [selectedToAccount, setSelectedToAccount] = useState(
+    editingTransaction?.toAccountId ||
+      accounts.find((a) => a.id !== selectedAccount)?.id ||
+      '',
+  );
+
+  const activeAccount = accounts.find((acc) => acc.id === selectedAccount);
 
   const handleSave = () => {
     if (!amount || isNaN(amount) || amount <= 0) {
@@ -83,6 +84,14 @@ export const AddTransactionScreen = () => {
     }
     if (!selectedAccount) {
       Alert.alert(t('error'), t('selectAccount'));
+      return;
+    }
+    if (type === 'transfer' && !selectedToAccount) {
+      Alert.alert(t('error'), t('selectToAccount'));
+      return;
+    }
+    if (type === 'transfer' && selectedAccount === selectedToAccount) {
+      Alert.alert(t('error'), t('selectDifferentAccountForTransfer'));
       return;
     }
 
@@ -96,17 +105,19 @@ export const AddTransactionScreen = () => {
         budgetId: selectedBudget || null,
         date: editingTransaction.date,
         note,
+        toAccountId: type === 'transfer' ? selectedToAccount : null,
       });
     } else {
       addTransaction({
         id: Date.now().toString(),
         type,
         amount,
-        categoryId: selectedCategory || null,
+        categoryId: type === 'transfer' ? null : selectedCategory || null,
         accountId: selectedAccount,
-        budgetId: selectedBudget || null,
+        budgetId: type === 'transfer' ? null : selectedBudget || null,
         date: new Date().toISOString(),
         note,
+        toAccountId: type === 'transfer' ? selectedToAccount : null,
       });
     }
 
@@ -146,11 +157,12 @@ export const AddTransactionScreen = () => {
       id: Date.now().toString(),
       type,
       amount,
-      categoryId: selectedCategory || null,
+      categoryId: type === 'transfer' ? null : selectedCategory || null,
       accountId: selectedAccount,
-      budgetId: selectedBudget || null,
+      budgetId: type === 'transfer' ? null : selectedBudget || null,
       date: new Date().toISOString(),
       note: note ? `${note} (${t('duplicate')})` : t('duplicate'),
+      toAccountId: type === 'transfer' ? selectedToAccount : null,
     });
 
     router.back();
@@ -171,7 +183,6 @@ export const AddTransactionScreen = () => {
   };
 
   const insets = useSafeAreaInsets();
-  const activeAccount = accounts.find((acc) => acc.id === selectedAccount);
   const displayCurrency = activeAccount?.currency || 'COP';
 
   return (
@@ -204,21 +215,28 @@ export const AddTransactionScreen = () => {
                 checkedColor: theme.colors.error,
               },
               { value: 'income', label: t('income'), checkedColor: '#4caf50' },
+              {
+                value: 'transfer',
+                label: t('transfer'),
+                checkedColor: theme.colors.primary,
+              },
             ]}
           />
         </View>
 
         <View style={styles.inputGroup}>
-          <TextInput
-            label={t('amount')}
-            value={displayAmount}
-            onChangeText={handleAmountChange}
-            mode="outlined"
-            keyboardType="numeric"
-            style={styles.amountInput}
-            outlineStyle={styles.inputOutline}
-            left={<TextInput.Affix text={displayCurrency + ' '} />}
-          />
+          <Tooltip title={t('amountTooltip')}>
+            <TextInput
+              label={t('amount')}
+              value={displayAmount}
+              onChangeText={handleAmountChange}
+              mode="outlined"
+              keyboardType="numeric"
+              style={styles.amountInput}
+              outlineStyle={styles.inputOutline}
+              left={<TextInput.Affix text={displayCurrency + ' '} />}
+            />
+          </Tooltip>
 
           <TextInput
             label={t('note') + ' (' + t('optional') + ')'}
@@ -232,9 +250,15 @@ export const AddTransactionScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text variant="titleMedium" style={styles.sectionTitle}>
-            {t('accounts')}
-          </Text>
+          <Tooltip title={t('accountTooltip')}>
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              {type === 'expense'
+                ? t('withdrawFrom')
+                : type === 'transfer'
+                  ? t('withdrawFrom')
+                  : t('depositTo')}
+            </Text>
+          </Tooltip>
           <View style={styles.chipsRow}>
             {accounts.map((acc) => (
               <Chip
@@ -245,43 +269,72 @@ export const AddTransactionScreen = () => {
                 mode="flat"
                 selectedColor={theme.colors.primary}
               >
-                {translateName(acc.name)}
+                {`${translateName(acc.name)} (${formatCurrency(acc.currentBalance)})`}
               </Chip>
             ))}
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text variant="titleMedium" style={styles.sectionTitle}>
-            {t('categories')}
-          </Text>
-          <View style={styles.chipsRow}>
-            {availableCategories.map((cat) => (
-              <Chip
-                key={cat.id}
-                selected={selectedCategory === cat.id}
-                onPress={() => {
-                  setSelectedCategory(cat.id);
-                  const matchingBudget = budgets.find(
-                    (b) => b.categoryId === cat.id,
-                  );
-                  if (matchingBudget) setSelectedBudget(matchingBudget.id);
-                }}
-                style={styles.chip}
-                mode="flat"
-                selectedColor={cat.color || undefined}
-              >
-                {translateName(cat.name)}
-              </Chip>
-            ))}
-          </View>
-        </View>
-
-        {budgets.length > 0 && (
+        {type === 'transfer' && (
           <View style={styles.section}>
             <Text variant="titleMedium" style={styles.sectionTitle}>
-              {t('budgets')}
+              {t('depositTo')}
             </Text>
+            <View style={styles.chipsRow}>
+              {accounts.map((acc) => (
+                <Chip
+                  key={acc.id}
+                  selected={selectedToAccount === acc.id}
+                  disabled={selectedAccount === acc.id}
+                  onPress={() => setSelectedToAccount(acc.id)}
+                  style={styles.chip}
+                  mode="flat"
+                  selectedColor={theme.colors.primary}
+                >
+                  {`${translateName(acc.name)} (${formatCurrency(acc.currentBalance)})`}
+                </Chip>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {type !== 'transfer' && (
+          <View style={styles.section}>
+            <Tooltip title={t('categoryTooltip')}>
+              <Text variant="titleMedium" style={styles.sectionTitle}>
+                {t('categories')}
+              </Text>
+            </Tooltip>
+            <View style={styles.chipsRow}>
+              {availableCategories.map((cat) => (
+                <Chip
+                  key={cat.id}
+                  selected={selectedCategory === cat.id}
+                  onPress={() => {
+                    setSelectedCategory(cat.id);
+                    const matchingBudget = budgets.find(
+                      (b) => b.categoryId === cat.id,
+                    );
+                    if (matchingBudget) setSelectedBudget(matchingBudget.id);
+                  }}
+                  style={styles.chip}
+                  mode="flat"
+                  selectedColor={cat.color || undefined}
+                >
+                  {translateName(cat.name)}
+                </Chip>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {type !== 'transfer' && budgets.length > 0 && (
+          <View style={styles.section}>
+            <Tooltip title={t('budgetTooltip')}>
+              <Text variant="titleMedium" style={styles.sectionTitle}>
+                {t('budgets')}
+              </Text>
+            </Tooltip>
             <View style={styles.chipsRow}>
               {budgets.map((bud) => (
                 <Chip

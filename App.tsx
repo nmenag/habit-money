@@ -1,26 +1,25 @@
 import {
+  NavigationContainer,
   DarkTheme as NavigationDarkTheme,
   DefaultTheme as NavigationDefaultTheme,
-  NavigationContainer,
 } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, useColorScheme, View } from 'react-native';
 import mobileAds from 'react-native-google-mobile-ads';
 import { interstitialManager } from './src/ads/InterstitialManager';
-import { initDb } from './src/database/schema';
+import { initDb } from './src/db/schema';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { useStore } from './src/store/useStore';
 
 import { adaptNavigationTheme, PaperProvider } from 'react-native-paper';
-import { darkTheme, lightTheme } from './src/theme/theme';
 import {
-  registerTranslation,
   en as paperDatesEn,
   es as paperDatesEs,
+  registerTranslation,
 } from 'react-native-paper-dates';
+import { darkTheme, lightTheme } from './src/theme/theme';
 
-// Register locales for the date picker
 registerTranslation('en', paperDatesEn);
 registerTranslation('es', paperDatesEs);
 

@@ -1,266 +1,445 @@
 import { Ionicons } from '@expo/vector-icons';
-import { endOfMonth, parseISO, startOfMonth } from 'date-fns';
+import {
+  endOfMonth,
+  format,
+  parseISO,
+  startOfMonth,
+  subMonths,
+} from 'date-fns';
+import { enUS, es as esLocale } from 'date-fns/locale';
 import { router } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import {
+  ActivityIndicator,
+  Avatar,
   Card,
+  Divider,
   FAB,
-  IconButton,
-  Surface,
+  ProgressBar,
   Text,
   useTheme,
 } from 'react-native-paper';
-import { PieChart } from 'react-native-chart-kit';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
-import { ScoreCard } from '../components/ScoreCard';
 import { useStore, useTranslation } from '../store/useStore';
-import { calculateFinancialScore } from '../utils/scoreCalculator';
-
-const screenWidth = Dimensions.get('window').width;
 
 export const DashboardScreen = () => {
-  const { transactions, accounts, categories, formatCurrency } = useStore();
+  const {
+    transactions,
+    accounts,
+    categories,
+    goals,
+    budgets,
+    isLoaded,
+    formatCurrency,
+  } = useStore();
   const { t, language, translateName } = useTranslation();
-  const [showAllCategories, setShowAllCategories] = useState(false);
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
 
-  const scoreData = useMemo(
-    () => calculateFinancialScore(transactions),
-    [transactions],
-  );
+  if (!isLoaded) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
-  const { totalIncome, totalExpenses, pieData } = useMemo(() => {
+  // 3. Data layer - helper functions
+  const data = useMemo(() => {
     const now = new Date();
-    const start = startOfMonth(now);
-    const end = endOfMonth(now);
+    const currentStart = startOfMonth(now);
+    const currentEnd = endOfMonth(now);
+    const lastStart = startOfMonth(subMonths(now, 1));
+    const lastEnd = endOfMonth(subMonths(now, 1));
 
-    let inc = 0;
-    let exp = 0;
+    // A. Balance Summary
+    let monthlyIncome = 0;
+    let monthlyExpenses = 0;
     const catExpenses: Record<string, number> = {};
 
-    transactions.forEach((t) => {
-      const d = parseISO(t.date);
-      if (d >= start && d <= end) {
-        if (t.type === 'income') {
-          inc += t.amount;
+    // For Insight (B. vs Last Month)
+    let lastMonthExpenses = 0;
+
+    transactions.forEach((tr) => {
+      const d = parseISO(tr.date);
+      if (d >= currentStart && d <= currentEnd) {
+        if (tr.type === 'income') {
+          monthlyIncome += tr.amount;
         } else {
-          exp += t.amount;
-          if (t.categoryId) {
-            catExpenses[t.categoryId] =
-              (catExpenses[t.categoryId] || 0) + t.amount;
+          monthlyExpenses += tr.amount;
+          if (tr.categoryId) {
+            catExpenses[tr.categoryId] =
+              (catExpenses[tr.categoryId] || 0) + tr.amount;
           }
+        }
+      } else if (d >= lastStart && d <= lastEnd) {
+        if (tr.type === 'expense') {
+          lastMonthExpenses += tr.amount;
         }
       }
     });
 
-    const colors = [
-      '#f44336',
-      '#e91e63',
-      '#9c27b0',
-      '#673ab7',
-      '#3f51b5',
-      '#2196f3',
-      '#00bcd4',
-      '#009688',
-      '#4caf50',
-      '#ff9800',
-    ];
-    let cIdx = 0;
+    const remainingBalance = monthlyIncome - monthlyExpenses;
 
-    const pie = Object.keys(catExpenses)
-      .map((catId) => {
-        const cat = categories.find((c) => c.id === catId);
-        const color = cat?.color || colors[cIdx++ % colors.length];
-        const amount = catExpenses[catId];
-        const percentage = exp > 0 ? (amount / exp) * 100 : 0;
-        return {
-          name: cat?.name ? translateName(cat.name) : t('other'),
-          population: amount,
-          color: color,
-          percentage: percentage.toFixed(1),
-          legendFontColor: '#7F7F7F',
-          legendFontSize: 12,
-        };
-      })
-      .sort((a, b) => b.population - a.population);
+    // C. Top Category
+    const topCatId = Object.keys(catExpenses).reduce(
+      (a, b) => (catExpenses[a] > catExpenses[b] ? a : b),
+      '',
+    );
+    const topCategory = categories.find((c) => c.id === topCatId);
+    const topCatAmount = topCatId ? catExpenses[topCatId] : 0;
+    const topCatPercent =
+      monthlyExpenses > 0 ? (topCatAmount / monthlyExpenses) * 100 : 0;
 
-    return { totalIncome: inc, totalExpenses: exp, pieData: pie };
-  }, [transactions, categories, t, language]);
+    // D. Main Insight
+    let insight = '';
+    if (monthlyExpenses > lastMonthExpenses && lastMonthExpenses > 0) {
+      const diff =
+        ((monthlyExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;
+      insight = t('insightSpentMore', { percent: diff.toFixed(0) });
+    } else if (remainingBalance > 0) {
+      insight = t('insightSavingMoney');
+    } else {
+      insight = t('insightKeepGoing');
+    }
+
+    // E. Goals Preview
+    const activeGoals = goals.filter((g) => g.status === 'active').slice(0, 2);
+
+    // F. Recent Transactions
+    const recentTransactions = [...transactions]
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 5);
+
+    // Spending Progress (B) - find total budget if any
+    const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
+    const limit = totalBudget > 0 ? totalBudget : monthlyIncome;
+    const ratio = limit > 0 ? monthlyExpenses / limit : 0;
+    const progress = Math.min(ratio, 1);
+
+    let progressColor = '#4caf50'; // Green
+    if (ratio > 0.9)
+      progressColor = theme.colors.error; // Red
+    else if (ratio >= 0.7) progressColor = '#ff9800'; // Orange
+
+    let progressMessage = '';
+    if (monthlyExpenses > 0 || monthlyIncome > 0) {
+      progressMessage = t('doingWell');
+      if (ratio > 1.0) progressMessage = t('exceededLimit');
+      else if (ratio > 0.9) progressMessage = t('aboutToExceed');
+      else if (ratio >= 0.7) progressMessage = t('closeToLimit');
+    }
+
+    return {
+      monthlyIncome,
+      monthlyExpenses,
+      remainingBalance,
+      topCategory,
+      topCatAmount,
+      topCatPercent,
+      insight,
+      activeGoals,
+      recentTransactions,
+      totalBudget,
+      limit,
+      progress,
+      progressRatio: ratio,
+      progressColor,
+      progressMessage,
+    };
+  }, [transactions, categories, goals, budgets, t, theme]);
+
+  const currentMonthDisplay = format(new Date(), 'MMMM yyyy', {
+    locale: language === 'es' ? esLocale : enUS,
+  });
 
   return (
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.accountsSection}>
-          <Text
-            variant="labelLarge"
-            style={[styles.sectionHeader, { color: theme.colors.secondary }]}
-          >
-            {t('accounts')}
+        <View style={styles.monthHeader}>
+          <Text variant="headlineSmall" style={styles.monthText}>
+            {currentMonthDisplay}
           </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.accountsScrollContent}
-          >
-            {accounts.map((acc) => (
-              <Card
-                key={acc.id}
-                style={[
-                  styles.accountCard,
-                  { borderLeftColor: acc.color || theme.colors.primary },
-                ]}
-                onPress={() =>
-                  router.push({
-                    pathname: '/transactions',
-                    params: { accountId: acc.id },
-                  })
-                }
-                mode="elevated"
-              >
-                <Card.Content>
-                  <Text variant="labelMedium" style={styles.accountCardName}>
-                    {translateName(acc.name)}
-                  </Text>
-                  <Text variant="titleMedium" style={styles.accountCardBalance}>
-                    {formatCurrency(acc.currentBalance, acc.currency)}
-                  </Text>
-                  <Text
-                    variant="labelSmall"
-                    style={[
-                      styles.accountCardType,
-                      { color: theme.colors.outline },
-                    ]}
-                  >
-                    {t(acc.type).toUpperCase()}
-                  </Text>
-                </Card.Content>
-              </Card>
-            ))}
-          </ScrollView>
         </View>
 
-        <View style={styles.summaryContainer}>
-          <View style={styles.monthlyBox}>
-            <Surface style={styles.monthlyItem} elevation={1}>
-              <Text variant="labelSmall" style={styles.monthlyLabel}>
-                {t('monthlyIncome')}
-              </Text>
-              <Text
-                variant="titleLarge"
-                style={[styles.monthlyValue, { color: '#4caf50' }]}
-              >
-                +{formatCurrency(totalIncome)}
-              </Text>
-            </Surface>
-            <Surface style={styles.monthlyItem} elevation={1}>
-              <Text variant="labelSmall" style={styles.monthlyLabel}>
-                {t('monthlyExpenses')}
-              </Text>
-              <Text
-                variant="titleLarge"
-                style={[styles.monthlyValue, { color: theme.colors.error }]}
-              >
-                -{formatCurrency(totalExpenses)}
-              </Text>
-            </Surface>
-          </View>
-        </View>
-
-        <ScoreCard scoreData={scoreData} />
-
-        {pieData.length > 0 && (
-          <Card style={styles.chartCard} mode="elevated">
-            <Card.Content>
-              <Text variant="titleMedium" style={styles.chartTitle}>
-                {t('chartTitle')}
-              </Text>
-              <View style={styles.pieRow}>
-                <PieChart
-                  data={pieData.map((d) => ({
-                    ...d,
-                    name: '',
-                    population: parseFloat(d.percentage),
-                  }))}
-                  width={screenWidth - 64}
-                  height={200}
-                  chartConfig={{
-                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                  }}
-                  accessor="population"
-                  backgroundColor="transparent"
-                  paddingLeft="50"
-                  absolute
-                  hasLegend={false}
-                />
+        {/* A. Balance Summary */}
+        <Card style={styles.card} mode="elevated">
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.cardTitle}>
+              {t('balanceSummary')}
+            </Text>
+            <View style={styles.balanceRow}>
+              <View>
+                <Text variant="labelSmall">{t('income')}</Text>
+                <Text style={[styles.amountText, { color: '#4caf50' }]}>
+                  {formatCurrency(data.monthlyIncome)}
+                </Text>
               </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text variant="labelSmall">{t('expense')}</Text>
+                <Text
+                  style={[styles.amountText, { color: theme.colors.error }]}
+                >
+                  {formatCurrency(data.monthlyExpenses)}
+                </Text>
+              </View>
+            </View>
+            <Divider style={{ marginVertical: 12 }} />
+            <View style={styles.balanceRow}>
+              <Text variant="titleMedium">{t('remaining')}</Text>
+              <Text
+                variant="titleLarge"
+                style={{
+                  fontWeight: '900',
+                  color:
+                    data.remainingBalance >= 0 ? '#4caf50' : theme.colors.error,
+                }}
+              >
+                {formatCurrency(data.remainingBalance)}
+              </Text>
+            </View>
+          </Card.Content>
+        </Card>
 
-              <View style={styles.categoryList}>
-                {(showAllCategories ? pieData : pieData.slice(0, 5)).map(
-                  (item, idx) => (
-                    <View key={idx} style={styles.categoryInfoRow}>
-                      <View style={styles.categoryLabelGroup}>
-                        <View
-                          style={[
-                            styles.colorDot,
-                            { backgroundColor: item.color },
-                          ]}
-                        />
-                        <Text variant="bodyMedium" numberOfLines={1}>
-                          {translateName(item.name)}
-                        </Text>
-                      </View>
-                      <View style={styles.categoryValueGroup}>
-                        <Text
-                          variant="bodyMedium"
-                          style={styles.categoryAmount}
-                        >
-                          {formatCurrency(item.population)}
+        {/* B. Monthly Spending Progress */}
+        <Card style={styles.card} mode="elevated">
+          <Card.Content>
+            <View style={styles.cardHeader}>
+              <Text variant="titleMedium">{t('spendingProgress')}</Text>
+              <Text variant="titleSmall" style={{ fontWeight: 'bold' }}>
+                {formatCurrency(data.monthlyExpenses)}
+              </Text>
+            </View>
+            <ProgressBar
+              progress={data.progress}
+              color={data.progressColor}
+              style={styles.progressBar}
+            />
+            <View
+              style={[
+                styles.row,
+                { justifyContent: 'space-between', marginTop: 6 },
+              ]}
+            >
+              {data.progressMessage ? (
+                <Text
+                  variant="labelSmall"
+                  style={{ color: data.progressColor, fontWeight: 'bold' }}
+                >
+                  {data.progressMessage}
+                </Text>
+              ) : null}
+              {data.limit > 0 && (
+                <Text
+                  variant="labelSmall"
+                  style={{ color: theme.colors.outline }}
+                >
+                  {t('totalBudgetLimit', {
+                    amount: formatCurrency(data.limit),
+                  })}
+                </Text>
+              )}
+            </View>
+          </Card.Content>
+        </Card>
+
+        {/* C. Top Category */}
+        <Card style={styles.card} mode="elevated">
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.cardTitle}>
+              {t('topSpendingCategory')}
+            </Text>
+            {data.topCategory ? (
+              <View style={styles.row}>
+                <Avatar.Icon
+                  size={40}
+                  icon={data.topCategory.icon || 'tag'}
+                  style={{
+                    backgroundColor:
+                      data.topCategory.color || theme.colors.primary,
+                  }}
+                />
+                <View style={{ marginLeft: 12, flex: 1 }}>
+                  <Text variant="titleMedium">
+                    {translateName(data.topCategory.name)}
+                  </Text>
+                  <Text variant="labelSmall">
+                    {data.topCatPercent.toFixed(1)}% {t('ofTotalExpenses')}
+                  </Text>
+                </View>
+                <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>
+                  {formatCurrency(data.topCatAmount)}
+                </Text>
+              </View>
+            ) : (
+              <Text
+                variant="bodyMedium"
+                style={{ color: theme.colors.outline, fontStyle: 'italic' }}
+              >
+                {t('noDataForPeriod')}
+              </Text>
+            )}
+          </Card.Content>
+        </Card>
+
+        {/* D. Main Insight */}
+        <Card
+          style={[
+            styles.card,
+            { backgroundColor: theme.colors.primaryContainer },
+          ]}
+          mode="contained"
+        >
+          <Card.Content style={styles.insightContent}>
+            <Ionicons
+              name="bulb-outline"
+              size={24}
+              color={theme.colors.onPrimaryContainer}
+            />
+            <Text
+              variant="bodyLarge"
+              style={[
+                styles.insightText,
+                { color: theme.colors.onPrimaryContainer },
+              ]}
+            >
+              {data.insight}
+            </Text>
+          </Card.Content>
+        </Card>
+
+        {/* E. Goals Preview */}
+        <Card style={styles.card} mode="elevated">
+          <Card.Content>
+            <View style={styles.cardHeader}>
+              <Text variant="titleMedium">{t('goals')}</Text>
+              <TouchableOpacity onPress={() => router.push('/goals')}>
+                <Text
+                  variant="labelLarge"
+                  style={{ color: theme.colors.primary }}
+                >
+                  {t('viewAll')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {data.activeGoals.length > 0 ? (
+              data.activeGoals.map((goal) => (
+                <View key={goal.id} style={{ marginBottom: 16 }}>
+                  <View style={styles.cardHeader}>
+                    <Text variant="bodyMedium" style={{ fontWeight: 'bold' }}>
+                      {goal.name}
+                    </Text>
+                    <Text variant="labelSmall">
+                      {formatCurrency(goal.currentAmount)} /{' '}
+                      {formatCurrency(goal.targetAmount)}
+                    </Text>
+                  </View>
+                  <ProgressBar
+                    progress={Math.min(
+                      goal.currentAmount / goal.targetAmount,
+                      1,
+                    )}
+                    color={goal.color || theme.colors.primary}
+                    style={styles.progressBar}
+                  />
+                </View>
+              ))
+            ) : (
+              <Text
+                variant="bodyMedium"
+                style={{ color: theme.colors.outline, fontStyle: 'italic' }}
+              >
+                {t('noGoals')}
+              </Text>
+            )}
+          </Card.Content>
+        </Card>
+
+        {/* F. Recent Transactions */}
+        <Card style={styles.card} mode="elevated">
+          <Card.Content>
+            <View style={[styles.cardHeader, { marginBottom: 12 }]}>
+              <Text variant="titleMedium">{t('recentTransactions')}</Text>
+              <TouchableOpacity onPress={() => router.push('/transactions')}>
+                <Text
+                  variant="labelLarge"
+                  style={{ color: theme.colors.primary }}
+                >
+                  {t('seeAll')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {data.recentTransactions.length > 0 ? (
+              data.recentTransactions.map((tr, index) => {
+                const cat = categories.find((c) => c.id === tr.categoryId);
+                return (
+                  <View key={tr.id}>
+                    <View style={[styles.row, { paddingVertical: 12 }]}>
+                      <Avatar.Icon
+                        size={36}
+                        icon={
+                          cat?.icon || (tr.type === 'income' ? 'plus' : 'minus')
+                        }
+                        style={{
+                          backgroundColor:
+                            cat?.color ||
+                            (tr.type === 'income'
+                              ? '#4caf50'
+                              : theme.colors.error),
+                        }}
+                        color="#fff"
+                      />
+                      <View style={{ marginLeft: 12, flex: 1 }}>
+                        <Text variant="bodyLarge" numberOfLines={1}>
+                          {tr.note || translateName(cat?.name || 'Other')}
                         </Text>
                         <Text
                           variant="labelSmall"
                           style={{ color: theme.colors.outline }}
                         >
-                          {item.percentage}%
+                          {format(parseISO(tr.date), 'MMM dd, yyyy', {
+                            locale: language === 'es' ? esLocale : enUS,
+                          })}
                         </Text>
                       </View>
+                      <Text
+                        variant="bodyLarge"
+                        style={{
+                          fontWeight: 'bold',
+                          color:
+                            tr.type === 'income'
+                              ? '#4caf50'
+                              : theme.colors.error,
+                        }}
+                      >
+                        {tr.type === 'income' ? '+' : '-'}
+                        {formatCurrency(tr.amount)}
+                      </Text>
                     </View>
-                  ),
-                )}
-
-                {pieData.length > 5 && (
-                  <TouchableOpacity
-                    onPress={() => setShowAllCategories(!showAllCategories)}
-                    style={styles.showMoreBtn}
-                  >
-                    <Text
-                      variant="labelLarge"
-                      style={{ color: theme.colors.primary }}
-                    >
-                      {showAllCategories ? t('showLess') : t('showMore')}
-                    </Text>
-                    <Ionicons
-                      name={showAllCategories ? 'chevron-up' : 'chevron-down'}
-                      size={16}
-                      color={theme.colors.primary}
-                    />
-                  </TouchableOpacity>
-                )}
-              </View>
-            </Card.Content>
-          </Card>
-        )}
+                    {index < data.recentTransactions.length - 1 && <Divider />}
+                  </View>
+                );
+              })
+            ) : (
+              <Text
+                variant="bodyMedium"
+                style={{
+                  color: theme.colors.outline,
+                  fontStyle: 'italic',
+                  textAlign: 'center',
+                  paddingVertical: 20,
+                }}
+              >
+                {t('noTransactions')}
+              </Text>
+            )}
+          </Card.Content>
+        </Card>
 
         <BannerAdComponent />
       </ScrollView>
@@ -280,110 +459,62 @@ const defaultStyles = (theme: any) =>
       flex: 1,
     },
     content: {
+      padding: 16,
       paddingBottom: 100,
     },
-    summaryContainer: {
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-    },
-    accountsSection: {
-      marginTop: 16,
-      paddingBottom: 8,
-    },
-    sectionHeader: {
-      textTransform: 'uppercase',
-      letterSpacing: 1.5,
-      marginLeft: 20,
-      marginBottom: 12,
-      fontWeight: '800',
-    },
-    accountsScrollContent: {
-      paddingHorizontal: 16,
-    },
-    accountCard: {
-      marginRight: 12,
-      width: 160,
-      borderLeftWidth: 4,
-      borderRadius: 16,
-    },
-    accountCardName: {
-      color: theme.colors.onSurfaceVariant,
-      fontWeight: '600',
-    },
-    accountCardBalance: {
-      fontWeight: '900',
-      marginVertical: 4,
-    },
-    accountCardType: {
-      fontWeight: '700',
-    },
-    monthlyBox: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-    },
-    monthlyItem: {
-      flex: 1,
-      padding: 20,
-      borderRadius: 24,
-      marginHorizontal: 4,
-      alignItems: 'center',
-      backgroundColor: theme.colors.surface,
-    },
-    monthlyLabel: {
-      color: theme.colors.onSurfaceVariant,
-      marginBottom: 4,
-    },
-    monthlyValue: {
-      fontWeight: '900',
-    },
-    chartCard: {
-      margin: 16,
-      borderRadius: 24,
-      backgroundColor: theme.colors.surface,
-    },
-    chartTitle: {
-      fontWeight: '700',
-      textAlign: 'center',
-      marginBottom: 8,
-    },
-    pieRow: {
-      alignItems: 'center',
+    center: {
       justifyContent: 'center',
-      height: 180,
+      alignItems: 'center',
     },
-    categoryList: {
+    monthHeader: {
+      marginBottom: 20,
       marginTop: 8,
     },
-    categoryInfoRow: {
+    monthText: {
+      fontWeight: '900',
+      color: theme.colors.primary,
+      textTransform: 'capitalize',
+    },
+    card: {
+      marginBottom: 16,
+      borderRadius: 16,
+    },
+    cardTitle: {
+      marginBottom: 12,
+      fontWeight: 'bold',
+    },
+    cardHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingVertical: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(0,0,0,0.03)',
+      marginBottom: 8,
     },
-    categoryLabelGroup: {
+    balanceRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    amountText: {
+      fontSize: 18,
+      fontWeight: 'bold',
+    },
+    progressBar: {
+      height: 8,
+      borderRadius: 4,
+    },
+    row: {
       flexDirection: 'row',
       alignItems: 'center',
+    },
+    insightContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 8,
+    },
+    insightText: {
+      marginLeft: 12,
       flex: 1,
-    },
-    colorDot: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
-      marginRight: 12,
-    },
-    categoryValueGroup: {
-      alignItems: 'flex-end',
-    },
-    categoryAmount: {
-      fontWeight: '700',
-    },
-    showMoreBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 16,
+      fontWeight: '600',
     },
     fab: {
       position: 'absolute',

@@ -10,6 +10,8 @@ export class AnalyticsManager {
     const currentMonth = await AnalyticsService.getMonthlyMetrics(0);
     const previousMonth = await AnalyticsService.getMonthlyMetrics(1);
     const categoryExpenses = await AnalyticsService.getCategoryExpenses(0);
+    const previousCategoryExpenses =
+      await AnalyticsService.getCategoryExpenses(1);
     const spendingDays = await AnalyticsService.getSpendingDays(0);
     const budgets = await AnalyticsService.getBudgetAdherence();
 
@@ -25,6 +27,7 @@ export class AnalyticsManager {
       currentMonth,
       previousMonth,
       categoryExpenses,
+      previousCategoryExpenses,
       budgets,
       spendingDays,
       expenseGrowth,
