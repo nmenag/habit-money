@@ -35,9 +35,11 @@ module.exports = {
     updates: {
       url: 'https://u.expo.dev/bed3f721-6ec2-417a-8e38-4d5f66778b4d',
     },
+    jsEngine: 'hermes',
     ios: {
       supportsTablet: true,
       bundleIdentifier: getPackageName(),
+      jsEngine: 'hermes',
     },
     android: {
       adaptiveIcon: {
@@ -51,6 +53,7 @@ module.exports = {
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
       package: getPackageName(),
+      jsEngine: 'hermes',
     },
     web: {
       output: 'static',

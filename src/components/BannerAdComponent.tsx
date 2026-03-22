@@ -8,10 +8,19 @@ import { useStore } from '../store/useStore';
 export const BannerAdComponent = () => {
   const theme = useTheme();
   const styles = defaultStyles(theme);
-  const { isPremiumUser } = useStore();
+  const isPremiumUser = useStore((s) => s.isPremiumUser);
+  const [showAd, setShowAd] = React.useState(false);
 
-  if (isPremiumUser) {
-    return null;
+  React.useEffect(() => {
+    // Delay ad loading by 1 second to prioritize main UI
+    const timer = setTimeout(() => {
+      setShowAd(true);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isPremiumUser || !showAd) {
+    return <View style={{ height: 0 }} />;
   }
 
   return (
@@ -23,7 +32,7 @@ export const BannerAdComponent = () => {
           requestNonPersonalizedAdsOnly: true,
         }}
         onAdFailedToLoad={(error) => {
-          console.error('Banner Ad failed to load: ', error);
+          if (__DEV__) console.warn('Banner Ad failed to load: ', error);
         }}
       />
     </View>

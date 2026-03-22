@@ -25,7 +25,7 @@ const FILTER_OPTIONS: FilterOption[] = [
   { type: 'custom', labelKey: 'filterCustom', short: 'Custom' },
 ];
 
-export const FilterBar: React.FC = () => {
+export const FilterBar: React.FC = React.memo(() => {
   const theme = useTheme();
   const { t } = useTranslation();
   const language = useStore((s) => s.language);
@@ -222,7 +222,7 @@ export const FilterBar: React.FC = () => {
       />
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   wrapper: {

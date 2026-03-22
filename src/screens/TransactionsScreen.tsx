@@ -21,12 +21,17 @@ import { isInRange } from '../utils/dateFilters';
 
 export const TransactionsScreen = () => {
   const params = useLocalSearchParams<{ accountId?: string }>();
-  const { transactions, accounts, categories, language } = useStore();
+  const { transactions, accounts, categories, language, loadFullData } =
+    useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const { selectedRange } = useFilterStore();
   const insets = useSafeAreaInsets();
+
+  React.useEffect(() => {
+    loadFullData();
+  }, [loadFullData]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(

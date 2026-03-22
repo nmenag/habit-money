@@ -24,16 +24,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
 
-export const DashboardScreen = () => {
-  const {
-    transactions,
-    accounts,
-    categories,
-    goals,
-    budgets,
-    isLoaded,
-    formatCurrency,
-  } = useStore();
+export const DashboardScreen = React.memo(() => {
+  const transactions = useStore((s) => s.transactions);
+  const accounts = useStore((s) => s.accounts);
+  const categories = useStore((s) => s.categories);
+  const goals = useStore((s) => s.goals);
+  const budgets = useStore((s) => s.budgets);
+  const isLoaded = useStore((s) => s.isLoaded);
+  const formatCurrency = useStore((s) => s.formatCurrency);
+
   const { t, language, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
@@ -451,7 +450,7 @@ export const DashboardScreen = () => {
       />
     </View>
   );
-};
+});
 
 const defaultStyles = (theme: any) =>
   StyleSheet.create({
