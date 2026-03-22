@@ -22,8 +22,13 @@ FinHabit is a modern, high-performance personal finance tracker built with **Rea
   - **Export to CSV**: Download full transaction history for external spreadsheet analysis.
   - **JSON Backup & Restore**: Securely export and import all application data to local JSON files for long-term data protection.
 - **Compliance & Privacy**:
-  - **About the App**: Dedicated section for app information, versioning, and developer contact.
-  - **Privacy Policy**: Built-in, professional privacy policy compliant with Google Play Store requirements, highlighting local data storage.
+  - **About the App**: Specialized section for branding, versioning, and developer contact.
+  - **Privacy Policy**: Built-in, professional privacy policy compliant with Google Store requirements.
+- **Premium Branding & UI**:
+  - **High-Resolution Iconry**: Custom, professionally designed app icons for Production and Preview builds.
+  - **Android Adaptive Icons**: Full support for adaptive layers (Foreground, Background, Monochrome) ensuring consistent look across different Android launchers.
+  - **Themed Icon Support**: Integration with Android 13+ material themed icons.
+  - **Integrated Logo**: Real-time branding in the About section for a cohesive user experience.
 - **Monetization**: Seamlessly integrated Google Mobile Ads (Banner and Interstitial) with test mode for development.
 
 ## 🛠️ Tech Stack
@@ -33,6 +38,7 @@ FinHabit is a modern, high-performance personal finance tracker built with **Rea
 - **State**: [Zustand](https://github.com/pmndrs/zustand) (Atomic & Persisted state)
 - **Database**: [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) (High-performance local storage)
 - **UI Components**: [React Native Paper](https://reactnativepaper.com/) (Material Design)
+- **Icons & Branding**: Custom Adaptive Iconry & [Material Community Icons](https://github.com/oblador/react-native-vector-icons)
 - **Visualization**: [react-native-chart-kit](https://github.com/indiespirit/react-native-chart-kit)
 - **Utilities**: `date-fns`, `expo-localization`
 
