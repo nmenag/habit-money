@@ -1,18 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import {
-  Text,
-  Button,
-  Surface,
-  useTheme,
-  IconButton,
-  Menu,
-} from 'react-native-paper';
 import * as Localization from 'expo-localization';
 import { useRouter } from 'expo-router';
-import { useStore, useTranslation } from '../store/useStore';
-import { Language } from '../i18n/translations';
+import React, { useEffect, useState } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
+import { Button, Menu, Surface, Text, useTheme } from 'react-native-paper';
 import { getDb } from '../db/schema';
+import { Language } from '../i18n/translations';
+import { useStore, useTranslation } from '../store/useStore';
 
 const ONBOARDING_KEY = 'isFirstLaunch';
 
@@ -36,10 +29,8 @@ export const OnboardingScreen = () => {
   }, [setLanguage]);
 
   const handleContinue = async () => {
-    // 1. Set language in store (saves to DB settings)
     setLanguage(detectedLang);
 
-    // 2. Set settings including first launch status and currency
     const db = getDb();
     db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
       'currency',
@@ -53,19 +44,14 @@ export const OnboardingScreen = () => {
       'onboarding_date',
       new Date().toISOString().split('T')[0],
     ]);
-
-    // 3. Reload data to ensure everything is fresh
     loadData();
 
-    // 4. Navigate to dashboard using replace
     router.replace('/(tabs)');
   };
 
   const selectLanguage = (lang: Language) => {
     setDetectedLang(lang);
     setLanguage(lang);
-    // Auto-switch currency when language changes for better UX
-    setDetectedCurrency(lang === 'es' ? 'COP' : 'USD');
     setLangMenuVisible(false);
   };
 
@@ -80,18 +66,10 @@ export const OnboardingScreen = () => {
     >
       <View style={styles.content}>
         <Surface style={styles.imageContainer} elevation={0}>
-          <View
-            style={[
-              styles.logoCircle,
-              { backgroundColor: theme.colors.primaryContainer },
-            ]}
-          >
-            <IconButton
-              icon="wallet-outline"
-              size={60}
-              iconColor={theme.colors.primary}
-            />
-          </View>
+          <Image
+            source={require('../../assets/icon.png')}
+            style={styles.logoImage}
+          />
         </Surface>
 
         <Text variant="headlineLarge" style={styles.title}>
@@ -200,12 +178,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoCircle: {
+  logoImage: {
     width: 120,
     height: 120,
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 28,
   },
   logoText: {
     fontSize: 48,
