@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
 import React from 'react';
 import {
+  Image,
   Linking,
   ScrollView,
   StyleSheet,
@@ -42,9 +43,10 @@ export const AboutScreen = () => {
       }}
     >
       <View style={styles.header}>
-        <View style={styles.logoPlaceholder}>
-          <Text style={styles.logoText}>FH</Text>
-        </View>
+        <Image
+          source={require('../../assets/icon.png')}
+          style={styles.logoImage}
+        />
         <Text variant="headlineMedium" style={styles.appName}>
           {appName}
         </Text>
@@ -91,24 +93,16 @@ const createStyles = (theme: any) =>
       alignItems: 'center',
       marginBottom: 32,
     },
-    logoPlaceholder: {
-      width: 80,
-      height: 80,
-      borderRadius: 20,
-      backgroundColor: theme.colors.primary,
-      justifyContent: 'center',
-      alignItems: 'center',
+    logoImage: {
+      width: 100,
+      height: 100,
+      borderRadius: 24,
       marginBottom: 16,
       elevation: 4,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.2,
       shadowRadius: 4,
-    },
-    logoText: {
-      color: 'white',
-      fontSize: 32,
-      fontWeight: 'bold',
     },
     appName: {
       fontWeight: 'bold',

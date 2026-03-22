@@ -41,10 +41,10 @@ module.exports = {
     },
     android: {
       adaptiveIcon: {
-        backgroundColor: '#E6F4FE',
+        backgroundColor: '#005CEE',
         foregroundImage: isPreview
-          ? './assets/icon-preview.png'
-          : './assets/icon.png',
+          ? './assets/images/android-icon-foreground-preview.png'
+          : './assets/images/android-icon-foreground.png',
         backgroundImage: './assets/images/android-icon-background.png',
         monochromeImage: './assets/images/android-icon-monochrome.png',
       },
