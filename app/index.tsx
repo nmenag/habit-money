@@ -16,7 +16,11 @@ export default function Index() {
           "SELECT val FROM settings WHERE id = 'isFirstLaunch'",
         );
 
-        if (row && row.val === 'false') {
+        const txCount = db.getFirstSync<{ count: number }>(
+          'SELECT COUNT(*) as count FROM transactions',
+        );
+
+        if ((row && row.val === 'false') || (txCount && txCount.count > 0)) {
           setFirstLaunch(false);
         } else {
           // If no row found or it's not 'false', then it's the first launch
