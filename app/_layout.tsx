@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, useColorScheme, View } from 'react-native';
 import mobileAds from 'react-native-google-mobile-ads';
@@ -50,6 +50,7 @@ export default function RootLayout() {
   const { loadData, isLoaded } = useStore();
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
+  const pathname = usePathname();
 
   const isDarkTheme = colorScheme === 'dark';
   const theme = isDarkTheme ? CombinedDarkTheme : CombinedDefaultTheme;
@@ -72,10 +73,15 @@ export default function RootLayout() {
     if (dbInitialized && !isLoaded) {
       loadData();
     }
-    if (dbInitialized && isLoaded) {
+    if (
+      dbInitialized &&
+      isLoaded &&
+      pathname !== '/onboarding' &&
+      pathname !== '/'
+    ) {
       checkBackupReminder(t);
     }
-  }, [dbInitialized, isLoaded, loadData, t]);
+  }, [dbInitialized, isLoaded, loadData, pathname, t]);
 
   if (!dbInitialized || !isLoaded) {
     return (
@@ -96,6 +102,7 @@ export default function RootLayout() {
     <PaperProvider theme={theme}>
       <StatusBar style={isDarkTheme ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="add-transaction"

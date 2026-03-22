@@ -208,14 +208,30 @@ export const checkBackupReminder = async (t: (key: any) => string) => {
   const db = getDb();
   const today = new Date().toISOString().split('T')[0];
 
+  // 1. Check if we have transactions
+  const txCount = db.getFirstSync<{ count: number }>(
+    'SELECT COUNT(*) as count FROM transactions',
+  );
+  if (!txCount || txCount.count === 0) return;
+
+  // 2. Check onboarding date
+  let onboardingDateRow;
+  try {
+    onboardingDateRow = db.getFirstSync<{ val: string }>(
+      "SELECT val FROM settings WHERE id = 'onboarding_date'",
+    );
+  } catch (e) {}
+
+  // If we don't have an onboarding date yet (older version), we might want to show it anyway
+  // but if we do have it, we only show it if today is not the onboarding day.
+  if (onboardingDateRow?.val === today) return;
+
   let lastReminderRow;
   try {
     lastReminderRow = db.getFirstSync<{ val: string }>(
       "SELECT val FROM settings WHERE id = 'last_backup_reminder_date'",
     );
-  } catch (e) {
-    // Column may not exist or setting row not present
-  }
+  } catch (e) {}
 
   const lastReminderDate = lastReminderRow?.val || '';
 

@@ -308,4 +308,10 @@ export const es = {
   withdrawFrom: 'Retirar de',
   depositTo: 'Depositar en',
   selectDate: 'Seleccionar Fecha',
+  onboardingWelcome: 'Bienvenido a FinHabit',
+  onboardingDesc:
+    'La forma más sencilla de rastrear tus gastos y construir mejores hábitos financieros.',
+  detectedLanguage: 'Idioma Detectado',
+  detectedCurrency: 'Moneda Detectada',
+  getStarted: 'Continuar',
 };

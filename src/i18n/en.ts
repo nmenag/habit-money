@@ -302,4 +302,10 @@ export const en = {
   withdrawFrom: 'Withdraw From',
   depositTo: 'Deposit To',
   selectDate: 'Select Date',
+  onboardingWelcome: 'Welcome to FinHabit',
+  onboardingDesc:
+    'The simplest way to track your expenses and build better financial habits.',
+  detectedLanguage: 'Detected Language',
+  detectedCurrency: 'Detected Currency',
+  getStarted: 'Continue',
 };

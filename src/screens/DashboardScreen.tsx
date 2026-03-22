@@ -125,10 +125,13 @@ export const DashboardScreen = () => {
       progressColor = theme.colors.error; // Red
     else if (ratio >= 0.7) progressColor = '#ff9800'; // Orange
 
-    let progressMessage = t('doingWell');
-    if (ratio > 1.0) progressMessage = t('exceededLimit');
-    else if (ratio > 0.9) progressMessage = t('aboutToExceed');
-    else if (ratio >= 0.7) progressMessage = t('closeToLimit');
+    let progressMessage = '';
+    if (monthlyExpenses > 0 || monthlyIncome > 0) {
+      progressMessage = t('doingWell');
+      if (ratio > 1.0) progressMessage = t('exceededLimit');
+      else if (ratio > 0.9) progressMessage = t('aboutToExceed');
+      else if (ratio >= 0.7) progressMessage = t('closeToLimit');
+    }
 
     return {
       monthlyIncome,
@@ -223,12 +226,14 @@ export const DashboardScreen = () => {
                 { justifyContent: 'space-between', marginTop: 6 },
               ]}
             >
-              <Text
-                variant="labelSmall"
-                style={{ color: data.progressColor, fontWeight: 'bold' }}
-              >
-                {data.progressMessage}
-              </Text>
+              {data.progressMessage ? (
+                <Text
+                  variant="labelSmall"
+                  style={{ color: data.progressColor, fontWeight: 'bold' }}
+                >
+                  {data.progressMessage}
+                </Text>
+              ) : null}
               {data.limit > 0 && (
                 <Text
                   variant="labelSmall"
