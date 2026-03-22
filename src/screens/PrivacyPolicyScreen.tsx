@@ -35,11 +35,16 @@ export const PrivacyPolicyScreen = () => {
     {
       title: t('contactInfoTitle'),
       content: t('contactInfoContent'),
+      showEmail: true,
     },
   ];
 
   const handleOpenPolicy = () => {
     Linking.openURL(t('adMobPrivacyUrl'));
+  };
+
+  const handleSendEmail = () => {
+    Linking.openURL(`mailto:${t('contactEmailAddress')}`);
   };
 
   return (
@@ -56,8 +61,7 @@ export const PrivacyPolicyScreen = () => {
           {t('privacyPolicy')}
         </Text>
         <Text variant="bodySmall" style={styles.lastUpdated}>
-          {t('lastUpdated') || 'Last Updated'}:{' '}
-          {new Date().toLocaleDateString()}
+          {t('lastUpdated') || 'Last Updated'}: {t('lastUpdatedDate')}
         </Text>
       </View>
 
@@ -78,6 +82,15 @@ export const PrivacyPolicyScreen = () => {
               onPress={handleOpenPolicy}
             >
               {t('viewAdMobPrivacy')}
+            </Text>
+          )}
+          {section.showEmail && (
+            <Text
+              variant="bodyMedium"
+              style={styles.link}
+              onPress={handleSendEmail}
+            >
+              {t('contactEmailAddress')}
             </Text>
           )}
           {index < POLICY_SECTIONS.length - 1 && (

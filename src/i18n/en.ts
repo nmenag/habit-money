@@ -250,7 +250,7 @@ export const en = {
   appDescription:
     'FinHabit is a simple and powerful tool designed to help you track your expenses, manage budgets, and reach your financial goals. All your data is stored locally on your device.',
   version: 'Version',
-  contactEmail: 'Contact Email',
+  contactEmailLabel: 'Contact Email',
   website: 'Website',
   dataCollectionTitle: 'Data Collection',
   dataCollectionContent:
@@ -269,8 +269,10 @@ export const en = {
     'You have full control over your data. You can delete individual transactions or the entire app data at any time.',
   contactInfoTitle: 'Contact Information',
   contactInfoContent:
-    'If you have any questions regarding this privacy policy, you can contact us at: nmena.garzon@gmail.com',
+    'If you have any questions regarding this privacy policy, you can contact us at:',
+  contactEmailAddress: 'nmena.garzon@gmail.com',
   lastUpdated: 'Last Updated',
+  lastUpdatedDate: '2024-03-22',
   app: 'App',
   adMobPrivacyUrl: 'https://policies.google.com/privacy',
   viewAdMobPrivacy: 'View Google/AdMob Privacy Policy',
@@ -294,7 +296,7 @@ export const en = {
   sendFeedback: 'Send Feedback',
   donate: 'Donate',
   donateDesc: 'Support the development of FinHabit',
-  buyMeACoffee: 'Buy me a coffee',
+  buyMeACoffee: 'Invite me a coffee',
   amountTooltip: 'Enter the value of the transaction.',
   accountTooltip: 'Select which account this transaction belongs to.',
   categoryTooltip: 'Categories help you analyze your spending habits.',

@@ -256,7 +256,7 @@ export const es = {
   appDescription:
     'FinHabit es una herramienta simple y poderosa diseñada para ayudarte a rastrear tus gastos, gestionar presupuestos y alcanzar tus metas financieras. Todos tus datos se almacenan localmente en tu dispositivo.',
   version: 'Versión',
-  contactEmail: 'Correo de Contacto',
+  contactEmailLabel: 'Correo de Contacto',
   dataCollectionTitle: 'Recopilación de Datos',
   dataCollectionContent:
     'FinHabit NO recopila ningún dato personal. Toda la información que ingresas (transacciones, cuentas, metas) se almacena localmente en tu dispositivo y nunca se sube a nuestros servidores.',
@@ -274,8 +274,10 @@ export const es = {
     'Tienes control total sobre tus datos. Puedes eliminar transacciones individuales o todos los datos de la aplicación en cualquier momento.',
   contactInfoTitle: 'Información de Contacto',
   contactInfoContent:
-    'Si tienes alguna pregunta sobre esta política de privacidad, puedes contactarnos en: nmena.garzon@gmail.com',
+    'Si tienes alguna pregunta sobre esta política de privacidad, puedes contactarnos en:',
+  contactEmailAddress: 'nmena.garzon@gmail.com',
   lastUpdated: 'Última actualización',
+  lastUpdatedDate: '22 de marzo de 2024',
   app: 'App',
   website: 'Sitio Web',
   adMobPrivacyUrl: 'https://policies.google.com/privacy',
@@ -300,7 +302,7 @@ export const es = {
   sendFeedback: 'Enviar Feedback',
   donate: 'Donar',
   donateDesc: 'Apoya el desarrollo de FinHabit',
-  buyMeACoffee: 'Cómprame un café',
+  buyMeACoffee: 'Invitame a un café',
   amountTooltip: 'Ingresa el valor de la transacción.',
   accountTooltip: 'Selecciona a qué cuenta pertenece esta transacción.',
   categoryTooltip: 'Las categorías te ayudan a analizar tus hábitos de gasto.',

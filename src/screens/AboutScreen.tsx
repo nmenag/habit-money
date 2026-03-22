@@ -19,7 +19,6 @@ export const AboutScreen = () => {
 
   const appName = Constants.expoConfig?.name || 'FinHabit';
   const version = Constants.expoConfig?.version || '1.0.0';
-  const contactEmail = 'nmena.garzon@gmail.com';
 
   const handleOpenLink = (url: string) => {
     Linking.openURL(url).catch((err) =>
@@ -28,7 +27,7 @@ export const AboutScreen = () => {
   };
 
   const handleEmail = () => {
-    Linking.openURL(`mailto:${contactEmail}`).catch((err) =>
+    Linking.openURL(`mailto:${t('contactEmailAddress')}`).catch((err) =>
       console.error("Couldn't send email", err),
     );
   };
@@ -66,10 +65,10 @@ export const AboutScreen = () => {
 
         <TouchableOpacity style={styles.infoRow} onPress={handleEmail}>
           <Text variant="labelLarge" style={styles.infoLabel}>
-            {t('contactEmail')}
+            {t('contactEmailLabel')}
           </Text>
           <Text variant="bodyMedium" style={styles.link}>
-            {contactEmail}
+            {t('contactEmailAddress')}
           </Text>
         </TouchableOpacity>
       </View>
