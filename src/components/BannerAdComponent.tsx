@@ -26,7 +26,7 @@ export const BannerAdComponent = () => {
     <View style={styles.container}>
       <BannerAd
         unitId={AdService.getBannerId()}
-        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        size={BannerAdSize.LARGE_ANCHORED_ADAPTIVE_BANNER}
         requestOptions={{
           requestNonPersonalizedAdsOnly: true,
         }}
