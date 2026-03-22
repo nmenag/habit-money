@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "timestamp": "2026-03-22T18:30:00.000Z",
+  "data": {
+    "accounts": [
+      {
+        "id": "acc-1",
+        "name": "Checking",
+        "type": "bank",
+        "initialBalance": 1000.0,
+        "currentBalance": 850.0,
+        "color": "#2196f3",
+        "currency": "COP"
+      },
+      {
+        "id": "acc-2",
+        "name": "Savings",
+        "type": "savings",
+        "initialBalance": 5000.0,
+        "currentBalance": 5150.0,
+        "color": "#4caf50",
+        "currency": "COP"
+      }
+    ],
+    "categories": [
+      {
+        "id": "1",
+        "name": "Food",
+        "type": "expense",
+        "icon": "food",
+        "color": "#f44336"
+      },
+      {
+        "id": "2",
+        "name": "Transport",
+        "type": "expense",
+        "icon": "car",
+        "color": "#2196f3"
+      },
+      {
+        "id": "7",
+        "name": "Salary",
+        "type": "income",
+        "icon": "cash",
+        "color": "#4caf50"
+      }
+    ],
+    "transactions": [
+      {
+        "id": "tx-1",
+        "type": "income",
+        "amount": 1500.0,
+        "categoryId": "7",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-03-01T08:00:00.000Z",
+        "note": "Monthly Pay"
+      },
+      {
+        "id": "tx-2",
+        "type": "expense",
+        "amount": 150.0,
+        "categoryId": "2",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-03-05T12:00:00.000Z",
+        "note": "Fuel"
+      },
+      {
+        "id": "tx-3",
+        "type": "transfer",
+        "amount": 150.0,
+        "categoryId": null,
+        "accountId": "acc-1",
+        "toAccountId": "acc-2",
+        "budgetId": null,
+        "date": "2026-03-10T10:00:00.000Z",
+        "note": "Auto-save"
+      }
+    ],
+    "budgets": [
+      {
+        "id": "b-1",
+        "name": "Dining",
+        "amount": 300.0,
+        "color": "#f44336",
+        "categoryId": "1"
+      }
+    ],
+    "goals": [
+      {
+        "id": "g-1",
+        "name": "Emergencies",
+        "targetAmount": 10000.0,
+        "currentAmount": 5150.0,
+        "color": "#3f51b5",
+        "icon": "shield-check",
+        "deadline": "2026-12-31",
+        "status": "active"
+      }
+    ],
+    "settings": [
+      { "id": "currency", "val": "COP" },
+      { "id": "onboarding_completed", "val": "true" }
+    ]
+  }
+}

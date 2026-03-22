@@ -31,11 +31,16 @@ export const InsightsScreen = () => {
     analyticsReport,
     formatCurrency,
     currencySymbol,
+    loadFullData,
   } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const { selectedRange } = useFilterStore();
+
+  React.useEffect(() => {
+    loadFullData();
+  }, [loadFullData]);
 
   const filtered = useMemo(() => {
     const inRange = transactions.filter((tx) =>

@@ -134,6 +134,9 @@ export const initDb = () => {
         FOREIGN KEY(categoryId) REFERENCES categories(id) ON DELETE SET NULL,
         FOREIGN KEY(accountId) REFERENCES accounts(id) ON DELETE CASCADE
       );
+      CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date);
+      CREATE INDEX IF NOT EXISTS idx_transactions_accountId ON transactions(accountId);
+      CREATE INDEX IF NOT EXISTS idx_transactions_categoryId ON transactions(categoryId);
     `);
   } catch (e) {
     console.error('Error creating transactions table:', e);

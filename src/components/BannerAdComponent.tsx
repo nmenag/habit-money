@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 import { useTheme } from 'react-native-paper';
 import { AdService } from '../ads/AdService';
@@ -8,10 +8,18 @@ import { useStore } from '../store/useStore';
 export const BannerAdComponent = () => {
   const theme = useTheme();
   const styles = defaultStyles(theme);
-  const { isPremiumUser } = useStore();
+  const isPremiumUser = useStore((s) => s.isPremiumUser);
+  const [showAd, setShowAd] = React.useState(false);
 
-  if (isPremiumUser) {
-    return null;
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowAd(true);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isPremiumUser || !showAd) {
+    return <View style={{ height: 0 }} />;
   }
 
   return (
@@ -23,7 +31,7 @@ export const BannerAdComponent = () => {
           requestNonPersonalizedAdsOnly: true,
         }}
         onAdFailedToLoad={(error) => {
-          console.error('Banner Ad failed to load: ', error);
+          if (__DEV__) console.warn('Banner Ad failed to load: ', error);
         }}
       />
     </View>

@@ -56,14 +56,31 @@ export default function App() {
   const theme = isDarkTheme ? CombinedDarkTheme : CombinedDefaultTheme;
 
   useEffect(() => {
+    // Suppress console.log in production
+    if (!__DEV__) {
+      console.log = () => {};
+      console.info = () => {};
+      console.warn = () => {};
+      // Keep console.error for critical crash tracking if needed,
+      // but usually even that is filtered by some.
+    }
+
     const setup = async () => {
       try {
-        await mobileAds().initialize();
-        interstitialManager.init();
         initDb();
         setDbInitialized(true);
+
+        // Defer Ads initialization to not block startup
+        setTimeout(async () => {
+          try {
+            await mobileAds().initialize();
+            interstitialManager.init();
+          } catch (e) {
+            if (__DEV__) console.warn('Ads init failed:', e);
+          }
+        }, 2000);
       } catch (e) {
-        console.error('Failed to initialize local DB or Ads', e);
+        console.error('Failed to initialize local DB', e);
       }
     };
     setup();

@@ -77,6 +77,10 @@ interface AppState {
   analyticsReport: AnalyticsReport | null;
 
   loadData: () => void;
+  loadFullData: () => void;
+  loadTransactions: (limit?: number) => void;
+  loadGoals: () => void;
+  loadBudgets: () => void;
   setLanguage: (lang: Language) => void;
   addAccount: (account: Account) => void;
   editAccount: (account: Account) => void;
@@ -127,13 +131,28 @@ export const useStore = create<AppState>((set, get) => ({
 
   loadData: () => {
     const db = getDb();
-    const accounts = db.getAllSync<Account>('SELECT * FROM accounts');
-    const transactions = db.getAllSync<Transaction>(
-      'SELECT * FROM transactions ORDER BY date DESC',
+
+    // 1. Fetch only essential settings and core entities for dashboard
+    const accounts = db.getAllSync<Account>(
+      'SELECT id, name, type, initialBalance, currentBalance, color, currency FROM accounts',
     );
-    const categories = db.getAllSync<Category>('SELECT * FROM categories');
-    const budgets = db.getAllSync<Budget>('SELECT * FROM budgets');
-    const goals = db.getAllSync<Goal>('SELECT * FROM goals');
+    const categories = db.getAllSync<Category>(
+      'SELECT id, name, type, icon, color FROM categories',
+    );
+
+    // Fetch only transactions from the last 2 months for the dashboard summaries
+    const twoMonthsAgo = new Date();
+    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+    const dateLimit = twoMonthsAgo.toISOString().split('T')[0];
+
+    const transactions = db.getAllSync<Transaction>(
+      `SELECT id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId 
+       FROM transactions 
+       WHERE date >= ? 
+       ORDER BY date DESC LIMIT 300`,
+      [dateLimit],
+    );
+
     let currencySetting;
     let languageSetting;
     let premiumSetting;
@@ -174,8 +193,6 @@ export const useStore = create<AppState>((set, get) => ({
       accounts,
       transactions,
       categories,
-      budgets,
-      goals,
       language: finalLanguage,
       currency: currencySetting?.val || 'COP',
       currencySymbol: currencySetting?.val === 'EUR' ? '€' : '$',
@@ -183,6 +200,49 @@ export const useStore = create<AppState>((set, get) => ({
       isLoaded: true,
     });
 
+    // Defer loading of non-critical data
+    setTimeout(() => {
+      get().loadBudgets();
+      get().loadGoals();
+    }, 100);
+  },
+
+  loadTransactions: (limit = 1000) => {
+    const db = getDb();
+    const transactions = db.getAllSync<Transaction>(
+      `SELECT id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId FROM transactions ORDER BY date DESC LIMIT ${limit}`,
+    );
+    set({ transactions });
+  },
+
+  loadGoals: () => {
+    const db = getDb();
+    const goals = db.getAllSync<Goal>(
+      'SELECT id, name, targetAmount, currentAmount, color, icon, deadline, status FROM goals',
+    );
+    set({ goals });
+  },
+
+  loadBudgets: () => {
+    const db = getDb();
+    const budgets = db.getAllSync<Budget>(
+      'SELECT id, amount, color, categoryId FROM budgets',
+    );
+    set({ budgets });
+  },
+
+  loadFullData: () => {
+    const db = getDb();
+    const transactions = db.getAllSync<Transaction>(
+      'SELECT id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId FROM transactions ORDER BY date DESC',
+    );
+    const goals = db.getAllSync<Goal>(
+      'SELECT id, name, targetAmount, currentAmount, color, icon, deadline, status FROM goals',
+    );
+    const budgets = db.getAllSync<Budget>(
+      'SELECT id, amount, color, categoryId FROM budgets',
+    );
+    set({ transactions, goals, budgets });
     get().refreshAnalytics();
   },
 
