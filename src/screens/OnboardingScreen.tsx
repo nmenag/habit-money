@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import {
   Text,
   Button,
@@ -80,18 +80,10 @@ export const OnboardingScreen = () => {
     >
       <View style={styles.content}>
         <Surface style={styles.imageContainer} elevation={0}>
-          <View
-            style={[
-              styles.logoCircle,
-              { backgroundColor: theme.colors.primaryContainer },
-            ]}
-          >
-            <IconButton
-              icon="wallet-outline"
-              size={60}
-              iconColor={theme.colors.primary}
-            />
-          </View>
+          <Image
+            source={require('../../assets/icon.png')}
+            style={styles.logoImage}
+          />
         </Surface>
 
         <Text variant="headlineLarge" style={styles.title}>
@@ -200,12 +192,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoCircle: {
+  logoImage: {
     width: 120,
     height: 120,
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 28,
   },
   logoText: {
     fontSize: 48,
