@@ -8,7 +8,12 @@ import {
 } from 'expo-file-system/legacy';
 import { getDb } from '../db/schema';
 
+let isBackupInProgress = false;
+let isRestoreInProgress = false;
+
 export const backupToJSON = async () => {
+  if (isBackupInProgress) return;
+  isBackupInProgress = true;
   const db = getDb();
   try {
     const accounts = db.getAllSync('SELECT * FROM accounts');
@@ -44,6 +49,8 @@ export const backupToJSON = async () => {
   } catch (error) {
     console.error('Backup error:', error);
     Alert.alert('Error', 'Failed to create backup');
+  } finally {
+    isBackupInProgress = false;
   }
 };
 
@@ -51,6 +58,8 @@ export const restoreFromJSON = async (
   onSuccess: () => void,
   t: (key: any) => string,
 ) => {
+  if (isRestoreInProgress) return;
+  isRestoreInProgress = true;
   try {
     // Dynamic import to avoid errors if native module fails during initial load
     const DocumentPicker = require('expo-document-picker');
@@ -126,7 +135,7 @@ export const restoreFromJSON = async (
 
     // Transactions
     const insertTransaction = db.prepareSync(
-      'INSERT INTO transactions (id, type, amount, categoryId, accountId, budgetId, date, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO transactions (id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
     try {
       transactions.forEach((t: any) =>
@@ -139,6 +148,7 @@ export const restoreFromJSON = async (
           t.budgetId,
           t.date,
           t.note,
+          t.toAccountId || null,
         ]),
       );
     } finally {
@@ -201,6 +211,8 @@ export const restoreFromJSON = async (
   } catch (error) {
     console.error('Restore error:', error);
     Alert.alert(t('error'), t('restoreError'));
+  } finally {
+    isRestoreInProgress = false;
   }
 };
 

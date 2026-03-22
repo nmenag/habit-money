@@ -23,9 +23,27 @@
       }
     ],
     "categories": [
-      { "id": "1", "name": "Food", "type": "expense", "icon": "food", "color": "#f44336" },
-      { "id": "2", "name": "Transport", "type": "expense", "icon": "car", "color": "#2196f3" },
-      { "id": "7", "name": "Salary", "type": "income", "icon": "cash", "color": "#4caf50" }
+      {
+        "id": "1",
+        "name": "Food",
+        "type": "expense",
+        "icon": "food",
+        "color": "#f44336"
+      },
+      {
+        "id": "2",
+        "name": "Transport",
+        "type": "expense",
+        "icon": "car",
+        "color": "#2196f3"
+      },
+      {
+        "id": "7",
+        "name": "Salary",
+        "type": "income",
+        "icon": "cash",
+        "color": "#4caf50"
+      }
     ],
     "transactions": [
       {
