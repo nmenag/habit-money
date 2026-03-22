@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 import { useTheme } from 'react-native-paper';
 import { AdService } from '../ads/AdService';
@@ -12,7 +12,6 @@ export const BannerAdComponent = () => {
   const [showAd, setShowAd] = React.useState(false);
 
   React.useEffect(() => {
-    // Delay ad loading by 1 second to prioritize main UI
     const timer = setTimeout(() => {
       setShowAd(true);
     }, 1000);

@@ -18,6 +18,19 @@ const getAppName = () => {
 };
 
 const isPreview = variant === 'preview';
+const isDev = variant === 'development';
+
+const getIcon = () => {
+  if (isDev) return './assets/icon-dev.png';
+  if (isPreview) return './assets/icon-preview.png';
+  return './assets/icon.png';
+};
+
+const getAdaptiveForeground = () => {
+  if (isDev) return './assets/images/android-icon-foreground-dev.png';
+  if (isPreview) return './assets/images/android-icon-foreground-preview.png';
+  return './assets/images/android-icon-foreground.png';
+};
 
 module.exports = {
   expo: {
@@ -25,7 +38,7 @@ module.exports = {
     slug: 'fin-habit',
     version: '1.0.0',
     orientation: 'portrait',
-    icon: isPreview ? './assets/icon-preview.png' : './assets/icon.png',
+    icon: getIcon(),
     scheme: 'finhabit',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
@@ -44,9 +57,7 @@ module.exports = {
     android: {
       adaptiveIcon: {
         backgroundColor: '#005CEE',
-        foregroundImage: isPreview
-          ? './assets/images/android-icon-foreground-preview.png'
-          : './assets/images/android-icon-foreground.png',
+        foregroundImage: getAdaptiveForeground(),
         backgroundImage: './assets/images/android-icon-background.png',
         monochromeImage: './assets/images/android-icon-monochrome.png',
       },
