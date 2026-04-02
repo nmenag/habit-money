@@ -19,7 +19,7 @@ export const AboutScreen = () => {
   const styles = createStyles(theme);
 
   const appName = Constants.expoConfig?.name || 'FinHabit';
-  const version = Constants.expoConfig?.version || '1.0.0';
+  const version = Constants.expoConfig?.version;
 
   const handleEmail = () => {
     Linking.openURL(`mailto:${t('contactEmailAddress')}`).catch((err) =>
