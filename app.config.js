@@ -88,7 +88,7 @@ module.exports = {
       [
         'react-native-google-mobile-ads',
         {
-          androidAppId: 'ca-app-pub-3940256099942544~3347511713',
+          androidAppId: process.env.ADMOB_ANDROID_APP_ID || 'ca-app-pub-3940256099942544~3347511713',
         },
       ],
       'expo-build-properties',
