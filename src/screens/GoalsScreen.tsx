@@ -22,7 +22,6 @@ export const GoalsScreen = () => {
       item.targetAmount > 0
         ? Math.min((item.currentAmount / item.targetAmount) * 100, 100)
         : 0;
-    const isCompleted = item.status === 'completed';
 
     return (
       <ScaleDecorator>

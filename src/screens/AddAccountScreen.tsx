@@ -66,7 +66,7 @@ export const AddAccountScreen = () => {
     if (params.account) {
       try {
         return JSON.parse(params.account) as Account;
-      } catch (e) {
+      } catch {
         return undefined;
       }
     }

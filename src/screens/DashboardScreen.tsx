@@ -1,11 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import {
-  endOfMonth,
-  format,
-  parseISO,
-  startOfMonth,
-  subMonths,
-} from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { enUS, es as esLocale } from 'date-fns/locale';
 import { router } from 'expo-router';
 import React, { useMemo } from 'react';
@@ -26,7 +20,6 @@ import { useStore, useTranslation } from '../store/useStore';
 
 export const DashboardScreen = React.memo(() => {
   const transactions = useStore((s) => s.transactions);
-  const accounts = useStore((s) => s.accounts);
   const categories = useStore((s) => s.categories);
   const goals = useStore((s) => s.goals);
   const budgets = useStore((s) => s.budgets);
@@ -37,14 +30,6 @@ export const DashboardScreen = React.memo(() => {
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
-
-  if (!isLoaded) {
-    return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
 
   // 3. Data layer - helper functions
   const data = useMemo(() => {
@@ -72,8 +57,8 @@ export const DashboardScreen = React.memo(() => {
     let lastMonthExpenses = 0;
 
     transactions.forEach((tr) => {
-      const d = parseISO(tr.date);
-      if (d >= currentStart && d <= currentEnd) {
+      const trDate = new Date(tr.date);
+      if (trDate >= currentStart && trDate <= currentEnd) {
         if (tr.type === 'income') {
           monthlyIncome += tr.amount;
         } else {
@@ -83,7 +68,7 @@ export const DashboardScreen = React.memo(() => {
               (catExpenses[tr.categoryId] || 0) + tr.amount;
           }
         }
-      } else if (d >= lastStart && d <= lastEnd) {
+      } else if (trDate >= lastStart && trDate <= lastEnd) {
         if (tr.type === 'expense') {
           lastMonthExpenses += tr.amount;
         }
@@ -167,6 +152,14 @@ export const DashboardScreen = React.memo(() => {
       locale: language === 'es' ? esLocale : enUS,
     });
   }, [language]);
+
+  if (!isLoaded) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <View
@@ -466,6 +459,8 @@ export const DashboardScreen = React.memo(() => {
     </View>
   );
 });
+
+DashboardScreen.displayName = 'DashboardScreen';
 
 const defaultStyles = (theme: any) =>
   StyleSheet.create({

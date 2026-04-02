@@ -37,13 +37,13 @@ export const initDb = () => {
     db.execSync(
       "ALTER TABLE accounts ADD COLUMN currency TEXT NOT NULL DEFAULT 'COP';",
     );
-  } catch (e) {}
+  } catch {}
 
   try {
     db.execSync(
       'ALTER TABLE accounts ADD COLUMN displayOrder INTEGER DEFAULT 0;',
     );
-  } catch (e) {}
+  } catch {}
 
   try {
     db.execSync(`
@@ -91,7 +91,7 @@ export const initDb = () => {
     db.execSync(
       'ALTER TABLE categories ADD COLUMN displayOrder INTEGER DEFAULT 0;',
     );
-  } catch (e) {}
+  } catch {}
 
   try {
     db.execSync(`
@@ -111,13 +111,13 @@ export const initDb = () => {
 
   try {
     db.execSync('ALTER TABLE budgets ADD COLUMN categoryId TEXT;');
-  } catch (e) {}
+  } catch {}
 
   try {
     db.execSync(
       'ALTER TABLE budgets ADD COLUMN displayOrder INTEGER DEFAULT 0;',
     );
-  } catch (e) {}
+  } catch {}
 
   try {
     db.execSync(`
@@ -165,13 +165,13 @@ export const initDb = () => {
 
   try {
     db.execSync('ALTER TABLE transactions ADD COLUMN budgetId TEXT;');
-  } catch (e) {
+  } catch {
     // Column might already exist
   }
 
   try {
     db.execSync('ALTER TABLE transactions ADD COLUMN toAccountId TEXT;');
-  } catch (e) {
+  } catch {
     // Column might already exist
   }
 
@@ -195,7 +195,7 @@ export const initDb = () => {
 
   try {
     db.execSync('ALTER TABLE goals ADD COLUMN displayOrder INTEGER DEFAULT 0;');
-  } catch (e) {}
+  } catch {}
 
   const locales = Localization.getLocales();
   const langCode = locales[0]?.languageCode === 'es' ? 'es' : 'en';

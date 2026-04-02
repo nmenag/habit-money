@@ -99,7 +99,7 @@ export const InsightsScreen = () => {
       txCount,
       spendingDays,
     };
-  }, [transactions, categories, selectedRange, t]);
+  }, [transactions, categories, selectedRange, t, translateName]);
 
   const barData = analyticsReport
     ? {

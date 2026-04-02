@@ -1,11 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import {
   Button,
   Card,
-  Chip,
   Divider,
   List,
   Menu,

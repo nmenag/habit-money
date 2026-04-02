@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { Suspense, lazy } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { DashboardScreen } from '../screens/DashboardScreen';
-import { useStore, useTranslation } from '../store/useStore';
+import { useTranslation } from '../store/useStore';
 
 // Lazy load non-essential screens
 const AccountsScreen = lazy(() =>
@@ -93,11 +93,17 @@ const LoadingFallback = () => (
   </View>
 );
 
-const withSuspense = (Component: any) => (props: any) => (
-  <Suspense fallback={<LoadingFallback />}>
-    <Component {...props} />
-  </Suspense>
-);
+const withSuspense = (Component: any) => {
+  const WrappedComponent = (props: any) => (
+    <Suspense fallback={<LoadingFallback />}>
+      <Component {...props} />
+    </Suspense>
+  );
+  WrappedComponent.displayName = `withSuspense(${
+    Component.displayName || Component.name || 'Component'
+  })`;
+  return WrappedComponent;
+};
 
 const TabNavigator = () => {
   const { t } = useTranslation();

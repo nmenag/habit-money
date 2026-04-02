@@ -1,10 +1,4 @@
-import {
-  endOfMonth,
-  format,
-  parseISO,
-  startOfMonth,
-  subMonths,
-} from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Transaction } from '../store/useStore';
 import { translations } from '../i18n/translations';
 
@@ -28,17 +22,24 @@ export const calculateFinancialScore = (
   transactions: Transaction[],
 ): ScoreData => {
   const now = new Date();
-  const currentMonthStart = startOfMonth(now);
-  const currentMonthEnd = endOfMonth(now);
+  const currentMonthStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+  );
+  const currentMonthEnd = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999),
+  );
 
-  const lastMonthStart = startOfMonth(subMonths(now, 1));
-  const lastMonthEnd = endOfMonth(subMonths(now, 1));
+  const lastMonthStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1),
+  );
+  const lastMonthEnd = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999),
+  );
 
   let currentIncome = 0;
   let currentExpense = 0;
   let spendingDates = new Set<string>();
 
-  let lastIncome = 0;
   let lastExpense = 0;
 
   transactions.forEach((t) => {
@@ -55,9 +56,7 @@ export const calculateFinancialScore = (
     }
 
     if (txDate >= lastMonthStart && txDate <= lastMonthEnd) {
-      if (t.type === 'income') {
-        lastIncome += amount;
-      } else {
+      if (t.type === 'expense') {
         lastExpense += amount;
       }
     }
@@ -94,11 +93,23 @@ export const calculateFinancialScore = (
   else if (score < 70) status = 'warning';
 
   let streak = 0;
-  let evalDate = subMonths(now, 1);
+  let evalMonthOffset = 1;
 
   while (true) {
-    const monthStart = startOfMonth(evalDate);
-    const monthEnd = endOfMonth(evalDate);
+    const monthStart = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - evalMonthOffset, 1),
+    );
+    const monthEnd = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth() - evalMonthOffset + 1,
+        0,
+        23,
+        59,
+        59,
+        999,
+      ),
+    );
 
     let monthIncome = 0;
     let monthExpense = 0;
@@ -113,7 +124,7 @@ export const calculateFinancialScore = (
 
     if (monthExpense <= monthIncome && (monthIncome > 0 || monthExpense > 0)) {
       streak++;
-      evalDate = subMonths(evalDate, 1);
+      evalMonthOffset++;
     } else {
       break;
     }

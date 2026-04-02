@@ -21,12 +21,6 @@ export const AboutScreen = () => {
   const appName = Constants.expoConfig?.name || 'FinHabit';
   const version = Constants.expoConfig?.version || '1.0.0';
 
-  const handleOpenLink = (url: string) => {
-    Linking.openURL(url).catch((err) =>
-      console.error("Couldn't load page", err),
-    );
-  };
-
   const handleEmail = () => {
     Linking.openURL(`mailto:${t('contactEmailAddress')}`).catch((err) =>
       console.error("Couldn't send email", err),

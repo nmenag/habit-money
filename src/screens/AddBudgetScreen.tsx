@@ -47,7 +47,7 @@ export const AddBudgetScreen = () => {
     if (params.budget) {
       try {
         return JSON.parse(params.budget) as Budget;
-      } catch (e) {
+      } catch {
         return undefined;
       }
     }
