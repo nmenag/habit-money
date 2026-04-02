@@ -6,6 +6,7 @@ FinHabit is a modern, high-performance personal finance tracker built with **Rea
 
 - **Expo Router Navigation**: Modern, file-based routing architecture for robust deep linking and smooth transitions.
 - **Dedicated Settings Tab**: A centralized hub for managing Accounts, Categories, Budgets, and Goals, keeping the main dashboard clean and focused.
+- **Interactive Reordering**: Full **Drag & Drop** support for Accounts, Categories, Budgets, and Goals, allowing for personal organization and layout customization.
 - **Full Localization (i18n)**: Comprehensive support for English and Spanish, including localized default categories and financial insights.
 - **Visual Financial Health**:
   - **Dynamic Dashboard**: Real-time overview of net balance and monthly cash flow.
@@ -14,10 +15,11 @@ FinHabit is a modern, high-performance personal finance tracker built with **Rea
 - **Smart Management**:
   - **Account Tracking**: Manage multiple financial sources (Cash, Bank, Credit).
   - **Financial Goals**: Set targets (e.g., "New Car") and track progress with estimated monthly savings.
-  - **Budgeting**: Define monthly spending limits per category with real-time percentage tracking.
-- **Accessibility & UX**:
-  - **Safe Area Aware**: Optimized for all device sizes (notches, dynamic islands, etc.).
+  - **Budgeting**: Define monthly spending limits per category with real-time percentage and remaining balance tracking.
+- **Customization & UX**:
+  - **Expanded Palette**: Choice of 40+ premium colors and over 100+ specialized icons for categories and goals.
   - **Dark Mode Ready**: Premium look and feel in any lighting.
+  - **UTC Core**: Precise date management using UTC standard for consistent reporting across timezones.
 - **Data Mobility & Security**:
   - **Export to CSV**: Download full transaction history for external spreadsheet analysis.
   - **JSON Backup & Restore**: Securely export and import all application data to local JSON files for long-term data protection.
@@ -26,19 +28,17 @@ FinHabit is a modern, high-performance personal finance tracker built with **Rea
   - **Privacy Policy**: Built-in, professional privacy policy compliant with Google Store requirements.
 - **Premium Branding & UI**:
   - **High-Resolution Iconry**: Custom, professionally designed app icons for Production and Preview builds.
-  - **Android Adaptive Icons**: Full support for adaptive layers (Foreground, Background, Monochrome) ensuring consistent look across different Android launchers.
-  - **Themed Icon Support**: Integration with Android 13+ material themed icons.
-  - **Integrated Logo**: Real-time branding in the About section for a cohesive user experience.
+  - **Android Adaptive Icons**: Full support for adaptive layers (Android 13+ material themed icons).
 - **Monetization**: Seamlessly integrated Google Mobile Ads (Banner and Interstitial) with test mode for development.
 
 ## 🛠️ Tech Stack
 
-- **Core**: [Expo SDK](https://expo.dev) & React Native
+- **Core**: [Expo SDK 54](https://expo.dev) & React Native 0.81
 - **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/) (File-based navigation)
 - **State**: [Zustand](https://github.com/pmndrs/zustand) (Atomic & Persisted state)
 - **Database**: [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) (High-performance local storage)
-- **UI Components**: [React Native Paper](https://reactnativepaper.com/) (Material Design)
-- **Icons & Branding**: Custom Adaptive Iconry & [Material Community Icons](https://github.com/oblador/react-native-vector-icons)
+- **UI Components**: [React Native Paper](https://reactnativepaper.com/) (Material Design 3)
+- **Gestures**: [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/) & [react-native-draggable-flatlist](https://github.com/computerjazz/react-native-draggable-flatlist)
 - **Visualization**: [react-native-chart-kit](https://github.com/indiespirit/react-native-chart-kit)
 - **Utilities**: `date-fns`, `expo-localization`
 
@@ -60,11 +60,15 @@ FinHabit is a modern, high-performance personal finance tracker built with **Rea
    npx expo start
    ```
 
+## 🧪 CI/CD
+
+- **GitHub Actions**: Automated pipeline for linting and type-checking on every push or pull request to `main`/`master`.
+- **Quality Control**: Use `npm run lint` and `npm run check-types` to ensure code stability.
+
 ## 📦 Deployment & Updates
 
 - **Verified OTA**: Supporting `expo-updates` for seamless Over-The-Air bug fixes and route updates.
 - **Build**: Optimized for Android APK/AAB builds using EAS Build.
-- **Route Validation**: Run `npm run routes` (aliased to `expo export`) to verify all route files are bundled correctly for OTA updates.
 
 ## 📄 License
 
