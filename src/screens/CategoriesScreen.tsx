@@ -1,7 +1,11 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
+import DraggableFlatList, {
+  RenderItemParams,
+  ScaleDecorator,
+} from 'react-native-draggable-flatlist';
 import {
   Card,
   FAB,
@@ -20,7 +24,8 @@ import {
 } from '../store/useStore';
 
 export const CategoriesScreen = () => {
-  const { categories, deleteCategory, transactions } = useStore();
+  const { categories, deleteCategory, transactions, updateCategoriesOrder } =
+    useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
@@ -47,44 +52,55 @@ export const CategoriesScreen = () => {
     );
   };
 
-  const renderItem = ({ item }: { item: Category }) => (
-    <Card
-      style={styles.card}
-      onPress={() =>
-        router.push({
-          pathname: '/add-category',
-          params: { category: JSON.stringify(item) },
-        })
-      }
-      mode="elevated"
-    >
-      <List.Item
-        title={translateName(item.name)}
-        titleStyle={styles.categoryName}
-        left={() => (
-          <View
-            style={[
-              styles.iconCircle,
-              { backgroundColor: item.color || theme.colors.surfaceVariant },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name={(item.icon as any) || 'tag'}
-              size={22}
-              color="#fff"
+  const renderItem = ({ item, drag, isActive }: RenderItemParams<Category>) => (
+    <ScaleDecorator>
+      <Card
+        style={[
+          styles.card,
+          {
+            backgroundColor: isActive
+              ? theme.colors.elevation.level3
+              : theme.colors.surface,
+          },
+        ]}
+        onPress={() =>
+          router.push({
+            pathname: '/add-category',
+            params: { category: JSON.stringify(item) },
+          })
+        }
+        onLongPress={drag}
+        disabled={isActive}
+        mode="elevated"
+      >
+        <List.Item
+          title={translateName(item.name)}
+          titleStyle={styles.categoryName}
+          left={() => (
+            <View
+              style={[
+                styles.iconCircle,
+                { backgroundColor: item.color || theme.colors.surfaceVariant },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name={(item.icon as any) || 'tag'}
+                size={22}
+                color="#fff"
+              />
+            </View>
+          )}
+          right={(props) => (
+            <IconButton
+              {...props}
+              icon="trash-can-outline"
+              iconColor={theme.colors.error}
+              onPress={() => handleDelete(item)}
             />
-          </View>
-        )}
-        right={(props) => (
-          <IconButton
-            {...props}
-            icon="trash-can-outline"
-            iconColor={theme.colors.error}
-            onPress={() => handleDelete(item)}
-          />
-        )}
-      />
-    </Card>
+          )}
+        />
+      </Card>
+    </ScaleDecorator>
   );
 
   const insets = useSafeAreaInsets();
@@ -115,10 +131,17 @@ export const CategoriesScreen = () => {
         />
       </View>
 
-      <FlatList
+      <DraggableFlatList
         data={filteredCategories}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
+        onDragEnd={({ data }) => {
+          // Merge reordered filtered list back into the main categories list
+          const otherCategories = categories.filter(
+            (c) => c.type !== activeTab,
+          );
+          updateCategoriesOrder([...data, ...otherCategories]);
+        }}
         contentContainerStyle={[styles.listContent, { paddingBottom: 100 }]}
         ListEmptyComponent={
           <View style={styles.empty}>

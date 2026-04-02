@@ -1,19 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import DraggableFlatList, {
+  RenderItemParams,
+  ScaleDecorator,
+} from 'react-native-draggable-flatlist';
 import { Card, FAB, ProgressBar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Goal, useStore, useTranslation } from '../store/useStore';
 
 export const GoalsScreen = () => {
-  const { goals, formatCurrency } = useStore();
+  const { goals, formatCurrency, updateGoalsOrder } = useStore();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const styles = defaultStyles(theme);
 
-  const renderItem = ({ item }: { item: Goal }) => {
+  const renderItem = ({ item, drag, isActive }: RenderItemParams<Goal>) => {
     const progress =
       item.targetAmount > 0
         ? Math.min((item.currentAmount / item.targetAmount) * 100, 100)
@@ -21,76 +25,93 @@ export const GoalsScreen = () => {
     const isCompleted = item.status === 'completed';
 
     return (
-      <Card
-        style={styles.card}
-        onPress={() =>
-          router.push({ pathname: '/goal-detail', params: { goalId: item.id } })
-        }
-        mode="elevated"
-      >
-        <Card.Content style={styles.cardContent}>
-          <View style={styles.cardHeader}>
-            <View
-              style={[
-                styles.iconContainer,
-                { backgroundColor: item.color || theme.colors.primary },
-              ]}
-            >
-              <Ionicons
-                name={(item.icon as any) || 'trophy'}
-                size={24}
-                color="#fff"
-              />
-            </View>
-            <View style={styles.textContainer}>
-              <Text variant="titleMedium" style={styles.name}>
-                {item.name}
-              </Text>
-              <Text
-                variant="labelMedium"
-                style={[styles.amountText, { color: theme.colors.outline }]}
-              >
-                {formatCurrency(item.currentAmount)} /{' '}
-                {formatCurrency(item.targetAmount)}
-              </Text>
-            </View>
-            <View style={styles.percentageContainer}>
-              <Text
-                variant="titleMedium"
+      <ScaleDecorator>
+        <Card
+          style={[
+            styles.card,
+            {
+              backgroundColor: isActive
+                ? theme.colors.elevation.level3
+                : theme.colors.surface,
+            },
+          ]}
+          onPress={() =>
+            router.push({
+              pathname: '/goal-detail',
+              params: { goalId: item.id },
+            })
+          }
+          onLongPress={drag}
+          disabled={isActive}
+          mode="elevated"
+        >
+          <Card.Content style={styles.cardContent}>
+            <View style={styles.cardHeader}>
+              <View
                 style={[
-                  styles.percentageText,
-                  { color: item.color || theme.colors.primary },
+                  styles.iconContainer,
+                  { backgroundColor: item.color || theme.colors.primary },
                 ]}
               >
-                {Math.round(progress)}%
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.progressSection}>
-            <ProgressBar
-              progress={progress / 100}
-              color={item.color || theme.colors.primary}
-              style={styles.progressBar}
-            />
-            {item.deadline && (
-              <View style={styles.deadlineRow}>
                 <Ionicons
-                  name="calendar-outline"
-                  size={12}
-                  color={theme.colors.outline}
+                  name={(item.icon as any) || 'trophy'}
+                  size={24}
+                  color="#fff"
                 />
+              </View>
+              <View style={styles.textContainer}>
+                <Text variant="titleMedium" style={styles.name}>
+                  {item.name}
+                </Text>
                 <Text
-                  variant="labelSmall"
-                  style={[styles.deadlineText, { color: theme.colors.outline }]}
+                  variant="labelMedium"
+                  style={[styles.amountText, { color: theme.colors.outline }]}
                 >
-                  {new Date(item.deadline).toLocaleDateString()}
+                  {formatCurrency(item.currentAmount)} /{' '}
+                  {formatCurrency(item.targetAmount)}
                 </Text>
               </View>
-            )}
-          </View>
-        </Card.Content>
-      </Card>
+              <View style={styles.percentageContainer}>
+                <Text
+                  variant="titleMedium"
+                  style={[
+                    styles.percentageText,
+                    { color: item.color || theme.colors.primary },
+                  ]}
+                >
+                  {Math.round(progress)}%
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.progressSection}>
+              <ProgressBar
+                progress={progress / 100}
+                color={item.color || theme.colors.primary}
+                style={styles.progressBar}
+              />
+              {item.deadline && (
+                <View style={styles.deadlineRow}>
+                  <Ionicons
+                    name="calendar-outline"
+                    size={12}
+                    color={theme.colors.outline}
+                  />
+                  <Text
+                    variant="labelSmall"
+                    style={[
+                      styles.deadlineText,
+                      { color: theme.colors.outline },
+                    ]}
+                  >
+                    {new Date(item.deadline).toLocaleDateString()}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </Card.Content>
+        </Card>
+      </ScaleDecorator>
     );
   };
 
@@ -98,9 +119,10 @@ export const GoalsScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <FlatList
+      <DraggableFlatList
         data={goals}
         keyExtractor={(item) => item.id}
+        onDragEnd={({ data }) => updateGoalsOrder(data)}
         renderItem={renderItem}
         contentContainerStyle={[
           styles.listContent,

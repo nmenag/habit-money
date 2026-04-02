@@ -24,29 +24,66 @@ import {
 } from '../store/useStore';
 
 const COLORS = [
-  '#f44336',
-  '#e91e63',
-  '#9c27b0',
-  '#673ab7',
-  '#3f51b5',
-  '#2196f3',
-  '#00bcd4',
-  '#009688',
-  '#4caf50',
-  '#ff9800',
-  '#795548',
-  '#607d8b',
+  // Flat Colors
+  '#f44336', // Red
+  '#e91e63', // Pink
+  '#9c27b0', // Purple
+  '#673ab7', // Deep Purple
+  '#3f51b5', // Indigo
+  '#2196f3', // Blue
+  '#03a9f4', // Light Blue
+  '#00bcd4', // Cyan
+  '#009688', // Teal
+  '#4caf50', // Green
+  '#8bc34a', // Light Green
+  '#cddc39', // Lime
+  '#ffeb3b', // Yellow
+  '#ffc107', // Amber
+  '#ff9800', // Orange
+  '#ff5722', // Deep Orange
+  '#795548', // Brown
+  '#9e9e9e', // Grey
+  '#607d8b', // Blue Grey
+  // Premium / Deep
+  '#1a1a1a', // Black
+  '#d32f2f', // Dark Red
+  '#c2185b', // Dark Pink
+  '#7b1fa2', // Dark Purple
+  '#512da8', // Dark Deep Purple
+  '#303f9f', // Dark Indigo
+  '#1976d2', // Dark Blue
+  '#0288d1', // Dark Light Blue
+  '#0097a7', // Dark Cyan
+  '#00796b', // Dark Teal
+  '#388e3c', // Dark Green
+  '#689f38', // Dark Light Green
+  '#afb42b', // Dark Lime
+  '#fbc02d', // Dark Yellow
+  '#ffa000', // Dark Amber
+  '#f57c00', // Dark Orange
+  '#e64a19', // Dark Deep Orange
+  '#5d4037', // Dark Brown
+  '#455a64', // Dark Blue Grey
 ];
 
 const ICONS = [
+  // Common
   'food',
   'car',
+  'bus',
+  'subway',
+  'bicycle',
   'home',
+  'home-city',
   'controller-classic',
   'medical-bag',
   'format-list-bulleted',
   'cash',
   'wallet',
+  'piggy-bank',
+  'bank',
+  'bank-transfer',
+  'credit-card',
   'cart',
   'airplane',
   'briefcase',
@@ -57,6 +94,50 @@ const ICONS = [
   'music-note',
   'chart-line',
   'trending-up',
+  // Food & Drink
+  'pizza',
+  'fast-food',
+  'food-apple',
+  'beer',
+  'glass-wine',
+  'ice-cream',
+  // Services
+  'gas-station',
+  'movie-open',
+  'ticket',
+  'laptop',
+  'cellphone',
+  'television',
+  'newspaper',
+  'book-open-variant',
+  // Life
+  'gift',
+  'heart',
+  'star',
+  'church',
+  'paw',
+  'dog',
+  'cat',
+  'baby-carriage',
+  'stroller',
+  // Home
+  'lightbulb',
+  'water',
+  'shield-home',
+  'hammer',
+  'wrench',
+  'brush',
+  'camera',
+  // Tech/Entertainment
+  'amazon',
+  'netflix',
+  'spotify',
+  'google-play',
+  'apple',
+  'github',
+  'xbox',
+  'playstation',
+  'steam',
 ];
 
 export const AddCategoryScreen = () => {
@@ -107,6 +188,7 @@ export const AddCategoryScreen = () => {
         type: type,
         color: color,
         icon: icon,
+        displayOrder: 0,
       });
     }
 

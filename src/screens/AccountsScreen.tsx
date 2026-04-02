@@ -1,14 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import DraggableFlatList, {
+  RenderItemParams,
+  ScaleDecorator,
+} from 'react-native-draggable-flatlist';
 import { FAB, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountCard } from '../components/AccountCard';
-import { useStore, useTranslation } from '../store/useStore';
+import { Account, useStore, useTranslation } from '../store/useStore';
 
 export const AccountsScreen = () => {
-  const { accounts, deleteAccount } = useStore();
+  const { accounts, deleteAccount, updateAccountsOrder } = useStore();
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
@@ -23,23 +27,28 @@ export const AccountsScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <FlatList
+      <DraggableFlatList
         data={accounts}
         keyExtractor={(item) => item.id}
+        onDragEnd={({ data }) => updateAccountsOrder(data)}
         contentContainerStyle={{ paddingBottom: 100, paddingTop: 12 }}
-        renderItem={({ item }) => (
-          <AccountCard
-            account={item}
-            onDelete={
-              accounts.length > 1 ? () => deleteAccount(item.id) : undefined
-            }
-            onPress={() =>
-              router.push({
-                pathname: '/add-account',
-                params: { account: JSON.stringify(item) },
-              })
-            }
-          />
+        renderItem={({ item, drag, isActive }: RenderItemParams<Account>) => (
+          <ScaleDecorator>
+            <AccountCard
+              account={item}
+              onDelete={
+                accounts.length > 1 ? () => deleteAccount(item.id) : undefined
+              }
+              onPress={() =>
+                router.push({
+                  pathname: '/add-account',
+                  params: { account: JSON.stringify(item) },
+                })
+              }
+              onLongPress={drag}
+              isActive={isActive}
+            />
+          </ScaleDecorator>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>

@@ -49,10 +49,19 @@ export const DashboardScreen = React.memo(() => {
   // 3. Data layer - helper functions
   const data = useMemo(() => {
     const now = new Date();
-    const currentStart = startOfMonth(now);
-    const currentEnd = endOfMonth(now);
-    const lastStart = startOfMonth(subMonths(now, 1));
-    const lastEnd = endOfMonth(subMonths(now, 1));
+    // Use UTC for current and last month ranges
+    const currentStart = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+    );
+    const currentEnd = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999),
+    );
+    const lastStart = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1),
+    );
+    const lastEnd = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999),
+    );
 
     // A. Balance Summary
     let monthlyIncome = 0;
@@ -151,9 +160,13 @@ export const DashboardScreen = React.memo(() => {
     };
   }, [transactions, categories, goals, budgets, t, theme]);
 
-  const currentMonthDisplay = format(new Date(), 'MMMM yyyy', {
-    locale: language === 'es' ? esLocale : enUS,
-  });
+  const currentMonthDisplay = useMemo(() => {
+    const now = new Date();
+    const utcDate = new Date(now.getUTCFullYear(), now.getUTCMonth(), 1);
+    return format(utcDate, 'MMMM yyyy', {
+      locale: language === 'es' ? esLocale : enUS,
+    });
+  }, [language]);
 
   return (
     <View
@@ -313,51 +326,53 @@ export const DashboardScreen = React.memo(() => {
         </Card>
 
         {/* E. Goals Preview */}
-        <Card style={styles.card} mode="elevated">
-          <Card.Content>
-            <View style={styles.cardHeader}>
-              <Text variant="titleMedium">{t('goals')}</Text>
-              <TouchableOpacity onPress={() => router.push('/goals')}>
-                <Text
-                  variant="labelLarge"
-                  style={{ color: theme.colors.primary }}
-                >
-                  {t('viewAll')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            {data.activeGoals.length > 0 ? (
-              data.activeGoals.map((goal) => (
-                <View key={goal.id} style={{ marginBottom: 16 }}>
-                  <View style={styles.cardHeader}>
-                    <Text variant="bodyMedium" style={{ fontWeight: 'bold' }}>
-                      {goal.name}
-                    </Text>
-                    <Text variant="labelSmall">
-                      {formatCurrency(goal.currentAmount)} /{' '}
-                      {formatCurrency(goal.targetAmount)}
-                    </Text>
+        {goals.length > 0 && (
+          <Card style={styles.card} mode="elevated">
+            <Card.Content>
+              <View style={styles.cardHeader}>
+                <Text variant="titleMedium">{t('goals')}</Text>
+                <TouchableOpacity onPress={() => router.push('/goals')}>
+                  <Text
+                    variant="labelLarge"
+                    style={{ color: theme.colors.primary }}
+                  >
+                    {t('viewAll')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              {data.activeGoals.length > 0 ? (
+                data.activeGoals.map((goal) => (
+                  <View key={goal.id} style={{ marginBottom: 16 }}>
+                    <View style={styles.cardHeader}>
+                      <Text variant="bodyMedium" style={{ fontWeight: 'bold' }}>
+                        {goal.name}
+                      </Text>
+                      <Text variant="labelSmall">
+                        {formatCurrency(goal.currentAmount)} /{' '}
+                        {formatCurrency(goal.targetAmount)}
+                      </Text>
+                    </View>
+                    <ProgressBar
+                      progress={Math.min(
+                        goal.currentAmount / goal.targetAmount,
+                        1,
+                      )}
+                      color={goal.color || theme.colors.primary}
+                      style={styles.progressBar}
+                    />
                   </View>
-                  <ProgressBar
-                    progress={Math.min(
-                      goal.currentAmount / goal.targetAmount,
-                      1,
-                    )}
-                    color={goal.color || theme.colors.primary}
-                    style={styles.progressBar}
-                  />
-                </View>
-              ))
-            ) : (
-              <Text
-                variant="bodyMedium"
-                style={{ color: theme.colors.outline, fontStyle: 'italic' }}
-              >
-                {t('noGoals')}
-              </Text>
-            )}
-          </Card.Content>
-        </Card>
+                ))
+              ) : (
+                <Text
+                  variant="bodyMedium"
+                  style={{ color: theme.colors.outline, fontStyle: 'italic' }}
+                >
+                  {t('noGoals')}
+                </Text>
+              )}
+            </Card.Content>
+          </Card>
+        )}
 
         {/* F. Recent Transactions */}
         <Card style={styles.card} mode="elevated">
