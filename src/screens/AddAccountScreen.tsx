@@ -32,12 +32,24 @@ const COLORS = [
   '#673ab7',
   '#3f51b5',
   '#2196f3',
+  '#03a9f4',
   '#00bcd4',
   '#009688',
   '#4caf50',
+  '#8bc34a',
+  '#cddc39',
+  '#ffeb3b',
+  '#ffc107',
   '#ff9800',
+  '#ff5722',
   '#795548',
+  '#9e9e9e',
   '#607d8b',
+  '#1a1a1a',
+  '#d32f2f',
+  '#c2185b',
+  '#7b1fa2',
+  '#512da8',
 ];
 
 const CURRENCIES = [
@@ -119,6 +131,7 @@ export const AddAccountScreen = () => {
         currentBalance: finalBalance,
         color: color,
         currency: selectedCurrency,
+        displayOrder: 0,
       });
     }
 
