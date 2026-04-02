@@ -22,6 +22,7 @@ export interface Account {
   currentBalance: number;
   color?: string | null;
   currency: string;
+  displayOrder: number;
 }
 
 export interface Category {
@@ -30,13 +31,16 @@ export interface Category {
   type: TransactionType;
   icon?: string | null;
   color?: string | null;
+  displayOrder: number;
 }
 
 export interface Budget {
   id: string;
+  name?: string;
   amount: number;
   color?: string | null;
   categoryId?: string | null;
+  displayOrder: number;
 }
 
 export interface Transaction {
@@ -60,6 +64,7 @@ export interface Goal {
   icon?: string | null;
   deadline?: string | null;
   status: 'active' | 'completed';
+  displayOrder: number;
 }
 
 interface AppState {
@@ -113,6 +118,10 @@ interface AppState {
   checkAndShowAd: () => Promise<void>;
   formatCurrency: (amount: number, currencyCode?: string) => string;
   refreshAnalytics: () => Promise<void>;
+  updateAccountsOrder: (accounts: Account[]) => void;
+  updateCategoriesOrder: (categories: Category[]) => void;
+  updateBudgetsOrder: (budgets: Budget[]) => void;
+  updateGoalsOrder: (goals: Goal[]) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -134,10 +143,10 @@ export const useStore = create<AppState>((set, get) => ({
 
     // 1. Fetch only essential settings and core entities for dashboard
     const accounts = db.getAllSync<Account>(
-      'SELECT id, name, type, initialBalance, currentBalance, color, currency FROM accounts',
+      'SELECT id, name, type, initialBalance, currentBalance, color, currency, displayOrder FROM accounts ORDER BY displayOrder ASC, name ASC',
     );
     const categories = db.getAllSync<Category>(
-      'SELECT id, name, type, icon, color FROM categories',
+      'SELECT id, name, type, icon, color, displayOrder FROM categories ORDER BY displayOrder ASC, name ASC',
     );
 
     // Fetch only transactions from the last 2 months for the dashboard summaries
@@ -218,7 +227,7 @@ export const useStore = create<AppState>((set, get) => ({
   loadGoals: () => {
     const db = getDb();
     const goals = db.getAllSync<Goal>(
-      'SELECT id, name, targetAmount, currentAmount, color, icon, deadline, status FROM goals',
+      'SELECT id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder FROM goals ORDER BY displayOrder ASC',
     );
     set({ goals });
   },
@@ -226,7 +235,7 @@ export const useStore = create<AppState>((set, get) => ({
   loadBudgets: () => {
     const db = getDb();
     const budgets = db.getAllSync<Budget>(
-      'SELECT id, amount, color, categoryId FROM budgets',
+      'SELECT id, name, amount, color, categoryId, displayOrder FROM budgets ORDER BY displayOrder ASC',
     );
     set({ budgets });
   },
@@ -237,10 +246,10 @@ export const useStore = create<AppState>((set, get) => ({
       'SELECT id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId FROM transactions ORDER BY date DESC',
     );
     const goals = db.getAllSync<Goal>(
-      'SELECT id, name, targetAmount, currentAmount, color, icon, deadline, status FROM goals',
+      'SELECT id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder FROM goals ORDER BY displayOrder ASC, name ASC',
     );
     const budgets = db.getAllSync<Budget>(
-      'SELECT id, amount, color, categoryId FROM budgets',
+      'SELECT id, name, amount, color, categoryId, displayOrder FROM budgets ORDER BY displayOrder ASC, id ASC',
     );
     set({ transactions, goals, budgets });
     get().refreshAnalytics();
@@ -262,8 +271,13 @@ export const useStore = create<AppState>((set, get) => ({
 
   addAccount: (account) => {
     const db = getDb();
+    const maxOrder = db.getFirstSync<{ maxOrder: number }>(
+      'SELECT MAX(displayOrder) as maxOrder FROM accounts',
+    );
+    const displayOrder = (maxOrder?.maxOrder || 0) + 1;
+
     db.runSync(
-      'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color, currency) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color, currency, displayOrder) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [
         account.id ?? null,
         account.name ?? null,
@@ -272,9 +286,12 @@ export const useStore = create<AppState>((set, get) => ({
         account.currentBalance ?? 0,
         account.color ?? null,
         account.currency ?? 'COP',
+        displayOrder,
       ],
     );
-    set((state) => ({ accounts: [...state.accounts, account] }));
+    set((state) => ({
+      accounts: [...state.accounts, { ...account, displayOrder }],
+    }));
   },
 
   editAccount: (account) => {
@@ -532,17 +549,25 @@ export const useStore = create<AppState>((set, get) => ({
 
   addCategory: (category) => {
     const db = getDb();
+    const maxOrder = db.getFirstSync<{ maxOrder: number }>(
+      'SELECT MAX(displayOrder) as maxOrder FROM categories',
+    );
+    const displayOrder = (maxOrder?.maxOrder || 0) + 1;
+
     db.runSync(
-      'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO categories (id, name, type, icon, color, displayOrder) VALUES (?, ?, ?, ?, ?, ?)',
       [
         category.id ?? null,
         category.name ?? null,
         category.type ?? null,
         category.icon ?? null,
         category.color ?? null,
+        displayOrder,
       ],
     );
-    set((state) => ({ categories: [...state.categories, category] }));
+    set((state) => ({
+      categories: [...state.categories, { ...category, displayOrder }],
+    }));
   },
 
   editCategory: (category) => {
@@ -574,17 +599,25 @@ export const useStore = create<AppState>((set, get) => ({
 
   addBudget: (budget) => {
     const db = getDb();
+    const maxOrder = db.getFirstSync<{ maxOrder: number }>(
+      'SELECT MAX(displayOrder) as maxOrder FROM budgets',
+    );
+    const displayOrder = (maxOrder?.maxOrder || 0) + 1;
+
     db.runSync(
-      'INSERT INTO budgets (id, name, amount, color, categoryId) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO budgets (id, name, amount, color, categoryId, displayOrder) VALUES (?, ?, ?, ?, ?, ?)',
       [
         budget.id ?? '',
-        '',
+        budget.name ?? '',
         budget.amount ?? 0,
         budget.color ?? null,
         budget.categoryId ?? null,
+        displayOrder,
       ],
     );
-    set((state) => ({ budgets: [...state.budgets, budget] }));
+    set((state) => ({
+      budgets: [...state.budgets, { ...budget, displayOrder }],
+    }));
   },
 
   editBudget: (budget) => {
@@ -592,7 +625,7 @@ export const useStore = create<AppState>((set, get) => ({
     db.runSync(
       'UPDATE budgets SET name = ?, amount = ?, color = ?, categoryId = ? WHERE id = ?',
       [
-        '',
+        budget.name ?? '',
         budget.amount ?? 0,
         budget.color ?? null,
         budget.categoryId ?? null,
@@ -615,10 +648,14 @@ export const useStore = create<AppState>((set, get) => ({
   addGoal: (goalData) => {
     const db = getDb();
     const id = Math.random().toString(36).substring(2, 9);
-    const goal: Goal = { ...goalData, id };
+    const maxOrder = db.getFirstSync<{ maxOrder: number }>(
+      'SELECT MAX(displayOrder) as maxOrder FROM goals',
+    );
+    const displayOrder = (maxOrder?.maxOrder || 0) + 1;
+    const goal: Goal = { ...goalData, id, displayOrder };
 
     db.runSync(
-      'INSERT INTO goals (id, name, targetAmount, currentAmount, color, icon, deadline, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO goals (id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         goal.id,
         goal.name,
@@ -628,6 +665,7 @@ export const useStore = create<AppState>((set, get) => ({
         goal.icon ?? null,
         goal.deadline ?? null,
         goal.status,
+        displayOrder,
       ],
     );
     set((state) => ({ goals: [...state.goals, goal] }));
@@ -713,6 +751,62 @@ export const useStore = create<AppState>((set, get) => ({
     } catch (error) {
       console.error('refreshAnalytics Error:', error);
     }
+  },
+
+  updateAccountsOrder: (accounts) => {
+    const db = getDb();
+    db.withTransactionSync(() => {
+      accounts.forEach((acc, index) => {
+        db.runSync('UPDATE accounts SET displayOrder = ? WHERE id = ?', [
+          index,
+          acc.id,
+        ]);
+        acc.displayOrder = index;
+      });
+    });
+    set({ accounts });
+  },
+
+  updateCategoriesOrder: (categories) => {
+    const db = getDb();
+    db.withTransactionSync(() => {
+      categories.forEach((cat, index) => {
+        db.runSync('UPDATE categories SET displayOrder = ? WHERE id = ?', [
+          index,
+          cat.id,
+        ]);
+        cat.displayOrder = index;
+      });
+    });
+    set({ categories });
+  },
+
+  updateBudgetsOrder: (budgets) => {
+    const db = getDb();
+    db.withTransactionSync(() => {
+      budgets.forEach((bud, index) => {
+        db.runSync('UPDATE budgets SET displayOrder = ? WHERE id = ?', [
+          index,
+          bud.id,
+        ]);
+        bud.displayOrder = index;
+      });
+    });
+    set({ budgets });
+  },
+
+  updateGoalsOrder: (goals) => {
+    const db = getDb();
+    db.withTransactionSync(() => {
+      goals.forEach((goal, index) => {
+        db.runSync('UPDATE goals SET displayOrder = ? WHERE id = ?', [
+          index,
+          goal.id,
+        ]);
+        goal.displayOrder = index;
+      });
+    });
+    set({ goals });
   },
 }));
 

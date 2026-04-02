@@ -7,6 +7,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import DraggableFlatList, {
+  RenderItemParams,
+  ScaleDecorator,
+} from 'react-native-draggable-flatlist';
 import {
   Card,
   FAB,
@@ -19,8 +23,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Budget, useStore, useTranslation } from '../store/useStore';
 
 export const BudgetsScreen = () => {
-  const { budgets, deleteBudget, transactions, formatCurrency, categories } =
-    useStore();
+  const {
+    budgets,
+    deleteBudget,
+    transactions,
+    formatCurrency,
+    categories,
+    updateBudgetsOrder,
+  } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
@@ -51,7 +61,7 @@ export const BudgetsScreen = () => {
     );
   };
 
-  const renderItem = ({ item }: { item: Budget }) => {
+  const renderItem = ({ item, drag, isActive }: RenderItemParams<Budget>) => {
     const spent = transactions
       .filter((t) => {
         const matchesBudget = t.budgetId === item.id;
@@ -61,48 +71,65 @@ export const BudgetsScreen = () => {
       })
       .reduce((sum, t) => sum + t.amount, 0);
     const progress = Math.min(spent / item.amount, 1);
+    const remaining = Math.max(item.amount - spent, 0);
     const category = categories.find((c) => c.id === item.categoryId);
 
     return (
-      <Card
-        style={styles.card}
-        onPress={() =>
-          router.push({
-            pathname: '/add-budget',
-            params: { budget: JSON.stringify(item) },
-          })
-        }
-        mode="elevated"
-      >
-        <Card.Content>
-          <View style={styles.cardHeader}>
-            <View style={styles.textContainer}>
-              <Text variant="titleLarge" style={styles.name}>
-                {category?.name ? translateName(category.name) : t('budgets')}
+      <ScaleDecorator>
+        <Card
+          style={[
+            styles.card,
+            {
+              backgroundColor: isActive
+                ? theme.colors.elevation.level3
+                : theme.colors.surface,
+            },
+          ]}
+          onPress={() =>
+            router.push({
+              pathname: '/add-budget',
+              params: { budget: JSON.stringify(item) },
+            })
+          }
+          onLongPress={drag}
+          disabled={isActive}
+          mode="elevated"
+        >
+          <Card.Content>
+            <View style={styles.cardHeader}>
+              <View style={styles.textContainer}>
+                <Text variant="titleLarge" style={styles.name}>
+                  {category?.name ? translateName(category.name) : t('budgets')}
+                </Text>
+                <Text variant="bodyMedium" style={styles.limitText}>
+                  {formatCurrency(spent)} / {formatCurrency(item.amount)}
+                </Text>
+              </View>
+              <IconButton
+                icon="trash-can-outline"
+                iconColor={theme.colors.error}
+                size={24}
+                onPress={() => handleDelete(item)}
+              />
+            </View>
+
+            <ProgressBar
+              progress={progress}
+              color={item.color || theme.colors.primary}
+              style={styles.progressBar}
+            />
+
+            <View style={styles.footerRow}>
+              <Text variant="labelSmall" style={styles.remainingText}>
+                {t('remainingAmount')}: {formatCurrency(remaining)}
               </Text>
-              <Text variant="bodyMedium" style={styles.limitText}>
-                {formatCurrency(spent)} / {formatCurrency(item.amount)}
+              <Text variant="labelSmall" style={styles.percentageText}>
+                {Math.round(progress * 100)}%
               </Text>
             </View>
-            <IconButton
-              icon="trash-can-outline"
-              iconColor={theme.colors.error}
-              size={24}
-              onPress={() => handleDelete(item)}
-            />
-          </View>
-
-          <ProgressBar
-            progress={progress}
-            color={item.color || theme.colors.primary}
-            style={styles.progressBar}
-          />
-
-          <Text variant="labelSmall" style={styles.percentageText}>
-            {Math.round(progress * 100)}%
-          </Text>
-        </Card.Content>
-      </Card>
+          </Card.Content>
+        </Card>
+      </ScaleDecorator>
     );
   };
 
@@ -112,10 +139,11 @@ export const BudgetsScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <FlatList
+      <DraggableFlatList
         data={budgets}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
+        onDragEnd={({ data }) => updateBudgetsOrder(data)}
         contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}
         ListEmptyComponent={
           <View style={styles.empty}>
@@ -171,9 +199,17 @@ const defaultStyles = (theme: any) =>
       height: 12,
       borderRadius: 6,
     },
-    percentageText: {
-      alignSelf: 'flex-end',
+    footerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
       marginTop: 4,
+    },
+    remainingText: {
+      fontWeight: '700',
+      color: theme.colors.onSurfaceVariant,
+    },
+    percentageText: {
       fontWeight: '700',
       color: theme.colors.onSurfaceVariant,
     },

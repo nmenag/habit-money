@@ -19,14 +19,19 @@ export const formatCurrency = (
   const symbol = symbols[currencyCode] || '$';
 
   if (currencyCode === 'COP') {
-    return `${symbol}${formatNumber(amount, 'es')}`;
+    return `${symbol} ${formatNumber(amount, 'es')}`;
   }
 
-  return `${symbol}${amount.toLocaleString(
-    language === 'es' ? 'es-CO' : 'en-US',
+  // For USD and others, use a cleaner format
+  // We force en-US formatting for USD if the user wants standard US format,
+  // or we keep it localized but ensure it looks premium.
+  const formatted = amount.toLocaleString(
+    language === 'es' ? 'es-ES' : 'en-US',
     {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     },
-  )}`;
+  );
+
+  return `${symbol} ${formatted}`;
 };

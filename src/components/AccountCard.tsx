@@ -7,12 +7,16 @@ interface Props {
   account: Account;
   onDelete?: () => void;
   onPress?: () => void;
+  onLongPress?: () => void;
+  isActive?: boolean;
 }
 
 export const AccountCard: React.FC<Props> = ({
   account,
   onDelete,
   onPress,
+  onLongPress,
+  isActive,
 }) => {
   const { formatCurrency } = useStore();
   const { t, translateName } = useTranslation();
@@ -49,10 +53,17 @@ export const AccountCard: React.FC<Props> = ({
     <Card
       style={[
         styles.card,
-        { borderLeftColor: account.color || theme.colors.primary },
+        {
+          borderLeftColor: account.color || theme.colors.primary,
+          backgroundColor: isActive
+            ? theme.colors.elevation.level3
+            : theme.colors.surface,
+        },
       ]}
       mode="elevated"
       onPress={onPress}
+      onLongPress={onLongPress}
+      disabled={isActive}
     >
       <Card.Content style={styles.cardContent}>
         <Avatar.Icon

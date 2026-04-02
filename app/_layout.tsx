@@ -9,6 +9,7 @@ import {
 } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { registerTranslation, en, es } from 'react-native-paper-dates';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { initDb } from '../src/db/schema';
 import { useStore, useTranslation } from '../src/store/useStore';
@@ -99,115 +100,117 @@ export default function RootLayout() {
   }
 
   return (
-    <PaperProvider theme={theme}>
-      <StatusBar style={isDarkTheme ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="add-transaction"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            title: t('addTransaction'),
-          }}
-        />
-        <Stack.Screen
-          name="add-account"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            title: t('addAccount'),
-          }}
-        />
-        <Stack.Screen
-          name="add-category"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            title: t('addCategory'),
-          }}
-        />
-        <Stack.Screen
-          name="add-budget"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            title: t('addBudget'),
-          }}
-        />
-        <Stack.Screen
-          name="add-goal"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            title: t('addGoal'),
-          }}
-        />
-        <Stack.Screen
-          name="accounts"
-          options={{
-            headerShown: true,
-            title: t('accounts'),
-          }}
-        />
-        <Stack.Screen
-          name="categories"
-          options={{
-            headerShown: true,
-            title: t('categories'),
-          }}
-        />
-        <Stack.Screen
-          name="budgets"
-          options={{
-            headerShown: true,
-            title: t('budgets'),
-          }}
-        />
-        <Stack.Screen
-          name="goals"
-          options={{
-            headerShown: true,
-            title: t('goals'),
-          }}
-        />
-        <Stack.Screen
-          name="calendar"
-          options={{
-            headerShown: true,
-            title: t('calendar'),
-          }}
-        />
-        <Stack.Screen
-          name="goal-detail"
-          options={{
-            headerShown: true,
-            title: t('goalDetail'),
-          }}
-        />
-        <Stack.Screen
-          name="about"
-          options={{
-            headerShown: true,
-            title: t('aboutApp'),
-          }}
-        />
-        <Stack.Screen
-          name="privacy-policy"
-          options={{
-            headerShown: true,
-            title: t('privacyPolicy'),
-          }}
-        />
-        <Stack.Screen
-          name="export-data"
-          options={{
-            headerShown: true,
-            title: t('exportData'),
-          }}
-        />
-      </Stack>
-    </PaperProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PaperProvider theme={theme}>
+        <StatusBar style={isDarkTheme ? 'light' : 'dark'} />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="add-transaction"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              title: t('addTransaction'),
+            }}
+          />
+          <Stack.Screen
+            name="add-account"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              title: t('addAccount'),
+            }}
+          />
+          <Stack.Screen
+            name="add-category"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              title: t('addCategory'),
+            }}
+          />
+          <Stack.Screen
+            name="add-budget"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              title: t('addBudget'),
+            }}
+          />
+          <Stack.Screen
+            name="add-goal"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              title: t('addGoal'),
+            }}
+          />
+          <Stack.Screen
+            name="accounts"
+            options={{
+              headerShown: true,
+              title: t('accounts'),
+            }}
+          />
+          <Stack.Screen
+            name="categories"
+            options={{
+              headerShown: true,
+              title: t('categories'),
+            }}
+          />
+          <Stack.Screen
+            name="budgets"
+            options={{
+              headerShown: true,
+              title: t('budgets'),
+            }}
+          />
+          <Stack.Screen
+            name="goals"
+            options={{
+              headerShown: true,
+              title: t('goals'),
+            }}
+          />
+          <Stack.Screen
+            name="calendar"
+            options={{
+              headerShown: true,
+              title: t('calendar'),
+            }}
+          />
+          <Stack.Screen
+            name="goal-detail"
+            options={{
+              headerShown: true,
+              title: t('goalDetail'),
+            }}
+          />
+          <Stack.Screen
+            name="about"
+            options={{
+              headerShown: true,
+              title: t('aboutApp'),
+            }}
+          />
+          <Stack.Screen
+            name="privacy-policy"
+            options={{
+              headerShown: true,
+              title: t('privacyPolicy'),
+            }}
+          />
+          <Stack.Screen
+            name="export-data"
+            options={{
+              headerShown: true,
+              title: t('exportData'),
+            }}
+          />
+        </Stack>
+      </PaperProvider>
+    </GestureHandlerRootView>
   );
 }

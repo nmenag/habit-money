@@ -82,6 +82,8 @@ export const es = {
   catSalary: 'Salario',
   catOtherIncome: 'Otros Ingresos',
   catInvestments: 'Inversiones',
+  catGifts: 'Regalos',
+  catRent: 'Arriendo',
   error: 'Error',
   enterValidAmount: 'Por favor ingresa un monto válido.',
   selectAccount: 'Por favor selecciona una cuenta.',

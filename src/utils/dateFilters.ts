@@ -38,39 +38,87 @@ export function getAllTimeRange(): DateRange {
 
 export function getTodayRange(): DateRange {
   const now = new Date();
-  return { type: 'today', startDate: startOfDay(now), endDate: endOfDay(now) };
+  const startDate = new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      0,
+      0,
+      0,
+      0,
+    ),
+  );
+  const endDate = new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      23,
+      59,
+      59,
+      999,
+    ),
+  );
+  return { type: 'today', startDate, endDate };
 }
 
 export function getWeekRange(): DateRange {
   const now = new Date();
+  const day = now.getUTCDay(); // 0 is Sunday
+  // Calculate Monday (start of week)
+  const diff = now.getUTCDate() - day + (day === 0 ? -6 : 1);
+  const startDate = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), diff, 0, 0, 0, 0),
+  );
+  const endDate = new Date(startDate);
+  endDate.setUTCDate(startDate.getUTCDate() + 6);
+  endDate.setUTCHours(23, 59, 59, 999);
+
   return {
     type: 'week',
-    startDate: startOfWeek(now, { weekStartsOn: 1 }),
-    endDate: endOfWeek(now, { weekStartsOn: 1 }),
+    startDate,
+    endDate,
   };
 }
 
 export function getMonthRange(): DateRange {
   const now = new Date();
+  const startDate = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0),
+  );
+  const endDate = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999),
+  );
   return {
     type: 'month',
-    startDate: startOfMonth(now),
-    endDate: endOfMonth(now),
+    startDate,
+    endDate,
   };
 }
 
 export function getLastMonthRange(): DateRange {
-  const lastMonth = subMonths(new Date(), 1);
+  const now = new Date();
+  const startDate = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1, 0, 0, 0, 0),
+  );
+  const endDate = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999),
+  );
   return {
     type: 'lastMonth',
-    startDate: startOfMonth(lastMonth),
-    endDate: endOfMonth(lastMonth),
+    startDate,
+    endDate,
   };
 }
 
 export function getYearRange(): DateRange {
   const now = new Date();
-  return { type: 'year', startDate: startOfYear(now), endDate: endOfYear(now) };
+  const startDate = new Date(Date.UTC(now.getUTCFullYear(), 0, 1, 0, 0, 0, 0));
+  const endDate = new Date(
+    Date.UTC(now.getUTCFullYear(), 11, 31, 23, 59, 59, 999),
+  );
+  return { type: 'year', startDate, endDate };
 }
 
 export function getRangeForType(

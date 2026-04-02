@@ -25,7 +25,8 @@ export const initDb = () => {
         initialBalance REAL NOT NULL,
         currentBalance REAL NOT NULL,
         color TEXT,
-        currency TEXT NOT NULL DEFAULT 'COP'
+        currency TEXT NOT NULL DEFAULT 'COP',
+        displayOrder INTEGER DEFAULT 0
       );
     `);
   } catch (e) {
@@ -39,13 +40,20 @@ export const initDb = () => {
   } catch (e) {}
 
   try {
+    db.execSync(
+      'ALTER TABLE accounts ADD COLUMN displayOrder INTEGER DEFAULT 0;',
+    );
+  } catch (e) {}
+
+  try {
     db.execSync(`
       CREATE TABLE IF NOT EXISTS categories (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         type TEXT DEFAULT 'expense',
         icon TEXT,
-        color TEXT
+        color TEXT,
+        displayOrder INTEGER DEFAULT 0
       );
     `);
 
@@ -80,6 +88,12 @@ export const initDb = () => {
   }
 
   try {
+    db.execSync(
+      'ALTER TABLE categories ADD COLUMN displayOrder INTEGER DEFAULT 0;',
+    );
+  } catch (e) {}
+
+  try {
     db.execSync(`
       CREATE TABLE IF NOT EXISTS budgets (
         id TEXT PRIMARY KEY,
@@ -87,6 +101,7 @@ export const initDb = () => {
         amount REAL NOT NULL,
         color TEXT,
         categoryId TEXT,
+        displayOrder INTEGER DEFAULT 0,
         FOREIGN KEY(categoryId) REFERENCES categories(id) ON DELETE SET NULL
       );
     `);
@@ -96,6 +111,12 @@ export const initDb = () => {
 
   try {
     db.execSync('ALTER TABLE budgets ADD COLUMN categoryId TEXT;');
+  } catch (e) {}
+
+  try {
+    db.execSync(
+      'ALTER TABLE budgets ADD COLUMN displayOrder INTEGER DEFAULT 0;',
+    );
   } catch (e) {}
 
   try {
@@ -164,12 +185,17 @@ export const initDb = () => {
         color TEXT,
         icon TEXT,
         deadline TEXT,
-        status TEXT DEFAULT 'active'
+        status TEXT DEFAULT 'active',
+        displayOrder INTEGER DEFAULT 0
       );
     `);
   } catch (e) {
     console.error('Error creating goals table:', e);
   }
+
+  try {
+    db.execSync('ALTER TABLE goals ADD COLUMN displayOrder INTEGER DEFAULT 0;');
+  } catch (e) {}
 
   const locales = Localization.getLocales();
   const langCode = locales[0]?.languageCode === 'es' ? 'es' : 'en';
@@ -243,6 +269,20 @@ export const initDb = () => {
         icon: 'chart-line',
         color: '#3f51b5',
       },
+      {
+        id: '10',
+        name: t.catGifts,
+        type: 'expense',
+        icon: 'gift',
+        color: '#ff4081',
+      },
+      {
+        id: '11',
+        name: t.catRent,
+        type: 'expense',
+        icon: 'home-city',
+        color: '#795548',
+      },
     ];
 
     const statement = db.prepareSync(
@@ -270,6 +310,28 @@ export const initDb = () => {
       db.runSync(
         'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
         ['9', t.catInvestments, 'expense', 'chart-line', '#3f51b5'],
+      );
+    }
+
+    // Check if Gifts category (ID 10) exists
+    const checkGifts = db.getFirstSync<{ id: string }>(
+      "SELECT id FROM categories WHERE id = '10'",
+    );
+    if (!checkGifts) {
+      db.runSync(
+        'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
+        ['10', t.catGifts, 'expense', 'gift', '#ff4081'],
+      );
+    }
+
+    // Check if Rent category (ID 11) exists
+    const checkRent = db.getFirstSync<{ id: string }>(
+      "SELECT id FROM categories WHERE id = '11'",
+    );
+    if (!checkRent) {
+      db.runSync(
+        'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
+        ['11', t.catRent, 'expense', 'home-city', '#795548'],
       );
     }
   }
