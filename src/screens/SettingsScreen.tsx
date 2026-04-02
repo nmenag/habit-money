@@ -8,16 +8,9 @@ import { useStore, useTranslation } from '../store/useStore';
 import { backupToJSON, restoreFromJSON } from '../utils/dataBackup';
 
 export const SettingsScreen = () => {
-  const {
-    setLanguage,
-    transactions,
-    accounts,
-    categories,
-    loadData,
-    incrementActionCounter,
-    checkAndShowAd,
-  } = useStore();
-  const { t, language, translateName } = useTranslation();
+  const { setLanguage, loadData, incrementActionCounter, checkAndShowAd } =
+    useStore();
+  const { t, language } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();

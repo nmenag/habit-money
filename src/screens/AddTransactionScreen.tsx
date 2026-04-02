@@ -25,7 +25,7 @@ export const AddTransactionScreen = () => {
     if (params.transaction) {
       try {
         return JSON.parse(params.transaction);
-      } catch (e) {
+      } catch {
         return null;
       }
     }

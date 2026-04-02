@@ -147,7 +147,7 @@ export const AddCategoryScreen = () => {
     if (params.category) {
       try {
         return JSON.parse(params.category) as Category;
-      } catch (e) {
+      } catch {
         return undefined;
       }
     }

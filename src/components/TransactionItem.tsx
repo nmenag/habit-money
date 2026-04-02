@@ -80,6 +80,8 @@ export const TransactionItem: React.FC<Props> = memo(
   },
 );
 
+TransactionItem.displayName = 'TransactionItem';
+
 const styles = StyleSheet.create({
   listItem: {
     paddingVertical: 8,

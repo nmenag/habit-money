@@ -15,7 +15,7 @@ import {
   TextInput,
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Goal, useStore, useTranslation } from '../store/useStore';
+import { useStore, useTranslation } from '../store/useStore';
 
 export const GoalDetailScreen = () => {
   const params = useLocalSearchParams<{ goalId?: string }>();

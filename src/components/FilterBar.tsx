@@ -224,6 +224,8 @@ export const FilterBar: React.FC = React.memo(() => {
   );
 });
 
+FilterBar.displayName = 'FilterBar';
+
 const styles = StyleSheet.create({
   wrapper: {
     borderBottomWidth: 1,

@@ -1,14 +1,4 @@
-import {
-  startOfDay,
-  endOfDay,
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
-  endOfMonth,
-  startOfYear,
-  endOfYear,
-  subMonths,
-} from 'date-fns';
+// No imports needed after manual UTC switch
 
 export type FilterType =
   | 'allTime'
@@ -140,10 +130,35 @@ export function getRangeForType(
     case 'year':
       return getYearRange();
     case 'custom':
+      const now = new Date();
       return {
         type: 'custom',
-        startDate: customStart ?? startOfDay(new Date()),
-        endDate: customEnd ?? endOfDay(new Date()),
+        startDate:
+          customStart ??
+          new Date(
+            Date.UTC(
+              now.getUTCFullYear(),
+              now.getUTCMonth(),
+              now.getUTCDate(),
+              0,
+              0,
+              0,
+              0,
+            ),
+          ),
+        endDate:
+          customEnd ??
+          new Date(
+            Date.UTC(
+              now.getUTCFullYear(),
+              now.getUTCMonth(),
+              now.getUTCDate(),
+              23,
+              59,
+              59,
+              999,
+            ),
+          ),
       };
     default:
       return getAllTimeRange();

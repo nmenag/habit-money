@@ -117,7 +117,7 @@ export const AddGoalScreen = () => {
     if (params.goal) {
       try {
         return JSON.parse(params.goal);
-      } catch (e) {
+      } catch {
         return undefined;
       }
     }

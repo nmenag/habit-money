@@ -6,6 +6,7 @@ import {
   documentDirectory,
   EncodingType,
 } from 'expo-file-system/legacy';
+import * as DocumentPicker from 'expo-document-picker';
 import { getDb } from '../db/schema';
 
 let isBackupInProgress = false;
@@ -62,7 +63,7 @@ export const restoreFromJSON = async (
   isRestoreInProgress = true;
   try {
     // Dynamic import to avoid errors if native module fails during initial load
-    const DocumentPicker = require('expo-document-picker');
+    // Restore from JSON code below...
 
     const result = await DocumentPicker.getDocumentAsync({
       type: 'application/json',
@@ -76,7 +77,7 @@ export const restoreFromJSON = async (
     let backup;
     try {
       backup = JSON.parse(content);
-    } catch (e) {
+    } catch {
       Alert.alert(t('error'), t('restoreError'));
       return;
     }
@@ -103,7 +104,7 @@ export const restoreFromJSON = async (
     // Insert data
     // Accounts
     const insertAccount = db.prepareSync(
-      'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color, currency) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color, currency, displayOrder) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     );
     try {
       accounts.forEach((a: any) =>
@@ -115,6 +116,7 @@ export const restoreFromJSON = async (
           a.currentBalance,
           a.color,
           a.currency || 'COP',
+          a.displayOrder || 0,
         ]),
       );
     } finally {
@@ -123,11 +125,18 @@ export const restoreFromJSON = async (
 
     // Categories
     const insertCategory = db.prepareSync(
-      'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO categories (id, name, type, icon, color, displayOrder) VALUES (?, ?, ?, ?, ?, ?)',
     );
     try {
       categories.forEach((c: any) =>
-        insertCategory.executeSync([c.id, c.name, c.type, c.icon, c.color]),
+        insertCategory.executeSync([
+          c.id,
+          c.name,
+          c.type,
+          c.icon,
+          c.color,
+          c.displayOrder || 0,
+        ]),
       );
     } finally {
       insertCategory.finalizeSync();
@@ -157,7 +166,7 @@ export const restoreFromJSON = async (
 
     // Budgets
     const insertBudget = db.prepareSync(
-      'INSERT INTO budgets (id, name, amount, color, categoryId) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO budgets (id, name, amount, color, categoryId, displayOrder) VALUES (?, ?, ?, ?, ?, ?)',
     );
     try {
       budgets.forEach((b: any) =>
@@ -167,6 +176,7 @@ export const restoreFromJSON = async (
           b.amount,
           b.color,
           b.categoryId,
+          b.displayOrder || 0,
         ]),
       );
     } finally {
@@ -175,7 +185,7 @@ export const restoreFromJSON = async (
 
     // Goals
     const insertGoal = db.prepareSync(
-      'INSERT INTO goals (id, name, targetAmount, currentAmount, color, icon, deadline, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO goals (id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
     try {
       goals.forEach((g: any) =>
@@ -188,6 +198,7 @@ export const restoreFromJSON = async (
           g.icon,
           g.deadline,
           g.status,
+          g.displayOrder || 0,
         ]),
       );
     } finally {
@@ -232,7 +243,7 @@ export const checkBackupReminder = async (t: (key: any) => string) => {
     onboardingDateRow = db.getFirstSync<{ val: string }>(
       "SELECT val FROM settings WHERE id = 'onboarding_date'",
     );
-  } catch (e) {}
+  } catch {}
 
   // If we don't have an onboarding date yet (older version), we might want to show it anyway
   // but if we do have it, we only show it if today is not the onboarding day.
@@ -243,7 +254,7 @@ export const checkBackupReminder = async (t: (key: any) => string) => {
     lastReminderRow = db.getFirstSync<{ val: string }>(
       "SELECT val FROM settings WHERE id = 'last_backup_reminder_date'",
     );
-  } catch (e) {}
+  } catch {}
 
   const lastReminderDate = lastReminderRow?.val || '';
 

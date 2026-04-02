@@ -193,7 +193,7 @@ export const useStore = create<AppState>((set, get) => ({
               : 'en';
           }
         }
-      } catch (e) {
+      } catch {
         console.warn('Localization native module not found, defaulting to en');
       }
     }

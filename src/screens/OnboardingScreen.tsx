@@ -7,8 +7,6 @@ import { getDb } from '../db/schema';
 import { Language } from '../i18n/translations';
 import { useStore, useTranslation } from '../store/useStore';
 
-const ONBOARDING_KEY = 'isFirstLaunch';
-
 export const OnboardingScreen = () => {
   const theme = useTheme();
   const router = useRouter();

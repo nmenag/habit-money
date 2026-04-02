@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { ScoreData } from '../utils/scoreCalculator';
-import { useStore, useTranslation } from '../store/useStore';
+import { useTranslation } from '../store/useStore';
 
 import { useTheme } from 'react-native-paper';
 

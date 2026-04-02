@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 export const getUtcNow = () => {
   return new Date();
 };
@@ -16,6 +18,5 @@ export const formatUtcMonth = (date: Date, locale: any) => {
 
   // Create a local date with UTC values for formatting (since format uses local by default)
   const localDate = new Date(year, month, 1);
-  const { format } = require('date-fns');
   return format(localDate, 'MMMM yyyy', { locale });
 };
