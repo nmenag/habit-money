@@ -122,12 +122,12 @@ export const calculateFinancialScore = (
   const insights: Insight[] = [];
   if (expenseGrowth > 0 && lastExpense > 0) {
     insights.push({
-      key: 'insightExpenseGrew',
+      key: 'insightSpentMoreThanLastMonth',
       params: { percentage: expenseGrowth.toFixed(1) },
     });
   } else if (expenseGrowth < 0) {
     insights.push({
-      key: 'insightExpenseLess',
+      key: 'insightSpentLessThanLastMonth',
       params: { percentage: Math.abs(expenseGrowth).toFixed(1) },
     });
   }
