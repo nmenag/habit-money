@@ -11,7 +11,7 @@ const getPackageName = () => {
 };
 
 const getAppName = () => {
-  const baseName = 'FinHabit';
+  const baseName = 'HabitFin';
   if (variant === 'development') return `${baseName} (Dev)`;
   if (variant === 'preview') return `${baseName} (Preview)`;
   return baseName;
@@ -35,11 +35,11 @@ const getAdaptiveForeground = () => {
 module.exports = {
   expo: {
     name: getAppName(),
-    slug: 'fin-habit',
+    slug: 'habit-fin',
     version: '1.0.1',
     orientation: 'portrait',
     icon: getIcon(),
-    scheme: 'finhabit',
+    scheme: 'habitfin',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     runtimeVersion: {
