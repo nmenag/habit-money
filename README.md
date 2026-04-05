@@ -70,7 +70,9 @@ HabitFin is a modern, high-performance personal finance tracker built with **Rea
 This project is configured for **EAS (Expo Application Services)** to handle builds, updates, and distribution.
 
 ### `app.config.js`
+
 The application configuration is dynamic and handles three variants: `development`, `preview`, and `production`.
+
 - **Slug**: `fin-habit` (Matches the associated EAS Project ID).
 - **Name**: `HabitFin`.
 - **Scheme**: `habitfin`.
@@ -79,6 +81,7 @@ The application configuration is dynamic and handles three variants: `developmen
 
 - **Verified OTA**: Supporting `expo-updates` for seamless Over-The-Air bug fixes and route updates.
 - **EAS Build**: Optimized for Android builds across different stages.
+
   ```bash
   # Production (AAB for Google Play)
   eas build --platform android --profile production
@@ -89,6 +92,7 @@ The application configuration is dynamic and handles three variants: `developmen
   # Development (Development Client for testing native modules)
   eas build --platform android --profile development
   ```
+
 - **Updates**: Push updates to users without a new store submission.
   ```bash
   eas update --branch main --message "Description of changes"
