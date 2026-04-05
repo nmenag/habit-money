@@ -10,6 +10,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "check-types": "tsc --noEmit",
+    "doctor": "npx expo-doctor",
     "routes": "expo export --platform android"
   },
   "dependencies": {
