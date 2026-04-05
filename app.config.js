@@ -11,7 +11,7 @@ const getPackageName = () => {
 };
 
 const getAppName = () => {
-  const baseName = 'FinHabit';
+  const baseName = 'HabitFin';
   if (variant === 'development') return `${baseName} (Dev)`;
   if (variant === 'preview') return `${baseName} (Preview)`;
   return baseName;
@@ -39,7 +39,7 @@ module.exports = {
     version: '1.0.1',
     orientation: 'portrait',
     icon: getIcon(),
-    scheme: 'finhabit',
+    scheme: 'habitfin',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     runtimeVersion: {
@@ -88,7 +88,9 @@ module.exports = {
       [
         'react-native-google-mobile-ads',
         {
-          androidAppId: process.env.ADMOB_ANDROID_APP_ID || 'ca-app-pub-3940256099942544~3347511713',
+          androidAppId:
+            process.env.ADMOB_ANDROID_APP_ID ||
+            'ca-app-pub-3940256099942544~3347511713',
         },
       ],
       'expo-build-properties',

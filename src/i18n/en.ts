@@ -250,13 +250,13 @@ export const en = {
   aboutApp: 'About the App',
   privacyPolicy: 'Privacy Policy',
   appDescription:
-    'FinHabit is a simple and powerful tool designed to help you track your expenses, manage budgets, and reach your financial goals. All your data is stored locally on your device.',
+    'HabitFin is a simple and powerful tool designed to help you track your expenses, manage budgets, and reach your financial goals. All your data is stored locally on your device.',
   version: 'Version',
   contactEmailLabel: 'Contact Email',
   website: 'Website',
   dataCollectionTitle: 'Data Collection',
   dataCollectionContent:
-    'FinHabit does NOT collect any personal data. All information you enter (transactions, accounts, goals) is stored locally on your device and is never uploaded to our servers.',
+    'HabitFin does NOT collect any personal data. All information you enter (transactions, accounts, goals) is stored locally on your device and is never uploaded to our servers.',
   howDataIsUsedTitle: 'How Data is Used',
   howDataIsUsedContent:
     'The data you provide is used exclusively to show you your financial statistics, manage your budgets, and track your goals within the app.',
@@ -293,11 +293,11 @@ export const en = {
   insightSavingMoney: 'You are saving money this month!',
   insightKeepGoing: 'Keep tracking to get insights!',
   feedback: 'Feedback',
-  feedbackDesc: 'Help us improve FinHabit with your suggestions',
+  feedbackDesc: 'Help us improve HabitFin with your suggestions',
   feedbackPlaceholder: 'Tell us what you think or report a bug...',
   sendFeedback: 'Send Feedback',
   donate: 'Donate',
-  donateDesc: 'Support the development of FinHabit',
+  donateDesc: 'Support the development of HabitFin',
   buyMeACoffee: 'Invite me a coffee',
   amountTooltip: 'Enter the value of the transaction.',
   accountTooltip: 'Select which account this transaction belongs to.',
@@ -306,7 +306,7 @@ export const en = {
   withdrawFrom: 'Withdraw From',
   depositTo: 'Deposit To',
   selectDate: 'Select Date',
-  onboardingWelcome: 'Welcome to FinHabit',
+  onboardingWelcome: 'Welcome to HabitFin',
   onboardingDesc:
     'The simplest way to track your expenses and build better financial habits.',
   detectedLanguage: 'Detected Language',
