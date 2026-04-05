@@ -1,6 +1,6 @@
-# FinHabit 💰👋
+# HabitFin 💰📈
 
-FinHabit is a modern, high-performance personal finance tracker built with **React Native** and **Expo**. It empowers users to take control of their financial life through a seamless, localized, and highly organized interface.
+HabitFin is a modern, high-performance personal finance tracker built with **React Native** and **Expo**. It empowers users to take control of their financial life through a seamless, localized, and highly organized interface.
 
 ## 🌟 Key Features
 
@@ -65,10 +65,34 @@ FinHabit is a modern, high-performance personal finance tracker built with **Rea
 - **GitHub Actions**: Automated pipeline for linting and type-checking on every push or pull request to `main`/`master`.
 - **Quality Control**: Use `npm run lint` and `npm run check-types` to ensure code stability.
 
-## 📦 Deployment & Updates
+## ⚙️ Expo & EAS Configuration
+
+This project is configured for **EAS (Expo Application Services)** to handle builds, updates, and distribution.
+
+### `app.config.js`
+The application configuration is dynamic and handles three variants: `development`, `preview`, and `production`. 
+- **Slug**: `fin-habit` (Matches the associated EAS Project ID).
+- **Name**: `HabitFin`.
+- **Scheme**: `habitfin`.
+
+### 📦 Deployment & Updates
 
 - **Verified OTA**: Supporting `expo-updates` for seamless Over-The-Air bug fixes and route updates.
-- **Build**: Optimized for Android APK/AAB builds using EAS Build.
+- **EAS Build**: Optimized for Android builds across different stages.
+  ```bash
+  # Production (AAB for Google Play)
+  eas build --platform android --profile production
+
+  # Preview (APK for internal testing)
+  eas build --platform android --profile preview
+
+  # Development (Development Client for testing native modules)
+  eas build --platform android --profile development
+  ```
+- **Updates**: Push updates to users without a new store submission.
+  ```bash
+  eas update --branch main --message "Description of changes"
+  ```
 
 ## 📄 License
 
