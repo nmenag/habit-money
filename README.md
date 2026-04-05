@@ -33,10 +33,10 @@ HabitFin is a modern, high-performance personal finance tracker built with **Rea
 
 ## 🛠️ Tech Stack
 
-- **Core**: [Expo SDK 54](https://expo.dev) & React Native 0.81
+- **Core**: [Expo SDK 54](https://expo.dev) & React Native 0.81 — [Architecture Details](docs/ARCHITECTURE.md)
 - **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/) (File-based navigation)
 - **State**: [Zustand](https://github.com/pmndrs/zustand) (Atomic & Persisted state)
-- **Database**: [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) (High-performance local storage)
+- **Database**: [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) (High-performance local storage) — [Schema Details](docs/DATABASE_DESIGN.md)
 - **UI Components**: [React Native Paper](https://reactnativepaper.com/) (Material Design 3)
 - **Gestures**: [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/) & [react-native-draggable-flatlist](https://github.com/computerjazz/react-native-draggable-flatlist)
 - **Visualization**: [react-native-chart-kit](https://github.com/indiespirit/react-native-chart-kit)
