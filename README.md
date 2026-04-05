@@ -47,7 +47,7 @@ HabitFin is a modern, high-performance personal finance tracker built with **Rea
 1. **Clone & Install**
 
    ```bash
-   git clone <repo-url>
+   git clone git@github.com:nmenag/fin-habit.git
    cd fin-habit
    npm install
    ```
@@ -70,7 +70,7 @@ HabitFin is a modern, high-performance personal finance tracker built with **Rea
 This project is configured for **EAS (Expo Application Services)** to handle builds, updates, and distribution.
 
 ### `app.config.js`
-The application configuration is dynamic and handles three variants: `development`, `preview`, and `production`. 
+The application configuration is dynamic and handles three variants: `development`, `preview`, and `production`.
 - **Slug**: `fin-habit` (Matches the associated EAS Project ID).
 - **Name**: `HabitFin`.
 - **Scheme**: `habitfin`.
