@@ -61,7 +61,7 @@ export const DashboardScreen = React.memo(() => {
       if (trDate >= currentStart && trDate <= currentEnd) {
         if (tr.type === 'income') {
           monthlyIncome += tr.amount;
-        } else {
+        } else if (tr.type === 'expense') {
           monthlyExpenses += tr.amount;
           if (tr.categoryId) {
             catExpenses[tr.categoryId] =
@@ -390,20 +390,28 @@ export const DashboardScreen = React.memo(() => {
                       <Avatar.Icon
                         size={36}
                         icon={
-                          cat?.icon || (tr.type === 'income' ? 'plus' : 'minus')
+                          tr.type === 'transfer'
+                            ? 'swap-horizontal'
+                            : cat?.icon ||
+                              (tr.type === 'income' ? 'plus' : 'minus')
                         }
                         style={{
                           backgroundColor:
-                            cat?.color ||
-                            (tr.type === 'income'
-                              ? '#4caf50'
-                              : theme.colors.error),
+                            tr.type === 'transfer'
+                              ? theme.colors.tertiary
+                              : cat?.color ||
+                                (tr.type === 'income'
+                                  ? '#4caf50'
+                                  : theme.colors.error),
                         }}
                         color="#fff"
                       />
                       <View style={{ marginLeft: 12, flex: 1 }}>
                         <Text variant="bodyLarge" numberOfLines={1}>
-                          {tr.note || translateName(cat?.name || 'Other')}
+                          {tr.note ||
+                            (tr.type === 'transfer'
+                              ? t('transfer')
+                              : translateName(cat?.name || 'Other'))}
                         </Text>
                         <Text
                           variant="labelSmall"
@@ -419,12 +427,18 @@ export const DashboardScreen = React.memo(() => {
                         style={{
                           fontWeight: 'bold',
                           color:
-                            tr.type === 'income'
-                              ? '#4caf50'
-                              : theme.colors.error,
+                            tr.type === 'transfer'
+                              ? theme.colors.onSurface
+                              : tr.type === 'income'
+                                ? '#4caf50'
+                                : theme.colors.error,
                         }}
                       >
-                        {tr.type === 'income' ? '+' : '-'}
+                        {tr.type === 'transfer'
+                          ? ''
+                          : tr.type === 'income'
+                            ? '+'
+                            : '-'}
                         {formatCurrency(tr.amount)}
                       </Text>
                     </View>
