@@ -28,6 +28,18 @@ export const TransactionItem: React.FC<Props> = memo(
     const dateLocale = language === 'es' ? es : enUS;
 
     const LeftContent = (props: any) => {
+      if (transaction.type === 'transfer') {
+        return (
+          <Avatar.Icon
+            {...props}
+            size={40}
+            icon="swap-horizontal"
+            style={[styles.avatar, { backgroundColor: theme.colors.tertiary }]}
+            color="#fff"
+          />
+        );
+      }
+
       const displayName = category?.name ? translateName(category.name) : '?';
       const firstLetter =
         displayName && displayName.length > 0
@@ -48,25 +60,38 @@ export const TransactionItem: React.FC<Props> = memo(
       );
     };
 
-    const RightContent = () => (
-      <View style={styles.rightContainer}>
-        <Text
-          variant="titleMedium"
-          style={[
-            styles.amount,
-            { color: isIncome ? '#4caf50' : theme.colors.error },
-          ]}
-        >
-          {isIncome ? '+' : '-'}
-          {formatCurrency(transaction.amount, accountCurrency)}
-        </Text>
-      </View>
-    );
+    const RightContent = () => {
+      const isTransfer = transaction.type === 'transfer';
+      return (
+        <View style={styles.rightContainer}>
+          <Text
+            variant="titleMedium"
+            style={[
+              styles.amount,
+              {
+                color: isTransfer
+                  ? theme.colors.onSurface
+                  : isIncome
+                    ? '#4caf50'
+                    : theme.colors.error,
+              },
+            ]}
+          >
+            {isTransfer ? '' : isIncome ? '+' : '-'}
+            {formatCurrency(transaction.amount, accountCurrency)}
+          </Text>
+        </View>
+      );
+    };
 
     return (
       <List.Item
         title={
-          category?.name ? translateName(category.name) : t('uncategorized')
+          transaction.type === 'transfer'
+            ? t('transfer')
+            : category?.name
+              ? translateName(category.name)
+              : t('uncategorized')
         }
         description={`${format(parseISO(transaction.date), 'MMM d, yyyy', {
           locale: dateLocale,

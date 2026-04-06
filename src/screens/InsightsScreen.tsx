@@ -54,7 +54,7 @@ export const InsightsScreen = () => {
     inRange.forEach((tx) => {
       if (tx.type === 'income') {
         totalIncome += tx.amount;
-      } else {
+      } else if (tx.type === 'expense') {
         totalExpenses += tx.amount;
         if (tx.categoryId) {
           catExpMap[tx.categoryId] =
