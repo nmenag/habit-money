@@ -27,6 +27,10 @@ export const TransactionItem: React.FC<Props> = memo(
     const accountCurrency = account?.currency || 'COP';
     const dateLocale = language === 'es' ? es : enUS;
 
+    const isAdjustment =
+      transaction.note &&
+      translateName(transaction.note) === t('balanceAdjustment');
+
     const LeftContent = (props: any) => {
       if (transaction.type === 'transfer') {
         return (
@@ -36,6 +40,21 @@ export const TransactionItem: React.FC<Props> = memo(
             icon="swap-horizontal"
             style={[styles.avatar, { backgroundColor: theme.colors.tertiary }]}
             color="#fff"
+          />
+        );
+      }
+
+      if (isAdjustment) {
+        return (
+          <Avatar.Icon
+            {...props}
+            size={40}
+            icon="scale-balance"
+            style={[
+              styles.avatar,
+              { backgroundColor: theme.colors.surfaceVariant },
+            ]}
+            color={theme.colors.onSurfaceVariant}
           />
         );
       }
@@ -84,15 +103,16 @@ export const TransactionItem: React.FC<Props> = memo(
       );
     };
 
+    const displayTitle = () => {
+      if (transaction.type === 'transfer') return t('transfer');
+      if (isAdjustment) return t('balanceAdjustment');
+      if (category?.name) return translateName(category.name);
+      return t('uncategorized');
+    };
+
     return (
       <List.Item
-        title={
-          transaction.type === 'transfer'
-            ? t('transfer')
-            : category?.name
-              ? translateName(category.name)
-              : t('uncategorized')
-        }
+        title={displayTitle()}
         description={`${format(parseISO(transaction.date), 'MMM d, yyyy', {
           locale: dateLocale,
         })}${transaction.note ? ` • ${transaction.note}` : ''}`}

@@ -30,6 +30,8 @@ export const nameToKeyMapping: Record<string, string> = {
   Bank: 'defaultAccountName',
   Banco: 'defaultAccountName',
   Main: 'defaultAccountName',
+  'Balance Adjustment': 'balanceAdjustment',
+  'Ajuste de Saldo': 'balanceAdjustment',
 };
 
 export const translations: Record<Language, TranslationKeys> = {

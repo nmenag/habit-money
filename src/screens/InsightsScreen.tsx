@@ -52,9 +52,11 @@ export const InsightsScreen = () => {
     const catExpMap: Record<string, number> = {};
 
     inRange.forEach((tx) => {
-      if (tx.type === 'income') {
+      const isAdjustment =
+        tx.note && translateName(tx.note) === t('balanceAdjustment');
+      if (tx.type === 'income' && !isAdjustment) {
         totalIncome += tx.amount;
-      } else if (tx.type === 'expense') {
+      } else if (tx.type === 'expense' && !isAdjustment) {
         totalExpenses += tx.amount;
         if (tx.categoryId) {
           catExpMap[tx.categoryId] =

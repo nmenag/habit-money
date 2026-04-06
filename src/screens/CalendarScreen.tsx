@@ -17,7 +17,7 @@ const formatAmount = (amount: number, formatCurrency: any) => {
 
 export const CalendarScreen = () => {
   const { transactions, categories, formatCurrency } = useStore();
-  const { t, language } = useTranslation();
+  const { t, language, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -30,8 +30,11 @@ export const CalendarScreen = () => {
 
   const dayTotals = dayTransactions.reduce(
     (acc, curr) => {
-      if (curr.type === 'income') acc.income += curr.amount;
-      else if (curr.type === 'expense') acc.expense += curr.amount;
+      const isAdjustment =
+        curr.note && translateName(curr.note) === t('balanceAdjustment');
+      if (curr.type === 'income' && !isAdjustment) acc.income += curr.amount;
+      else if (curr.type === 'expense' && !isAdjustment)
+        acc.expense += curr.amount;
       return acc;
     },
     { income: 0, expense: 0 },
