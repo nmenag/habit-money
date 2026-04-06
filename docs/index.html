@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HabitFin - Legal & Privacy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #005cee;
+        --primary-dark: #0046b8;
+        --bg: #f8faff;
+        --text: #1e293b;
+        --text-light: #64748b;
+        --card-bg: #ffffff;
+        --radius: 16px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Outfit', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .header {
+        padding: 60px 20px;
+        text-align: center;
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
+        color: white;
+        clip-path: ellipse(150% 100% at 50% 0%);
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        letter-spacing: -0.02em;
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: -40px auto 60px;
+        padding: 0 20px;
+        flex: 1;
+      }
+
+      .card-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+
+      @media (max-width: 600px) {
+        .card-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background-color: var(--card-bg);
+        padding: 40px 30px;
+        border-radius: var(--radius);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        text-align: center;
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 92, 238, 0.1);
+      }
+
+      .card .icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        display: block;
+      }
+
+      .card h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--primary);
+      }
+
+      .card p {
+        color: var(--text-light);
+        font-size: 0.95rem;
+      }
+
+      .footer {
+        padding: 40px 20px;
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--text-light);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        background: white;
+      }
+
+      .app-name {
+        font-weight: 700;
+        color: var(--text);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <h1>HabitFin</h1>
+      <p>Your privacy and security are our priority.</p>
+    </header>
+
+    <main class="container">
+      <div class="card-grid">
+        <a href="privacy.html" class="card">
+          <span class="icon">🛡️</span>
+          <h2>Privacy Policy</h2>
+          <p>
+            Learn how we protect your data and security while using HabitFin.
+          </p>
+        </a>
+        <a href="terms.html" class="card">
+          <span class="icon">📜</span>
+          <h2>Terms of Service</h2>
+          <p>Read our guidelines and agreements for using the HabitFin app.</p>
+        </a>
+      </div>
+    </main>
+
+    <footer class="footer">
+      &copy; 2026 <span class="app-name">HabitFin</span>. All rights reserved.
+    </footer>
+  </body>
+</html>
