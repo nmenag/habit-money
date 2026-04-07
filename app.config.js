@@ -17,18 +17,15 @@ const getAppName = () => {
   return baseName;
 };
 
-const isPreview = variant === 'preview';
 const isDev = variant === 'development';
 
 const getIcon = () => {
   if (isDev) return './assets/icon-dev.png';
-  if (isPreview) return './assets/icon-preview.png';
   return './assets/icon.png';
 };
 
 const getAdaptiveForeground = () => {
   if (isDev) return './assets/images/android-icon-foreground-dev.png';
-  if (isPreview) return './assets/images/android-icon-foreground-preview.png';
   return './assets/images/android-icon-foreground.png';
 };
 
