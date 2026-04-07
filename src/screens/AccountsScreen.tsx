@@ -41,8 +41,8 @@ export const AccountsScreen = () => {
               }
               onPress={() =>
                 router.push({
-                  pathname: '/add-account',
-                  params: { account: JSON.stringify(item) },
+                  pathname: '/account-detail',
+                  params: { accountId: item.id },
                 })
               }
               onLongPress={drag}

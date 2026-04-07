@@ -23,6 +23,7 @@ export const DashboardScreen = React.memo(() => {
   const categories = useStore((s) => s.categories);
   const goals = useStore((s) => s.goals);
   const budgets = useStore((s) => s.budgets);
+  const accounts = useStore((s) => s.accounts);
   const isLoaded = useStore((s) => s.isLoaded);
   const formatCurrency = useStore((s) => s.formatCurrency);
 
@@ -129,6 +130,9 @@ export const DashboardScreen = React.memo(() => {
       else if (ratio >= 0.7) progressMessage = t('closeToLimit');
     }
 
+    // G. Total Balance (all accounts)
+    const totalBalance = accounts.reduce((sum, a) => sum + a.currentBalance, 0);
+
     return {
       monthlyIncome,
       monthlyExpenses,
@@ -145,8 +149,9 @@ export const DashboardScreen = React.memo(() => {
       progressRatio: ratio,
       progressColor,
       progressMessage,
+      totalBalance,
     };
-  }, [transactions, categories, goals, budgets, t, theme]);
+  }, [transactions, categories, goals, budgets, accounts, t, theme]);
 
   const currentMonthDisplay = useMemo(() => {
     const now = new Date();
@@ -211,6 +216,72 @@ export const DashboardScreen = React.memo(() => {
                 {formatCurrency(data.remainingBalance)}
               </Text>
             </View>
+          </Card.Content>
+        </Card>
+
+        {/* AA. Accounts Summary */}
+        <Card style={styles.card} mode="elevated">
+          <Card.Content>
+            <View style={styles.cardHeader}>
+              <Text variant="titleMedium">{t('accounts')}</Text>
+              <TouchableOpacity onPress={() => router.push('/accounts')}>
+                <Text
+                  variant="labelLarge"
+                  style={{ color: theme.colors.primary }}
+                >
+                  {t('viewAll')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ marginBottom: 8 }}>
+              <Text
+                variant="labelSmall"
+                style={{ color: theme.colors.outline }}
+              >
+                {t('totalBalance')}
+              </Text>
+              <Text variant="headlineSmall" style={{ fontWeight: '900' }}>
+                {formatCurrency(data.totalBalance)}
+              </Text>
+            </View>
+            <Divider style={{ marginVertical: 8 }} />
+            {accounts.slice(0, 3).map((acc, index) => (
+              <View key={acc.id}>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: '/account-detail',
+                      params: { accountId: acc.id },
+                    })
+                  }
+                  style={[styles.row, { paddingVertical: 10 }]}
+                >
+                  <Avatar.Icon
+                    size={32}
+                    icon={
+                      acc.type === 'bank'
+                        ? 'bank'
+                        : acc.type === 'credit'
+                          ? 'credit-card'
+                          : 'cash'
+                    }
+                    style={{
+                      backgroundColor: acc.color || theme.colors.primary,
+                    }}
+                    color="#fff"
+                  />
+                  <View style={{ marginLeft: 12, flex: 1 }}>
+                    <Text variant="bodyMedium" style={{ fontWeight: '700' }}>
+                      {translateName(acc.name)}
+                    </Text>
+                  </View>
+                  <Text variant="bodyLarge" style={{ fontWeight: 'bold' }}>
+                    {formatCurrency(acc.currentBalance, acc.currency)}
+                  </Text>
+                </TouchableOpacity>
+                {index < Math.min(accounts.length, 3) - 1 && <Divider />}
+              </View>
+            ))}
           </Card.Content>
         </Card>
 
