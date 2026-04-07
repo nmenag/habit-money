@@ -476,12 +476,14 @@ export const DashboardScreen = React.memo(() => {
           </Card.Content>
         </Card>
 
-        <BannerAdComponent />
+        <View style={{ height: 20 }} />
       </ScrollView>
+
+      <BannerAdComponent />
 
       <FAB
         icon="plus"
-        style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
+        style={[styles.fab, { bottom: (insets.bottom || 0) + 120 }]}
         onPress={() => router.push('/add-transaction')}
       />
     </View>

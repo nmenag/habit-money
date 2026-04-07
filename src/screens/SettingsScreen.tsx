@@ -65,170 +65,178 @@ export const SettingsScreen = () => {
   ];
 
   return (
-    <ScrollView
+    <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={{
-        paddingTop: insets.top > 0 ? 0 : 16,
-        paddingBottom: (insets.bottom || 0) + 40,
-      }}
     >
-      <View style={styles.section}>
-        <Text variant="labelLarge" style={styles.sectionTitle}>
-          {t('preferences')}
-        </Text>
-        <Card style={styles.card} mode="contained">
-          {SETTINGS_LINKS.map((item, index) => (
-            <View key={item.screen}>
-              <List.Item
-                title={item.name}
-                left={(props) => <List.Icon {...props} icon={item.icon} />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
-                onPress={() => router.push(item.screen as any)}
-              />
-              {index < SETTINGS_LINKS.length - 1 && <Divider />}
-            </View>
-          ))}
-        </Card>
-      </View>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingTop: insets.top > 0 ? 0 : 16,
+          paddingBottom: (insets.bottom || 0) + 40,
+        }}
+      >
+        <View style={styles.section}>
+          <Text variant="labelLarge" style={styles.sectionTitle}>
+            {t('preferences')}
+          </Text>
+          <Card style={styles.card} mode="contained">
+            {SETTINGS_LINKS.map((item, index) => (
+              <View key={item.screen}>
+                <List.Item
+                  title={item.name}
+                  left={(props) => <List.Icon {...props} icon={item.icon} />}
+                  right={(props) => (
+                    <List.Icon {...props} icon="chevron-right" />
+                  )}
+                  onPress={() => router.push(item.screen as any)}
+                />
+                {index < SETTINGS_LINKS.length - 1 && <Divider />}
+              </View>
+            ))}
+          </Card>
+        </View>
 
-      <View style={styles.section}>
-        <Text variant="labelLarge" style={styles.sectionTitle}>
-          {t('settings')}
-        </Text>
-        <Card style={styles.card} mode="contained">
-          <List.Item
-            title={t('exportData')}
-            description={t('exportDataDesc')}
-            left={(props) => (
-              <List.Icon {...props} icon="file-delimited-outline" />
-            )}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => router.push('/export-data' as any)}
-          />
-          <Divider />
-          <List.Item
-            title={t('backupData')}
-            description={t('backupDataDesc')}
-            left={(props) => (
-              <List.Icon {...props} icon="database-export-outline" />
-            )}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={handleBackupJSON}
-          />
-          <Divider />
-          <List.Item
-            title={t('restoreData')}
-            description={t('restoreDataDesc')}
-            left={(props) => (
-              <List.Icon {...props} icon="database-import-outline" />
-            )}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={handleRestoreJSON}
-          />
-        </Card>
-      </View>
+        <View style={styles.section}>
+          <Text variant="labelLarge" style={styles.sectionTitle}>
+            {t('settings')}
+          </Text>
+          <Card style={styles.card} mode="contained">
+            <List.Item
+              title={t('exportData')}
+              description={t('exportDataDesc')}
+              left={(props) => (
+                <List.Icon {...props} icon="file-delimited-outline" />
+              )}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={() => router.push('/export-data' as any)}
+            />
+            <Divider />
+            <List.Item
+              title={t('backupData')}
+              description={t('backupDataDesc')}
+              left={(props) => (
+                <List.Icon {...props} icon="database-export-outline" />
+              )}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={handleBackupJSON}
+            />
+            <Divider />
+            <List.Item
+              title={t('restoreData')}
+              description={t('restoreDataDesc')}
+              left={(props) => (
+                <List.Icon {...props} icon="database-import-outline" />
+              )}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={handleRestoreJSON}
+            />
+          </Card>
+        </View>
 
-      <View style={styles.section}>
-        <Text variant="labelLarge" style={styles.sectionTitle}>
-          {t('language')}
-        </Text>
-        <Card style={styles.card} mode="contained">
-          {LANGUAGES.map((item, index) => (
-            <View key={item.code}>
-              <List.Item
-                title={item.name}
-                left={(props) => (
-                  <View style={styles.languageIndicator}>
-                    <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>
-                      {item.label}
-                    </Text>
-                  </View>
-                )}
-                right={(props) =>
-                  language === item.code ? (
-                    <List.Icon
-                      {...props}
-                      icon="check-circle"
-                      color={theme.colors.primary}
-                    />
-                  ) : null
-                }
-                onPress={() => setLanguage(item.code as any)}
-                style={
-                  language === item.code
-                    ? { backgroundColor: theme.colors.primaryContainer }
-                    : undefined
-                }
-              />
-              {index < LANGUAGES.length - 1 && <Divider />}
-            </View>
-          ))}
-        </Card>
-        <Text variant="bodySmall" style={styles.sectionInfoText}>
-          {t('changeLanguageDesc')}
-        </Text>
-      </View>
+        <View style={styles.section}>
+          <Text variant="labelLarge" style={styles.sectionTitle}>
+            {t('language')}
+          </Text>
+          <Card style={styles.card} mode="contained">
+            {LANGUAGES.map((item, index) => (
+              <View key={item.code}>
+                <List.Item
+                  title={item.name}
+                  left={(props) => (
+                    <View style={styles.languageIndicator}>
+                      <Text
+                        variant="titleMedium"
+                        style={{ fontWeight: 'bold' }}
+                      >
+                        {item.label}
+                      </Text>
+                    </View>
+                  )}
+                  right={(props) =>
+                    language === item.code ? (
+                      <List.Icon
+                        {...props}
+                        icon="check-circle"
+                        color={theme.colors.primary}
+                      />
+                    ) : null
+                  }
+                  onPress={() => setLanguage(item.code as any)}
+                  style={
+                    language === item.code
+                      ? { backgroundColor: theme.colors.primaryContainer }
+                      : undefined
+                  }
+                />
+                {index < LANGUAGES.length - 1 && <Divider />}
+              </View>
+            ))}
+          </Card>
+          <Text variant="bodySmall" style={styles.sectionInfoText}>
+            {t('changeLanguageDesc')}
+          </Text>
+        </View>
 
-      <View style={styles.section}>
-        <Text variant="labelLarge" style={styles.sectionTitle}>
-          {t('feedback')}
-        </Text>
-        <Card style={styles.card} mode="contained">
-          <List.Item
-            title={t('sendFeedback')}
-            description={t('feedbackDesc')}
-            left={(props) => <List.Icon {...props} icon="message-outline" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={handleOpenEmail}
-          />
-        </Card>
-      </View>
+        <View style={styles.section}>
+          <Text variant="labelLarge" style={styles.sectionTitle}>
+            {t('feedback')}
+          </Text>
+          <Card style={styles.card} mode="contained">
+            <List.Item
+              title={t('sendFeedback')}
+              description={t('feedbackDesc')}
+              left={(props) => <List.Icon {...props} icon="message-outline" />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={handleOpenEmail}
+            />
+          </Card>
+        </View>
 
-      <View style={styles.section}>
-        <Text variant="labelLarge" style={styles.sectionTitle}>
-          {t('donate')}
-        </Text>
-        <Card style={styles.card} mode="contained">
-          <List.Item
-            title={t('buyMeACoffee')}
-            description={t('donateDesc')}
-            left={(props) => (
-              <List.Icon {...props} icon="coffee" color="#FF5E5B" />
-            )}
-            right={(props) => <List.Icon {...props} icon="open-in-new" />}
-            onPress={handleDonate}
-          />
-        </Card>
-      </View>
+        <View style={styles.section}>
+          <Text variant="labelLarge" style={styles.sectionTitle}>
+            {t('donate')}
+          </Text>
+          <Card style={styles.card} mode="contained">
+            <List.Item
+              title={t('buyMeACoffee')}
+              description={t('donateDesc')}
+              left={(props) => (
+                <List.Icon {...props} icon="coffee" color="#FF5E5B" />
+              )}
+              right={(props) => <List.Icon {...props} icon="open-in-new" />}
+              onPress={handleDonate}
+            />
+          </Card>
+        </View>
 
-      <View style={styles.section}>
-        <Text variant="labelLarge" style={styles.sectionTitle}>
-          {t('app') || 'App'}
-        </Text>
-        <Card style={styles.card} mode="contained">
-          <List.Item
-            title={t('aboutApp')}
-            left={(props) => (
-              <List.Icon {...props} icon="information-outline" />
-            )}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => router.push('/about')}
-          />
-          <Divider />
-          <List.Item
-            title={t('privacyPolicy')}
-            left={(props) => (
-              <List.Icon {...props} icon="shield-check-outline" />
-            )}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => router.push('/privacy-policy')}
-          />
-        </Card>
-      </View>
-
-      <View style={{ height: 40 }} />
+        <View style={styles.section}>
+          <Text variant="labelLarge" style={styles.sectionTitle}>
+            {t('app') || 'App'}
+          </Text>
+          <Card style={styles.card} mode="contained">
+            <List.Item
+              title={t('aboutApp')}
+              left={(props) => (
+                <List.Icon {...props} icon="information-outline" />
+              )}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={() => router.push('/about')}
+            />
+            <Divider />
+            <List.Item
+              title={t('privacyPolicy')}
+              left={(props) => (
+                <List.Icon {...props} icon="shield-check-outline" />
+              )}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={() => router.push('/privacy-policy')}
+            />
+          </Card>
+        </View>
+        <View style={{ height: 20 }} />
+      </ScrollView>
       <BannerAdComponent />
-    </ScrollView>
+    </View>
   );
 };
 
