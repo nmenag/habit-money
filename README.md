@@ -90,6 +90,42 @@ npx expo run:android
 
 This command compiles the native Android project (prebuild) and installs the development build directly onto your device.
 
+#### 🔧 Useful ADB Commands
+
+During development, you may need these common Android Debug Bridge (ADB) commands:
+
+- **List connected devices**: `adb devices`
+- **Install an APK**: `adb install path/to/app.apk`
+- **Uninstall the app**: `adb uninstall com.finhabit.dev`
+- **Open Dev Menu**: `adb shell input keyevent 82`
+- **Forward Metro Port**: `adb reverse tcp:8081 tcp:8081` (Run if the app can't connect to the bundler)
+- **View Logs**: `adb logcat` (Filter specifically by `adb logcat *:S ReactNative:V ReactNativeJS:V`)
+
+#### 📦 Build APK locally
+
+To generate a standalone APK directly on your machine without using EAS Cloud:
+
+1.  **Navigate to the android directory**:
+
+    ```bash
+    cd android
+    ```
+
+2.  **Generate a Debug APK**:
+
+    ```bash
+    ./gradlew assembleDebug
+    ```
+
+    The output will be at: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+3.  **Generate a Release APK**:
+    ```bash
+    ./gradlew assembleRelease
+    ```
+    The output will be at: `android/app/build/outputs/apk/release/app-release.apk`
+    _Note: Ensure you have your signing config (keystore) properly configured for production builds._
+
 ## 🧪 CI/CD
 
 - **GitHub Actions**: Automated pipeline for linting and type-checking on every push or pull request to `main`/`master`.
