@@ -1,6 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { format, parseISO } from 'date-fns';
-import { enUS, es } from 'date-fns/locale';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -21,8 +19,7 @@ import { useStore, useTranslation } from '../store/useStore';
 export const BudgetDetailScreen = () => {
   const params = useLocalSearchParams<{ budgetId: string }>();
   const { budgetId } = params;
-  const { budgets, transactions, categories, formatCurrency, language } =
-    useStore();
+  const { budgets, transactions, categories, formatCurrency } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);

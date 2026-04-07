@@ -151,7 +151,7 @@ export const DashboardScreen = React.memo(() => {
       progressMessage,
       totalBalance,
     };
-  }, [transactions, categories, goals, budgets, accounts, t, theme]);
+  }, [transactions, categories, goals, budgets, accounts, t, theme, translateName]);
 
   const currentMonthDisplay = useMemo(() => {
     const now = new Date();
