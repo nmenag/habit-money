@@ -101,6 +101,22 @@ During development, you may need these common Android Debug Bridge (ADB) command
 - **Forward Metro Port**: `adb reverse tcp:8081 tcp:8081` (Run if the app can't connect to the bundler)
 - **View Logs**: `adb logcat` (Filter specifically by `adb logcat *:S ReactNative:V ReactNativeJS:V`)
 
+#### 🧹 Cleaning the Build
+
+If you encounter persistent build errors, you may need to clean the build cache:
+
+```bash
+cd android && ./gradlew clean && cd ..
+```
+
+#### 🎭 Working with Variants
+
+The app supports different configurations via the `APP_VARIANT` environment variable (defined in `app.config.js`):
+
+- **Development**: `APP_VARIANT=development npx expo run:android` (Package: `com.finhabit.dev`)
+- **Preview**: `APP_VARIANT=preview npx expo run:android` (Package: `com.finhabit.preview`)
+- **Production**: `npx expo run:android` (Package: `com.finhabit`)
+
 #### 📦 Build APK locally
 
 To generate a standalone APK directly on your machine without using EAS Cloud:
@@ -128,8 +144,13 @@ To generate a standalone APK directly on your machine without using EAS Cloud:
 
 ## 🧪 CI/CD
 
-- **GitHub Actions**: Automated pipeline for linting and type-checking on every push or pull request to `main`/`master`.
-- **Quality Control**: Use `npm run lint` and `npm run check-types` to ensure code stability.
+- **GitHub Actions**:
+  - **Continuous Integration**: Every Pull Request to `main` triggers a validation pipeline that runs `expo-doctor`, `lint`, and `type-check`.
+  - **Automated Releases**: Pushes to `main` trigger a release workflow that automatically creates a GitHub Release tagged with the version from `package.json`.
+- **Quality Control**:
+  - `npm run doctor`: Validate Expo configuration and dependency health.
+  - `npm run lint`: Maintain code quality and style consistency.
+  - `npm run check-types`: Ensure full TypeScript type safety.
 
 ## ⚙️ Expo & EAS Configuration
 
@@ -157,6 +178,12 @@ The application configuration is dynamic and handles three variants: `developmen
 
   # Development (Development Client for testing native modules)
   eas build --platform android --profile development
+  ```
+
+- **Local EAS Builds**: You can also run EAS builds locally on your machine (requires a correctly configured build environment):
+
+  ```bash
+  eas build --platform android --profile preview --local
   ```
 
 - **Updates**: Push updates to users without a new store submission.
