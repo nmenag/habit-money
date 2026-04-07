@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Terms and Conditions - HabitFin</title>
+    <title>Terms of Service - HabitFin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -13,12 +13,11 @@
     <style>
       :root {
         --primary: #005cee;
-        --primary-dark: #0046b8;
-        --bg: #f8faff;
-        --text: #1e293b;
-        --text-light: #64748b;
-        --card-bg: #ffffff;
-        --radius: 12px;
+        --dark: #0f172a;
+        --light: #f8faff;
+        --white: #ffffff;
+        --gray: #64748b;
+        --radius: 24px;
       }
 
       * {
@@ -29,56 +28,77 @@
 
       body {
         font-family: 'Outfit', sans-serif;
-        background-color: var(--bg);
-        color: var(--text);
+        background-color: var(--light);
+        color: var(--dark);
         line-height: 1.6;
         padding: 40px 20px;
       }
 
       .container {
         max-width: 800px;
-        margin: 0 auto;
-        background-color: var(--card-bg);
+        margin: 40px auto;
+        background-color: var(--white);
         padding: 60px 40px;
         border-radius: var(--radius);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
       }
 
       @media (max-width: 600px) {
         .container {
           padding: 30px 20px;
+          margin: 20px auto;
         }
       }
 
-      h1 {
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin-bottom: 20px;
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 800;
         color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 24px;
+        color: var(--dark);
+        letter-spacing: -0.02em;
       }
 
       h2 {
         font-size: 1.5rem;
-        font-weight: 600;
-        margin: 30px 0 15px;
-        color: var(--text);
+        font-weight: 700;
+        margin: 40px 0 16px;
+        color: var(--dark);
       }
 
       p {
-        margin-bottom: 15px;
+        margin-bottom: 16px;
+        color: var(--gray);
+      }
+
+      strong {
+        color: var(--dark);
+        font-weight: 700;
       }
 
       ul {
-        margin: 15px 0 20px 20px;
+        margin: 16px 0 24px 20px;
       }
 
       li {
-        margin-bottom: 8px;
+        margin-bottom: 12px;
+        color: var(--gray);
       }
 
       a {
         color: var(--primary);
         text-decoration: none;
+        font-weight: 600;
       }
 
       a:hover {
@@ -86,70 +106,124 @@
       }
 
       .back-link {
-        display: inline-block;
-        margin-bottom: 30px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 24px;
         font-weight: 600;
+        color: var(--gray);
+        transition: color 0.3s;
+      }
+
+      .back-link:hover {
+        color: var(--primary);
+        text-decoration: none;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 60px;
+        color: var(--gray);
+        font-size: 0.9rem;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <a href="index.html" class="back-link">← Back to home</a>
+      <a href="index.html" class="back-link">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="19" y1="12" x2="5" y2="12" />
+          <polyline points="12 19 5 12 12 5" />
+        </svg>
+        Back to Home
+      </a>
 
-      <h1>Terms and Conditions for HabitFin</h1>
-      <p><strong>Effective Date: April 6, 2026</strong></p>
+      <div class="logo">
+        <svg
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+        HabitFin
+      </div>
+
+      <h1>Terms of Service</h1>
+      <p><strong>Last Updated: April 6, 2026</strong></p>
 
       <p>
-        By downloading or using the app, these terms will automatically apply to
-        you – you should make sure therefore that you read them carefully before
-        using the app.
+        By downloading and using the HabitFin app, these terms will
+        automatically apply to you. Please read them carefully before using the
+        application.
       </p>
 
-      <h2>1. App Usage</h2>
+      <h2>1. Use of the Application</h2>
       <p>
-        HabitFin provides this app for your personal financial management. While
-        we strive to keep everything accurate and up-to-date, we cannot
-        guarantee its completeness, accuracy, or reliability.
+        HabitFin is provided for personal financial tracking and habit building.
+        We reserve the right to modify or discontinue features at any time. You
+        are responsible for maintaining the security of your device and for any
+        activity that occurs with your local data.
       </p>
 
-      <h2>2. Ad-Based Model</h2>
+      <h2>2. Local Storage Disclaimer</h2>
       <p>
-        The app is currently free to use and includes advertisements provided by
-        Google AdMob. These advertisements may be personalized based on data
-        collected by Google according to their policies.
+        <strong>Safety of your information is your responsibility.</strong>
+        Since all your data is stored locally on your phone, you understand and
+        agree that HabitFin is not responsible for any data loss resulting from
+        device failure, theft, or application uninstallation without a backup.
       </p>
 
-      <h2>3. Security Responsibility</h2>
+      <h2>3. Intellectual Property</h2>
       <p>
-        It’s your responsibility to keep your phone and access to the app
-        secure. We recommend that you do not jailbreak or root your phone, which
-        could make your phone vulnerable to malware/viruses/malicious programs,
-        compromise your phone’s security features and it could mean that the
-        HabitFin app won’t work properly or at all.
+        The application, including all its code, design, icons, and branding, is
+        the property of HabitFin and is protected by copyright and other laws.
+        You may not copy, modify, or redistribute any part of the app.
       </p>
 
-      <h2>4. Disclaimer for Data Loss</h2>
+      <h2>4. Third-Party Costs</h2>
       <p>
-        We are not responsible for any direct or indirect loss of financial
-        data, incorrect calculations, or decisions made based on information
-        provided in the app. Always double-check your important financial
-        transactions.
+        HabitFin may require an internet connection to display advertisements
+        via AdMob or to run certain services. You are responsible for any costs
+        incurred by your service provider (e.g., data charges).
       </p>
 
-      <h2>5. Modifications</h2>
+      <h2>5. Limitation of Liability</h2>
       <p>
-        We reserve the right to make changes to the app or to charge for its
-        services, at any time and for any reason. We will never charge you for
-        the app or its services without making it very clear to you exactly what
-        you’re paying for.
+        HabitFin is provided "as is" and without any warranty of any kind. We
+        will not be liable for any direct or indirect damages resulting from
+        your use of the application, including financial decisions made based on
+        the data provided by the app.
       </p>
 
-      <h2>6. Contact Us</h2>
+      <h2>6. Modifications to Terms</h2>
       <p>
-        If you have any questions or suggestions about our Terms and Conditions,
-        do not hesitate to contact us at
-        <strong>nmena.garzon@gmail.com</strong>.
+        We may update our Terms of Service periodically. We will notify you of
+        any changes by updating this page. Your continued use of the app after
+        such changes constitutes your acceptance of the new terms.
       </p>
+
+      <h2>7. Governing Law</h2>
+      <p>
+        These terms are governed by and construed in accordance with the laws
+        of the jurisdiction where HabitFin is based.
+      </p>
+
+      <footer>&copy; 2026 HabitFin. All rights reserved.</footer>
     </div>
   </body>
 </html>

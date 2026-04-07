@@ -3,22 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HabitFin - Legal & Privacy</title>
+    <title>HabitFin - Master Your Money, Build Better Habits</title>
+    <meta
+      name="description"
+      content="HabitFin is a simple, powerful, and privacy-focused personal finance app. Track expenses, manage budgets, and reach your goals effortlessly."
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
         --primary: #005cee;
-        --primary-dark: #0046b8;
-        --bg: #f8faff;
-        --text: #1e293b;
-        --text-light: #64748b;
-        --card-bg: #ffffff;
-        --radius: 16px;
+        --secondary: #00e676;
+        --accent: #4caf50;
+        --dark: #0f172a;
+        --light: #f8faff;
+        --white: #ffffff;
+        --gray: #64748b;
+        --border: rgba(0, 0, 0, 0.05);
+        --radius-lg: 32px;
+        --radius-md: 20px;
+        --radius-sm: 12px;
       }
 
       * {
@@ -27,135 +35,628 @@
         box-sizing: border-box;
       }
 
+      html {
+        scroll-behavior: smooth;
+      }
+
       body {
         font-family: 'Outfit', sans-serif;
-        background-color: var(--bg);
-        color: var(--text);
+        background-color: var(--white);
+        color: var(--dark);
         line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      /* Navigation */
+      nav {
         display: flex;
-        flex-direction: column;
-        min-height: 100vh;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 8%;
+        position: fixed;
+        width: 100%;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border);
       }
 
-      .header {
-        padding: 60px 20px;
-        text-align: center;
-        background: linear-gradient(
-          135deg,
-          var(--primary),
-          var(--primary-dark)
-        );
-        color: white;
-        clip-path: ellipse(150% 100% at 50% 0%);
-      }
-
-      .header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-        letter-spacing: -0.02em;
-      }
-
-      .header p {
-        font-size: 1.1rem;
-        opacity: 0.9;
-      }
-
-      .container {
-        max-width: 800px;
-        margin: -40px auto 60px;
-        padding: 0 20px;
-        flex: 1;
-      }
-
-      .card-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-      }
-
-      @media (max-width: 600px) {
-        .card-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .card {
-        background-color: var(--card-bg);
-        padding: 40px 30px;
-        border-radius: var(--radius);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-        text-align: center;
-        transition:
-          transform 0.3s ease,
-          box-shadow 0.3s ease;
+      .logo {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
         text-decoration: none;
-        color: inherit;
       }
 
-      .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0, 92, 238, 0.1);
+      .nav-links {
+        display: flex;
+        gap: 32px;
+        align-items: center;
       }
 
-      .card .icon {
-        font-size: 3rem;
-        margin-bottom: 20px;
-        display: block;
-      }
-
-      .card h2 {
-        font-size: 1.5rem;
+      .nav-links a {
+        text-decoration: none;
+        color: var(--dark);
         font-weight: 600;
-        margin-bottom: 12px;
+        font-size: 0.95rem;
+        transition: color 0.3s;
+      }
+
+      .nav-links a:hover {
         color: var(--primary);
       }
 
-      .card p {
-        color: var(--text-light);
-        font-size: 0.95rem;
+      .btn-nav {
+        background: var(--primary);
+        color: white !important;
+        padding: 12px 28px;
+        border-radius: 50px;
+        transition: all 0.3s;
       }
 
-      .footer {
-        padding: 40px 20px;
-        text-align: center;
-        font-size: 0.9rem;
-        color: var(--text-light);
-        border-top: 1px solid rgba(0, 0, 0, 0.05);
-        background: white;
+      .btn-nav:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 92, 238, 0.2);
+        background: #004dc7;
       }
 
-      .app-name {
+      /* Hero Section */
+      .hero {
+        padding: 200px 8% 120px;
+        background: radial-gradient(circle at top right, #f0f7ff, #ffffff);
+        min-height: 95vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+      }
+
+      .hero-content {
+        max-width: 650px;
+        z-index: 2;
+      }
+
+      .hero h1 {
+        font-size: 4.2rem;
+        font-weight: 800;
+        line-height: 1.05;
+        margin-bottom: 24px;
+        color: var(--dark);
+        letter-spacing: -0.05em;
+      }
+
+      .hero h1 span {
+        color: var(--primary);
+      }
+
+      .hero p {
+        font-size: 1.35rem;
+        color: var(--gray);
+        margin-bottom: 48px;
+        max-width: 550px;
+        font-weight: 400;
+      }
+
+      .cta-group {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+      }
+
+      .btn {
+        padding: 18px 40px;
+        border-radius: 50px;
         font-weight: 700;
-        color: var(--text);
+        text-decoration: none;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.15rem;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 15px 35px rgba(0, 92, 238, 0.25);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(0, 92, 238, 0.35);
+      }
+
+      .hero-image {
+        position: absolute;
+        right: -1%;
+        top: 55%;
+        transform: translateY(-50%) rotate(-3deg);
+        width: 48%;
+        max-width: 650px;
+        z-index: 1;
+        opacity: 0;
+        animation: heroFadeIn 1.4s forwards cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      @keyframes heroFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-40%) rotate(0deg) scale(0.95);
+          right: -5%;
+        }
+        to {
+          opacity: 1;
+          transform: translateY(-50%) rotate(-3deg) scale(1);
+          right: -1%;
+        }
+      }
+
+      .hero-image img {
+        width: 100%;
+        border-radius: var(--radius-lg);
+        box-shadow: 0 45px 110px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Features Section */
+      .features {
+        padding: 140px 8%;
+        background-color: var(--white);
+      }
+
+      .section-header {
+        text-align: center;
+        max-width: 850px;
+        margin: 0 auto 100px;
+      }
+
+      .section-header h2 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 24px;
+        letter-spacing: -0.04em;
+        line-height: 1.1;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 56px;
+      }
+
+      .feature-card {
+        padding: 56px;
+        border-radius: var(--radius-md);
+        background: var(--light);
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 1px solid transparent;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-16px);
+        background: var(--white);
+        border-color: var(--border);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05);
+      }
+
+      .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--white);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin-bottom: 36px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      }
+
+      .feature-card h3 {
+        font-size: 1.7rem;
+        font-weight: 800;
+        margin-bottom: 18px;
+        color: var(--dark);
+      }
+
+      .feature-card p {
+        color: var(--gray);
+        font-size: 1.1rem;
+        line-height: 1.5;
+        font-weight: 500;
+      }
+
+      /* Showcase Section */
+      .showcase {
+        padding: 140px 8%;
+        background-color: var(--dark);
+        color: var(--white);
+        display: flex;
+        align-items: center;
+        gap: 120px;
+        border-radius: 56px;
+        margin: 0 40px;
+      }
+
+      .showcase-image {
+        flex: 1;
+      }
+
+      .showcase-image img {
+        width: 100%;
+        border-radius: 40px;
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+      }
+
+      .showcase-content {
+        flex: 1;
+      }
+
+      .showcase-content h2 {
+        font-size: 3.8rem;
+        font-weight: 800;
+        margin-bottom: 36px;
+        line-height: 1.05;
+        letter-spacing: -0.05em;
+      }
+
+      .showcase-content p {
+        margin-bottom: 48px;
+        font-size: 1.4rem;
+        opacity: 0.9;
+        font-weight: 400;
+      }
+
+      .showcase-list {
+        list-style: none;
+      }
+
+      .showcase-list li {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 28px;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      .check-icon {
+        width: 36px;
+        height: 36px;
+        background: var(--secondary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: var(--dark);
+      }
+
+      /* Privacy Pill */
+      .privacy-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #f0f7ff;
+        color: var(--primary);
+        padding: 10px 24px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 32px;
+      }
+
+      /* Footer */
+      footer {
+        padding: 140px 8% 60px;
+        background: #f8faff;
+        margin-top: 140px;
+      }
+
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 80px;
+        margin-bottom: 100px;
+      }
+
+      .footer-brand h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 24px;
+      }
+
+      .footer-brand p {
+        color: var(--gray);
+        max-width: 360px;
+        font-size: 1.15rem;
+      }
+
+      .footer-links h4 {
+        margin-bottom: 32px;
+        color: var(--dark);
+        font-size: 1.2rem;
+        font-weight: 800;
+      }
+
+      .footer-links ul {
+        list-style: none;
+      }
+
+      .footer-links li {
+        margin-bottom: 18px;
+      }
+
+      .footer-links a {
+        text-decoration: none;
+        color: var(--gray);
+        transition: color 0.3s;
+        font-weight: 600;
+      }
+
+      .footer-links a:hover {
+        color: var(--primary);
+      }
+
+      .bottom-bar {
+        padding-top: 60px;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--gray);
+        font-size: 1.1rem;
+      }
+
+      /* Responsive */
+      @media (max-width: 1400px) {
+        .hero h1 {
+          font-size: 3.5rem;
+        }
+        .feature-grid {
+          gap: 32px;
+        }
+      }
+
+      @media (max-width: 1100px) {
+        .hero {
+          flex-direction: column;
+          text-align: center;
+          padding-top: 160px;
+        }
+        .hero-content {
+          max-width: 100%;
+          margin-bottom: 100px;
+        }
+        .hero-image {
+          position: relative;
+          right: auto;
+          top: auto;
+          transform: none;
+          width: 90%;
+          margin: 0 auto;
+          animation: none;
+          opacity: 1;
+        }
+        .cta-group {
+          justify-content: center;
+        }
+        .feature-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .showcase {
+          flex-direction: column;
+          padding: 100px 8%;
+          margin: 0 20px;
+          gap: 80px;
+        }
+        .showcase-content h2 {
+          font-size: 3rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .feature-grid {
+          grid-template-columns: 1fr;
+        }
+        .footer-grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 40px;
+        }
+        .bottom-bar {
+          flex-direction: column;
+          gap: 20px;
+          text-align: center;
+        }
       }
     </style>
   </head>
   <body>
-    <header class="header">
-      <h1>HabitFin</h1>
-      <p>Your privacy and security are our priority.</p>
+    <nav>
+      <a href="#" class="logo">
+        <svg
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+        HabitFin
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#insights">Insights</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html" class="btn-nav">Settings & Help</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-content">
+        <div class="privacy-pill">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          No Accounts. No Tracking. 100% Local.
+        </div>
+        <h1>Master Your <span>Financial</span> Habits</h1>
+        <p>
+          Master your spending, crush your goals, and manage your accounts with
+          the simplest personal finance tool. Your data stays strictly on your
+          phone.
+        </p>
+        <div class="cta-group">
+          <a href="#" class="btn btn-primary"> Open Dashboard </a>
+        </div>
+      </div>
+      <div class="hero-image">
+        <img src="assets/hero.png" alt="HabitFin App Accurate Dashboard" />
+      </div>
     </header>
 
-    <main class="container">
-      <div class="card-grid">
-        <a href="privacy.html" class="card">
-          <span class="icon">🛡️</span>
-          <h2>Privacy Policy</h2>
-          <p>
-            Learn how we protect your data and security while using HabitFin.
-          </p>
-        </a>
-        <a href="terms.html" class="card">
-          <span class="icon">📜</span>
-          <h2>Terms of Service</h2>
-          <p>Read our guidelines and agreements for using the HabitFin app.</p>
-        </a>
+    <section class="features" id="features">
+      <div class="section-header">
+        <h2>Designed for Clarity</h2>
+        <p>
+          HabitFin is built to give you an instant vertical summary of your
+          finances so you can spend less time tracking and more time living.
+        </p>
       </div>
-    </main>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <div class="feature-icon">📈</div>
+          <h3>Dashboard Summary</h3>
+          <p>
+            View your monthly income, expenses, and remaining balance at a
+            glance with a high-contrast balance summary card.
+          </p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">📑</div>
+          <h3>Transaction History</h3>
+          <p>
+            The dedicated transactions tab lets you search, filter by type
+            (Income/Expense), and view history grouped by date.
+          </p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">💡</div>
+          <h3>Smart Insights</h3>
+          <p>
+            Get automated insights based on your spending habits compared to the
+            previous month. Built right into your main view.
+          </p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">💳</div>
+          <h3>Account Integration</h3>
+          <p>
+            The accounts summary highlights your total balance across all bank,
+            cash, and credit card accounts in real-time.
+          </p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Top Spending</h3>
+          <p>
+            Instantly identify which category consumed most of your budget this
+            month with precise percentage breakdowns.
+          </p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">🛠️</div>
+          <h3>Full Control</h3>
+          <p>
+            Access all settings, category management, account editing, and data
+            backups from the simplified settings menu.
+          </p>
+        </article>
+      </div>
+    </section>
 
-    <footer class="footer">
-      &copy; 2026 <span class="app-name">HabitFin</span>. All rights reserved.
+    <section class="showcase" id="insights">
+      <div class="showcase-image">
+        <img src="assets/features.png" alt="HabitFin App Real Screen View" />
+      </div>
+      <div class="showcase-content">
+        <h2>100% Personal. 0% Privacy Risk.</h2>
+        <p>
+          Your financial life is nobody else's business. That's why HabitFin was
+          built without any cloud syncing or servers.
+        </p>
+        <ul class="showcase-list">
+          <li>
+            <div class="check-icon">✓</div>
+            Deep Financial Insights Tab
+          </li>
+          <li>
+            <div class="check-icon">✓</div>
+            Manual CSV & JSON Backups
+          </li>
+          <li>
+            <div class="check-icon">✓</div>
+            Custom Categories & Icons
+          </li>
+          <li>
+            <div class="check-icon">✓</div>
+            Universal Currency Support
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h2>HabitFin</h2>
+          <p>
+            Simple, private, and powerful financial tracking for those who value
+            their data and their future.
+          </p>
+        </div>
+        <div class="footer-links">
+          <h4>Navigation</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#insights">Insights</a></li>
+            <li><a href="#">Transactions</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">Settings & Help</a></li>
+            <li><a href="#">GitHub Repo</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="bottom-bar">
+        <p>&copy; 2026 HabitFin. All rights reserved.</p>
+        <p>Your money, your rules.</p>
+      </div>
     </footer>
   </body>
 </html>

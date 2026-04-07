@@ -13,12 +13,11 @@
     <style>
       :root {
         --primary: #005cee;
-        --primary-dark: #0046b8;
-        --bg: #f8faff;
-        --text: #1e293b;
-        --text-light: #64748b;
-        --card-bg: #ffffff;
-        --radius: 12px;
+        --dark: #0f172a;
+        --light: #f8faff;
+        --white: #ffffff;
+        --gray: #64748b;
+        --radius: 24px;
       }
 
       * {
@@ -29,164 +28,219 @@
 
       body {
         font-family: 'Outfit', sans-serif;
-        background-color: var(--bg);
-        color: var(--text);
+        background-color: var(--light);
+        color: var(--dark);
         line-height: 1.6;
         padding: 40px 20px;
       }
 
       .container {
         max-width: 800px;
-        margin: 0 auto;
-        background-color: var(--card-bg);
+        margin: 40px auto;
+        background-color: var(--white);
         padding: 60px 40px;
         border-radius: var(--radius);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
       }
 
       @media (max-width: 600px) {
         .container {
           padding: 30px 20px;
+          margin: 20px auto;
         }
       }
 
-      h1 {
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin-bottom: 20px;
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 800;
         color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 24px;
+        color: var(--dark);
+        letter-spacing: -0.02em;
       }
 
       h2 {
         font-size: 1.5rem;
-        font-weight: 600;
-        margin: 30px 0 15px;
-        color: var(--text);
+        font-weight: 700;
+        margin: 40px 0 16px;
+        color: var(--dark);
       }
 
       p {
-        margin-bottom: 15px;
+        margin-bottom: 16px;
+        color: var(--gray);
+      }
+
+      strong {
+        color: var(--dark);
+        font-weight: 700;
       }
 
       ul {
-        margin: 15px 0 20px 20px;
+        margin: 16px 0 24px 20px;
       }
 
       li {
-        margin-bottom: 8px;
+        margin-bottom: 12px;
+        color: var(--gray);
       }
 
       a {
         color: var(--primary);
         text-decoration: none;
+        font-weight: 600;
       }
 
       a:hover {
         text-decoration: underline;
       }
 
-      hr {
-        border: 0;
-        border-top: 1px solid rgba(0, 0, 0, 0.1);
-        margin: 40px 0;
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 24px;
+        font-weight: 600;
+        color: var(--gray);
+        transition: color 0.3s;
       }
 
-      .back-link {
-        display: inline-block;
-        margin-bottom: 30px;
-        font-weight: 600;
+      .back-link:hover {
+        color: var(--primary);
+        text-decoration: none;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 60px;
+        color: var(--gray);
+        font-size: 0.9rem;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <a href="index.html" class="back-link">← Back to home</a>
+      <a href="index.html" class="back-link">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="19" y1="12" x2="5" y2="12" />
+          <polyline points="12 19 5 12 12 5" />
+        </svg>
+        Back to Home
+      </a>
 
-      <h1>Privacy Policy for HabitFin</h1>
+      <div class="logo">
+        <svg
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+        HabitFin
+      </div>
+
+      <h1>Privacy Policy</h1>
       <p><strong>Effective Date: April 6, 2026</strong></p>
 
       <p>
-        HabitFin ("we", "us", or "our") built the HabitFin app as a Freemium
-        app. This SERVICE is provided by HabitFin at no cost and is intended for
-        use as is.
-      </p>
-      <p>
-        This page is used to inform visitors regarding our policies with the
-        collection, use, and disclosure of Personal Information if anyone
-        decided to use our Service.
+        At HabitFin, we are committed to protecting your privacy. This policy
+        explains how we handle your data when you use the HabitFin mobile
+        application.
       </p>
 
-      <h2>Information Collection and Use</h2>
+      <h2>1. Data Collection & Local Storage</h2>
       <p>
-        <strong>1. Local Data Storage</strong><br />
-        HabitFin is an <strong>offline-first</strong> application. All financial
-        data, transactions, accounts, and budget information you enter is stored
-        exclusively on your device. We do not transmit or store this data on any
-        external servers.
+        <strong>Your financial data is yours alone.</strong> HabitFin is
+        designed as an offline-first application. All transactions, accounts,
+        budgets, and goals you enter are stored <strong>locally</strong> on your
+        device. We do not have access to this data, nor do we store it on our
+        servers.
       </p>
 
+      <h2>2. Third-Party Services</h2>
       <p>
-        <strong>2. Third-Party Services</strong><br />
-        The app does use third-party services that may collect information used
-        to identify you.
+        To provide certain features and display advertisements, we use the
+        following third-party services which may collect data according to their
+        own policies:
       </p>
       <ul>
         <li>
-          <a href="https://www.google.com/policies/privacy/"
+          <a href="https://www.google.com/policies/privacy/" target="_blank"
             >Google Play Services</a
           >
         </li>
         <li>
-          <a href="https://support.google.com/admob/answer/6128543?hl=en"
+          <a
+            href="https://support.google.com/admob/answer/6128543?hl=en"
+            target="_blank"
             >AdMob</a
           >
         </li>
-        <li><a href="https://expo.dev/privacy">Expo</a></li>
+        <li>
+          <a href="https://expo.dev/privacy" target="_blank">Expo</a>
+        </li>
       </ul>
 
+      <h2>3. Log Data & Bug Reporting</h2>
       <p>
-        <strong>3. Log Data</strong><br />
-        Whenever you use our Service, in a case of an error in the app we may
-        collect data and information (through third-party products) on your
-        phone called Log Data. This Log Data may include information such as
-        your device IP address, operating system version, the configuration of
-        the app, and other statistics.
+        In the event of an application error, we may collect diagnostics data
+        known as Log Data. This helps us identify and fix technical issues. This
+        data may include your device type, IP address, and operating system
+        version, but it never includes your personal financial records.
       </p>
 
-      <h2>Cookies</h2>
+      <h2>4. Cookies</h2>
       <p>
-        This Service does not use these “cookies” explicitly. However, the app
-        may use third-party code and libraries that use “cookies” to collect
-        information and improve their services.
+        HabitFin does not use cookies directly. However, third-party libraries
+        integrated into the app (like AdMob) may use cookies to serve relevant
+        advertisements.
       </p>
 
-      <h2>Security</h2>
+      <h2>5. Security</h2>
       <p>
-        We value your trust in providing us your Personal Information, thus we
-        are striving to use commercially acceptable means of protecting it. But
-        remember that no method of transmission over the internet, or method of
-        electronic storage is 100% secure and reliable.
+        We prioritize the security of your information. Since your data is
+        stored locally, your device's security settings (biometrics, PIN, etc.)
+        are your primary defense. We recommend keeping your device updated and
+        secured.
       </p>
 
-      <h2>Children’s Privacy</h2>
+      <h2>6. Children's Privacy</h2>
       <p>
-        These Services do not address anyone under the age of 13. We do not
-        knowingly collect personally identifiable information from children
-        under 13.
+        Our services are not intended for individuals under 13. We do not
+        knowingly collect personal information from children.
       </p>
 
-      <h2>Changes to This Privacy Policy</h2>
+      <h2>7. Contact Information</h2>
       <p>
-        We may update our Privacy Policy from time to time. You are advised to
-        review this page periodically for any changes. We will notify you of any
-        changes by posting the new Privacy Policy on this page.
+        If you have questions about this Privacy Policy, please contact us at:
+        <strong>nmena.garzon@gmail.com</strong>
       </p>
 
-      <h2>Contact Us</h2>
-      <p>
-        If you have any questions or suggestions about our Privacy Policy, do
-        not hesitate to contact us at <strong>nmena.garzon@gmail.com</strong>.
-      </p>
+      <footer>&copy; 2026 HabitFin. All rights reserved.</footer>
     </div>
   </body>
 </html>
