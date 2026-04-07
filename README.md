@@ -60,6 +60,29 @@ HabitFin is a modern, high-performance personal finance tracker built with **Rea
    npx expo start
    ```
 
+### 📱 Android Development
+
+For local native development on Android, you can run the app directly on your physical device or an emulator.
+
+#### 🛠️ 1. Requirements (Android SDK)
+To build and run the native code locally, you must have the **Android SDK** and **Java Development Kit (JDK)** installed:
+- **Android Studio**: Install it to get the necessary build tools and SDKs.
+- **Environment Variables**: Configure your shell to include `ANDROID_HOME` (e.g., `~/Android/Sdk`) and add the `platform-tools` and `build-tools` directories to your `PATH`.
+- **JDK**: Ensure you have a compatible Java version installed (refer to Expo documentation for the specific version required by SDK 54).
+
+#### 🔌 2. Device Setup (USB Debugging)
+To run and debug the app on a physical Android device:
+1. **Enable Developer Options**: Go to *Settings > About Phone* and tap **Build Number** 7 times.
+2. **Enable USB Debugging**: In *Settings > System > Developer Options*, toggle on **USB Debugging**. This allows the ADB (Android Debug Bridge) to communicate with your device for installing and debugging the application.
+3. **Connect**: Plug your device into your computer via a USB cable and authorize the connection on the device screen.
+
+#### 🚀 3. Run the App
+With your device connected or an emulator running, execute:
+```bash
+npx expo run:android
+```
+This command compiles the native Android project (prebuild) and installs the development build directly onto your device.
+
 ## 🧪 CI/CD
 
 - **GitHub Actions**: Automated pipeline for linting and type-checking on every push or pull request to `main`/`master`.

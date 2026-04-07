@@ -58,10 +58,13 @@ export const DashboardScreen = React.memo(() => {
 
     transactions.forEach((tr) => {
       const trDate = new Date(tr.date);
+      const isAdjustment =
+        tr.note && translateName(tr.note) === t('balanceAdjustment');
+
       if (trDate >= currentStart && trDate <= currentEnd) {
-        if (tr.type === 'income') {
+        if (tr.type === 'income' && !isAdjustment) {
           monthlyIncome += tr.amount;
-        } else if (tr.type === 'expense') {
+        } else if (tr.type === 'expense' && !isAdjustment) {
           monthlyExpenses += tr.amount;
           if (tr.categoryId) {
             catExpenses[tr.categoryId] =
@@ -69,7 +72,7 @@ export const DashboardScreen = React.memo(() => {
           }
         }
       } else if (trDate >= lastStart && trDate <= lastEnd) {
-        if (tr.type === 'expense') {
+        if (tr.type === 'expense' && !isAdjustment) {
           lastMonthExpenses += tr.amount;
         }
       }
@@ -384,6 +387,8 @@ export const DashboardScreen = React.memo(() => {
             {data.recentTransactions.length > 0 ? (
               data.recentTransactions.map((tr, index) => {
                 const cat = categories.find((c) => c.id === tr.categoryId);
+                const isAdjustment =
+                  tr.note && translateName(tr.note) === t('balanceAdjustment');
                 return (
                   <View key={tr.id}>
                     <View style={[styles.row, { paddingVertical: 12 }]}>
@@ -392,26 +397,35 @@ export const DashboardScreen = React.memo(() => {
                         icon={
                           tr.type === 'transfer'
                             ? 'swap-horizontal'
-                            : cat?.icon ||
-                              (tr.type === 'income' ? 'plus' : 'minus')
+                            : isAdjustment
+                              ? 'scale-balance'
+                              : cat?.icon ||
+                                (tr.type === 'income' ? 'plus' : 'minus')
                         }
                         style={{
                           backgroundColor:
                             tr.type === 'transfer'
                               ? theme.colors.tertiary
-                              : cat?.color ||
-                                (tr.type === 'income'
-                                  ? '#4caf50'
-                                  : theme.colors.error),
+                              : isAdjustment
+                                ? theme.colors.surfaceVariant
+                                : cat?.color ||
+                                  (tr.type === 'income'
+                                    ? '#4caf50'
+                                    : theme.colors.error),
                         }}
-                        color="#fff"
+                        color={
+                          isAdjustment ? theme.colors.onSurfaceVariant : '#fff'
+                        }
                       />
                       <View style={{ marginLeft: 12, flex: 1 }}>
                         <Text variant="bodyLarge" numberOfLines={1}>
-                          {tr.note ||
-                            (tr.type === 'transfer'
-                              ? t('transfer')
-                              : translateName(cat?.name || 'Other'))}
+                          {tr.note &&
+                          translateName(tr.note) === t('balanceAdjustment')
+                            ? t('balanceAdjustment')
+                            : tr.note ||
+                              (tr.type === 'transfer'
+                                ? t('transfer')
+                                : translateName(cat?.name || 'Other'))}
                         </Text>
                         <Text
                           variant="labelSmall"
