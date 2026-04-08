@@ -81,8 +81,8 @@ export const BudgetsScreen = () => {
           ]}
           onPress={() =>
             router.push({
-              pathname: '/add-budget',
-              params: { budget: JSON.stringify(item) },
+              pathname: '/budget-detail',
+              params: { budgetId: item.id },
             })
           }
           onLongPress={drag}

@@ -130,6 +130,7 @@ TransactionItem.displayName = 'TransactionItem';
 const styles = StyleSheet.create({
   listItem: {
     paddingVertical: 8,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.05)',
   },

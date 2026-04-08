@@ -261,7 +261,7 @@ export const TransactionsScreen = () => {
       <FlatList
         data={groupedTransactions}
         keyExtractor={(item) => item.date}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 16 }}
         renderItem={({ item: group }) => (
           <View>
             <View
@@ -327,7 +327,7 @@ export const TransactionsScreen = () => {
 
       <FAB
         icon="plus"
-        style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
+        style={[styles.fab, { bottom: (insets.bottom || 0) + 120 }]}
         onPress={() =>
           router.push({
             pathname: '/add-transaction',
@@ -343,7 +343,7 @@ const defaultStyles = (theme: any) =>
   StyleSheet.create({
     container: { flex: 1 },
     searchRow: {
-      paddingHorizontal: 12,
+      paddingHorizontal: 16,
       paddingVertical: 8,
     },
     searchbar: {
@@ -357,7 +357,7 @@ const defaultStyles = (theme: any) =>
       paddingBottom: 8,
     },
     chipsScroll: {
-      paddingHorizontal: 12,
+      paddingHorizontal: 16,
       paddingTop: 4,
       gap: 8,
       flexDirection: 'row',

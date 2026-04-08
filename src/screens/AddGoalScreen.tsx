@@ -13,7 +13,7 @@ import {
 import { Button, Text, TextInput, useTheme } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useStore, useTranslation, Goal } from '../store/useStore';
+import { useStore, useTranslation } from '../store/useStore';
 import { GOAL_ICONS as ICONS, COLORS } from '../constants';
 import { formatNumber } from '../utils/formatters';
 

@@ -33,7 +33,7 @@ module.exports = {
   expo: {
     name: getAppName(),
     slug: 'fin-habit',
-    version: '1.0.3',
+    version: '1.0.4',
     orientation: 'portrait',
     icon: getIcon(),
     scheme: 'habitfin',

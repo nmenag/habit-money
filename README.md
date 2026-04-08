@@ -65,28 +65,92 @@ HabitFin is a modern, high-performance personal finance tracker built with **Rea
 For local native development on Android, you can run the app directly on your physical device or an emulator.
 
 #### 🛠️ 1. Requirements (Android SDK)
+
 To build and run the native code locally, you must have the **Android SDK** and **Java Development Kit (JDK)** installed:
+
 - **Android Studio**: Install it to get the necessary build tools and SDKs.
 - **Environment Variables**: Configure your shell to include `ANDROID_HOME` (e.g., `~/Android/Sdk`) and add the `platform-tools` and `build-tools` directories to your `PATH`.
 - **JDK**: Ensure you have a compatible Java version installed (refer to Expo documentation for the specific version required by SDK 54).
 
 #### 🔌 2. Device Setup (USB Debugging)
+
 To run and debug the app on a physical Android device:
-1. **Enable Developer Options**: Go to *Settings > About Phone* and tap **Build Number** 7 times.
-2. **Enable USB Debugging**: In *Settings > System > Developer Options*, toggle on **USB Debugging**. This allows the ADB (Android Debug Bridge) to communicate with your device for installing and debugging the application.
+
+1. **Enable Developer Options**: Go to _Settings > About Phone_ and tap **Build Number** 7 times.
+2. **Enable USB Debugging**: In _Settings > System > Developer Options_, toggle on **USB Debugging**. This allows the ADB (Android Debug Bridge) to communicate with your device for installing and debugging the application.
 3. **Connect**: Plug your device into your computer via a USB cable and authorize the connection on the device screen.
 
 #### 🚀 3. Run the App
+
 With your device connected or an emulator running, execute:
+
 ```bash
 npx expo run:android
 ```
+
 This command compiles the native Android project (prebuild) and installs the development build directly onto your device.
+
+#### 🔧 Useful ADB Commands
+
+During development, you may need these common Android Debug Bridge (ADB) commands:
+
+- **List connected devices**: `adb devices`
+- **Install an APK**: `adb install path/to/app.apk`
+- **Uninstall the app**: `adb uninstall com.finhabit.dev`
+- **Open Dev Menu**: `adb shell input keyevent 82`
+- **Forward Metro Port**: `adb reverse tcp:8081 tcp:8081` (Run if the app can't connect to the bundler)
+- **View Logs**: `adb logcat` (Filter specifically by `adb logcat *:S ReactNative:V ReactNativeJS:V`)
+
+#### 🧹 Cleaning the Build
+
+If you encounter persistent build errors, you may need to clean the build cache:
+
+```bash
+cd android && ./gradlew clean && cd ..
+```
+
+#### 🎭 Working with Variants
+
+The app supports different configurations via the `APP_VARIANT` environment variable (defined in `app.config.js`):
+
+- **Development**: `APP_VARIANT=development npx expo run:android` (Package: `com.finhabit.dev`)
+- **Preview**: `APP_VARIANT=preview npx expo run:android` (Package: `com.finhabit.preview`)
+- **Production**: `npx expo run:android` (Package: `com.finhabit`)
+
+#### 📦 Build APK locally
+
+To generate a standalone APK directly on your machine without using EAS Cloud:
+
+1.  **Navigate to the android directory**:
+
+    ```bash
+    cd android
+    ```
+
+2.  **Generate a Debug APK**:
+
+    ```bash
+    ./gradlew assembleDebug
+    ```
+
+    The output will be at: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+3.  **Generate a Release APK**:
+    ```bash
+    ./gradlew assembleRelease
+    ```
+    The output will be at: `android/app/build/outputs/apk/release/app-release.apk`
+    _Note: Ensure you have your signing config (keystore) properly configured for production builds._
 
 ## 🧪 CI/CD
 
-- **GitHub Actions**: Automated pipeline for linting and type-checking on every push or pull request to `main`/`master`.
-- **Quality Control**: Use `npm run lint` and `npm run check-types` to ensure code stability.
+- **GitHub Actions**:
+  - **Continuous Integration**: Every Pull Request to `main` triggers a validation pipeline that runs `expo-doctor`, `lint`, and `type-check`.
+  - **Automated Releases**: Pushes to `main` trigger a release workflow that automatically creates a GitHub Release tagged with the version from `package.json`.
+- **Quality Control**:
+  - `npm run doctor`: Validate Expo configuration and dependency health.
+  - `npm run lint`: Maintain code quality and style consistency.
+  - `npm run check-types`: Ensure full TypeScript type safety.
 
 ## ⚙️ Expo & EAS Configuration
 
@@ -114,6 +178,12 @@ The application configuration is dynamic and handles three variants: `developmen
 
   # Development (Development Client for testing native modules)
   eas build --platform android --profile development
+  ```
+
+- **Local EAS Builds**: You can also run EAS builds locally on your machine (requires a correctly configured build environment):
+
+  ```bash
+  eas build --platform android --profile preview --local
   ```
 
 - **Updates**: Push updates to users without a new store submission.
