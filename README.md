@@ -178,6 +178,9 @@ The application configuration is dynamic and handles three variants: `developmen
 
   # Development (Development Client for testing native modules)
   eas build --platform android --profile development
+
+  # Development (Development Client for testing native modules) - Local build
+   eas build --platform android --profile development --clear-cache --local
   ```
 
 - **Local EAS Builds**: You can also run EAS builds locally on your machine (requires a correctly configured build environment):
