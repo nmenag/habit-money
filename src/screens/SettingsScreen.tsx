@@ -8,8 +8,14 @@ import { useStore, useTranslation } from '../store/useStore';
 import { backupToJSON, restoreFromJSON } from '../utils/dataBackup';
 
 export const SettingsScreen = () => {
-  const { setLanguage, loadData, incrementActionCounter, checkAndShowAd } =
-    useStore();
+  const {
+    setLanguage,
+    setThemePreference,
+    themePreference,
+    loadData,
+    incrementActionCounter,
+    checkAndShowAd,
+  } = useStore();
   const { t, language } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
@@ -62,6 +68,12 @@ export const SettingsScreen = () => {
   const LANGUAGES = [
     { code: 'en', name: t('english'), label: 'EN' },
     { code: 'es', name: t('spanish'), label: 'ES' },
+  ];
+
+  const THEMES = [
+    { code: 'system', name: t('system'), icon: 'monitor' },
+    { code: 'light', name: t('light'), icon: 'white-balance-sunny' },
+    { code: 'dark', name: t('dark'), icon: 'weather-night' },
   ];
 
   return (
@@ -175,6 +187,38 @@ export const SettingsScreen = () => {
           <Text variant="bodySmall" style={styles.sectionInfoText}>
             {t('changeLanguageDesc')}
           </Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text variant="labelLarge" style={styles.sectionTitle}>
+            {t('theme')}
+          </Text>
+          <Card style={styles.card} mode="contained">
+            {THEMES.map((item, index) => (
+              <View key={item.code}>
+                <List.Item
+                  title={item.name}
+                  left={(props) => <List.Icon {...props} icon={item.icon} />}
+                  right={(props) =>
+                    themePreference === item.code ? (
+                      <List.Icon
+                        {...props}
+                        icon="check-circle"
+                        color={theme.colors.primary}
+                      />
+                    ) : null
+                  }
+                  onPress={() => setThemePreference(item.code as any)}
+                  style={
+                    themePreference === item.code
+                      ? { backgroundColor: theme.colors.primaryContainer }
+                      : undefined
+                  }
+                />
+                {index < THEMES.length - 1 && <Divider />}
+              </View>
+            ))}
+          </Card>
         </View>
 
         <View style={styles.section}>

@@ -76,6 +76,7 @@ interface AppState {
   language: Language;
   currency: string;
   currencySymbol: string;
+  themePreference: 'light' | 'dark' | 'system';
   isLoaded: boolean;
   isPremiumUser: boolean;
   actionCounter: number;
@@ -87,6 +88,7 @@ interface AppState {
   loadGoals: () => void;
   loadBudgets: () => void;
   setLanguage: (lang: Language) => void;
+  setThemePreference: (theme: 'light' | 'dark' | 'system') => void;
   addAccount: (account: Account) => void;
   editAccount: (account: Account) => void;
   deleteAccount: (id: string) => void;
@@ -132,6 +134,7 @@ export const useStore = create<AppState>((set, get) => ({
   language: 'en',
   currency: 'COP',
   currencySymbol: '$',
+  themePreference: 'system',
   isLoaded: false,
   isPremiumUser: false,
   actionCounter: 0,
@@ -175,6 +178,9 @@ export const useStore = create<AppState>((set, get) => ({
       premiumSetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'premium'",
       );
+      var themeSetting = db.getFirstSync<{ val: string }>(
+        "SELECT val FROM settings WHERE id = 'themePreference'",
+      );
     } catch (e) {
       console.warn('Could not load settings from DB:', e);
     }
@@ -205,6 +211,8 @@ export const useStore = create<AppState>((set, get) => ({
       language: finalLanguage,
       currency: currencySetting?.val || 'COP',
       currencySymbol: currencySetting?.val === 'EUR' ? '€' : '$',
+      themePreference:
+        (themeSetting?.val as 'light' | 'dark' | 'system') || 'system',
       isPremiumUser: premiumSetting?.val === 'true',
       isLoaded: true,
     });
@@ -267,6 +275,19 @@ export const useStore = create<AppState>((set, get) => ({
       console.error('setLanguage DB Error:', error);
     }
     get().refreshAnalytics();
+  },
+
+  setThemePreference: (theme: 'light' | 'dark' | 'system') => {
+    set({ themePreference: theme });
+    try {
+      const db = getDb();
+      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+        'themePreference',
+        theme,
+      ]);
+    } catch (error) {
+      console.error('setThemePreference DB Error:', error);
+    }
   },
 
   addAccount: (account) => {

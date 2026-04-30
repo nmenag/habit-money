@@ -35,6 +35,10 @@ export const es = {
     'Cambiar la moneda actualizará cómo se muestran todos los montos en la aplicación.',
   english: 'Inglés',
   spanish: 'Español',
+  theme: 'Tema',
+  light: 'Claro',
+  dark: 'Oscuro',
+  system: 'Por defecto',
   backupData: 'Copia de Seguridad (JSON)',
   backupDataDesc:
     'Exporta todos los datos de la app a un archivo JSON para respaldo.',
