@@ -324,4 +324,7 @@ export const es = {
   detectedLanguage: 'Idioma Detectado',
   detectedCurrency: 'Moneda Detectada',
   getStarted: 'Continuar',
+  agreeToTermsPrefix: 'Al continuar, aceptas nuestra ',
+  agreeToTermsAnd: ' y ',
+  termsOfUse: 'Términos de Uso',
 };

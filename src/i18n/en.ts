@@ -318,4 +318,7 @@ export const en = {
   detectedLanguage: 'Detected Language',
   detectedCurrency: 'Detected Currency',
   getStarted: 'Continue',
+  agreeToTermsPrefix: 'By continuing, you agree to our ',
+  agreeToTermsAnd: ' and ',
+  termsOfUse: 'Terms of Use',
 };
