@@ -128,7 +128,7 @@ export const SettingsScreen = () => {
         );
       }
     },
-    [notificationsEnabled, t],
+    [notificationsEnabled, t, setNotificationTime],
   );
 
   const SETTINGS_LINKS = [

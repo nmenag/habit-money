@@ -6,6 +6,7 @@ import { Button, Menu, Surface, Text, useTheme } from 'react-native-paper';
 import { getDb } from '../db/schema';
 import { Language } from '../i18n/translations';
 import { useStore, useTranslation } from '../store/useStore';
+import { getLocalDateString } from '../utils/dateUtils';
 
 export const OnboardingScreen = () => {
   const theme = useTheme();
@@ -40,7 +41,7 @@ export const OnboardingScreen = () => {
     ]);
     db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
       'onboarding_date',
-      new Date().toISOString().split('T')[0],
+      getLocalDateString(),
     ]);
     loadData();
 

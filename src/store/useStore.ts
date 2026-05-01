@@ -9,6 +9,7 @@ import {
 } from '../i18n/translations';
 import { AnalyticsManager } from '../services/analytics/AnalyticsManager';
 import { AnalyticsReport } from '../services/analytics/types';
+import { getLocalDateString } from '../utils/dateUtils';
 import { formatCurrency as formatCurrencyUtil } from '../utils/formatters';
 
 export type AccountType = 'cash' | 'bank' | 'credit';
@@ -159,15 +160,14 @@ export const useStore = create<AppState>((set, get) => ({
       'SELECT id, name, type, icon, color, displayOrder FROM categories ORDER BY displayOrder ASC, name ASC',
     );
 
-    // Fetch only transactions from the last 2 months for the dashboard summaries
     const twoMonthsAgo = new Date();
     twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
-    const dateLimit = twoMonthsAgo.toISOString().split('T')[0];
+    const dateLimit = getLocalDateString(twoMonthsAgo);
 
     const transactions = db.getAllSync<Transaction>(
-      `SELECT id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId 
-       FROM transactions 
-       WHERE date >= ? 
+      `SELECT id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId
+       FROM transactions
+       WHERE date >= ?
        ORDER BY date DESC LIMIT 300`,
       [dateLimit],
     );
@@ -178,7 +178,6 @@ export const useStore = create<AppState>((set, get) => ({
     let themeSetting;
     let notifEnabledSetting;
     let notifTimeSetting;
-    let passcodeEnabledSetting;
     try {
       currencySetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'currency'",
@@ -202,7 +201,6 @@ export const useStore = create<AppState>((set, get) => ({
       console.warn('Could not load settings from DB:', e);
     }
 
-    // Detect default language
     let finalLanguage: Language = 'en';
     if (languageSetting?.val) {
       finalLanguage = languageSetting.val as Language;

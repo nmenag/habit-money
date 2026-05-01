@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TransactionType, useStore, useTranslation } from '../store/useStore';
 import { formatNumber } from '../utils/formatters';
+import { getLocalISOString } from '../utils/dateUtils';
 
 export const AddTransactionScreen = () => {
   const params = useLocalSearchParams<{
@@ -115,7 +116,7 @@ export const AddTransactionScreen = () => {
         categoryId: type === 'transfer' ? null : selectedCategory || null,
         accountId: selectedAccount,
         budgetId: type === 'transfer' ? null : selectedBudget || null,
-        date: new Date().toISOString(),
+        date: getLocalISOString(),
         note,
         toAccountId: type === 'transfer' ? selectedToAccount : null,
       });
@@ -160,7 +161,7 @@ export const AddTransactionScreen = () => {
       categoryId: type === 'transfer' ? null : selectedCategory || null,
       accountId: selectedAccount,
       budgetId: type === 'transfer' ? null : selectedBudget || null,
-      date: new Date().toISOString(),
+      date: getLocalISOString(),
       note: note ? `${note} (${t('duplicate')})` : t('duplicate'),
       toAccountId: type === 'transfer' ? selectedToAccount : null,
     });

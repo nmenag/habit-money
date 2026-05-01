@@ -23,17 +23,41 @@ export const calculateFinancialScore = (
 ): ScoreData => {
   const now = new Date();
   const currentMonthStart = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+    0,
+    0,
+    0,
+    0,
   );
   const currentMonthEnd = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999),
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999,
   );
 
   const lastMonthStart = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1),
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1,
+    0,
+    0,
+    0,
+    0,
   );
   const lastMonthEnd = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999),
+    now.getFullYear(),
+    now.getMonth(),
+    0,
+    23,
+    59,
+    59,
+    999,
   );
 
   let currentIncome = 0;
@@ -97,18 +121,22 @@ export const calculateFinancialScore = (
 
   while (true) {
     const monthStart = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - evalMonthOffset, 1),
+      now.getFullYear(),
+      now.getMonth() - evalMonthOffset,
+      1,
+      0,
+      0,
+      0,
+      0,
     );
     const monthEnd = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth() - evalMonthOffset + 1,
-        0,
-        23,
-        59,
-        59,
-        999,
-      ),
+      now.getFullYear(),
+      now.getMonth() - evalMonthOffset + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
     );
 
     let monthIncome = 0;

@@ -25,6 +25,7 @@ import {
 } from '../store/useStore';
 import { CURRENCIES, COLORS } from '../constants';
 import { formatNumber } from '../utils/formatters';
+import { getLocalISOString } from '../utils/dateUtils';
 
 export const AddAccountScreen = () => {
   const params = useLocalSearchParams<{ account?: string }>();
@@ -85,7 +86,7 @@ export const AddAccountScreen = () => {
           amount: Math.abs(difference),
           categoryId: null,
           accountId: editingAccount.id,
-          date: new Date().toISOString(),
+          date: getLocalISOString(),
           note: t('balanceAdjustment'),
         });
       }

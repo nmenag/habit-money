@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarView } from '../components/CalendarView';
 import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../store/useStore';
+import { getLocalISOString } from '../utils/dateUtils';
 
 const formatAmount = (amount: number, formatCurrency: any) => {
   if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M';
@@ -126,7 +127,7 @@ export const CalendarScreen = () => {
         onPress={() =>
           router.push({
             pathname: '/add-transaction',
-            params: { date: selectedDate.toISOString() },
+            params: { date: getLocalISOString(selectedDate) },
           })
         }
       />

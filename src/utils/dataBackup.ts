@@ -1,13 +1,14 @@
-import { Alert } from 'react-native';
-import * as Sharing from 'expo-sharing';
+import * as DocumentPicker from 'expo-document-picker';
 import {
-  writeAsStringAsync,
-  readAsStringAsync,
   documentDirectory,
   EncodingType,
+  readAsStringAsync,
+  writeAsStringAsync,
 } from 'expo-file-system/legacy';
-import * as DocumentPicker from 'expo-document-picker';
+import * as Sharing from 'expo-sharing';
+import { Alert } from 'react-native';
 import { getDb } from '../db/schema';
+import { getLocalDateString, getLocalISOString } from './dateUtils';
 
 let isBackupInProgress = false;
 let isRestoreInProgress = false;
@@ -26,7 +27,7 @@ export const backupToJSON = async () => {
 
     const backupData = {
       version: 1,
-      timestamp: new Date().toISOString(),
+      timestamp: getLocalISOString(),
       data: {
         accounts,
         transactions,
@@ -37,7 +38,7 @@ export const backupToJSON = async () => {
       },
     };
 
-    const fileName = `finhabit_backup_${new Date().toISOString().split('T')[0]}.json`;
+    const fileName = `finhabit_backup_${getLocalDateString()}.json`;
     const fileUri = `${documentDirectory}${fileName}`;
 
     await writeAsStringAsync(fileUri, JSON.stringify(backupData, null, 2), {
@@ -62,9 +63,6 @@ export const restoreFromJSON = async (
   if (isRestoreInProgress) return;
   isRestoreInProgress = true;
   try {
-    // Dynamic import to avoid errors if native module fails during initial load
-    // Restore from JSON code below...
-
     const result = await DocumentPicker.getDocumentAsync({
       type: 'application/json',
       copyToCacheDirectory: true,
@@ -92,7 +90,6 @@ export const restoreFromJSON = async (
 
     const db = getDb();
 
-    // Clear existing data
     db.execSync('PRAGMA foreign_keys = OFF;');
     db.execSync('DELETE FROM transactions;');
     db.execSync('DELETE FROM accounts;');
@@ -101,8 +98,6 @@ export const restoreFromJSON = async (
     db.execSync('DELETE FROM goals;');
     db.execSync('DELETE FROM settings;');
 
-    // Insert data
-    // Accounts
     const insertAccount = db.prepareSync(
       'INSERT INTO accounts (id, name, type, initialBalance, currentBalance, color, currency, displayOrder) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     );
@@ -123,7 +118,6 @@ export const restoreFromJSON = async (
       insertAccount.finalizeSync();
     }
 
-    // Categories
     const insertCategory = db.prepareSync(
       'INSERT INTO categories (id, name, type, icon, color, displayOrder) VALUES (?, ?, ?, ?, ?, ?)',
     );
@@ -142,7 +136,6 @@ export const restoreFromJSON = async (
       insertCategory.finalizeSync();
     }
 
-    // Transactions
     const insertTransaction = db.prepareSync(
       'INSERT INTO transactions (id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
@@ -164,7 +157,6 @@ export const restoreFromJSON = async (
       insertTransaction.finalizeSync();
     }
 
-    // Budgets
     const insertBudget = db.prepareSync(
       'INSERT INTO budgets (id, name, amount, color, categoryId, displayOrder) VALUES (?, ?, ?, ?, ?, ?)',
     );
@@ -205,7 +197,6 @@ export const restoreFromJSON = async (
       insertGoal.finalizeSync();
     }
 
-    // Settings
     const insertSetting = db.prepareSync(
       'INSERT INTO settings (id, val) VALUES (?, ?)',
     );
@@ -229,15 +220,13 @@ export const restoreFromJSON = async (
 
 export const checkBackupReminder = async (t: (key: any) => string) => {
   const db = getDb();
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
 
-  // 1. Check if we have transactions
   const txCount = db.getFirstSync<{ count: number }>(
     'SELECT COUNT(*) as count FROM transactions',
   );
   if (!txCount || txCount.count === 0) return;
 
-  // 2. Check onboarding date
   let onboardingDateRow;
   try {
     onboardingDateRow = db.getFirstSync<{ val: string }>(
@@ -245,8 +234,6 @@ export const checkBackupReminder = async (t: (key: any) => string) => {
     );
   } catch {}
 
-  // If we don't have an onboarding date yet (older version), we might want to show it anyway
-  // but if we do have it, we only show it if today is not the onboarding day.
   if (onboardingDateRow?.val === today) return;
 
   let lastReminderRow;
