@@ -56,6 +56,15 @@ export const en = {
   premiumDesc: 'Remove all ads and unlock advanced features.',
   freeVersion: 'Free Version (Ad-supported)',
   premiumVersion: 'Premium Version (Ad-free)',
+  notifications: 'Notifications',
+  notificationsDesc: 'Enable daily and weekly reminders.',
+  notificationTime: 'Reminder Time',
+  notificationTimeDesc: 'Set the time for your daily reminders.',
+  notificationDailyTitle: "Don't forget your finances!",
+  notificationDailyBody: 'Track your daily expenses to stay on budget.',
+  notificationWeeklyTitle: 'Weekly Financial Review',
+  notificationWeeklyBody:
+    "It's time to review your week's spending and income.",
 
   save: 'Save',
   update: 'Update',

@@ -82,6 +82,9 @@ interface AppState {
   actionCounter: number;
   analyticsReport: AnalyticsReport | null;
 
+  notificationsEnabled: boolean;
+  notificationTime: string;
+
   loadData: () => void;
   loadFullData: () => void;
   loadTransactions: (limit?: number) => void;
@@ -89,6 +92,8 @@ interface AppState {
   loadBudgets: () => void;
   setLanguage: (lang: Language) => void;
   setThemePreference: (theme: 'light' | 'dark' | 'system') => void;
+  setNotificationsEnabled: (enabled: boolean) => void;
+  setNotificationTime: (time: string) => void;
   addAccount: (account: Account) => void;
   editAccount: (account: Account) => void;
   deleteAccount: (id: string) => void;
@@ -139,6 +144,8 @@ export const useStore = create<AppState>((set, get) => ({
   isPremiumUser: false,
   actionCounter: 0,
   analyticsReport: null,
+  notificationsEnabled: false,
+  notificationTime: '20:00',
   goals: [],
 
   loadData: () => {
@@ -168,6 +175,10 @@ export const useStore = create<AppState>((set, get) => ({
     let currencySetting;
     let languageSetting;
     let premiumSetting;
+    let themeSetting;
+    let notifEnabledSetting;
+    let notifTimeSetting;
+    let passcodeEnabledSetting;
     try {
       currencySetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'currency'",
@@ -178,8 +189,14 @@ export const useStore = create<AppState>((set, get) => ({
       premiumSetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'premium'",
       );
-      var themeSetting = db.getFirstSync<{ val: string }>(
+      themeSetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'themePreference'",
+      );
+      notifEnabledSetting = db.getFirstSync<{ val: string }>(
+        "SELECT val FROM settings WHERE id = 'notificationsEnabled'",
+      );
+      notifTimeSetting = db.getFirstSync<{ val: string }>(
+        "SELECT val FROM settings WHERE id = 'notificationTime'",
       );
     } catch (e) {
       console.warn('Could not load settings from DB:', e);
@@ -214,6 +231,8 @@ export const useStore = create<AppState>((set, get) => ({
       themePreference:
         (themeSetting?.val as 'light' | 'dark' | 'system') || 'system',
       isPremiumUser: premiumSetting?.val === 'true',
+      notificationsEnabled: notifEnabledSetting?.val === 'true',
+      notificationTime: notifTimeSetting?.val || '20:00',
       isLoaded: true,
     });
 
@@ -287,6 +306,32 @@ export const useStore = create<AppState>((set, get) => ({
       ]);
     } catch (error) {
       console.error('setThemePreference DB Error:', error);
+    }
+  },
+
+  setNotificationsEnabled: (enabled: boolean) => {
+    set({ notificationsEnabled: enabled });
+    try {
+      const db = getDb();
+      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+        'notificationsEnabled',
+        String(enabled),
+      ]);
+    } catch (error) {
+      console.error('setNotificationsEnabled DB Error:', error);
+    }
+  },
+
+  setNotificationTime: (time: string) => {
+    set({ notificationTime: time });
+    try {
+      const db = getDb();
+      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+        'notificationTime',
+        time,
+      ]);
+    } catch (error) {
+      console.error('setNotificationTime DB Error:', error);
     }
   },
 

@@ -56,7 +56,7 @@ module.exports = {
         backgroundColor: '#005CEE',
         foregroundImage: getAdaptiveForeground(),
       },
-      edgeToEdgeEnabled: true,
+      // edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
       package: getPackageName(),
       jsEngine: 'hermes',
@@ -97,6 +97,13 @@ module.exports = {
       ],
       'expo-build-properties',
       'expo-localization',
+      [
+        'expo-notifications',
+        {
+          icon: './assets/images/notification-icon.png',
+          color: '#005CEE',
+        },
+      ],
     ],
     experiments: {
       reactCompiler: true,

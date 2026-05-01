@@ -17,6 +17,7 @@ import { useStore, useTranslation } from '../src/store/useStore';
 import { darkTheme, lightTheme } from '../src/theme/theme';
 import { interstitialManager } from '../src/ads/InterstitialManager';
 import { checkBackupReminder } from '../src/utils/dataBackup';
+import { NotificationService } from '../src/services/NotificationService';
 
 // Register locales for the date picker
 registerTranslation('en', en);
@@ -66,6 +67,7 @@ export default function RootLayout() {
         await mobileAds().initialize();
         interstitialManager.init();
         initDb();
+        await NotificationService.setupChannel();
         setDbInitialized(true);
       } catch (e) {
         console.error('Failed to initialize local DB or Ads', e);

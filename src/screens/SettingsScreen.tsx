@@ -1,11 +1,20 @@
 import { router } from 'expo-router';
 import React from 'react';
 import { Alert, Linking, ScrollView, StyleSheet, View } from 'react-native';
-import { Card, Divider, List, Text, useTheme } from 'react-native-paper';
+import {
+  Card,
+  Divider,
+  List,
+  Switch,
+  Text,
+  useTheme,
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TimePickerModal } from 'react-native-paper-dates';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
 import { backupToJSON, restoreFromJSON } from '../utils/dataBackup';
+import { NotificationService } from '../services/NotificationService';
 
 export const SettingsScreen = () => {
   const {
@@ -15,7 +24,47 @@ export const SettingsScreen = () => {
     loadData,
     incrementActionCounter,
     checkAndShowAd,
+    notificationsEnabled,
+    notificationTime,
+    setNotificationsEnabled,
+    setNotificationTime,
   } = useStore();
+
+  const toggleNotifications = async () => {
+    const newValue = !notificationsEnabled;
+    if (newValue) {
+      const granted = await NotificationService.requestPermissions();
+      if (!granted) {
+        Alert.alert(
+          t('error') || 'Error',
+          'Please enable notifications in your phone settings.',
+        );
+        return;
+      }
+    }
+    setNotificationsEnabled(newValue);
+    if (newValue) {
+      const [hour, minute] = notificationTime.split(':').map(Number);
+      NotificationService.scheduleDailyReminder(
+        hour,
+        minute,
+        t('notificationDailyTitle') || "Don't forget your finances!",
+        t('notificationDailyBody') ||
+          'Track your daily expenses to stay on budget.',
+      );
+      NotificationService.scheduleWeeklyReminder(
+        1,
+        hour,
+        minute,
+        t('notificationWeeklyTitle') || 'Weekly Financial Review',
+        t('notificationWeeklyBody') ||
+          "It's time to review your week's spending and income.",
+      );
+    } else {
+      NotificationService.cancelAllNotifications();
+    }
+  };
+
   const { t, language } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
@@ -48,6 +97,39 @@ export const SettingsScreen = () => {
       },
     ]);
   };
+
+  const [timePickerVisible, setTimePickerVisible] = React.useState(false);
+
+  const onDismissTimePicker = React.useCallback(() => {
+    setTimePickerVisible(false);
+  }, [setTimePickerVisible]);
+
+  const onConfirmTimePicker = React.useCallback(
+    ({ hours, minutes }: { hours: number; minutes: number }) => {
+      setTimePickerVisible(false);
+      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      setNotificationTime(formattedTime);
+      if (notificationsEnabled) {
+        NotificationService.cancelAllNotifications();
+        NotificationService.scheduleDailyReminder(
+          hours,
+          minutes,
+          t('notificationDailyTitle') || "Don't forget your finances!",
+          t('notificationDailyBody') ||
+            'Track your daily expenses to stay on budget.',
+        );
+        NotificationService.scheduleWeeklyReminder(
+          1,
+          hours,
+          minutes,
+          t('notificationWeeklyTitle') || 'Weekly Financial Review',
+          t('notificationWeeklyBody') ||
+            "It's time to review your week's spending and income.",
+        );
+      }
+    },
+    [notificationsEnabled, t],
+  );
 
   const SETTINGS_LINKS = [
     { name: t('manageAccounts'), icon: 'wallet-outline', screen: '/accounts' },
@@ -223,6 +305,45 @@ export const SettingsScreen = () => {
 
         <View style={styles.section}>
           <Text variant="labelLarge" style={styles.sectionTitle}>
+            {t('notifications') || 'Notifications'}
+          </Text>
+          <Card style={styles.card} mode="contained">
+            <List.Item
+              title={t('notifications') || 'Notifications'}
+              description={
+                t('notificationsDesc') || 'Enable daily and weekly reminders.'
+              }
+              left={(props) => <List.Icon {...props} icon="bell-outline" />}
+              right={(props) => (
+                <View style={{ justifyContent: 'center' }}>
+                  <Switch
+                    value={notificationsEnabled}
+                    onValueChange={toggleNotifications}
+                  />
+                </View>
+              )}
+            />
+            {notificationsEnabled && (
+              <View>
+                <Divider />
+                <List.Item
+                  title={t('notificationTime') || 'Reminder Time'}
+                  description={notificationTime}
+                  left={(props) => (
+                    <List.Icon {...props} icon="clock-outline" />
+                  )}
+                  right={(props) => (
+                    <List.Icon {...props} icon="chevron-right" />
+                  )}
+                  onPress={() => setTimePickerVisible(true)}
+                />
+              </View>
+            )}
+          </Card>
+        </View>
+
+        <View style={styles.section}>
+          <Text variant="labelLarge" style={styles.sectionTitle}>
             {t('feedback')}
           </Text>
           <Card style={styles.card} mode="contained">
@@ -280,6 +401,13 @@ export const SettingsScreen = () => {
         <View style={{ height: 20 }} />
       </ScrollView>
       <BannerAdComponent />
+      <TimePickerModal
+        visible={timePickerVisible}
+        onDismiss={onDismissTimePicker}
+        onConfirm={onConfirmTimePicker}
+        hours={parseInt(notificationTime.split(':')[0], 10)}
+        minutes={parseInt(notificationTime.split(':')[1], 10)}
+      />
     </View>
   );
 };
