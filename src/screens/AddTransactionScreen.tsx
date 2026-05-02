@@ -268,7 +268,7 @@ export const AddTransactionScreen = () => {
                 onPress={() => setSelectedAccount(acc.id)}
                 style={styles.chip}
                 mode="flat"
-                selectedColor={theme.colors.primary}
+                selectedColor={acc.color || theme.colors.primary}
               >
                 {`${translateName(acc.name)} (${formatCurrency(acc.currentBalance)})`}
               </Chip>
@@ -290,7 +290,7 @@ export const AddTransactionScreen = () => {
                   onPress={() => setSelectedToAccount(acc.id)}
                   style={styles.chip}
                   mode="flat"
-                  selectedColor={theme.colors.primary}
+                  selectedColor={acc.color || theme.colors.primary}
                 >
                   {`${translateName(acc.name)} (${formatCurrency(acc.currentBalance)})`}
                 </Chip>
@@ -320,7 +320,7 @@ export const AddTransactionScreen = () => {
                   }}
                   style={styles.chip}
                   mode="flat"
-                  selectedColor={cat.color || undefined}
+                  selectedColor={cat.color || theme.colors.primary}
                 >
                   {translateName(cat.name)}
                 </Chip>
@@ -346,6 +346,11 @@ export const AddTransactionScreen = () => {
                   }
                   style={styles.chip}
                   mode="flat"
+                  selectedColor={
+                    bud.color ||
+                    categories.find((c) => c.id === bud.categoryId)?.color ||
+                    theme.colors.primary
+                  }
                 >
                   {translateName(
                     categories.find((c) => c.id === bud.categoryId)?.name ||
