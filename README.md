@@ -1,6 +1,6 @@
-# HabitFin 💰📈
+# Habit Money 💰📈
 
-HabitFin is a modern, high-performance personal finance tracker built with **React Native** and **Expo**. It empowers users to take control of their financial life through a seamless, localized, and highly organized interface.
+Habit Money is a modern, high-performance personal finance tracker built with **React Native** and **Expo**. It empowers users to take control of their financial life through a seamless, localized, and highly organized interface.
 
 ## 🌟 Key Features
 
@@ -99,7 +99,7 @@ During development, you may need these common Android Debug Bridge (ADB) command
 
 - **List connected devices**: `adb devices`
 - **Install an APK**: `adb install path/to/app.apk`
-- **Uninstall the app**: `adb uninstall com.finhabit.dev`
+- **Uninstall the app**: `adb uninstall com.habitmoney.dev`
 - **Open Dev Menu**: `adb shell input keyevent 82`
 - **Forward Metro Port**: `adb reverse tcp:8081 tcp:8081` (Run if the app can't connect to the bundler)
 - **View Logs**: `adb logcat` (Filter specifically by `adb logcat *:S ReactNative:V ReactNativeJS:V`)
@@ -116,9 +116,9 @@ cd android && ./gradlew clean && cd ..
 
 The app supports different configurations via the `APP_VARIANT` environment variable (defined in `app.config.js`):
 
-- **Development**: `APP_VARIANT=development npx expo run:android` (Package: `com.finhabit.dev`)
-- **Preview**: `APP_VARIANT=preview npx expo run:android` (Package: `com.finhabit.preview`)
-- **Production**: `npx expo run:android` (Package: `com.finhabit`)
+- **Development**: `APP_VARIANT=development npx expo run:android` (Package: `com.habitmoney.dev`)
+- **Preview**: `APP_VARIANT=preview npx expo run:android` (Package: `com.habitmoney.preview`)
+- **Production**: `npx expo run:android` (Package: `com.habitmoney`)
 
 #### 📦 Build APK locally
 
@@ -164,8 +164,8 @@ This project is configured for **EAS (Expo Application Services)** to handle bui
 The application configuration is dynamic and handles three variants: `development`, `preview`, and `production`.
 
 - **Slug**: `fin-habit` (Matches the associated EAS Project ID).
-- **Name**: `HabitFin`.
-- **Scheme**: `habitfin`.
+- **Name**: `Habit Money`.
+- **Scheme**: `habitmoney`.
 
 ### 📦 Deployment & Updates
 

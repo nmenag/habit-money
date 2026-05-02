@@ -71,7 +71,7 @@ export const SettingsScreen = () => {
   const insets = useSafeAreaInsets();
 
   const handleOpenEmail = () => {
-    const subject = `HabitFin Feedback (${language})`;
+    const subject = `Habit Money Feedback (${language})`;
     Linking.openURL(`mailto:nmena.garzon@gmail.com?subject=${subject}`);
   };
 

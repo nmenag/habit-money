@@ -1,20 +1,31 @@
 import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 
-// Branding colors
-const trustBlue = '#005CEE';
-const habitMint = '#00E676';
-const obsidian = '#121212';
-const paperGray = '#F8F9FA';
+const primaryGreen = '#16A34A';
+const secondaryGreen = '#22C55E';
+const accentGreen = '#4ADE80';
+
+const darkBackground = '#0B0F0C';
+const darkSurface = '#111827';
+const darkTextPrimary = '#E5E7EB';
+const darkTextSecondary = '#9CA3AF';
+
+const lightBackground = '#F9FAFB';
+const lightSurface = '#FFFFFF';
+const lightTextPrimary = '#111827';
+const lightTextSecondary = '#4B5563';
 
 export const lightTheme = {
   ...MD3LightTheme,
-  roundness: 6, // Corresponds to 24px (2xl) for most components in RN Paper
+  roundness: 8,
   colors: {
     ...MD3LightTheme.colors,
-    primary: trustBlue,
-    secondary: habitMint,
-    surface: paperGray,
-    background: '#FFFFFF',
+    primary: primaryGreen,
+    secondary: secondaryGreen,
+    tertiary: accentGreen,
+    surface: lightSurface,
+    background: lightBackground,
+    onSurface: lightTextPrimary,
+    onSurfaceVariant: lightTextSecondary,
     elevation: {
       ...MD3LightTheme.colors.elevation,
       level1: '#FFFFFF',
@@ -24,16 +35,19 @@ export const lightTheme = {
 
 export const darkTheme = {
   ...MD3DarkTheme,
-  roundness: 6,
+  roundness: 8,
   colors: {
     ...MD3DarkTheme.colors,
-    primary: trustBlue,
-    secondary: habitMint,
-    surface: '#1E1E1E',
-    background: obsidian,
+    primary: primaryGreen,
+    secondary: secondaryGreen,
+    tertiary: accentGreen,
+    surface: darkSurface,
+    background: darkBackground,
+    onSurface: darkTextPrimary,
+    onSurfaceVariant: darkTextSecondary,
     elevation: {
       ...MD3DarkTheme.colors.elevation,
-      level1: '#1E1E1E',
+      level1: '#1F2937', // Slightly lighter than surface for elevation
     },
   },
 };

@@ -1,12 +1,12 @@
-# Terms and Conditions for HabitFin
+# Terms and Conditions for Habit Money
 
 **Effective Date: April 6, 2026**
 
-By downloading or using the app, these terms will automatically apply to you – you should make sure therefore that you read them carefully before using the app. You’re not allowed to copy, or modify the app, any part of the app, or our trademarks in any way. You’re not allowed to attempt to extract the source code of the app, and you also shouldn’t try to translate the app into other languages, or make derivative versions. The app itself, and all the trademarks, copyright, database rights and other intellectual property rights related to it, still belong to HabitFin.
+By downloading or using the app, these terms will automatically apply to you – you should make sure therefore that you read them carefully before using the app. You’re not allowed to copy, or modify the app, any part of the app, or our trademarks in any way. You’re not allowed to attempt to extract the source code of the app, and you also shouldn’t try to translate the app into other languages, or make derivative versions. The app itself, and all the trademarks, copyright, database rights and other intellectual property rights related to it, still belong to Habit Money.
 
 ## 1. App Usage
 
-HabitFin provides this app for your personal financial management. While we strive to keep everything accurate and up-to-date, we cannot guarantee its completeness, accuracy, or reliability. You agree that your use of the app and any related services is at your own risk.
+Habit Money provides this app for your personal financial management. While we strive to keep everything accurate and up-to-date, we cannot guarantee its completeness, accuracy, or reliability. You agree that your use of the app and any related services is at your own risk.
 
 ## 2. Personal Data & Privacy
 
@@ -22,11 +22,11 @@ We are committed to ensuring that the app is as useful and efficient as possible
 
 ## 5. Security Responsibility
 
-The HabitFin app stores and processes personal data that you have provided to us, in order to provide our Service. It’s your responsibility to keep your phone and access to the app secure. We therefore recommend that you do not jailbreak or root your phone, which is the process of removing software restrictions and limitations imposed by the official operating system of your device. It could make your phone vulnerable to malware/viruses/malicious programs, compromise your phone’s security features and it could mean that the HabitFin app won’t work properly or at all.
+The Habit Money app stores and processes personal data that you have provided to us, in order to provide our Service. It’s your responsibility to keep your phone and access to the app secure. We therefore recommend that you do not jailbreak or root your phone, which is the process of removing software restrictions and limitations imposed by the official operating system of your device. It could make your phone vulnerable to malware/viruses/malicious programs, compromise your phone’s security features and it could mean that the Habit Money app won’t work properly or at all.
 
 ## 6. Liability for No Data Transfer
 
-You should be aware that there are certain things that HabitFin will not take responsibility for. Certain functions of the app will require the app to have an active internet connection (especially for ads). The connection can be Wi-Fi, or provided by your mobile network provider, but HabitFin cannot take responsibility for the app not working at full functionality if you don’t have access to Wi-Fi, and you don’t have any of your data allowance left.
+You should be aware that there are certain things that Habit Money will not take responsibility for. Certain functions of the app will require the app to have an active internet connection (especially for ads). The connection can be Wi-Fi, or provided by your mobile network provider, but Habit Money cannot take responsibility for the app not working at full functionality if you don’t have access to Wi-Fi, and you don’t have any of your data allowance left.
 
 ## 7. Modifications to the Service
 

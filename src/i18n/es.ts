@@ -272,12 +272,12 @@ export const es = {
   aboutApp: 'Sobre la App',
   privacyPolicy: 'Política de Privacidad',
   appDescription:
-    'HabitFin es una herramienta simple y poderosa diseñada para ayudarte a rastrear tus gastos, gestionar presupuestos y alcanzar tus metas financieras. Todos tus datos se almacenan localmente en tu dispositivo.',
+    'Habit Money es una herramienta simple y poderosa diseñada para ayudarte a rastrear tus gastos, gestionar presupuestos y alcanzar tus metas financieras. Todos tus datos se almacenan localmente en tu dispositivo.',
   version: 'Versión',
   contactEmailLabel: 'Correo de Contacto',
   dataCollectionTitle: 'Recopilación de Datos',
   dataCollectionContent:
-    'HabitFin NO recopila ningún dato personal. Toda la información que ingresas (transacciones, cuentas, metas) se almacena localmente en tu dispositivo y nunca se sube a nuestros servidores.',
+    'Habit Money NO recopila ningún dato personal. Toda la información que ingresas (transacciones, cuentas, metas) se almacena localmente en tu dispositivo y nunca se sube a nuestros servidores.',
   howDataIsUsedTitle: 'Cómo se usan los datos',
   howDataIsUsedContent:
     'Los datos que proporcionas se utilizan exclusivamente para mostrarte tus estadísticas financieras, gestionar tus presupuestos y rastrear tus metas dentro de la aplicación.',
@@ -315,11 +315,11 @@ export const es = {
   insightSavingMoney: '¡Estás ahorrando dinero este mes!',
   insightKeepGoing: '¡Sigue registrando para obtener consejos!',
   feedback: 'Feedback',
-  feedbackDesc: 'Ayúdanos a mejorar HabitFin con tus sugerencias',
+  feedbackDesc: 'Ayúdanos a mejorar Habit Money con tus sugerencias',
   feedbackPlaceholder: 'Cuéntanos qué piensas o reporta un error...',
   sendFeedback: 'Enviar Feedback',
   donate: 'Donar',
-  donateDesc: 'Apoya el desarrollo de HabitFin',
+  donateDesc: 'Apoya el desarrollo de Habit Money',
   buyMeACoffee: 'Invitame a un café',
   amountTooltip: 'Ingresa el valor de la transacción.',
   accountTooltip: 'Selecciona a qué cuenta pertenece esta transacción.',
@@ -328,7 +328,7 @@ export const es = {
   withdrawFrom: 'Retirar de',
   depositTo: 'Depositar en',
   selectDate: 'Seleccionar Fecha',
-  onboardingWelcome: 'Bienvenido a HabitFin',
+  onboardingWelcome: 'Bienvenido a Habit Money',
   onboardingDesc:
     'La forma más sencilla de rastrear tus gastos y construir mejores hábitos financieros.',
   detectedLanguage: 'Idioma Detectado',

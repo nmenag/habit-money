@@ -1,12 +1,11 @@
-# HabitFin: Database Design Documentation
+# Habit Money: Database Design Documentation
 
-This document describes the structure and relationships of the local SQLite database used by **HabitFin**.
+This document describes the structure and relationships of the local SQLite database used by **Habit Money**.
 
 ## 🏗️ Architecture Overview
 
-HabitFin uses **SQLite** through `expo-sqlite`. The database is localized to the user's device, ensuring 100% privacy and offline functionality.
+Habit Money uses **SQLite** through `expo-sqlite`. The database is localized to the user's device, ensuring 100% privacy and offline functionality.
 
-- **Database File**: `finhabit.db`
 - **Engine**: WAL (Write-Ahead Logging) mode enabled for performance.
 
 ---
