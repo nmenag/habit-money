@@ -12,6 +12,7 @@ HabitFin is a modern, high-performance personal finance tracker built with **Rea
   - **Dynamic Dashboard**: Real-time overview of net balance and monthly cash flow.
   - **Interactive Insights**: Smart analysis of spending growth, savings rates, and frequency alerts.
   - **Expense Charts**: Beautiful pie and bar charts visualizing category-wise spending and month-over-month growth.
+
 - **Smart Management**:
   - **Account Tracking**: Manage multiple financial sources (Cash, Bank, Credit).
   - **Financial Goals**: Set targets (e.g., "New Car") and track progress with estimated monthly savings.
@@ -19,7 +20,9 @@ HabitFin is a modern, high-performance personal finance tracker built with **Rea
 - **Customization & UX**:
   - **Expanded Palette**: Choice of 40+ premium colors and over 100+ specialized icons for categories and goals.
   - **Dark Mode Ready**: Premium look and feel in any lighting.
-  - **UTC Core**: Precise date management using UTC standard for consistent reporting across timezones.
+  - **Local Timezone Support**: Accurate financial reporting based on your device's local time, ensuring transactions align with your real-world calendar.
+  - **Smart Reminders**: Automated daily and weekly notifications to help you stay consistent with your financial tracking.
+
 - **Data Mobility & Security**:
   - **Export to CSV**: Download full transaction history for external spreadsheet analysis.
   - **JSON Backup & Restore**: Securely export and import all application data to local JSON files for long-term data protection.
@@ -33,7 +36,7 @@ HabitFin is a modern, high-performance personal finance tracker built with **Rea
 
 ## 🛠️ Tech Stack
 
-- **Core**: [Expo SDK 54](https://expo.dev) & React Native 0.81 — [Architecture Details](docs/ARCHITECTURE.md)
+- **Core**: [Expo SDK 55](https://expo.dev) & React Native 0.83 — [Architecture Details](docs/ARCHITECTURE.md)
 - **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/) (File-based navigation)
 - **State**: [Zustand](https://github.com/pmndrs/zustand) (Atomic & Persisted state)
 - **Database**: [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) (High-performance local storage) — [Schema Details](docs/DATABASE_DESIGN.md)
@@ -70,7 +73,7 @@ To build and run the native code locally, you must have the **Android SDK** and 
 
 - **Android Studio**: Install it to get the necessary build tools and SDKs.
 - **Environment Variables**: Configure your shell to include `ANDROID_HOME` (e.g., `~/Android/Sdk`) and add the `platform-tools` and `build-tools` directories to your `PATH`.
-- **JDK**: Ensure you have a compatible Java version installed (refer to Expo documentation for the specific version required by SDK 54).
+- **JDK**: Ensure you have a compatible Java version installed (refer to Expo documentation for the specific version required by SDK 55).
 
 #### 🔌 2. Device Setup (USB Debugging)
 
