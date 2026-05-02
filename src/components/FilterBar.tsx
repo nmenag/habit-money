@@ -5,7 +5,6 @@ import React, { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
-import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
 import { FilterType } from '../utils/dateFilters';
 
@@ -29,8 +28,10 @@ export const FilterBar: React.FC = React.memo(() => {
   const theme = useTheme();
   const { t } = useTranslation();
   const language = useStore((s) => s.language);
-  const { selectedRange, setFilter, setCustomRange, clearFilter } =
-    useFilterStore();
+  const selectedRange = useStore((s) => s.selectedRange);
+  const setFilterType = useStore((s) => s.setFilterType);
+  const setSelectedRange = useStore((s) => s.setSelectedRange);
+  const clearFilter = useStore((s) => s.clearFilter);
 
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -38,7 +39,7 @@ export const FilterBar: React.FC = React.memo(() => {
     if (option.type === 'custom') {
       setPickerOpen(true);
     } else {
-      setFilter(option.type);
+      setFilterType(option.type);
     }
   };
 
@@ -59,10 +60,14 @@ export const FilterBar: React.FC = React.memo(() => {
         const end = endDate ?? startDate;
         const endFull = new Date(end);
         endFull.setHours(23, 59, 59, 999);
-        setCustomRange(startDate, endFull);
+        setSelectedRange({
+          type: 'custom',
+          startDate,
+          endDate: endFull,
+        });
       }
     },
-    [setCustomRange],
+    [setSelectedRange],
   );
 
   const getLabel = (option: FilterOption): string => {

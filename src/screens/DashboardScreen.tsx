@@ -16,7 +16,9 @@ import {
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
+import { FilterBar } from '../components/FilterBar';
 import { useStore, useTranslation } from '../store/useStore';
+import { isInRange } from '../utils/dateFilters';
 
 export const DashboardScreen = React.memo(() => {
   const transactions = useStore((s) => s.transactions);
@@ -26,6 +28,7 @@ export const DashboardScreen = React.memo(() => {
   const accounts = useStore((s) => s.accounts);
   const isLoaded = useStore((s) => s.isLoaded);
   const formatCurrency = useStore((s) => s.formatCurrency);
+  const selectedRange = useStore((s) => s.selectedRange);
 
   const { t, language, translateName } = useTranslation();
   const theme = useTheme();
@@ -34,52 +37,29 @@ export const DashboardScreen = React.memo(() => {
 
   // 3. Data layer - helper functions
   const data = useMemo(() => {
-    const now = new Date();
-    // Use UTC for current and last month ranges
-    const currentStart = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
-    );
-    const currentEnd = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999),
-    );
-    const lastStart = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1),
-    );
-    const lastEnd = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999),
-    );
-
     // A. Balance Summary
-    let monthlyIncome = 0;
-    let monthlyExpenses = 0;
+    let filteredIncome = 0;
+    let filteredExpenses = 0;
     const catExpenses: Record<string, number> = {};
 
-    // For Insight (B. vs Last Month)
-    let lastMonthExpenses = 0;
-
     transactions.forEach((tr) => {
-      const trDate = new Date(tr.date);
       const isAdjustment =
         tr.note && translateName(tr.note) === t('balanceAdjustment');
 
-      if (trDate >= currentStart && trDate <= currentEnd) {
+      if (isInRange(tr.date, selectedRange)) {
         if (tr.type === 'income' && !isAdjustment) {
-          monthlyIncome += tr.amount;
+          filteredIncome += tr.amount;
         } else if (tr.type === 'expense' && !isAdjustment) {
-          monthlyExpenses += tr.amount;
+          filteredExpenses += tr.amount;
           if (tr.categoryId) {
             catExpenses[tr.categoryId] =
               (catExpenses[tr.categoryId] || 0) + tr.amount;
           }
         }
-      } else if (trDate >= lastStart && trDate <= lastEnd) {
-        if (tr.type === 'expense' && !isAdjustment) {
-          lastMonthExpenses += tr.amount;
-        }
       }
     });
 
-    const remainingBalance = monthlyIncome - monthlyExpenses;
+    const remainingBalance = filteredIncome - filteredExpenses;
 
     // C. Top Category
     const topCatId = Object.keys(catExpenses).reduce(
@@ -89,15 +69,11 @@ export const DashboardScreen = React.memo(() => {
     const topCategory = categories.find((c) => c.id === topCatId);
     const topCatAmount = topCatId ? catExpenses[topCatId] : 0;
     const topCatPercent =
-      monthlyExpenses > 0 ? (topCatAmount / monthlyExpenses) * 100 : 0;
+      filteredExpenses > 0 ? (topCatAmount / filteredExpenses) * 100 : 0;
 
     // D. Main Insight
     let insight = '';
-    if (monthlyExpenses > lastMonthExpenses && lastMonthExpenses > 0) {
-      const diff =
-        ((monthlyExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;
-      insight = t('insightSpentMore', { percent: diff.toFixed(0) });
-    } else if (remainingBalance > 0) {
+    if (remainingBalance > 0) {
       insight = t('insightSavingMoney');
     } else {
       insight = t('insightKeepGoing');
@@ -113,8 +89,8 @@ export const DashboardScreen = React.memo(() => {
 
     // Spending Progress (B) - find total budget if any
     const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
-    const limit = totalBudget > 0 ? totalBudget : monthlyIncome;
-    const ratio = limit > 0 ? monthlyExpenses / limit : 0;
+    const limit = totalBudget > 0 ? totalBudget : filteredIncome;
+    const ratio = limit > 0 ? filteredExpenses / limit : 0;
     const progress = Math.min(ratio, 1);
 
     let progressColor = '#4caf50'; // Green
@@ -123,7 +99,7 @@ export const DashboardScreen = React.memo(() => {
     else if (ratio >= 0.7) progressColor = '#ff9800'; // Orange
 
     let progressMessage = '';
-    if (monthlyExpenses > 0 || monthlyIncome > 0) {
+    if (filteredExpenses > 0 || filteredIncome > 0) {
       progressMessage = t('doingWell');
       if (ratio > 1.0) progressMessage = t('exceededLimit');
       else if (ratio > 0.9) progressMessage = t('aboutToExceed');
@@ -134,8 +110,8 @@ export const DashboardScreen = React.memo(() => {
     const totalBalance = accounts.reduce((sum, a) => sum + a.currentBalance, 0);
 
     return {
-      monthlyIncome,
-      monthlyExpenses,
+      monthlyIncome: filteredIncome,
+      monthlyExpenses: filteredExpenses,
       remainingBalance,
       topCategory,
       topCatAmount,
@@ -160,15 +136,18 @@ export const DashboardScreen = React.memo(() => {
     t,
     theme,
     translateName,
+    selectedRange,
   ]);
 
   const currentMonthDisplay = useMemo(() => {
-    const now = new Date();
-    const utcDate = new Date(now.getUTCFullYear(), now.getUTCMonth(), 1);
-    return format(utcDate, 'MMMM yyyy', {
+    if (selectedRange.type === 'allTime') return t('filterAllTime');
+    if (selectedRange.type === 'custom') {
+      return `${format(selectedRange.startDate, 'MMM d')} – ${format(selectedRange.endDate, 'MMM d, yyyy')}`;
+    }
+    return format(selectedRange.startDate, 'MMMM yyyy', {
       locale: language === 'es' ? esLocale : enUS,
     });
-  }, [language]);
+  }, [selectedRange, language, t]);
 
   if (!isLoaded) {
     return (
@@ -182,6 +161,7 @@ export const DashboardScreen = React.memo(() => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
+      <FilterBar />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.monthHeader}>
           <Text variant="headlineSmall" style={styles.monthText}>

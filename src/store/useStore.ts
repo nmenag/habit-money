@@ -9,6 +9,7 @@ import {
 } from '../i18n/translations';
 import { AnalyticsManager } from '../services/analytics/AnalyticsManager';
 import { AnalyticsReport } from '../services/analytics/types';
+import { DateRange, FilterType, getRangeForType } from '../utils/dateFilters';
 import { getLocalDateString } from '../utils/dateUtils';
 import { formatCurrency as formatCurrencyUtil } from '../utils/formatters';
 
@@ -82,6 +83,7 @@ interface AppState {
   isPremiumUser: boolean;
   actionCounter: number;
   analyticsReport: AnalyticsReport | null;
+  selectedRange: DateRange;
 
   notificationsEnabled: boolean;
   notificationTime: string;
@@ -130,6 +132,9 @@ interface AppState {
   updateCategoriesOrder: (categories: Category[]) => void;
   updateBudgetsOrder: (budgets: Budget[]) => void;
   updateGoalsOrder: (goals: Goal[]) => void;
+  setSelectedRange: (range: DateRange) => void;
+  setFilterType: (type: FilterType) => void;
+  clearFilter: () => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -148,6 +153,7 @@ export const useStore = create<AppState>((set, get) => ({
   notificationsEnabled: false,
   notificationTime: '20:00',
   goals: [],
+  selectedRange: getRangeForType('month'),
 
   loadData: () => {
     const db = getDb();
@@ -178,6 +184,9 @@ export const useStore = create<AppState>((set, get) => ({
     let themeSetting;
     let notifEnabledSetting;
     let notifTimeSetting;
+    let filterTypeSetting;
+    let customStartSetting;
+    let customEndSetting;
     try {
       currencySetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'currency'",
@@ -196,6 +205,15 @@ export const useStore = create<AppState>((set, get) => ({
       );
       notifTimeSetting = db.getFirstSync<{ val: string }>(
         "SELECT val FROM settings WHERE id = 'notificationTime'",
+      );
+      filterTypeSetting = db.getFirstSync<{ val: string }>(
+        "SELECT val FROM settings WHERE id = 'selectedFilterType'",
+      );
+      customStartSetting = db.getFirstSync<{ val: string }>(
+        "SELECT val FROM settings WHERE id = 'customStartDate'",
+      );
+      customEndSetting = db.getFirstSync<{ val: string }>(
+        "SELECT val FROM settings WHERE id = 'customEndDate'",
       );
     } catch (e) {
       console.warn('Could not load settings from DB:', e);
@@ -231,6 +249,11 @@ export const useStore = create<AppState>((set, get) => ({
       isPremiumUser: premiumSetting?.val === 'true',
       notificationsEnabled: notifEnabledSetting?.val === 'true',
       notificationTime: notifTimeSetting?.val || '20:00',
+      selectedRange: getRangeForType(
+        (filterTypeSetting?.val as FilterType) || 'month',
+        customStartSetting?.val ? new Date(customStartSetting.val) : undefined,
+        customEndSetting?.val ? new Date(customEndSetting.val) : undefined,
+      ),
       isLoaded: true,
     });
 
@@ -543,7 +566,54 @@ export const useStore = create<AppState>((set, get) => ({
         ],
       );
 
-      get().loadData();
+      set((state) => {
+        const updatedAccounts = state.accounts.map((acc) => {
+          let balance = acc.currentBalance;
+
+          if (
+            oldTransaction.type === 'transfer' &&
+            oldTransaction.toAccountId
+          ) {
+            if (acc.id === oldTransaction.accountId)
+              balance += oldTransaction.amount;
+            if (acc.id === oldTransaction.toAccountId)
+              balance -= oldTransaction.amount;
+          } else if (acc.id === oldTransaction.accountId) {
+            const oldModifier =
+              oldTransaction.type === 'income'
+                ? -oldTransaction.amount
+                : oldTransaction.amount;
+            balance += oldModifier;
+          }
+
+          if (transaction.type === 'transfer' && transaction.toAccountId) {
+            if (acc.id === transaction.accountId) balance -= transaction.amount;
+            if (acc.id === transaction.toAccountId)
+              balance += transaction.amount;
+          } else if (acc.id === transaction.accountId) {
+            const newModifier =
+              transaction.type === 'income'
+                ? transaction.amount
+                : -transaction.amount;
+            balance += newModifier;
+          }
+
+          return { ...acc, currentBalance: balance };
+        });
+
+        // 2. Update transactions state
+        const updatedTransactions = state.transactions
+          .map((t) => (t.id === transaction.id ? transaction : t))
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+          );
+
+        return {
+          accounts: updatedAccounts,
+          transactions: updatedTransactions,
+        };
+      });
+
       get().incrementActionCounter();
       get().checkAndShowAd();
       get().refreshAnalytics();
@@ -871,6 +941,38 @@ export const useStore = create<AppState>((set, get) => ({
       });
     });
     set({ goals });
+  },
+
+  setSelectedRange: (range: DateRange) => {
+    set({ selectedRange: range });
+    try {
+      const db = getDb();
+      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+        'selectedFilterType',
+        range.type,
+      ]);
+      if (range.type === 'custom') {
+        db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+          'customStartDate',
+          range.startDate.toISOString(),
+        ]);
+        db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+          'customEndDate',
+          range.endDate.toISOString(),
+        ]);
+      }
+    } catch (error) {
+      console.error('setSelectedRange DB Error:', error);
+    }
+  },
+
+  setFilterType: (type: FilterType) => {
+    const range = getRangeForType(type);
+    get().setSelectedRange(range);
+  },
+
+  clearFilter: () => {
+    get().setFilterType('allTime');
   },
 }));
 

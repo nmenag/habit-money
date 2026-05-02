@@ -95,7 +95,14 @@ module.exports = {
             'ca-app-pub-3940256099942544~1458002511',
         },
       ],
-      'expo-build-properties',
+      [
+        'expo-build-properties',
+        {
+          android: {
+            enableProguardInReleaseBuilds: true,
+          },
+        },
+      ],
       'expo-localization',
       [
         'expo-notifications',

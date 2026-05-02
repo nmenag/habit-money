@@ -5,7 +5,6 @@ import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { Card, Surface, Text, useTheme } from 'react-native-paper';
 import { FilterBar } from '../components/FilterBar';
-import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
 import { isInRange } from '../utils/dateFilters';
 
@@ -32,11 +31,11 @@ export const InsightsScreen = () => {
     formatCurrency,
     currencySymbol,
     loadFullData,
+    selectedRange,
   } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
-  const { selectedRange } = useFilterStore();
 
   React.useEffect(() => {
     loadFullData();

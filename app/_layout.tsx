@@ -1,7 +1,7 @@
 import { Stack, usePathname } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, useColorScheme, View } from 'react-native';
-import mobileAds from 'react-native-google-mobile-ads';
+import { initializeAds } from '../src/ads/AdInitializer';
 import { PaperProvider, adaptNavigationTheme } from 'react-native-paper';
 import {
   DarkTheme as NavigationDarkTheme,
@@ -64,7 +64,7 @@ export default function RootLayout() {
   useEffect(() => {
     const setup = async () => {
       try {
-        await mobileAds().initialize();
+        await initializeAds();
         interstitialManager.init();
         initDb();
         await NotificationService.setupChannel();

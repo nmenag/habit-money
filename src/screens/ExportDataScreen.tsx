@@ -12,7 +12,6 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { FilterBar } from '../components/FilterBar';
-import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
 import { exportTransactionsToCSV } from '../utils/csvExport';
 import { isInRange } from '../utils/dateFilters';
@@ -24,12 +23,12 @@ export const ExportDataScreen = () => {
     categories,
     incrementActionCounter,
     checkAndShowAd,
+    selectedRange,
   } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
-  const { selectedRange } = useFilterStore();
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
     null,

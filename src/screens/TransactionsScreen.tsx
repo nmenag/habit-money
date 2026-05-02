@@ -15,18 +15,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { FilterBar } from '../components/FilterBar';
 import { TransactionItem } from '../components/TransactionItem';
-import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
 import { isInRange } from '../utils/dateFilters';
 
 export const TransactionsScreen = () => {
   const params = useLocalSearchParams<{ accountId?: string }>();
-  const { transactions, accounts, categories, language, loadFullData } =
-    useStore();
+  const {
+    transactions,
+    accounts,
+    categories,
+    language,
+    loadFullData,
+    selectedRange,
+  } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
-  const { selectedRange } = useFilterStore();
   const insets = useSafeAreaInsets();
 
   React.useEffect(() => {
