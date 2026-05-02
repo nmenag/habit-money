@@ -100,7 +100,7 @@ module.exports = {
       [
         'expo-notifications',
         {
-          icon: './assets/images/notification-icon.png',
+          icon: './assets/icon.png',
           color: '#005CEE',
         },
       ],
