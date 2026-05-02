@@ -54,8 +54,6 @@ We use **Zustand** for lightweight, performant state management.
 
 ### 3. Data Persistence (SQLite)
 
-The primary data source is a local **SQLite** database (`habitmoney.db`).
-
 - All financial data is stored locally.
 - **`src/db/schema.ts`** handles table creation, indexing, and migrations.
 

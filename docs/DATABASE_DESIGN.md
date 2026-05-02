@@ -6,7 +6,6 @@ This document describes the structure and relationships of the local SQLite data
 
 Habit Money uses **SQLite** through `expo-sqlite`. The database is localized to the user's device, ensuring 100% privacy and offline functionality.
 
-- **Database File**: `habitmoney.db`
 - **Engine**: WAL (Write-Ahead Logging) mode enabled for performance.
 
 ---

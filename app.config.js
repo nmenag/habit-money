@@ -33,7 +33,7 @@ module.exports = {
   expo: {
     name: getAppName(),
     slug: 'fin-habit',
-    version: '1.0.5',
+    version: '1.1.0',
     orientation: 'portrait',
     icon: getIcon(),
     scheme: 'habitmoney',
@@ -56,7 +56,6 @@ module.exports = {
         backgroundColor: '#16A34A',
         foregroundImage: getAdaptiveForeground(),
       },
-      // edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
       package: getPackageName(),
       jsEngine: 'hermes',

@@ -1,17 +1,14 @@
 import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 
-// Branding colors (Fintech Green Style)
 const primaryGreen = '#16A34A';
 const secondaryGreen = '#22C55E';
 const accentGreen = '#4ADE80';
 
-// Dark Theme Neutrals
 const darkBackground = '#0B0F0C';
 const darkSurface = '#111827';
 const darkTextPrimary = '#E5E7EB';
 const darkTextSecondary = '#9CA3AF';
 
-// Light Theme Neutrals (Standard clean backgrounds)
 const lightBackground = '#F9FAFB';
 const lightSurface = '#FFFFFF';
 const lightTextPrimary = '#111827';
