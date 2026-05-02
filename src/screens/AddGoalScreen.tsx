@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useStore, useTranslation } from '../store/useStore';
 import { GOAL_ICONS as ICONS, COLORS } from '../constants';
 import { formatNumber } from '../utils/formatters';
+import { getLocalISOString } from '../utils/dateUtils';
 
 export const AddGoalScreen = () => {
   const params = useLocalSearchParams<{ goal?: string }>();
@@ -79,7 +80,7 @@ export const AddGoalScreen = () => {
       currentAmount: editingGoal?.currentAmount || 0,
       color,
       icon,
-      deadline: selectedDate ? selectedDate.toISOString() : '',
+      deadline: selectedDate ? getLocalISOString(selectedDate) : '',
       status: ((editingGoal?.currentAmount || 0) >= targetAmount
         ? 'completed'
         : 'active') as 'active' | 'completed',

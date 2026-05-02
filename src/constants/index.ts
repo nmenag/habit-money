@@ -103,15 +103,6 @@ export const CATEGORY_ICONS = [
   'wrench',
   'brush',
   'camera',
-  'amazon',
-  'netflix',
-  'spotify',
-  'google-play',
-  'apple',
-  'github',
-  'xbox',
-  'playstation',
-  'steam',
 ];
 
 export const GOAL_ICONS = [

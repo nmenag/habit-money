@@ -1,11 +1,11 @@
-// @ts-ignore
 import {
-  writeAsStringAsync,
   documentDirectory,
   EncodingType,
+  writeAsStringAsync,
 } from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
-import { Transaction, Account, Category } from '../store/useStore';
+import { Account, Category, Transaction } from '../store/useStore';
+import { getLocalDateString } from './dateUtils';
 
 export const exportTransactionsToCSV = async (
   transactions: Transaction[],
@@ -52,7 +52,7 @@ export const exportTransactionsToCSV = async (
     .join('\n');
 
   const csvContent = '\uFEFF' + header + rows;
-  const fileName = `finhabit_transactions_${new Date().toISOString().split('T')[0]}.csv`;
+  const fileName = `finhabit_transactions_${getLocalDateString()}.csv`;
   const fileUri = `${documentDirectory}${fileName}`;
 
   try {

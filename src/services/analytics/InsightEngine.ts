@@ -5,6 +5,7 @@ import {
 } from '../../i18n/translations';
 import { AnalyticsReport, Insight } from './types';
 import { formatCurrency } from '../../utils/formatters';
+import { getLocalISOString } from '../../utils/dateUtils';
 
 export class InsightEngine {
   static generateInsights(
@@ -37,7 +38,7 @@ export class InsightEngine {
           ),
           level: 'warning',
           category: 'comparison',
-          timestamp: new Date().toISOString(),
+          timestamp: getLocalISOString(),
         });
       } else if (growth < 0) {
         insights.push({
@@ -49,7 +50,7 @@ export class InsightEngine {
           ),
           level: 'positive',
           category: 'comparison',
-          timestamp: new Date().toISOString(),
+          timestamp: getLocalISOString(),
         });
       }
     }
@@ -66,7 +67,7 @@ export class InsightEngine {
           .replace('{{category}}', translatedName),
         level: 'info',
         category: 'spending',
-        timestamp: new Date().toISOString(),
+        timestamp: getLocalISOString(),
       });
     }
 
@@ -101,7 +102,7 @@ export class InsightEngine {
             .replace('{{percentage}}', maxIncrease.toFixed(0)),
           level: 'warning',
           category: 'comparison',
-          timestamp: new Date().toISOString(),
+          timestamp: getLocalISOString(),
         });
       }
     }
@@ -115,7 +116,7 @@ export class InsightEngine {
           message: t.insightBalancePositiveMessage,
           level: 'positive',
           category: 'balance',
-          timestamp: new Date().toISOString(),
+          timestamp: getLocalISOString(),
         });
       } else if (currentMonth.expenses > currentMonth.income) {
         insights.push({
@@ -124,7 +125,7 @@ export class InsightEngine {
           message: t.insightBalanceNegativeMessage,
           level: 'warning',
           category: 'balance',
-          timestamp: new Date().toISOString(),
+          timestamp: getLocalISOString(),
         });
       }
     }
@@ -149,7 +150,7 @@ export class InsightEngine {
         ),
         level: 'info',
         category: 'projection',
-        timestamp: new Date().toISOString(),
+        timestamp: getLocalISOString(),
       });
     }
 
@@ -161,7 +162,7 @@ export class InsightEngine {
         message: t.insightNoDataMessage,
         level: 'info',
         category: 'general',
-        timestamp: new Date().toISOString(),
+        timestamp: getLocalISOString(),
       });
     }
 

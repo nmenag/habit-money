@@ -56,7 +56,7 @@ module.exports = {
         backgroundColor: '#005CEE',
         foregroundImage: getAdaptiveForeground(),
       },
-      edgeToEdgeEnabled: true,
+      // edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
       package: getPackageName(),
       jsEngine: 'hermes',
@@ -80,16 +80,30 @@ module.exports = {
       ],
       'expo-sqlite',
       'expo-router',
+      'expo-font',
+      'expo-image',
+      'expo-sharing',
+      'expo-web-browser',
       [
         'react-native-google-mobile-ads',
         {
           androidAppId:
             process.env.ADMOB_ANDROID_APP_ID ||
             'ca-app-pub-3940256099942544~3347511713',
+          iosAppId:
+            process.env.ADMOB_IOS_APP_ID ||
+            'ca-app-pub-3940256099942544~1458002511',
         },
       ],
       'expo-build-properties',
       'expo-localization',
+      [
+        'expo-notifications',
+        {
+          icon: './assets/icon.png',
+          color: '#005CEE',
+        },
+      ],
     ],
     experiments: {
       reactCompiler: true,

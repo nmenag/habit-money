@@ -1,11 +1,12 @@
 import * as Localization from 'expo-localization';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, Linking, StyleSheet, View } from 'react-native';
 import { Button, Menu, Surface, Text, useTheme } from 'react-native-paper';
 import { getDb } from '../db/schema';
 import { Language } from '../i18n/translations';
 import { useStore, useTranslation } from '../store/useStore';
+import { getLocalDateString } from '../utils/dateUtils';
 
 export const OnboardingScreen = () => {
   const theme = useTheme();
@@ -40,7 +41,7 @@ export const OnboardingScreen = () => {
     ]);
     db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
       'onboarding_date',
-      new Date().toISOString().split('T')[0],
+      getLocalDateString(),
     ]);
     loadData();
 
@@ -147,6 +148,35 @@ export const OnboardingScreen = () => {
       </View>
 
       <View style={styles.footer}>
+        <Text
+          variant="bodySmall"
+          style={{ textAlign: 'center', opacity: 0.7, marginBottom: 16 }}
+        >
+          {t('agreeToTermsPrefix')}
+          <Text
+            style={{
+              textDecorationLine: 'underline',
+              color: theme.colors.primary,
+            }}
+            onPress={() =>
+              Linking.openURL('https://nmenag.github.io/fin-habit/privacy.html')
+            }
+          >
+            {t('privacyPolicy')}
+          </Text>
+          {t('agreeToTermsAnd')}
+          <Text
+            style={{
+              textDecorationLine: 'underline',
+              color: theme.colors.primary,
+            }}
+            onPress={() =>
+              Linking.openURL('https://nmenag.github.io/fin-habit/terms.html')
+            }
+          >
+            {t('termsOfUse')}
+          </Text>
+        </Text>
         <Button
           mode="contained"
           onPress={handleContinue}

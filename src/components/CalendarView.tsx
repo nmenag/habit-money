@@ -16,6 +16,7 @@ import React, { useMemo, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { IconButton, Text, useTheme } from 'react-native-paper';
 import { useStore, useTranslation } from '../store/useStore';
+import { getLocalDateString } from '../utils/dateUtils';
 
 const formatAmount = (amount: number, formatCurrency: any) => {
   if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M';
@@ -40,7 +41,7 @@ export const CalendarView = ({
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const startDate = startOfWeek(monthStart, { weekStartsOn: 0 }); // Sunday start
+  const startDate = startOfWeek(monthStart, { weekStartsOn: 0 });
   const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
 
   const daysInMonth = eachDayOfInterval({ start: startDate, end: endDate });
@@ -50,7 +51,6 @@ export const CalendarView = ({
 
   const dateLocale = language === 'es' ? esLocale : enUS;
 
-  // Generate weekday names based on locale
   const weekDays = useMemo(() => {
     const days = [];
     for (let i = 0; i < 7; i++) {
@@ -63,7 +63,7 @@ export const CalendarView = ({
     (acc, current) => {
       let dateStr = '';
       try {
-        dateStr = new Date(current.date).toISOString().split('T')[0];
+        dateStr = getLocalDateString(new Date(current.date));
       } catch {
         dateStr = current.date.split('T')[0];
       }

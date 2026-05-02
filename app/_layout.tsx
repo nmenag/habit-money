@@ -6,6 +6,7 @@ import { PaperProvider, adaptNavigationTheme } from 'react-native-paper';
 import {
   DarkTheme as NavigationDarkTheme,
   DefaultTheme as NavigationDefaultTheme,
+  ThemeProvider,
 } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { registerTranslation, en, es } from 'react-native-paper-dates';
@@ -16,6 +17,7 @@ import { useStore, useTranslation } from '../src/store/useStore';
 import { darkTheme, lightTheme } from '../src/theme/theme';
 import { interstitialManager } from '../src/ads/InterstitialManager';
 import { checkBackupReminder } from '../src/utils/dataBackup';
+import { NotificationService } from '../src/services/NotificationService';
 
 // Register locales for the date picker
 registerTranslation('en', en);
@@ -51,9 +53,12 @@ export default function RootLayout() {
   const { loadData, isLoaded } = useStore();
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
+  const themePreference = useStore((state) => state.themePreference);
   const pathname = usePathname();
 
-  const isDarkTheme = colorScheme === 'dark';
+  const isDarkTheme =
+    themePreference === 'dark' ||
+    (themePreference === 'system' && colorScheme === 'dark');
   const theme = isDarkTheme ? CombinedDarkTheme : CombinedDefaultTheme;
 
   useEffect(() => {
@@ -62,6 +67,7 @@ export default function RootLayout() {
         await mobileAds().initialize();
         interstitialManager.init();
         initDb();
+        await NotificationService.setupChannel();
         setDbInitialized(true);
       } catch (e) {
         console.error('Failed to initialize local DB or Ads', e);
@@ -102,114 +108,116 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PaperProvider theme={theme}>
-        <StatusBar style={isDarkTheme ? 'light' : 'dark'} />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="add-transaction"
-            options={{
-              presentation: 'modal',
-              headerShown: true,
-              title: t('addTransaction'),
-            }}
-          />
-          <Stack.Screen
-            name="add-account"
-            options={{
-              presentation: 'modal',
-              headerShown: true,
-              title: t('addAccount'),
-            }}
-          />
-          <Stack.Screen
-            name="add-category"
-            options={{
-              presentation: 'modal',
-              headerShown: true,
-              title: t('addCategory'),
-            }}
-          />
-          <Stack.Screen
-            name="add-budget"
-            options={{
-              presentation: 'modal',
-              headerShown: true,
-              title: t('addBudget'),
-            }}
-          />
-          <Stack.Screen
-            name="add-goal"
-            options={{
-              presentation: 'modal',
-              headerShown: true,
-              title: t('addGoal'),
-            }}
-          />
-          <Stack.Screen
-            name="accounts"
-            options={{
-              headerShown: true,
-              title: t('accounts'),
-            }}
-          />
-          <Stack.Screen
-            name="categories"
-            options={{
-              headerShown: true,
-              title: t('categories'),
-            }}
-          />
-          <Stack.Screen
-            name="budgets"
-            options={{
-              headerShown: true,
-              title: t('budgets'),
-            }}
-          />
-          <Stack.Screen
-            name="goals"
-            options={{
-              headerShown: true,
-              title: t('goals'),
-            }}
-          />
-          <Stack.Screen
-            name="calendar"
-            options={{
-              headerShown: true,
-              title: t('calendar'),
-            }}
-          />
-          <Stack.Screen
-            name="goal-detail"
-            options={{
-              headerShown: true,
-              title: t('goalDetail'),
-            }}
-          />
-          <Stack.Screen
-            name="about"
-            options={{
-              headerShown: true,
-              title: t('aboutApp'),
-            }}
-          />
-          <Stack.Screen
-            name="privacy-policy"
-            options={{
-              headerShown: true,
-              title: t('privacyPolicy'),
-            }}
-          />
-          <Stack.Screen
-            name="export-data"
-            options={{
-              headerShown: true,
-              title: t('exportData'),
-            }}
-          />
-        </Stack>
+        <ThemeProvider value={theme as any}>
+          <StatusBar style={isDarkTheme ? 'light' : 'dark'} />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="add-transaction"
+              options={{
+                presentation: 'modal',
+                headerShown: true,
+                title: t('addTransaction'),
+              }}
+            />
+            <Stack.Screen
+              name="add-account"
+              options={{
+                presentation: 'modal',
+                headerShown: true,
+                title: t('addAccount'),
+              }}
+            />
+            <Stack.Screen
+              name="add-category"
+              options={{
+                presentation: 'modal',
+                headerShown: true,
+                title: t('addCategory'),
+              }}
+            />
+            <Stack.Screen
+              name="add-budget"
+              options={{
+                presentation: 'modal',
+                headerShown: true,
+                title: t('addBudget'),
+              }}
+            />
+            <Stack.Screen
+              name="add-goal"
+              options={{
+                presentation: 'modal',
+                headerShown: true,
+                title: t('addGoal'),
+              }}
+            />
+            <Stack.Screen
+              name="accounts"
+              options={{
+                headerShown: true,
+                title: t('accounts'),
+              }}
+            />
+            <Stack.Screen
+              name="categories"
+              options={{
+                headerShown: true,
+                title: t('categories'),
+              }}
+            />
+            <Stack.Screen
+              name="budgets"
+              options={{
+                headerShown: true,
+                title: t('budgets'),
+              }}
+            />
+            <Stack.Screen
+              name="goals"
+              options={{
+                headerShown: true,
+                title: t('goals'),
+              }}
+            />
+            <Stack.Screen
+              name="calendar"
+              options={{
+                headerShown: true,
+                title: t('calendar'),
+              }}
+            />
+            <Stack.Screen
+              name="goal-detail"
+              options={{
+                headerShown: true,
+                title: t('goalDetail'),
+              }}
+            />
+            <Stack.Screen
+              name="about"
+              options={{
+                headerShown: true,
+                title: t('aboutApp'),
+              }}
+            />
+            <Stack.Screen
+              name="privacy-policy"
+              options={{
+                headerShown: true,
+                title: t('privacyPolicy'),
+              }}
+            />
+            <Stack.Screen
+              name="export-data"
+              options={{
+                headerShown: true,
+                title: t('exportData'),
+              }}
+            />
+          </Stack>
+        </ThemeProvider>
       </PaperProvider>
     </GestureHandlerRootView>
   );

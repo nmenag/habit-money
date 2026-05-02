@@ -35,6 +35,10 @@ export const es = {
     'Cambiar la moneda actualizará cómo se muestran todos los montos en la aplicación.',
   english: 'Inglés',
   spanish: 'Español',
+  theme: 'Tema',
+  light: 'Claro',
+  dark: 'Oscuro',
+  system: 'Por defecto',
   backupData: 'Copia de Seguridad (JSON)',
   backupDataDesc:
     'Exporta todos los datos de la app a un archivo JSON para respaldo.',
@@ -54,6 +58,16 @@ export const es = {
   premiumDesc: 'Elimina todos los anuncios y desbloquea funciones avanzadas.',
   freeVersion: 'Versión Gratuita (Con anuncios)',
   premiumVersion: 'Versión Premium (Sin anuncios)',
+  notifications: 'Notificaciones',
+  notificationsDesc: 'Activa recordatorios diarios y semanales.',
+  notificationTime: 'Hora del Recordatorio',
+  notificationTimeDesc: 'Configura la hora para tus recordatorios diarios.',
+  notificationDailyTitle: '¡No olvides tus finanzas!',
+  notificationDailyBody:
+    'Registra tus gastos diarios para mantenerte dentro del presupuesto.',
+  notificationWeeklyTitle: 'Revisión Financiera Semanal',
+  notificationWeeklyBody:
+    'Es hora de revisar tus gastos e ingresos de la semana.',
 
   save: 'Guardar',
   update: 'Actualizar',
@@ -320,4 +334,7 @@ export const es = {
   detectedLanguage: 'Idioma Detectado',
   detectedCurrency: 'Moneda Detectada',
   getStarted: 'Continuar',
+  agreeToTermsPrefix: 'Al continuar, aceptas nuestra ',
+  agreeToTermsAnd: ' y ',
+  termsOfUse: 'Términos de Uso',
 };

@@ -49,10 +49,12 @@ const CombinedDarkTheme = {
 
 export default function App() {
   const [dbInitialized, setDbInitialized] = useState(false);
-  const { loadData, isLoaded } = useStore();
+  const { loadData, isLoaded, themePreference } = useStore();
   const colorScheme = useColorScheme();
 
-  const isDarkTheme = colorScheme === 'dark';
+  const isDarkTheme =
+    themePreference === 'dark' ||
+    (themePreference === 'system' && colorScheme === 'dark');
   const theme = isDarkTheme ? CombinedDarkTheme : CombinedDefaultTheme;
 
   useEffect(() => {
