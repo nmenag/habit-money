@@ -18,7 +18,7 @@ export const AboutScreen = () => {
   const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
 
-  const appName = Constants.expoConfig?.name || 'HabitFin';
+  const appName = Constants.expoConfig?.name || 'Habit Money';
   const version = Constants.expoConfig?.version;
 
   const handleEmail = () => {

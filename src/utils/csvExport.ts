@@ -52,7 +52,7 @@ export const exportTransactionsToCSV = async (
     .join('\n');
 
   const csvContent = '\uFEFF' + header + rows;
-  const fileName = `finhabit_transactions_${getLocalDateString()}.csv`;
+  const fileName = `habitmoney_transactions_${getLocalDateString()}.csv`;
   const fileUri = `${documentDirectory}${fileName}`;
 
   try {

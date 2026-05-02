@@ -117,10 +117,10 @@ export const DashboardScreen = React.memo(() => {
     const ratio = limit > 0 ? monthlyExpenses / limit : 0;
     const progress = Math.min(ratio, 1);
 
-    let progressColor = '#4caf50'; // Green
+    let progressColor = '#16A34A'; // New Primary Green
     if (ratio > 0.9)
       progressColor = theme.colors.error; // Red
-    else if (ratio >= 0.7) progressColor = '#ff9800'; // Orange
+    else if (ratio >= 0.7) progressColor = '#F59E0B'; // Amber/Orange
 
     let progressMessage = '';
     if (monthlyExpenses > 0 || monthlyIncome > 0) {
@@ -198,7 +198,7 @@ export const DashboardScreen = React.memo(() => {
             <View style={styles.balanceRow}>
               <View>
                 <Text variant="labelSmall">{t('income')}</Text>
-                <Text style={[styles.amountText, { color: '#4caf50' }]}>
+                <Text style={[styles.amountText, { color: '#16A34A' }]}>
                   {formatCurrency(data.monthlyIncome)}
                 </Text>
               </View>
@@ -219,7 +219,7 @@ export const DashboardScreen = React.memo(() => {
                 style={{
                   fontWeight: '900',
                   color:
-                    data.remainingBalance >= 0 ? '#4caf50' : theme.colors.error,
+                    data.remainingBalance >= 0 ? '#16A34A' : theme.colors.error,
                 }}
               >
                 {formatCurrency(data.remainingBalance)}
@@ -490,7 +490,7 @@ export const DashboardScreen = React.memo(() => {
                                 ? theme.colors.surfaceVariant
                                 : cat?.color ||
                                   (tr.type === 'income'
-                                    ? '#4caf50'
+                                    ? '#16A34A'
                                     : theme.colors.error),
                         }}
                         color={
@@ -524,7 +524,7 @@ export const DashboardScreen = React.memo(() => {
                             tr.type === 'transfer'
                               ? theme.colors.onSurface
                               : tr.type === 'income'
-                                ? '#4caf50'
+                                ? '#16A34A'
                                 : theme.colors.error,
                         }}
                       >

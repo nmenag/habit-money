@@ -38,7 +38,7 @@ export const backupToJSON = async () => {
       },
     };
 
-    const fileName = `finhabit_backup_${getLocalDateString()}.json`;
+    const fileName = `habitmoney_backup_${getLocalDateString()}.json`;
     const fileUri = `${documentDirectory}${fileName}`;
 
     await writeAsStringAsync(fileUri, JSON.stringify(backupData, null, 2), {

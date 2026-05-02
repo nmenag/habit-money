@@ -1,10 +1,10 @@
-# HabitFin: Architecture Documentation
+# Habit Money: Architecture Documentation
 
-This document outlines the high-level architecture and design patterns used in **HabitFin**.
+This document outlines the high-level architecture and design patterns used in **Habit Money**.
 
 ## 🏗️ System Overview
 
-HabitFin is an Expo-based cross-platform mobile application designed with a **100% Offline-First** philosophy. It prioritizes data privacy and high-speed local processing.
+Habit Money is an Expo-based cross-platform mobile application designed with a **100% Offline-First** philosophy. It prioritizes data privacy and high-speed local processing.
 
 ```mermaid
 graph TD
@@ -54,7 +54,7 @@ We use **Zustand** for lightweight, performant state management.
 
 ### 3. Data Persistence (SQLite)
 
-The primary data source is a local **SQLite** database (`finhabit.db`).
+The primary data source is a local **SQLite** database (`habitmoney.db`).
 
 - All financial data is stored locally.
 - **`src/db/schema.ts`** handles table creation, indexing, and migrations.

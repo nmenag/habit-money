@@ -253,7 +253,7 @@ export const initDb = () => {
         name: t.catSalary,
         type: 'income',
         icon: 'cash',
-        color: '#4caf50',
+        color: '#16A34A',
       },
       {
         id: '8',

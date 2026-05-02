@@ -6,12 +6,12 @@ const variant = getAppVariant();
 
 const getPackageName = () => {
   if (variant === 'development') return 'com.finhabit.dev';
-  if (variant === 'preview') return 'com.finhabit.preview';
+  if (variant === 'preview') return 'com.habitmoney.preview';
   return 'com.finhabit';
 };
 
 const getAppName = () => {
-  const baseName = 'HabitFin';
+  const baseName = 'Habit Money';
   if (variant === 'development') return `${baseName} (Dev)`;
   if (variant === 'preview') return `${baseName} (Preview)`;
   return baseName;
@@ -36,7 +36,7 @@ module.exports = {
     version: '1.0.5',
     orientation: 'portrait',
     icon: getIcon(),
-    scheme: 'habitfin',
+    scheme: 'habitmoney',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     runtimeVersion: {
@@ -53,7 +53,7 @@ module.exports = {
     },
     android: {
       adaptiveIcon: {
-        backgroundColor: '#005CEE',
+        backgroundColor: '#16A34A',
         foregroundImage: getAdaptiveForeground(),
       },
       // edgeToEdgeEnabled: true,
@@ -72,9 +72,9 @@ module.exports = {
           image: './assets/images/splash-icon.png',
           imageWidth: 200,
           resizeMode: 'contain',
-          backgroundColor: '#ffffff',
+          backgroundColor: '#F9FAFB',
           dark: {
-            backgroundColor: '#000000',
+            backgroundColor: '#0B0F0C',
           },
         },
       ],
@@ -95,13 +95,20 @@ module.exports = {
             'ca-app-pub-3940256099942544~1458002511',
         },
       ],
-      'expo-build-properties',
+      [
+        'expo-build-properties',
+        {
+          android: {
+            enableProguardInReleaseBuilds: true,
+          },
+        },
+      ],
       'expo-localization',
       [
         'expo-notifications',
         {
           icon: './assets/icon.png',
-          color: '#005CEE',
+          color: '#16A34A',
         },
       ],
     ],
