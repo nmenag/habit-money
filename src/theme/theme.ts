@@ -4,8 +4,8 @@ const primaryGreen = '#22C55E';
 const secondaryGreen = '#86EFAC';
 const accentGreen = '#BBF7D0';
 
-const darkBackground = '#0B0F0C';
-const darkSurface = '#111827';
+const darkBackground = '#065F46';
+const darkSurface = '#054C38';
 const darkTextPrimary = '#E5E7EB';
 const darkTextSecondary = '#9CA3AF';
 
