@@ -1,15 +1,15 @@
 import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 
-const primaryGreen = '#16A34A';
-const secondaryGreen = '#22C55E';
-const accentGreen = '#4ADE80';
+const primaryGreen = '#22C55E';
+const secondaryGreen = '#86EFAC';
+const accentGreen = '#BBF7D0';
 
 const darkBackground = '#0B0F0C';
 const darkSurface = '#111827';
 const darkTextPrimary = '#E5E7EB';
 const darkTextSecondary = '#9CA3AF';
 
-const lightBackground = '#F9FAFB';
+const lightBackground = '#FFFFFF';
 const lightSurface = '#FFFFFF';
 const lightTextPrimary = '#111827';
 const lightTextSecondary = '#4B5563';
