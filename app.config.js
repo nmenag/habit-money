@@ -33,7 +33,7 @@ module.exports = {
   expo: {
     name: getAppName(),
     slug: 'fin-habit',
-    version: '1.1.0',
+    version: '1.1.1',
     orientation: 'portrait',
     icon: getIcon(),
     scheme: 'habitmoney',
@@ -53,7 +53,7 @@ module.exports = {
     },
     android: {
       adaptiveIcon: {
-        backgroundColor: '#16A34A',
+        backgroundColor: '#22C55E',
         foregroundImage: getAdaptiveForeground(),
       },
       predictiveBackGestureEnabled: false,
