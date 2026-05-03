@@ -92,7 +92,12 @@ export const CalendarScreen = () => {
                   variant="labelSmall"
                   style={[
                     styles.netTotal,
-                    { color: dailyNet < 0 ? theme.colors.error : '#4caf50' },
+                    {
+                      color:
+                        dailyNet < 0
+                          ? theme.colors.error
+                          : (theme.colors as any).income,
+                    },
                   ]}
                 >
                   Sum: {formatCurrency(dailyNet)}
@@ -173,11 +178,11 @@ const defaultStyles = (theme: any) =>
       alignItems: 'flex-end',
     },
     incomeTotal: {
-      color: '#4caf50',
+      color: (theme.colors as any).income,
       fontWeight: 'bold',
     },
     expenseTotal: {
-      color: '#f44336',
+      color: theme.colors.error,
       fontWeight: 'bold',
     },
     netTotal: {

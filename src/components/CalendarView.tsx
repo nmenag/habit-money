@@ -127,7 +127,10 @@ export const CalendarView = ({
                     color: theme.colors.primary,
                     fontWeight: 'bold',
                   },
-                  isSelected && { color: '#fff', fontWeight: 'bold' },
+                  isSelected && {
+                    color: theme.colors.onPrimary,
+                    fontWeight: 'bold',
+                  },
                 ]}
               >
                 {format(day, 'd')}
@@ -217,12 +220,12 @@ const defaultStyles = (theme: any) =>
     },
     incomeAmount: {
       fontSize: 9,
-      color: '#4caf50',
+      color: (theme.colors as any).income,
       fontWeight: '900',
     },
     expenseAmount: {
       fontSize: 9,
-      color: '#f44336',
+      color: theme.colors.error,
       fontWeight: '900',
     },
   });

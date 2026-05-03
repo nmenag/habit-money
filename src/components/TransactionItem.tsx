@@ -91,7 +91,7 @@ export const TransactionItem: React.FC<Props> = memo(
                 color: isTransfer
                   ? theme.colors.onSurface
                   : isIncome
-                    ? '#16A34A'
+                    ? (theme.colors as any).income
                     : theme.colors.error,
               },
             ]}

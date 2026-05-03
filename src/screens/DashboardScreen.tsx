@@ -198,7 +198,12 @@ export const DashboardScreen = React.memo(() => {
             <View style={styles.balanceRow}>
               <View>
                 <Text variant="labelSmall">{t('income')}</Text>
-                <Text style={[styles.amountText, { color: '#16A34A' }]}>
+                <Text
+                  style={[
+                    styles.amountText,
+                    { color: (theme.colors as any).income },
+                  ]}
+                >
                   {formatCurrency(data.monthlyIncome)}
                 </Text>
               </View>
@@ -219,7 +224,9 @@ export const DashboardScreen = React.memo(() => {
                 style={{
                   fontWeight: '900',
                   color:
-                    data.remainingBalance >= 0 ? '#16A34A' : theme.colors.error,
+                    data.remainingBalance >= 0
+                      ? (theme.colors as any).income
+                      : theme.colors.error,
                 }}
               >
                 {formatCurrency(data.remainingBalance)}
@@ -518,15 +525,17 @@ export const DashboardScreen = React.memo(() => {
                       </View>
                       <Text
                         variant="bodyLarge"
-                        style={{
-                          fontWeight: 'bold',
-                          color:
-                            tr.type === 'transfer'
-                              ? theme.colors.onSurface
-                              : tr.type === 'income'
-                                ? '#16A34A'
-                                : theme.colors.error,
-                        }}
+                        style={[
+                          styles.amountText,
+                          {
+                            color:
+                              tr.type === 'transfer'
+                                ? theme.colors.onSurface
+                                : tr.type === 'income'
+                                  ? (theme.colors as any).income
+                                  : theme.colors.error,
+                          },
+                        ]}
                       >
                         {tr.type === 'transfer'
                           ? ''

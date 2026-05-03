@@ -5,24 +5,12 @@ import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { Card, Surface, Text, useTheme } from 'react-native-paper';
 import { FilterBar } from '../components/FilterBar';
+import { chartColors } from '../theme/theme';
 import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
 import { isInRange } from '../utils/dateFilters';
 
 const screenWidth = Dimensions.get('window').width;
-
-const CHART_COLORS = [
-  '#f44336',
-  '#e91e63',
-  '#9c27b0',
-  '#673ab7',
-  '#3f51b5',
-  '#2196f3',
-  '#00bcd4',
-  '#009688',
-  '#4caf50',
-  '#ff9800',
-];
 
 export const InsightsScreen = () => {
   const {
@@ -73,7 +61,7 @@ export const InsightsScreen = () => {
       .map(([catId, amount]) => {
         const cat = categories.find((c) => c.id === catId);
         const color =
-          cat?.color || CHART_COLORS[colorIdx++ % CHART_COLORS.length];
+          cat?.color || chartColors[colorIdx++ % chartColors.length];
         const pct = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0;
         return {
           id: catId,
@@ -112,7 +100,10 @@ export const InsightsScreen = () => {
               analyticsReport.previousMonth.expenses,
               analyticsReport.currentMonth.expenses,
             ],
-            colors: [(_opacity = 1) => '#90caf9', (_opacity = 1) => '#2196f3'],
+            colors: [
+              (_opacity = 1) => theme.colors.primaryContainer,
+              (_opacity = 1) => theme.colors.primary,
+            ],
           },
         ],
       }
@@ -142,8 +133,8 @@ export const InsightsScreen = () => {
   const chartConfig = {
     backgroundGradientFrom: theme.colors.surface,
     backgroundGradientTo: theme.colors.surface,
-    color: (opacity = 1) => `rgba(33, 150, 243, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
+    color: (opacity = 1) => theme.colors.primary,
+    labelColor: (opacity = 1) => theme.colors.onSurface,
     strokeWidth: 2,
     barPercentage: 0.6,
     useShadowColorFromDataset: false,
@@ -202,25 +193,41 @@ export const InsightsScreen = () => {
         {/* Summary Cards */}
         <View style={styles.summaryContainer}>
           <Surface
-            style={[styles.miniCard, { backgroundColor: '#e8f5e9' }]}
+            style={[
+              styles.miniCard,
+              { backgroundColor: (theme.colors as any).incomeContainer },
+            ]}
             elevation={1}
           >
-            <Ionicons name="arrow-up-circle" size={20} color="#2e7d32" />
+            <Ionicons
+              name="arrow-up-circle"
+              size={20}
+              color={(theme.colors as any).income}
+            />
             <Text
               variant="labelSmall"
-              style={[styles.miniLabel, { color: '#388e3c' }]}
+              style={[
+                styles.miniLabel,
+                { color: (theme.colors as any).income },
+              ]}
             >
               {t('income')}
             </Text>
             <Text
               variant="titleMedium"
-              style={[styles.miniValue, { color: '#2e7d32' }]}
+              style={[
+                styles.miniValue,
+                { color: (theme.colors as any).income },
+              ]}
             >
               {formatCurrency(filtered.totalIncome)}
             </Text>
           </Surface>
           <Surface
-            style={[styles.miniCard, { backgroundColor: '#ffebee' }]}
+            style={[
+              styles.miniCard,
+              { backgroundColor: theme.colors.errorContainer },
+            ]}
             elevation={1}
           >
             <Ionicons
@@ -260,7 +267,9 @@ export const InsightsScreen = () => {
               style={{
                 fontWeight: '900',
                 color:
-                  filtered.savingsRate >= 0 ? '#4caf50' : theme.colors.error,
+                  filtered.savingsRate >= 0
+                    ? (theme.colors as any).income
+                    : theme.colors.error,
               }}
             >
               {filtered.savingsRate.toFixed(1)}%
@@ -394,7 +403,10 @@ export const InsightsScreen = () => {
                   style={[
                     styles.growthValue,
                     {
-                      color: expenseGrowth > 0 ? theme.colors.error : '#4caf50',
+                      color:
+                        expenseGrowth > 0
+                          ? theme.colors.error
+                          : (theme.colors as any).income,
                     },
                   ]}
                 >
@@ -423,15 +435,17 @@ export const InsightsScreen = () => {
               if (insight.level === 'critical' || insight.level === 'warning') {
                 iconName = 'alert-circle-outline';
                 iconColor =
-                  insight.level === 'critical' ? theme.colors.error : '#ff9800';
+                  insight.level === 'critical'
+                    ? theme.colors.error
+                    : (theme.colors as any).warning;
                 backgroundColor =
                   insight.level === 'critical'
-                    ? 'rgba(186, 26, 26, 0.1)'
-                    : 'rgba(255, 152, 0, 0.1)';
+                    ? theme.colors.errorContainer
+                    : (theme.colors as any).warningContainer;
               } else if (insight.level === 'positive') {
                 iconName = 'checkmark-circle-outline';
-                iconColor = '#4caf50';
-                backgroundColor = 'rgba(76, 175, 80, 0.1)';
+                iconColor = (theme.colors as any).income;
+                backgroundColor = (theme.colors as any).incomeContainer;
               }
 
               return (

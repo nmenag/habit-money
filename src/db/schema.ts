@@ -57,7 +57,6 @@ export const initDb = () => {
       );
     `);
 
-    // Migration for icons from Ionicons to MaterialCommunityIcons
     db.execSync(
       "UPDATE categories SET icon = 'controller-classic' WHERE icon = 'game-controller';",
     );
@@ -83,6 +82,16 @@ export const initDb = () => {
     db.execSync(
       "UPDATE categories SET icon = 'music-note' WHERE icon = 'musical-notes';",
     );
+    db.execSync(
+      "UPDATE categories SET icon = 'hamburger' WHERE icon = 'fast-food';",
+    );
+    db.execSync(
+      "UPDATE categories SET icon = 'baby-carriage' WHERE icon = 'stroller';",
+    );
+    db.execSync(
+      "UPDATE goals SET icon = 'cash-outline' WHERE icon = 'piggy-bank';",
+    );
+    db.execSync("UPDATE goals SET icon = 'stats-chart' WHERE icon = 'chart';");
   } catch (e) {
     console.error('Error creating/migrating categories table:', e);
   }

@@ -17,11 +17,11 @@ export const ScoreCard: React.FC<Props> = ({ scoreData }) => {
   const getStatusColor = () => {
     switch (scoreData.status) {
       case 'healthy':
-        return '#4caf50';
+        return (theme.colors as any).income;
       case 'warning':
-        return '#ff9800';
+        return (theme.colors as any).warning;
       case 'overspending':
-        return '#f44336';
+        return theme.colors.error;
     }
   };
 
