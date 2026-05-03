@@ -69,7 +69,14 @@ export const AccountsScreen = () => {
 
       <FAB
         icon="plus"
-        style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
+        style={[
+          styles.fab,
+          {
+            backgroundColor: theme.colors.primary,
+            bottom: (insets.bottom || 0) + 80,
+          },
+        ]}
+        color="white"
         onPress={handleAddAccount}
       />
     </View>
@@ -93,7 +100,7 @@ const defaultStyles = (theme: any) =>
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 20,
-      elevation: 4,
+      borderRadius: 28,
+      elevation: 6,
     },
   });

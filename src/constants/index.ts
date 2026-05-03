@@ -34,9 +34,6 @@ export const COLORS = [
   '#fbc02d', // Dark Yellow
   '#ffa000', // Dark Amber
   '#f57c00', // Dark Orange
-  '#e64a19', // Dark Deep Orange
-  '#5d4037', // Dark Brown
-  '#455a64', // Dark Blue Grey
 ];
 
 export const CURRENCIES = [
@@ -74,7 +71,7 @@ export const CATEGORY_ICONS = [
   'chart-line',
   'trending-up',
   'pizza',
-  'fast-food',
+  'hamburger',
   'food-apple',
   'beer',
   'glass-wine',
@@ -95,14 +92,12 @@ export const CATEGORY_ICONS = [
   'dog',
   'cat',
   'baby-carriage',
-  'stroller',
+  'baby-bottle',
   'lightbulb',
   'water',
   'shield-home',
   'hammer',
   'wrench',
-  'brush',
-  'camera',
 ];
 
 export const GOAL_ICONS = [
@@ -166,8 +161,4 @@ export const GOAL_ICONS = [
   'moon',
   'at',
   'attach',
-  'alarm',
-  'analytics',
-  'basket',
-  'battery-full',
 ];

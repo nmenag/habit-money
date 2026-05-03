@@ -16,6 +16,7 @@ import {
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
+import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../store/useStore';
 
 export const DashboardScreen = React.memo(() => {
@@ -117,7 +118,7 @@ export const DashboardScreen = React.memo(() => {
     const ratio = limit > 0 ? monthlyExpenses / limit : 0;
     const progress = Math.min(ratio, 1);
 
-    let progressColor = '#16A34A'; // New Primary Green
+    let progressColor = theme.colors.primary; // Growth Signal Green
     if (ratio > 0.9)
       progressColor = theme.colors.error; // Red
     else if (ratio >= 0.7) progressColor = '#F59E0B'; // Amber/Orange
@@ -198,7 +199,9 @@ export const DashboardScreen = React.memo(() => {
             <View style={styles.balanceRow}>
               <View>
                 <Text variant="labelSmall">{t('income')}</Text>
-                <Text style={[styles.amountText, { color: '#16A34A' }]}>
+                <Text
+                  style={[styles.amountText, { color: theme.colors.primary }]}
+                >
                   {formatCurrency(data.monthlyIncome)}
                 </Text>
               </View>
@@ -467,75 +470,22 @@ export const DashboardScreen = React.memo(() => {
             {data.recentTransactions.length > 0 ? (
               data.recentTransactions.map((tr, index) => {
                 const cat = categories.find((c) => c.id === tr.categoryId);
-                const isAdjustment =
-                  tr.note && translateName(tr.note) === t('balanceAdjustment');
                 return (
                   <View key={tr.id}>
-                    <View style={[styles.row, { paddingVertical: 12 }]}>
-                      <Avatar.Icon
-                        size={36}
-                        icon={
-                          tr.type === 'transfer'
-                            ? 'swap-horizontal'
-                            : isAdjustment
-                              ? 'scale-balance'
-                              : cat?.icon ||
-                                (tr.type === 'income' ? 'plus' : 'minus')
-                        }
-                        style={{
-                          backgroundColor:
-                            tr.type === 'transfer'
-                              ? theme.colors.tertiary
-                              : isAdjustment
-                                ? theme.colors.surfaceVariant
-                                : cat?.color ||
-                                  (tr.type === 'income'
-                                    ? '#16A34A'
-                                    : theme.colors.error),
-                        }}
-                        color={
-                          isAdjustment ? theme.colors.onSurfaceVariant : '#fff'
-                        }
-                      />
-                      <View style={{ marginLeft: 12, flex: 1 }}>
-                        <Text variant="bodyLarge" numberOfLines={1}>
-                          {tr.note &&
-                          translateName(tr.note) === t('balanceAdjustment')
-                            ? t('balanceAdjustment')
-                            : tr.note ||
-                              (tr.type === 'transfer'
-                                ? t('transfer')
-                                : translateName(cat?.name || 'Other'))}
-                        </Text>
-                        <Text
-                          variant="labelSmall"
-                          style={{ color: theme.colors.outline }}
-                        >
-                          {format(parseISO(tr.date), 'MMM dd, yyyy', {
-                            locale: language === 'es' ? esLocale : enUS,
-                          })}
-                        </Text>
-                      </View>
-                      <Text
-                        variant="bodyLarge"
-                        style={{
-                          fontWeight: 'bold',
-                          color:
-                            tr.type === 'transfer'
-                              ? theme.colors.onSurface
-                              : tr.type === 'income'
-                                ? '#16A34A'
-                                : theme.colors.error,
-                        }}
-                      >
-                        {tr.type === 'transfer'
-                          ? ''
-                          : tr.type === 'income'
-                            ? '+'
-                            : '-'}
-                        {formatCurrency(tr.amount)}
-                      </Text>
-                    </View>
+                    <TouchableOpacity
+                      onPress={() =>
+                        router.push({
+                          pathname: '/add-transaction',
+                          params: {
+                            transaction: JSON.stringify(tr),
+                            isEditing: 'true',
+                          },
+                        })
+                      }
+                      activeOpacity={0.7}
+                    >
+                      <TransactionItem transaction={tr} category={cat} />
+                    </TouchableOpacity>
                     {index < data.recentTransactions.length - 1 && <Divider />}
                   </View>
                 );
@@ -555,17 +505,9 @@ export const DashboardScreen = React.memo(() => {
             )}
           </Card.Content>
         </Card>
-
-        <View style={{ height: 20 }} />
       </ScrollView>
 
       <BannerAdComponent />
-
-      <FAB
-        icon="plus"
-        style={[styles.fab, { bottom: (insets.bottom || 0) + 120 }]}
-        onPress={() => router.push('/add-transaction')}
-      />
     </View>
   );
 });
@@ -578,35 +520,41 @@ const defaultStyles = (theme: any) =>
       flex: 1,
     },
     content: {
-      padding: 16,
-      paddingBottom: 100,
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 120,
     },
     center: {
       justifyContent: 'center',
       alignItems: 'center',
     },
     monthHeader: {
-      marginBottom: 20,
+      marginBottom: 24,
       marginTop: 8,
     },
     monthText: {
       fontWeight: '900',
       color: theme.colors.primary,
       textTransform: 'capitalize',
+      fontSize: 28,
+      letterSpacing: -0.5,
     },
     card: {
-      marginBottom: 16,
+      marginBottom: 20,
       borderRadius: 16,
+      elevation: 0,
+      backgroundColor: theme.colors.elevation.level1,
     },
     cardTitle: {
-      marginBottom: 12,
-      fontWeight: 'bold',
+      marginBottom: 16,
+      fontWeight: '800',
+      fontSize: 18,
     },
     cardHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 8,
+      marginBottom: 12,
     },
     balanceRow: {
       flexDirection: 'row',
@@ -614,31 +562,27 @@ const defaultStyles = (theme: any) =>
       alignItems: 'center',
     },
     amountText: {
-      fontSize: 18,
-      fontWeight: 'bold',
+      fontSize: 20,
+      fontWeight: '800',
     },
     progressBar: {
-      height: 8,
-      borderRadius: 4,
+      height: 10,
+      borderRadius: 5,
     },
     row: {
       flexDirection: 'row',
       alignItems: 'center',
+      minHeight: 48,
     },
     insightContent: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 8,
+      paddingVertical: 12,
     },
     insightText: {
       marginLeft: 12,
       flex: 1,
-      fontWeight: '600',
-    },
-    fab: {
-      position: 'absolute',
-      right: 16,
-      borderRadius: 20,
-      elevation: 4,
+      fontWeight: '700',
+      lineHeight: 22,
     },
   });

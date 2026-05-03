@@ -226,18 +226,26 @@ export const AddTransactionScreen = () => {
         </View>
 
         <View style={styles.inputGroup}>
-          <Tooltip title={t('amountTooltip')}>
-            <TextInput
-              label={t('amount')}
-              value={displayAmount}
-              onChangeText={handleAmountChange}
-              mode="outlined"
-              keyboardType="numeric"
-              style={styles.amountInput}
-              outlineStyle={styles.inputOutline}
-              left={<TextInput.Affix text={displayCurrency + ' '} />}
-            />
-          </Tooltip>
+          <Text variant="labelLarge" style={styles.amountLabel}>
+            {t('amount')}
+          </Text>
+          <TextInput
+            value={displayAmount}
+            onChangeText={handleAmountChange}
+            mode="flat"
+            keyboardType="numeric"
+            style={styles.amountInput}
+            underlineColor="transparent"
+            activeUnderlineColor="transparent"
+            placeholder="0"
+            left={
+              <TextInput.Affix
+                text={displayCurrency + ' '}
+                textStyle={styles.amountAffix}
+              />
+            }
+            contentStyle={styles.amountInputContent}
+          />
 
           <TextInput
             label={t('note') + ' (' + t('optional') + ')'}
@@ -251,26 +259,34 @@ export const AddTransactionScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Tooltip title={t('accountTooltip')}>
-            <Text variant="titleMedium" style={styles.sectionTitle}>
-              {type === 'expense'
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            {type === 'expense'
+              ? t('withdrawFrom')
+              : type === 'transfer'
                 ? t('withdrawFrom')
-                : type === 'transfer'
-                  ? t('withdrawFrom')
-                  : t('depositTo')}
-            </Text>
-          </Tooltip>
+                : t('depositTo')}
+          </Text>
           <View style={styles.chipsRow}>
             {accounts.map((acc) => (
               <Chip
                 key={acc.id}
                 selected={selectedAccount === acc.id}
                 onPress={() => setSelectedAccount(acc.id)}
-                style={styles.chip}
+                style={[
+                  styles.chip,
+                  selectedAccount === acc.id && {
+                    backgroundColor: acc.color || theme.colors.primary,
+                  },
+                ]}
                 mode="flat"
-                selectedColor={acc.color || theme.colors.primary}
+                selectedColor={
+                  selectedAccount === acc.id
+                    ? '#FFFFFF'
+                    : acc.color || theme.colors.primary
+                }
+                textStyle={styles.chipText}
               >
-                {`${translateName(acc.name)} (${formatCurrency(acc.currentBalance)})`}
+                {`${translateName(acc.name)}`}
               </Chip>
             ))}
           </View>
@@ -288,11 +304,21 @@ export const AddTransactionScreen = () => {
                   selected={selectedToAccount === acc.id}
                   disabled={selectedAccount === acc.id}
                   onPress={() => setSelectedToAccount(acc.id)}
-                  style={styles.chip}
+                  style={[
+                    styles.chip,
+                    selectedToAccount === acc.id && {
+                      backgroundColor: acc.color || theme.colors.primary,
+                    },
+                  ]}
                   mode="flat"
-                  selectedColor={acc.color || theme.colors.primary}
+                  selectedColor={
+                    selectedToAccount === acc.id
+                      ? '#FFFFFF'
+                      : acc.color || theme.colors.primary
+                  }
+                  textStyle={styles.chipText}
                 >
-                  {`${translateName(acc.name)} (${formatCurrency(acc.currentBalance)})`}
+                  {`${translateName(acc.name)}`}
                 </Chip>
               ))}
             </View>
@@ -301,11 +327,9 @@ export const AddTransactionScreen = () => {
 
         {type !== 'transfer' && (
           <View style={styles.section}>
-            <Tooltip title={t('categoryTooltip')}>
-              <Text variant="titleMedium" style={styles.sectionTitle}>
-                {t('categories')}
-              </Text>
-            </Tooltip>
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              {t('categories')}
+            </Text>
             <View style={styles.chipsRow}>
               {availableCategories.map((cat) => (
                 <Chip
@@ -318,9 +342,19 @@ export const AddTransactionScreen = () => {
                     );
                     if (matchingBudget) setSelectedBudget(matchingBudget.id);
                   }}
-                  style={styles.chip}
+                  style={[
+                    styles.chip,
+                    selectedCategory === cat.id && {
+                      backgroundColor: cat.color || theme.colors.primary,
+                    },
+                  ]}
                   mode="flat"
-                  selectedColor={cat.color || theme.colors.primary}
+                  selectedColor={
+                    selectedCategory === cat.id
+                      ? '#FFFFFF'
+                      : cat.color || theme.colors.primary
+                  }
+                  textStyle={styles.chipText}
                 >
                   {translateName(cat.name)}
                 </Chip>
@@ -331,33 +365,41 @@ export const AddTransactionScreen = () => {
 
         {type !== 'transfer' && budgets.length > 0 && (
           <View style={styles.section}>
-            <Tooltip title={t('budgetTooltip')}>
-              <Text variant="titleMedium" style={styles.sectionTitle}>
-                {t('budgets')}
-              </Text>
-            </Tooltip>
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              {t('budgets')}
+            </Text>
             <View style={styles.chipsRow}>
-              {budgets.map((bud) => (
-                <Chip
-                  key={bud.id}
-                  selected={selectedBudget === bud.id}
-                  onPress={() =>
-                    setSelectedBudget(selectedBudget === bud.id ? '' : bud.id)
-                  }
-                  style={styles.chip}
-                  mode="flat"
-                  selectedColor={
-                    bud.color ||
-                    categories.find((c) => c.id === bud.categoryId)?.color ||
-                    theme.colors.primary
-                  }
-                >
-                  {translateName(
-                    categories.find((c) => c.id === bud.categoryId)?.name ||
-                      t('budgets'),
-                  )}
-                </Chip>
-              ))}
+              {budgets.map((bud) => {
+                const budColor =
+                  bud.color ||
+                  categories.find((c) => c.id === bud.categoryId)?.color ||
+                  theme.colors.primary;
+                return (
+                  <Chip
+                    key={bud.id}
+                    selected={selectedBudget === bud.id}
+                    onPress={() =>
+                      setSelectedBudget(selectedBudget === bud.id ? '' : bud.id)
+                    }
+                    style={[
+                      styles.chip,
+                      selectedBudget === bud.id && {
+                        backgroundColor: budColor,
+                      },
+                    ]}
+                    mode="flat"
+                    selectedColor={
+                      selectedBudget === bud.id ? '#FFFFFF' : budColor
+                    }
+                    textStyle={styles.chipText}
+                  >
+                    {translateName(
+                      categories.find((c) => c.id === bud.categoryId)?.name ||
+                        t('budgets'),
+                    )}
+                  </Chip>
+                );
+              })}
             </View>
           </View>
         )}
@@ -378,6 +420,7 @@ export const AddTransactionScreen = () => {
               mode="outlined"
               onPress={handleDuplicate}
               style={styles.actionBtn}
+              contentStyle={styles.actionBtnContent}
               icon="content-copy"
             >
               {t('duplicate')}
@@ -386,6 +429,7 @@ export const AddTransactionScreen = () => {
               mode="outlined"
               onPress={handleDelete}
               style={styles.actionBtn}
+              contentStyle={styles.actionBtnContent}
               textColor={theme.colors.error}
               icon="trash-can"
             >
@@ -403,61 +447,97 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingTop: 24,
   },
   segmentedContainer: {
-    marginBottom: 24,
+    marginBottom: 32,
   },
   inputGroup: {
-    marginBottom: 24,
+    marginBottom: 32,
+  },
+  amountLabel: {
+    opacity: 0.6,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    fontSize: 12,
+    fontWeight: '800',
+    marginBottom: 8,
   },
   amountInput: {
-    marginBottom: 16,
     backgroundColor: 'transparent',
+    fontSize: 48,
+    fontWeight: '900',
+    marginBottom: 24,
+    height: 80,
+  },
+  amountInputContent: {
+    fontWeight: '900',
+    paddingLeft: 0,
+  },
+  amountAffix: {
+    fontSize: 24,
+    fontWeight: '700',
+    opacity: 0.5,
   },
   input: {
     backgroundColor: 'transparent',
   },
   inputOutline: {
     borderRadius: 16,
+    borderWidth: 1.5,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 32,
   },
   sectionTitle: {
     fontWeight: '800',
     marginBottom: 16,
-    marginLeft: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontSize: 14,
+    opacity: 0.6,
   },
   chipsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: 12,
   },
   chip: {
-    marginRight: 8,
-    marginBottom: 8,
     borderRadius: 12,
+    minHeight: 48,
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  chipText: {
+    fontSize: 14,
+    fontWeight: '700',
   },
   saveBtn: {
-    borderRadius: 20,
-    marginTop: 32,
-    elevation: 2,
+    borderRadius: 16,
+    marginTop: 16,
+    elevation: 0,
   },
   saveBtnContent: {
-    height: 56,
+    height: 64,
   },
   saveBtnLabel: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   editActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 12,
     marginTop: 16,
   },
   actionBtn: {
     flex: 1,
-    marginHorizontal: 4,
     borderRadius: 16,
+    borderWidth: 1.5,
+  },
+  actionBtnContent: {
+    height: 56,
   },
 });

@@ -10,7 +10,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Chip, FAB, Menu, Searchbar, Text, useTheme } from 'react-native-paper';
+import {
+  Chip,
+  Divider,
+  FAB,
+  Menu,
+  Searchbar,
+  Text,
+  useTheme,
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { FilterBar } from '../components/FilterBar';
@@ -274,7 +282,7 @@ export const TransactionsScreen = () => {
                 variant="labelSmall"
                 style={[
                   styles.sectionHeaderText,
-                  { color: theme.colors.onSurfaceVariant },
+                  { color: theme.colors.primary },
                 ]}
               >
                 {format(parseISO(group.date), 'EEEE, MMMM d', {
@@ -282,16 +290,20 @@ export const TransactionsScreen = () => {
                 })}
               </Text>
             </View>
-            {group.items.map((tx) => {
+            {group.items.map((tx, index) => {
               const category = categories.find((c) => c.id === tx.categoryId);
               return (
-                <TouchableOpacity
-                  key={tx.id}
-                  onPress={() => handleTransactionPress(tx)}
-                  activeOpacity={0.7}
-                >
-                  <TransactionItem transaction={tx} category={category} />
-                </TouchableOpacity>
+                <View key={tx.id}>
+                  <TouchableOpacity
+                    onPress={() => handleTransactionPress(tx)}
+                    activeOpacity={0.7}
+                  >
+                    <TransactionItem transaction={tx} category={category} />
+                  </TouchableOpacity>
+                  {index < group.items.length - 1 && (
+                    <Divider style={styles.divider} />
+                  )}
+                </View>
               );
             })}
           </View>
@@ -324,17 +336,6 @@ export const TransactionsScreen = () => {
       />
 
       <BannerAdComponent />
-
-      <FAB
-        icon="plus"
-        style={[styles.fab, { bottom: (insets.bottom || 0) + 120 }]}
-        onPress={() =>
-          router.push({
-            pathname: '/add-transaction',
-            params: { accountId: selectedAccountId || '' },
-          })
-        }
-      />
     </View>
   );
 };
@@ -343,43 +344,48 @@ const defaultStyles = (theme: any) =>
   StyleSheet.create({
     container: { flex: 1 },
     searchRow: {
-      paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingHorizontal: 20,
+      paddingVertical: 12,
     },
     searchbar: {
-      height: 44,
-      borderRadius: 12,
+      height: 48,
+      borderRadius: 16,
     },
     secondaryFiltersRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      borderBottomWidth: 1,
-      paddingBottom: 8,
+      paddingBottom: 12,
     },
     chipsScroll: {
-      paddingHorizontal: 16,
-      paddingTop: 4,
-      gap: 8,
+      paddingHorizontal: 20,
+      gap: 12,
       flexDirection: 'row',
       alignItems: 'center',
       flexGrow: 1,
     },
     filterChip: {
-      height: 32,
+      height: 40,
+      borderRadius: 12,
     },
     countBadge: {
-      paddingHorizontal: 10,
+      paddingHorizontal: 16,
       justifyContent: 'center',
     },
     sectionHeader: {
       paddingHorizontal: 16,
-      paddingTop: 12,
-      paddingBottom: 4,
+      paddingTop: 24,
+      paddingBottom: 8,
     },
     sectionHeaderText: {
       textTransform: 'uppercase',
-      letterSpacing: 0.8,
-      fontWeight: '800',
+      letterSpacing: 1,
+      fontWeight: '900',
+      fontSize: 11,
+    },
+    divider: {
+      backgroundColor: theme.colors.outlineVariant,
+      opacity: 0.5,
+      marginHorizontal: 16,
     },
     empty: {
       padding: 60,
@@ -393,11 +399,5 @@ const defaultStyles = (theme: any) =>
     },
     clearLink: {
       paddingVertical: 4,
-    },
-    fab: {
-      position: 'absolute',
-      right: 16,
-      borderRadius: 20,
-      elevation: 4,
     },
   });

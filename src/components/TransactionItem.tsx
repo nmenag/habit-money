@@ -36,7 +36,7 @@ export const TransactionItem: React.FC<Props> = memo(
         return (
           <Avatar.Icon
             {...props}
-            size={40}
+            size={44}
             icon="swap-horizontal"
             style={[styles.avatar, { backgroundColor: theme.colors.tertiary }]}
             color="#fff"
@@ -48,7 +48,7 @@ export const TransactionItem: React.FC<Props> = memo(
         return (
           <Avatar.Icon
             {...props}
-            size={40}
+            size={44}
             icon="scale-balance"
             style={[
               styles.avatar,
@@ -59,22 +59,16 @@ export const TransactionItem: React.FC<Props> = memo(
         );
       }
 
-      const displayName = category?.name ? translateName(category.name) : '?';
-      const firstLetter =
-        displayName && displayName.length > 0
-          ? displayName[0].toUpperCase()
-          : '?';
-
       return (
-        <Avatar.Text
+        <Avatar.Icon
           {...props}
-          size={40}
-          label={firstLetter}
+          size={44}
+          icon={category?.icon || 'tag'}
           style={[
             styles.avatar,
-            { backgroundColor: category?.color || theme.colors.surfaceVariant },
+            { backgroundColor: category?.color || theme.colors.primary },
           ]}
-          labelStyle={{ color: '#fff' }}
+          color="#fff"
         />
       );
     };
@@ -91,7 +85,7 @@ export const TransactionItem: React.FC<Props> = memo(
                 color: isTransfer
                   ? theme.colors.onSurface
                   : isIncome
-                    ? '#16A34A'
+                    ? theme.colors.primary
                     : theme.colors.error,
               },
             ]}
@@ -120,6 +114,7 @@ export const TransactionItem: React.FC<Props> = memo(
         right={RightContent}
         style={styles.listItem}
         titleStyle={styles.capitalize}
+        descriptionStyle={styles.description}
       />
     );
   },
@@ -129,23 +124,27 @@ TransactionItem.displayName = 'TransactionItem';
 
 const styles = StyleSheet.create({
   listItem: {
-    paddingVertical: 8,
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
   },
   rightContainer: {
     justifyContent: 'center',
-    paddingRight: 8,
+    paddingRight: 4,
   },
   avatar: {
-    borderRadius: 12,
+    borderRadius: 14,
   },
   amount: {
-    fontWeight: '700',
+    fontWeight: '800',
+    fontSize: 17,
   },
   capitalize: {
     textTransform: 'capitalize',
-    fontWeight: '700',
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  description: {
+    fontSize: 13,
+    opacity: 0.6,
   },
 });

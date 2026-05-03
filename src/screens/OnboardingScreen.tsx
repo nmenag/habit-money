@@ -64,34 +64,24 @@ export const OnboardingScreen = () => {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <View style={styles.content}>
-        <Surface style={styles.imageContainer} elevation={0}>
+        <View style={styles.header}>
           <Image
             source={require('../../assets/icon.png')}
             style={styles.logoImage}
           />
-        </Surface>
+          <Text variant="headlineLarge" style={styles.title}>
+            {t('onboardingWelcome')}
+          </Text>
+          <Text variant="bodyLarge" style={styles.description}>
+            {t('onboardingDesc')}
+          </Text>
+        </View>
 
-        <Text variant="headlineLarge" style={styles.title}>
-          {t('onboardingWelcome')}
-        </Text>
-
-        <Text variant="bodyLarge" style={styles.description}>
-          {t('onboardingDesc')}
-        </Text>
-
-        <Surface style={styles.settingsCard} elevation={1}>
-          <View style={styles.settingRow}>
-            <View style={{ flex: 1 }}>
-              <Text
-                variant="labelLarge"
-                style={{ color: theme.colors.secondary }}
-              >
-                {t('detectedLanguage')}
-              </Text>
-              <Text variant="titleMedium">
-                {detectedLang === 'es' ? t('spanish') : t('english')}
-              </Text>
-            </View>
+        <View style={styles.settingsSection}>
+          <View style={styles.settingItem}>
+            <Text variant="labelLarge" style={styles.settingLabel}>
+              {t('detectedLanguage')}
+            </Text>
             <Menu
               visible={langMenuVisible}
               onDismiss={() => setLangMenuVisible(false)}
@@ -99,7 +89,8 @@ export const OnboardingScreen = () => {
                 <Button
                   mode="outlined"
                   onPress={() => setLangMenuVisible(true)}
-                  compact
+                  style={styles.pickerButton}
+                  contentStyle={styles.pickerButtonContent}
                 >
                   {detectedLang === 'es' ? t('spanish') : t('english')}
                 </Button>
@@ -116,16 +107,10 @@ export const OnboardingScreen = () => {
             </Menu>
           </View>
 
-          <View style={styles.settingRow}>
-            <View style={{ flex: 1 }}>
-              <Text
-                variant="labelLarge"
-                style={{ color: theme.colors.secondary }}
-              >
-                {t('detectedCurrency')}
-              </Text>
-              <Text variant="titleMedium">{detectedCurrency}</Text>
-            </View>
+          <View style={styles.settingItem}>
+            <Text variant="labelLarge" style={styles.settingLabel}>
+              {t('detectedCurrency')}
+            </Text>
             <Menu
               visible={currencyMenuVisible}
               onDismiss={() => setCurrencyMenuVisible(false)}
@@ -133,7 +118,8 @@ export const OnboardingScreen = () => {
                 <Button
                   mode="outlined"
                   onPress={() => setCurrencyMenuVisible(true)}
-                  compact
+                  style={styles.pickerButton}
+                  contentStyle={styles.pickerButtonContent}
                 >
                   {detectedCurrency}
                 </Button>
@@ -144,20 +130,14 @@ export const OnboardingScreen = () => {
               <Menu.Item onPress={() => selectCurrency('EUR')} title="EUR" />
             </Menu>
           </View>
-        </Surface>
+        </View>
       </View>
 
       <View style={styles.footer}>
-        <Text
-          variant="bodySmall"
-          style={{ textAlign: 'center', opacity: 0.7, marginBottom: 16 }}
-        >
+        <Text variant="bodySmall" style={styles.termsText}>
           {t('agreeToTermsPrefix')}
           <Text
-            style={{
-              textDecorationLine: 'underline',
-              color: theme.colors.primary,
-            }}
+            style={styles.link}
             onPress={() =>
               Linking.openURL('https://nmenag.github.io/fin-habit/privacy.html')
             }
@@ -166,10 +146,7 @@ export const OnboardingScreen = () => {
           </Text>
           {t('agreeToTermsAnd')}
           <Text
-            style={{
-              textDecorationLine: 'underline',
-              color: theme.colors.primary,
-            }}
+            style={styles.link}
             onPress={() =>
               Linking.openURL('https://nmenag.github.io/fin-habit/terms.html')
             }
@@ -197,57 +174,76 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 80,
   },
-  imageContainer: {
-    marginBottom: 40,
+  header: {
     alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 48,
   },
   logoImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 28,
-  },
-  logoText: {
-    fontSize: 48,
-    fontWeight: 'bold',
+    width: 100,
+    height: 100,
+    borderRadius: 24,
+    marginBottom: 24,
   },
   title: {
     textAlign: 'center',
-    fontWeight: 'bold',
-    marginBottom: 16,
+    fontWeight: '800',
+    marginBottom: 12,
+    letterSpacing: -0.5,
   },
   description: {
     textAlign: 'center',
     opacity: 0.7,
-    marginBottom: 40,
-    paddingHorizontal: 20,
+    lineHeight: 24,
   },
-  settingsCard: {
-    width: '100%',
-    padding: 20,
-    borderRadius: 16,
-    gap: 20,
+  settingsSection: {
+    gap: 24,
   },
-  settingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  settingItem: {
+    gap: 8,
+  },
+  settingLabel: {
+    opacity: 0.6,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  pickerButton: {
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  pickerButtonContent: {
+    height: 56,
+    justifyContent: 'flex-start',
   },
   footer: {
     padding: 24,
     paddingBottom: 48,
   },
+  termsText: {
+    textAlign: 'center',
+    opacity: 0.5,
+    marginBottom: 20,
+    lineHeight: 18,
+  },
+  link: {
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
   button: {
-    borderRadius: 12,
+    borderRadius: 16,
+    elevation: 0,
   },
   buttonContent: {
-    height: 56,
+    height: 64,
   },
   buttonLabel: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
 });
