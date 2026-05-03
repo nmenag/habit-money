@@ -69,7 +69,14 @@ export const AccountsScreen = () => {
 
       <FAB
         icon="plus"
-        style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
+        style={[
+          styles.fab,
+          {
+            bottom: (insets.bottom || 0) + 80,
+            backgroundColor: theme.colors.primary,
+          },
+        ]}
+        color="#fff"
         onPress={handleAddAccount}
       />
     </View>

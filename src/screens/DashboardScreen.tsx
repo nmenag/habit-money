@@ -563,7 +563,14 @@ export const DashboardScreen = React.memo(() => {
 
       <FAB
         icon="plus"
-        style={[styles.fab, { bottom: (insets.bottom || 0) + 120 }]}
+        style={[
+          styles.fab,
+          {
+            bottom: (insets.bottom || 0) + 120,
+            backgroundColor: theme.colors.primary,
+          },
+        ]}
+        color="#fff"
         onPress={() => router.push('/add-transaction')}
       />
     </View>
