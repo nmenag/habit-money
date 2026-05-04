@@ -1,5 +1,5 @@
 import { getDb } from '../../db/schema';
-import { MonthlyMetrics, CategoryExpense } from './types';
+import { CategoryExpense, MonthlyMetrics } from './types';
 
 export class AnalyticsService {
   private static getMonthDateRange(offset: number = 0) {
@@ -10,7 +10,6 @@ export class AnalyticsService {
     const month = String(date.getMonth() + 1).padStart(2, '0');
 
     const start = `${year}-${month}-01T00:00:00.000Z`;
-    // Last day of month
     const lastDay = new Date(year, date.getMonth() + 1, 0).getDate();
     const end = `${year}-${month}-${String(lastDay).padStart(2, '0')}T23:59:59.999Z`;
 
@@ -21,18 +20,21 @@ export class AnalyticsService {
     const db = getDb();
     const { start, end, month } = this.getMonthDateRange(offset);
 
-    const totals = db.getFirstSync<{ income: number; expenses: number }>(
+    const totals = (await db.getFirstAsync<{
+      income: number;
+      expenses: number;
+    }>(
       `
-      SELECT 
+      SELECT
         SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
         SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expenses
       FROM transactions
       WHERE date >= ? AND date <= ?
     `,
       [start, end],
-    ) || { income: 0, expenses: 0 };
+    )) || { income: 0, expenses: 0 };
 
-    const topCategory = db.getFirstSync<{
+    const topCategory = await db.getFirstAsync<{
       id: string;
       name: string;
       amount: number;
@@ -70,16 +72,16 @@ export class AnalyticsService {
     const db = getDb();
     const { start, end } = this.getMonthDateRange(offset);
 
-    const rows = db.getAllSync<{
+    const rows = await db.getAllAsync<{
       categoryId: string;
       categoryName: string;
       amount: number;
       color: string;
     }>(
       `
-      SELECT 
-        c.id as categoryId, 
-        c.name as categoryName, 
+      SELECT
+        c.id as categoryId,
+        c.name as categoryName,
         SUM(t.amount) as amount,
         MAX(c.color) as color
       FROM transactions t
@@ -103,7 +105,7 @@ export class AnalyticsService {
     const db = getDb();
     const { start, end } = this.getMonthDateRange(offset);
 
-    const result = db.getFirstSync<{ count: number }>(
+    const result = await db.getFirstAsync<{ count: number }>(
       `
       SELECT COUNT(DISTINCT substr(date, 1, 10)) as count
       FROM transactions
@@ -119,22 +121,22 @@ export class AnalyticsService {
     const db = getDb();
     const { start, end } = this.getMonthDateRange(0);
 
-    const rows = db.getAllSync<{
+    const rows = await db.getAllAsync<{
       categoryId: string;
       categoryName: string;
       amount: number;
       spent: number;
     }>(
       `
-      SELECT 
-        b.categoryId, 
-        c.name as categoryName, 
+      SELECT
+        b.categoryId,
+        c.name as categoryName,
         b.amount,
         COALESCE(SUM(t.amount), 0) as spent
       FROM budgets b
       JOIN categories c ON b.categoryId = c.id
-      LEFT JOIN transactions t ON t.categoryId = b.categoryId 
-        AND t.type = 'expense' 
+      LEFT JOIN transactions t ON t.categoryId = b.categoryId
+        AND t.type = 'expense'
         AND t.date >= ? AND t.date <= ?
       GROUP BY b.categoryId
     `,

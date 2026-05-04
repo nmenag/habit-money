@@ -14,7 +14,6 @@ export const AD_UNIT_IDS = {
   }),
 };
 
-// Use TestIds.BANNER and TestIds.INTERSTITIAL for development
 export const DEV_AD_UNIT_IDS = {
   BANNER: TestIds.BANNER,
   INTERSTITIAL: TestIds.INTERSTITIAL,

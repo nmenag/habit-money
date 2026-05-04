@@ -215,7 +215,11 @@ export const AddTransactionScreen = () => {
                 label: t('expense'),
                 checkedColor: theme.colors.error,
               },
-              { value: 'income', label: t('income'), checkedColor: '#4caf50' },
+              {
+                value: 'income',
+                label: t('income'),
+                checkedColor: (theme.colors as any).income,
+              },
               {
                 value: 'transfer',
                 label: t('transfer'),

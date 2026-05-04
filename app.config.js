@@ -33,7 +33,7 @@ module.exports = {
   expo: {
     name: getAppName(),
     slug: 'fin-habit',
-    version: '1.1.1',
+    version: '1.1.2',
     orientation: 'portrait',
     icon: getIcon(),
     scheme: 'habitmoney',
@@ -106,8 +106,8 @@ module.exports = {
       [
         'expo-notifications',
         {
-          icon: './assets/icon.png',
-          color: '#16A34A',
+          icon: './assets/images/notification-icon.png',
+          color: '#22C55E',
         },
       ],
     ],

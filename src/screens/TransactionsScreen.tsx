@@ -327,7 +327,14 @@ export const TransactionsScreen = () => {
 
       <FAB
         icon="plus"
-        style={[styles.fab, { bottom: (insets.bottom || 0) + 120 }]}
+        style={[
+          styles.fab,
+          {
+            bottom: (insets.bottom || 0) + 120,
+            backgroundColor: theme.colors.primary,
+          },
+        ]}
+        color="#fff"
         onPress={() =>
           router.push({
             pathname: '/add-transaction',
@@ -397,7 +404,7 @@ const defaultStyles = (theme: any) =>
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 20,
-      elevation: 4,
+      borderRadius: 16,
+      elevation: 6,
     },
   });

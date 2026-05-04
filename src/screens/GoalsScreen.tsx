@@ -8,6 +8,7 @@ import DraggableFlatList, {
 } from 'react-native-draggable-flatlist';
 import { Card, FAB, ProgressBar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 import { Goal, useStore, useTranslation } from '../store/useStore';
 
 export const GoalsScreen = () => {
@@ -125,7 +126,7 @@ export const GoalsScreen = () => {
         renderItem={renderItem}
         contentContainerStyle={[
           styles.listContent,
-          { paddingBottom: insets.bottom + 100 },
+          { paddingBottom: insets.bottom + 140 },
         ]}
         ListEmptyComponent={
           <View style={styles.empty}>
@@ -139,9 +140,19 @@ export const GoalsScreen = () => {
           </View>
         }
       />
+
+      <BannerAdComponent />
+
       <FAB
         icon="plus"
-        style={[styles.fab, { bottom: (insets.bottom || 0) + 80 }]}
+        style={[
+          styles.fab,
+          {
+            bottom: (insets.bottom || 0) + 120,
+            backgroundColor: theme.colors.primary,
+          },
+        ]}
+        color="#fff"
         onPress={() => router.push('/add-goal')}
       />
     </View>
@@ -241,7 +252,7 @@ const defaultStyles = (theme: any) =>
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 20,
-      elevation: 4,
+      borderRadius: 16,
+      elevation: 6,
     },
   });

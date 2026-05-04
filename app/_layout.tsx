@@ -1,25 +1,24 @@
-import { Stack, usePathname } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, useColorScheme, View } from 'react-native';
-import mobileAds from 'react-native-google-mobile-ads';
-import { PaperProvider, adaptNavigationTheme } from 'react-native-paper';
 import {
   DarkTheme as NavigationDarkTheme,
   DefaultTheme as NavigationDefaultTheme,
   ThemeProvider,
 } from '@react-navigation/native';
+import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { registerTranslation, en, es } from 'react-native-paper-dates';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import mobileAds from 'react-native-google-mobile-ads';
+import { adaptNavigationTheme, PaperProvider } from 'react-native-paper';
+import { en, es, registerTranslation } from 'react-native-paper-dates';
 
+import { interstitialManager } from '../src/ads/InterstitialManager';
 import { initDb } from '../src/db/schema';
+import { NotificationService } from '../src/services/NotificationService';
 import { useStore, useTranslation } from '../src/store/useStore';
 import { darkTheme, lightTheme } from '../src/theme/theme';
-import { interstitialManager } from '../src/ads/InterstitialManager';
 import { checkBackupReminder } from '../src/utils/dataBackup';
-import { NotificationService } from '../src/services/NotificationService';
 
-// Register locales for the date picker
 registerTranslation('en', en);
 registerTranslation('es', es);
 

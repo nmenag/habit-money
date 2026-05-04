@@ -12,6 +12,8 @@ import { AnalyticsReport } from '../services/analytics/types';
 import { getLocalDateString } from '../utils/dateUtils';
 import { formatCurrency as formatCurrencyUtil } from '../utils/formatters';
 
+let analyticsDebounceTimer: any = null;
+
 export type AccountType = 'cash' | 'bank' | 'credit';
 export type TransactionType = 'income' | 'expense' | 'transfer';
 
@@ -238,6 +240,7 @@ export const useStore = create<AppState>((set, get) => ({
     setTimeout(() => {
       get().loadBudgets();
       get().loadGoals();
+      get().refreshAnalytics();
     }, 100);
   },
 
@@ -808,13 +811,21 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   refreshAnalytics: async () => {
-    try {
-      const { language } = get();
-      const report = await AnalyticsManager.generateFullReport(language);
-      set({ analyticsReport: report });
-    } catch (error) {
-      console.error('refreshAnalytics Error:', error);
+    if (analyticsDebounceTimer) {
+      clearTimeout(analyticsDebounceTimer);
     }
+
+    analyticsDebounceTimer = setTimeout(async () => {
+      try {
+        const { language } = get();
+        const report = await AnalyticsManager.generateFullReport(language);
+        set({ analyticsReport: report });
+        analyticsDebounceTimer = null;
+      } catch (error) {
+        console.error('refreshAnalytics Error:', error);
+        analyticsDebounceTimer = null;
+      }
+    }, 300); // 300ms debounce for UI responsiveness
   },
 
   updateAccountsOrder: (accounts) => {

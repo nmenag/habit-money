@@ -126,7 +126,11 @@ export const FilterBar: React.FC = React.memo(() => {
                 <Ionicons
                   name="calendar-outline"
                   size={12}
-                  color={isActive ? '#fff' : theme.colors.onSurfaceVariant}
+                  color={
+                    isActive
+                      ? theme.colors.onPrimary
+                      : theme.colors.onSurfaceVariant
+                  }
                   style={{ marginRight: 4 }}
                 />
               )}
@@ -134,7 +138,11 @@ export const FilterBar: React.FC = React.memo(() => {
                 <Ionicons
                   name="infinite-outline"
                   size={12}
-                  color={isActive ? '#fff' : theme.colors.onSurfaceVariant}
+                  color={
+                    isActive
+                      ? theme.colors.onPrimary
+                      : theme.colors.onSurfaceVariant
+                  }
                   style={{ marginRight: 4 }}
                 />
               )}
@@ -142,7 +150,9 @@ export const FilterBar: React.FC = React.memo(() => {
               <Text
                 variant="labelSmall"
                 style={{
-                  color: isActive ? '#fff' : theme.colors.onSurfaceVariant,
+                  color: isActive
+                    ? theme.colors.onPrimary
+                    : theme.colors.onSurfaceVariant,
                   fontWeight: isActive ? '700' : '500',
                   fontSize: 12,
                 }}
@@ -162,7 +172,7 @@ export const FilterBar: React.FC = React.memo(() => {
                   <Ionicons
                     name="close-circle"
                     size={14}
-                    color="rgba(255,255,255,0.9)"
+                    color={theme.colors.onPrimary}
                   />
                 </TouchableOpacity>
               )}
