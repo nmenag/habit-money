@@ -16,6 +16,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 import {
   Category,
   TransactionType,
@@ -142,7 +143,10 @@ export const CategoriesScreen = () => {
           );
           updateCategoriesOrder([...data, ...otherCategories]);
         }}
-        contentContainerStyle={[styles.listContent, { paddingBottom: 100 }]}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: insets.bottom + 140 },
+        ]}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Ionicons
@@ -159,12 +163,15 @@ export const CategoriesScreen = () => {
           </View>
         }
       />
+
+      <BannerAdComponent />
+
       <FAB
         icon="plus"
         style={[
           styles.fab,
           {
-            bottom: (insets.bottom || 0) + 80,
+            bottom: (insets.bottom || 0) + 120,
             backgroundColor: theme.colors.primary,
           },
         ]}
@@ -223,7 +230,7 @@ const defaultStyles = (theme: any) =>
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 20,
-      elevation: 4,
+      borderRadius: 16,
+      elevation: 6,
     },
   });

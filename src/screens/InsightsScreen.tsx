@@ -8,6 +8,7 @@ import { FilterBar } from '../components/FilterBar';
 import { chartColors } from '../theme/theme';
 import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 import { isInRange } from '../utils/dateFilters';
 
 const screenWidth = Dimensions.get('window').width;
@@ -513,6 +514,7 @@ export const InsightsScreen = () => {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+      <BannerAdComponent />
     </View>
   );
 };

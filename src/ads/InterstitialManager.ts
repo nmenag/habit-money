@@ -1,4 +1,4 @@
-import { InterstitialAd, AdEventType } from 'react-native-google-mobile-ads';
+import { AdEventType, InterstitialAd } from 'react-native-google-mobile-ads';
 import { AdService } from './AdService';
 
 class InterstitialManager {
@@ -24,7 +24,7 @@ class InterstitialManager {
 
     this.interstitial.addAdEventListener(AdEventType.CLOSED, () => {
       this.loaded = false;
-      this.load(); // Reload after closing
+      this.load();
     });
 
     this.interstitial.addAdEventListener(AdEventType.ERROR, (error) => {
@@ -47,11 +47,11 @@ class InterstitialManager {
         await this.interstitial.show();
       } catch (error) {
         console.error('Failed to show Interstitial Ad:', error);
-        this.load(); // Try to reload
+        this.load();
       }
     } else {
       console.log('Interstitial Ad not loaded yet');
-      this.load(); // Ensure it's loading for next time
+      this.load();
     }
   }
 

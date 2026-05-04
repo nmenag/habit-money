@@ -10,6 +10,7 @@ export const BannerAdComponent = () => {
   const styles = defaultStyles(theme);
   const isPremiumUser = useStore((s) => s.isPremiumUser);
   const [showAd, setShowAd] = React.useState(false);
+  const [loadError, setLoadError] = React.useState(false);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -18,20 +19,23 @@ export const BannerAdComponent = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  if (isPremiumUser || !showAd) {
-    return <View style={{ height: 0 }} />;
+  const adUnitId = AdService.getBannerId();
+
+  if (isPremiumUser || !showAd || loadError || !adUnitId) {
+    return null;
   }
 
   return (
     <View style={styles.container}>
       <BannerAd
-        unitId={AdService.getBannerId()}
+        unitId={adUnitId}
         size={BannerAdSize.LARGE_ANCHORED_ADAPTIVE_BANNER}
         requestOptions={{
           requestNonPersonalizedAdsOnly: true,
         }}
         onAdFailedToLoad={(error) => {
           if (__DEV__) console.warn('Banner Ad failed to load: ', error);
+          setLoadError(true);
         }}
       />
     </View>

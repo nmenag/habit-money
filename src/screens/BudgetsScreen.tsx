@@ -14,6 +14,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 import { Budget, useStore, useTranslation } from '../store/useStore';
 
 export const BudgetsScreen = () => {
@@ -138,7 +139,10 @@ export const BudgetsScreen = () => {
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         onDragEnd={({ data }) => updateBudgetsOrder(data)}
-        contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: insets.bottom + 140 },
+        ]}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text
@@ -151,12 +155,14 @@ export const BudgetsScreen = () => {
         }
       />
 
+      <BannerAdComponent />
+
       <FAB
         icon="plus"
         style={[
           styles.fab,
           {
-            bottom: (insets.bottom || 0) + 80,
+            bottom: (insets.bottom || 0) + 120,
             backgroundColor: theme.colors.primary,
           },
         ]}
@@ -171,6 +177,9 @@ const defaultStyles = (theme: any) =>
   StyleSheet.create({
     container: {
       flex: 1,
+    },
+    listContent: {
+      paddingTop: 8,
     },
     card: {
       marginVertical: 8,
@@ -226,7 +235,7 @@ const defaultStyles = (theme: any) =>
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 20,
-      elevation: 4,
+      borderRadius: 16,
+      elevation: 6,
     },
   });
