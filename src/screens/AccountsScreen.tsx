@@ -31,7 +31,10 @@ export const AccountsScreen = () => {
         data={accounts}
         keyExtractor={(item) => item.id}
         onDragEnd={({ data }) => updateAccountsOrder(data)}
-        contentContainerStyle={{ paddingBottom: 100, paddingTop: 12 }}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: insets.bottom + 100 },
+        ]}
         renderItem={({ item, drag, isActive }: RenderItemParams<Account>) => (
           <ScaleDecorator>
             <AccountCard
@@ -87,6 +90,9 @@ const defaultStyles = (theme: any) =>
   StyleSheet.create({
     container: {
       flex: 1,
+    },
+    listContent: {
+      padding: 16,
     },
     empty: {
       padding: 40,

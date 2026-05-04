@@ -1,8 +1,9 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
-import { Avatar, Card, IconButton, Text, useTheme } from 'react-native-paper';
+import { Card, IconButton, Text, useTheme } from 'react-native-paper';
 import { Account, useStore, useTranslation } from '../store/useStore';
-import { spacing, lightTheme, darkTheme, AppTheme } from '../theme/theme';
+import { AppTheme } from '../theme/theme';
 
 interface Props {
   account: Account;
@@ -40,13 +41,13 @@ export const AccountCard: React.FC<Props> = ({
   const getAccountIcon = (type: string) => {
     switch (type) {
       case 'cash':
-        return 'cash';
+        return 'cash-outline';
       case 'bank':
-        return 'bank';
+        return 'business-outline';
       case 'credit':
-        return 'credit-card-outline';
+        return 'card-outline';
       default:
-        return 'wallet';
+        return 'wallet-outline';
     }
   };
 
@@ -57,9 +58,7 @@ export const AccountCard: React.FC<Props> = ({
         {
           backgroundColor: isActive
             ? theme.colors.elevation.level3
-            : account.color
-              ? `${account.color}0A` // Subtle background tint for structural grouping
-              : theme.colors.surface,
+            : theme.colors.surface,
         },
       ]}
       mode="elevated"
@@ -70,38 +69,46 @@ export const AccountCard: React.FC<Props> = ({
       accessibilityRole="button"
     >
       <Card.Content style={styles.cardContent}>
-        <Avatar.Icon
-          size={44}
-          icon={getAccountIcon(account.type)}
-          style={[
-            styles.avatar,
-            { backgroundColor: account.color || theme.colors.primaryContainer },
-          ]}
-          color={theme.colors.onPrimary}
-        />
-        <View style={styles.content}>
-          <Text variant="labelMedium" style={styles.type}>
-            {t(account.type).toUpperCase()}
-          </Text>
-          <Text variant="titleMedium" style={styles.name}>
-            {translateName(account.name)}
-          </Text>
-        </View>
-        <View style={styles.rightSection}>
-          <Text
-            variant="titleLarge"
+        <View style={styles.cardHeader}>
+          <View
             style={[
-              styles.balance,
-              {
-                color:
-                  account.currentBalance < 0
-                    ? theme.colors.error
-                    : theme.colors.onSurface,
-              },
+              styles.iconContainer,
+              { backgroundColor: account.color || theme.colors.primary },
             ]}
           >
-            {formatCurrency(account.currentBalance, account.currency)}
-          </Text>
+            <Ionicons
+              name={getAccountIcon(account.type) as any}
+              size={24}
+              color="#fff"
+            />
+          </View>
+          <View style={styles.textContainer}>
+            <Text variant="titleMedium" style={styles.name}>
+              {translateName(account.name)}
+            </Text>
+            <Text
+              variant="labelMedium"
+              style={[styles.typeText, { color: theme.colors.outline }]}
+            >
+              {t(account.type).toUpperCase()}
+            </Text>
+          </View>
+          <View style={styles.balanceContainer}>
+            <Text
+              variant="titleMedium"
+              style={[
+                styles.balanceText,
+                {
+                  color:
+                    account.currentBalance < 0
+                      ? theme.colors.error
+                      : theme.colors.onSurface,
+                },
+              ]}
+            >
+              {formatCurrency(account.currentBalance, account.currency)}
+            </Text>
+          </View>
           {onDelete && (
             <IconButton
               icon="trash-can-outline"
@@ -123,40 +130,47 @@ export const AccountCard: React.FC<Props> = ({
 const defaultStyles = (theme: AppTheme) =>
   StyleSheet.create({
     card: {
-      marginVertical: spacing.xs,
-      marginHorizontal: spacing.md,
-      borderRadius: theme.roundness,
-      backgroundColor: theme.colors.surface,
+      marginBottom: 16,
+      borderRadius: 16,
       overflow: 'hidden',
     },
     cardContent: {
+      padding: 16,
+    },
+    cardHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: spacing.md, // Increased for better rhythm
-      paddingHorizontal: spacing.md,
     },
-    avatar: {
-      marginRight: spacing.md,
+    iconContainer: {
+      width: 48,
+      height: 48,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 16,
+      elevation: 2,
+      shadowColor: theme.colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
     },
-    content: {
+    textContainer: {
       flex: 1,
     },
     name: {
-      fontWeight: '700',
-      color: theme.colors.onSurface,
-      marginVertical: 2,
-    },
-    type: {
-      letterSpacing: 1.2,
-      color: theme.colors.onSurfaceVariant,
       fontWeight: '800',
-      fontSize: 12,
+      letterSpacing: 0.2,
     },
-    rightSection: {
+    typeText: {
+      marginTop: 2,
+      fontWeight: '500',
+    },
+    balanceContainer: {
       alignItems: 'flex-end',
+      marginRight: 8,
     },
-    balance: {
-      fontWeight: '900',
+    balanceText: {
+      fontWeight: '800',
     },
     deleteButton: {
       margin: 0,
