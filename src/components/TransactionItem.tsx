@@ -9,7 +9,7 @@ import {
   useStore,
   useTranslation,
 } from '../store/useStore';
-import { spacing } from '../theme/theme';
+import { spacing, AppTheme } from '../theme/theme';
 
 interface Props {
   transaction: Transaction;
@@ -21,7 +21,7 @@ export const TransactionItem: React.FC<Props> = memo(
     const accounts = useStore((state) => state.accounts);
     const formatCurrency = useStore((state) => state.formatCurrency);
     const { t, language, translateName } = useTranslation();
-    const theme = useTheme();
+    const theme = useTheme<AppTheme>();
 
     const isIncome = transaction.type === 'income';
     const account = accounts.find((a) => a.id === transaction.accountId);

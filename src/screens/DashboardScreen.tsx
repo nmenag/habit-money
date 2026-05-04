@@ -17,7 +17,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
-import { spacing, lightTheme, darkTheme } from '../theme/theme';
+import { spacing, lightTheme, darkTheme, AppTheme } from '../theme/theme';
 
 export const DashboardScreen = React.memo(() => {
   const transactions = useStore((s) => s.transactions);
@@ -29,7 +29,7 @@ export const DashboardScreen = React.memo(() => {
   const formatCurrency = useStore((s) => s.formatCurrency);
 
   const { t, language, translateName } = useTranslation();
-  const theme = useTheme();
+  const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
 
@@ -587,7 +587,7 @@ export const DashboardScreen = React.memo(() => {
 
 DashboardScreen.displayName = 'DashboardScreen';
 
-const defaultStyles = (theme: typeof lightTheme | typeof darkTheme) =>
+const defaultStyles = (theme: AppTheme) =>
   StyleSheet.create({
     container: {
       flex: 1,

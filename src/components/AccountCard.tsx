@@ -2,7 +2,7 @@ import React from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Avatar, Card, IconButton, Text, useTheme } from 'react-native-paper';
 import { Account, useStore, useTranslation } from '../store/useStore';
-import { spacing, lightTheme, darkTheme } from '../theme/theme';
+import { spacing, lightTheme, darkTheme, AppTheme } from '../theme/theme';
 
 interface Props {
   account: Account;
@@ -21,7 +21,7 @@ export const AccountCard: React.FC<Props> = ({
 }) => {
   const { formatCurrency } = useStore();
   const { t, translateName } = useTranslation();
-  const theme = useTheme();
+  const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
 
   const handleDelete = () => {
@@ -57,7 +57,7 @@ export const AccountCard: React.FC<Props> = ({
         {
           backgroundColor: isActive
             ? theme.colors.elevation.level3
-            : account.color 
+            : account.color
               ? `${account.color}0A` // Subtle background tint for structural grouping
               : theme.colors.surface,
         },
@@ -88,11 +88,16 @@ export const AccountCard: React.FC<Props> = ({
           </Text>
         </View>
         <View style={styles.rightSection}>
-          <Text 
-            variant="titleLarge" 
+          <Text
+            variant="titleLarge"
             style={[
-              styles.balance, 
-              { color: account.currentBalance < 0 ? theme.colors.error : theme.colors.onSurface }
+              styles.balance,
+              {
+                color:
+                  account.currentBalance < 0
+                    ? theme.colors.error
+                    : theme.colors.onSurface,
+              },
             ]}
           >
             {formatCurrency(account.currentBalance, account.currency)}
@@ -115,7 +120,7 @@ export const AccountCard: React.FC<Props> = ({
   );
 };
 
-const defaultStyles = (theme: typeof lightTheme | typeof darkTheme) =>
+const defaultStyles = (theme: AppTheme) =>
   StyleSheet.create({
     card: {
       marginVertical: spacing.xs,

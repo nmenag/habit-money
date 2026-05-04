@@ -1,4 +1,4 @@
-import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
+import { MD3DarkTheme, MD3LightTheme, useTheme } from 'react-native-paper';
 
 const palette = {
   green: {
@@ -61,17 +61,17 @@ export const chartColors = [
   '#6366F1', // indigo
 ];
 
-// 3. Theme Augmentation
-declare global {
-  namespace ReactNativePaper {
-    interface MD3Colors {
-      income: string;
-      incomeContainer: string;
-      warning: string;
-      warningContainer: string;
-    }
+declare module 'react-native-paper' {
+  export interface MD3Colors {
+    income: string;
+    incomeContainer: string;
+    warning: string;
+    warningContainer: string;
   }
 }
+
+export type AppTheme = typeof lightTheme;
+export const useAppTheme = () => useTheme<AppTheme>();
 
 export const lightTheme = {
   ...MD3LightTheme,
