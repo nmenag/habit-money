@@ -43,7 +43,7 @@ export const DashboardScreen = React.memo(() => {
   }, [analyticsReport, refreshAnalytics]);
 
   // 3. Data layer - optimized mapping from report
-  const data = useMemo(() => {
+  const financialData = useMemo(() => {
     if (!analyticsReport) return null;
 
     const { currentMonth } = analyticsReport;
@@ -62,18 +62,6 @@ export const DashboardScreen = React.memo(() => {
     const ratio = limit > 0 ? monthlyExpenses / limit : 0;
     const progress = Math.min(ratio, 1);
 
-    let progressColor = theme.colors.primary;
-    if (ratio > 0.9) progressColor = theme.colors.error;
-    else if (ratio >= 0.7) progressColor = theme.colors.warning; // Use semantic warning color
-
-    let progressMessage = '';
-    if (monthlyExpenses > 0 || monthlyIncome > 0) {
-      progressMessage = t('doingWell');
-      if (ratio > 1.0) progressMessage = t('exceededLimit');
-      else if (ratio > 0.9) progressMessage = t('aboutToExceed');
-      else if (ratio >= 0.7) progressMessage = t('closeToLimit');
-    }
-
     // Top Category
     const topCatId = currentMonth.topCategory?.id;
     const topCategory = topCatId
@@ -90,26 +78,50 @@ export const DashboardScreen = React.memo(() => {
       topCategory,
       topCatAmount,
       topCatPercent,
-      insight: analyticsReport.insights[0]?.message || t('insightKeepGoing'),
       activeGoals,
       recentTransactions,
       totalBudget,
       limit,
       progress,
+      totalBalance,
+      ratio,
+      insightMessage: analyticsReport.insights[0]?.message,
+    };
+  }, [analyticsReport, accounts, goals, transactions, budgets, categories]);
+
+  // 4. UI Layer - derive colors and messages from financial data
+  const uiData = useMemo(() => {
+    if (!financialData) return null;
+
+    const { ratio, insightMessage, monthlyExpenses, monthlyIncome } =
+      financialData;
+
+    let progressColor = theme.colors.primary;
+    if (ratio > 0.9) progressColor = theme.colors.error;
+    else if (ratio >= 0.7) progressColor = theme.colors.warning;
+
+    let progressMessage = '';
+    if (monthlyExpenses > 0 || monthlyIncome > 0) {
+      progressMessage = t('doingWell');
+      if (ratio > 1.0) progressMessage = t('exceededLimit');
+      else if (ratio > 0.9) progressMessage = t('aboutToExceed');
+      else if (ratio >= 0.7) progressMessage = t('closeToLimit');
+    }
+
+    return {
       progressColor,
       progressMessage,
-      totalBalance,
+      insight: insightMessage || t('insightKeepGoing'),
     };
-  }, [
-    analyticsReport,
-    accounts,
-    goals,
-    transactions,
-    budgets,
-    categories,
-    theme,
-    t,
-  ]);
+  }, [financialData, theme, t]);
+
+  const data = useMemo(() => {
+    if (!financialData || !uiData) return null;
+    return {
+      ...financialData,
+      ...uiData,
+    };
+  }, [financialData, uiData]);
 
   const currentMonthDisplay = useMemo(() => {
     const now = new Date();
@@ -156,12 +168,19 @@ export const DashboardScreen = React.memo(() => {
               <View>
                 <Text
                   variant="labelSmall"
-                  style={{ color: theme.colors.onPrimaryContainer }}
+                  style={{
+                    color: theme.colors.onPrimaryContainer,
+                    fontWeight: '800',
+                    letterSpacing: 0.8,
+                  }}
                 >
-                  {t('monthlyIncome')}
+                  {t('monthlyIncome').toUpperCase()}
                 </Text>
                 <Text
-                  style={[styles.amountText, { color: theme.colors.primary }]}
+                  style={[
+                    styles.amountText,
+                    { color: theme.colors.income, fontSize: 22 },
+                  ]}
                 >
                   {formatCurrency(data.monthlyIncome)}
                 </Text>
@@ -169,12 +188,19 @@ export const DashboardScreen = React.memo(() => {
               <View style={{ alignItems: 'flex-end' }}>
                 <Text
                   variant="labelSmall"
-                  style={{ color: theme.colors.onPrimaryContainer }}
+                  style={{
+                    color: theme.colors.onPrimaryContainer,
+                    fontWeight: '800',
+                    letterSpacing: 0.8,
+                  }}
                 >
-                  {t('monthlyExpenses')}
+                  {t('monthlyExpenses').toUpperCase()}
                 </Text>
                 <Text
-                  style={[styles.amountText, { color: theme.colors.error }]}
+                  style={[
+                    styles.amountText,
+                    { color: theme.colors.error, fontSize: 22 },
+                  ]}
                 >
                   {formatCurrency(data.monthlyExpenses)}
                 </Text>
@@ -604,7 +630,7 @@ const defaultStyles = (theme: typeof lightTheme | typeof darkTheme) =>
     },
     amountText: {
       fontSize: 18,
-      fontWeight: 'bold',
+      fontWeight: '900',
     },
     progressBar: {
       height: 8,
@@ -619,6 +645,19 @@ const defaultStyles = (theme: typeof lightTheme | typeof darkTheme) =>
       alignItems: 'center',
       paddingVertical: spacing.sm,
     },
+    sectionCard: {
+      marginHorizontal: spacing.md,
+      marginBottom: spacing.md, // Consistent rhythm
+      borderRadius: 16,
+      elevation: 2,
+    },
+    headerCard: {
+      marginHorizontal: spacing.md,
+      marginTop: spacing.sm,
+      marginBottom: spacing.lg, // Generous separation after hero
+      borderRadius: 24,
+      elevation: 4,
+    },
     insightText: {
       marginLeft: spacing.md,
       flex: 1,
@@ -627,7 +666,11 @@ const defaultStyles = (theme: typeof lightTheme | typeof darkTheme) =>
     fab: {
       position: 'absolute',
       right: spacing.md,
-      borderRadius: 20,
-      elevation: 4,
+      borderRadius: 16,
+      elevation: 6,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
     },
   });

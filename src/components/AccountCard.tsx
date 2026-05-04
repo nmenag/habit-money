@@ -57,7 +57,9 @@ export const AccountCard: React.FC<Props> = ({
         {
           backgroundColor: isActive
             ? theme.colors.elevation.level3
-            : theme.colors.surface,
+            : account.color 
+              ? `${account.color}0A` // Subtle background tint for structural grouping
+              : theme.colors.surface,
         },
       ]}
       mode="elevated"
@@ -67,12 +69,6 @@ export const AccountCard: React.FC<Props> = ({
       accessibilityLabel={`${translateName(account.name)}, ${t(account.type)}, ${formatCurrency(account.currentBalance, account.currency)}`}
       accessibilityRole="button"
     >
-      <View
-        style={[
-          styles.accentTint,
-          { backgroundColor: account.color || theme.colors.primary },
-        ]}
-      />
       <Card.Content style={styles.cardContent}>
         <Avatar.Icon
           size={44}
@@ -92,7 +88,13 @@ export const AccountCard: React.FC<Props> = ({
           </Text>
         </View>
         <View style={styles.rightSection}>
-          <Text variant="titleLarge" style={styles.balance}>
+          <Text 
+            variant="titleLarge" 
+            style={[
+              styles.balance, 
+              { color: account.currentBalance < 0 ? theme.colors.error : theme.colors.onSurface }
+            ]}
+          >
             {formatCurrency(account.currentBalance, account.currency)}
           </Text>
           {onDelete && (
@@ -140,28 +142,18 @@ const defaultStyles = (theme: typeof lightTheme | typeof darkTheme) =>
       marginVertical: 2,
     },
     type: {
-      letterSpacing: 1.5,
+      letterSpacing: 1.2,
       color: theme.colors.onSurfaceVariant,
       fontWeight: '800',
-      fontSize: 10,
+      fontSize: 12,
     },
     rightSection: {
       alignItems: 'flex-end',
     },
     balance: {
       fontWeight: '900',
-      color: theme.colors.onSurface,
     },
     deleteButton: {
       margin: 0,
-    },
-    // New: Tinted accent background
-    accentTint: {
-      position: 'absolute',
-      left: 0,
-      top: 0,
-      bottom: 0,
-      width: 4,
-      opacity: 0.5,
     },
   });

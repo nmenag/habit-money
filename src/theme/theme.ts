@@ -1,10 +1,5 @@
-import {
-  MD3DarkTheme,
-  MD3LightTheme,
-  configureFonts,
-} from 'react-native-paper';
+import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 
-// 1. Token primitives (Tailwind-inspired palette)
 const palette = {
   green: {
     50: '#F0FDF4',
