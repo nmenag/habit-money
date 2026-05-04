@@ -238,6 +238,7 @@ export const useStore = create<AppState>((set, get) => ({
     setTimeout(() => {
       get().loadBudgets();
       get().loadGoals();
+      get().refreshAnalytics();
     }, 100);
   },
 

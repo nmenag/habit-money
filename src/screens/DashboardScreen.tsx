@@ -17,6 +17,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
+import { spacing, lightTheme, darkTheme } from '../theme/theme';
 
 export const DashboardScreen = React.memo(() => {
   const transactions = useStore((s) => s.transactions);
@@ -32,95 +33,38 @@ export const DashboardScreen = React.memo(() => {
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
 
-  // 3. Data layer - helper functions
-  const data = useMemo(() => {
-    const now = new Date();
-    // Use UTC for current and last month ranges
-    const currentStart = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
-    );
-    const currentEnd = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999),
-    );
-    const lastStart = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1),
-    );
-    const lastEnd = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999),
-    );
+  const analyticsReport = useStore((s) => s.analyticsReport);
+  const refreshAnalytics = useStore((s) => s.refreshAnalytics);
 
-    // A. Balance Summary
-    let monthlyIncome = 0;
-    let monthlyExpenses = 0;
-    const catExpenses: Record<string, number> = {};
-
-    // For Insight (B. vs Last Month)
-    let lastMonthExpenses = 0;
-
-    transactions.forEach((tr) => {
-      const trDate = new Date(tr.date);
-      const isAdjustment =
-        tr.note && translateName(tr.note) === t('balanceAdjustment');
-
-      if (trDate >= currentStart && trDate <= currentEnd) {
-        if (tr.type === 'income' && !isAdjustment) {
-          monthlyIncome += tr.amount;
-        } else if (tr.type === 'expense' && !isAdjustment) {
-          monthlyExpenses += tr.amount;
-          if (tr.categoryId) {
-            catExpenses[tr.categoryId] =
-              (catExpenses[tr.categoryId] || 0) + tr.amount;
-          }
-        }
-      } else if (trDate >= lastStart && trDate <= lastEnd) {
-        if (tr.type === 'expense' && !isAdjustment) {
-          lastMonthExpenses += tr.amount;
-        }
-      }
-    });
-
-    const remainingBalance = monthlyIncome - monthlyExpenses;
-
-    // C. Top Category
-    const topCatId = Object.keys(catExpenses).reduce(
-      (a, b) => (catExpenses[a] > catExpenses[b] ? a : b),
-      '',
-    );
-    const topCategory = categories.find((c) => c.id === topCatId);
-    const topCatAmount = topCatId ? catExpenses[topCatId] : 0;
-    const topCatPercent =
-      monthlyExpenses > 0 ? (topCatAmount / monthlyExpenses) * 100 : 0;
-
-    // D. Main Insight
-    let insight = '';
-    if (monthlyExpenses > lastMonthExpenses && lastMonthExpenses > 0) {
-      const diff =
-        ((monthlyExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;
-      insight = t('insightSpentMore', { percent: diff.toFixed(0) });
-    } else if (remainingBalance > 0) {
-      insight = t('insightSavingMoney');
-    } else {
-      insight = t('insightKeepGoing');
+  React.useEffect(() => {
+    if (!analyticsReport) {
+      refreshAnalytics();
     }
+  }, [analyticsReport, refreshAnalytics]);
 
-    // E. Goals Preview
+  // 3. Data layer - optimized mapping from report
+  const data = useMemo(() => {
+    if (!analyticsReport) return null;
+
+    const { currentMonth } = analyticsReport;
+    const monthlyIncome = currentMonth.income;
+    const monthlyExpenses = currentMonth.expenses;
+    const remainingBalance = currentMonth.savings;
+
+    // Accounts & Goals (Small arrays, fast to compute)
+    const totalBalance = accounts.reduce((sum, a) => sum + a.currentBalance, 0);
     const activeGoals = goals.filter((g) => g.status === 'active').slice(0, 2);
+    const recentTransactions = transactions.slice(0, 5);
 
-    // F. Recent Transactions
-    const recentTransactions = [...transactions]
-      .sort((a, b) => b.date.localeCompare(a.date))
-      .slice(0, 5);
-
-    // Spending Progress (B) - find total budget if any
+    // Budgeting logic
     const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
     const limit = totalBudget > 0 ? totalBudget : monthlyIncome;
     const ratio = limit > 0 ? monthlyExpenses / limit : 0;
     const progress = Math.min(ratio, 1);
 
-    let progressColor = '#16A34A'; // New Primary Green
-    if (ratio > 0.9)
-      progressColor = theme.colors.error; // Red
-    else if (ratio >= 0.7) progressColor = '#F59E0B'; // Amber/Orange
+    let progressColor = theme.colors.primary;
+    if (ratio > 0.9) progressColor = theme.colors.error;
+    else if (ratio >= 0.7) progressColor = theme.colors.warning; // Use semantic warning color
 
     let progressMessage = '';
     if (monthlyExpenses > 0 || monthlyIncome > 0) {
@@ -130,8 +74,14 @@ export const DashboardScreen = React.memo(() => {
       else if (ratio >= 0.7) progressMessage = t('closeToLimit');
     }
 
-    // G. Total Balance (all accounts)
-    const totalBalance = accounts.reduce((sum, a) => sum + a.currentBalance, 0);
+    // Top Category
+    const topCatId = currentMonth.topCategory?.id;
+    const topCategory = topCatId
+      ? categories.find((c) => c.id === topCatId)
+      : undefined;
+    const topCatAmount = currentMonth.topCategory?.amount || 0;
+    const topCatPercent =
+      monthlyExpenses > 0 ? (topCatAmount / monthlyExpenses) * 100 : 0;
 
     return {
       monthlyIncome,
@@ -140,39 +90,43 @@ export const DashboardScreen = React.memo(() => {
       topCategory,
       topCatAmount,
       topCatPercent,
-      insight,
+      insight: analyticsReport.insights[0]?.message || t('insightKeepGoing'),
       activeGoals,
       recentTransactions,
       totalBudget,
       limit,
       progress,
-      progressRatio: ratio,
       progressColor,
       progressMessage,
       totalBalance,
     };
   }, [
-    transactions,
-    categories,
-    goals,
-    budgets,
+    analyticsReport,
     accounts,
-    t,
+    goals,
+    transactions,
+    budgets,
+    categories,
     theme,
-    translateName,
+    t,
   ]);
 
   const currentMonthDisplay = useMemo(() => {
     const now = new Date();
-    const utcDate = new Date(now.getUTCFullYear(), now.getUTCMonth(), 1);
-    return format(utcDate, 'MMMM yyyy', {
+    return format(now, 'MMMM yyyy', {
       locale: language === 'es' ? esLocale : enUS,
     });
   }, [language]);
 
-  if (!isLoaded) {
+  if (!isLoaded || !data) {
     return (
-      <View style={[styles.container, styles.center]}>
+      <View
+        style={[
+          styles.container,
+          styles.center,
+          { backgroundColor: theme.colors.background },
+        ]}
+      >
         <ActivityIndicator size="large" />
       </View>
     );
@@ -189,26 +143,36 @@ export const DashboardScreen = React.memo(() => {
           </Text>
         </View>
 
-        {/* A. Balance Summary */}
-        <Card style={styles.card} mode="elevated">
+        {/* 1. Main Balance Summary - Contained for hierarchy */}
+        <Card
+          style={[
+            styles.card,
+            { backgroundColor: theme.colors.primaryContainer },
+          ]}
+          mode="contained"
+        >
           <Card.Content>
-            <Text variant="titleMedium" style={styles.cardTitle}>
-              {t('balanceSummary')}
-            </Text>
             <View style={styles.balanceRow}>
               <View>
-                <Text variant="labelSmall">{t('income')}</Text>
                 <Text
-                  style={[
-                    styles.amountText,
-                    { color: (theme.colors as any).income },
-                  ]}
+                  variant="labelSmall"
+                  style={{ color: theme.colors.onPrimaryContainer }}
+                >
+                  {t('monthlyIncome')}
+                </Text>
+                <Text
+                  style={[styles.amountText, { color: theme.colors.primary }]}
                 >
                   {formatCurrency(data.monthlyIncome)}
                 </Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <Text variant="labelSmall">{t('expense')}</Text>
+                <Text
+                  variant="labelSmall"
+                  style={{ color: theme.colors.onPrimaryContainer }}
+                >
+                  {t('monthlyExpenses')}
+                </Text>
                 <Text
                   style={[styles.amountText, { color: theme.colors.error }]}
                 >
@@ -216,16 +180,21 @@ export const DashboardScreen = React.memo(() => {
                 </Text>
               </View>
             </View>
-            <Divider style={{ marginVertical: 12 }} />
+            <Divider style={{ marginVertical: spacing.sm, opacity: 0.3 }} />
             <View style={styles.balanceRow}>
-              <Text variant="titleMedium">{t('remaining')}</Text>
+              <Text
+                variant="titleMedium"
+                style={{ color: theme.colors.onPrimaryContainer }}
+              >
+                {t('remaining')}
+              </Text>
               <Text
                 variant="titleLarge"
                 style={{
                   fontWeight: '900',
                   color:
                     data.remainingBalance >= 0
-                      ? (theme.colors as any).income
+                      ? theme.colors.income
                       : theme.colors.error,
                 }}
               >
@@ -284,7 +253,7 @@ export const DashboardScreen = React.memo(() => {
                     style={{
                       backgroundColor: acc.color || theme.colors.primary,
                     }}
-                    color="#fff"
+                    color={theme.colors.onPrimary}
                   />
                   <View style={{ marginLeft: 12, flex: 1 }}>
                     <Text variant="bodyMedium" style={{ fontWeight: '700' }}>
@@ -501,7 +470,9 @@ export const DashboardScreen = React.memo(() => {
                                     : theme.colors.error),
                         }}
                         color={
-                          isAdjustment ? theme.colors.onSurfaceVariant : '#fff'
+                          isAdjustment
+                            ? theme.colors.onSurfaceVariant
+                            : theme.colors.onPrimary
                         }
                       />
                       <View style={{ marginLeft: 12, flex: 1 }}>
@@ -532,7 +503,7 @@ export const DashboardScreen = React.memo(() => {
                               tr.type === 'transfer'
                                 ? theme.colors.onSurface
                                 : tr.type === 'income'
-                                  ? (theme.colors as any).income
+                                  ? theme.colors.income
                                   : theme.colors.error,
                           },
                         ]}
@@ -579,8 +550,10 @@ export const DashboardScreen = React.memo(() => {
             backgroundColor: theme.colors.primary,
           },
         ]}
-        color="#fff"
+        color={theme.colors.onPrimary}
         onPress={() => router.push('/add-transaction')}
+        accessibilityLabel={t('addTransaction')}
+        accessibilityRole="button"
       />
     </View>
   );
@@ -588,13 +561,13 @@ export const DashboardScreen = React.memo(() => {
 
 DashboardScreen.displayName = 'DashboardScreen';
 
-const defaultStyles = (theme: any) =>
+const defaultStyles = (theme: typeof lightTheme | typeof darkTheme) =>
   StyleSheet.create({
     container: {
       flex: 1,
     },
     content: {
-      padding: 16,
+      padding: spacing.md,
       paddingBottom: 100,
     },
     center: {
@@ -602,8 +575,8 @@ const defaultStyles = (theme: any) =>
       alignItems: 'center',
     },
     monthHeader: {
-      marginBottom: 20,
-      marginTop: 8,
+      marginBottom: spacing.lg,
+      marginTop: spacing.sm,
     },
     monthText: {
       fontWeight: '900',
@@ -611,18 +584,18 @@ const defaultStyles = (theme: any) =>
       textTransform: 'capitalize',
     },
     card: {
-      marginBottom: 16,
-      borderRadius: 16,
+      marginBottom: spacing.md,
+      borderRadius: theme.roundness,
     },
     cardTitle: {
-      marginBottom: 12,
+      marginBottom: spacing.md,
       fontWeight: 'bold',
     },
     cardHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 8,
+      marginBottom: spacing.sm,
     },
     balanceRow: {
       flexDirection: 'row',
@@ -644,16 +617,16 @@ const defaultStyles = (theme: any) =>
     insightContent: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 8,
+      paddingVertical: spacing.sm,
     },
     insightText: {
-      marginLeft: 12,
+      marginLeft: spacing.md,
       flex: 1,
       fontWeight: '600',
     },
     fab: {
       position: 'absolute',
-      right: 16,
+      right: spacing.md,
       borderRadius: 20,
       elevation: 4,
     },

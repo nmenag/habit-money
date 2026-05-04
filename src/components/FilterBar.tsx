@@ -126,7 +126,11 @@ export const FilterBar: React.FC = React.memo(() => {
                 <Ionicons
                   name="calendar-outline"
                   size={12}
-                  color={isActive ? '#fff' : theme.colors.onSurfaceVariant}
+                  color={
+                    isActive
+                      ? theme.colors.onPrimary
+                      : theme.colors.onSurfaceVariant
+                  }
                   style={{ marginRight: 4 }}
                 />
               )}
@@ -134,7 +138,11 @@ export const FilterBar: React.FC = React.memo(() => {
                 <Ionicons
                   name="infinite-outline"
                   size={12}
-                  color={isActive ? '#fff' : theme.colors.onSurfaceVariant}
+                  color={
+                    isActive
+                      ? theme.colors.onPrimary
+                      : theme.colors.onSurfaceVariant
+                  }
                   style={{ marginRight: 4 }}
                 />
               )}

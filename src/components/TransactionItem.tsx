@@ -9,6 +9,7 @@ import {
   useStore,
   useTranslation,
 } from '../store/useStore';
+import { spacing } from '../theme/theme';
 
 interface Props {
   transaction: Transaction;
@@ -39,7 +40,7 @@ export const TransactionItem: React.FC<Props> = memo(
             size={40}
             icon="swap-horizontal"
             style={[styles.avatar, { backgroundColor: theme.colors.tertiary }]}
-            color="#fff"
+            color={theme.colors.onPrimary}
           />
         );
       }
@@ -74,13 +75,14 @@ export const TransactionItem: React.FC<Props> = memo(
             styles.avatar,
             { backgroundColor: category?.color || theme.colors.surfaceVariant },
           ]}
-          labelStyle={{ color: '#fff' }}
+          labelStyle={{ color: theme.colors.onPrimary }}
         />
       );
     };
 
+    const isTransfer = transaction.type === 'transfer';
+
     const RightContent = () => {
-      const isTransfer = transaction.type === 'transfer';
       return (
         <View style={styles.rightContainer}>
           <Text
@@ -91,7 +93,7 @@ export const TransactionItem: React.FC<Props> = memo(
                 color: isTransfer
                   ? theme.colors.onSurface
                   : isIncome
-                    ? (theme.colors as any).income
+                    ? theme.colors.income
                     : theme.colors.error,
               },
             ]}
@@ -104,7 +106,7 @@ export const TransactionItem: React.FC<Props> = memo(
     };
 
     const displayTitle = () => {
-      if (transaction.type === 'transfer') return t('transfer');
+      if (isTransfer) return t('transfer');
       if (isAdjustment) return t('balanceAdjustment');
       if (category?.name) return translateName(category.name);
       return t('uncategorized');
@@ -119,7 +121,9 @@ export const TransactionItem: React.FC<Props> = memo(
         left={LeftContent}
         right={RightContent}
         style={styles.listItem}
-        titleStyle={styles.capitalize}
+        titleStyle={styles.title}
+        accessibilityLabel={`${displayTitle()}, ${isTransfer ? t('transfer') : formatCurrency(transaction.amount, accountCurrency)}, ${format(parseISO(transaction.date), 'PPPP', { locale: dateLocale })}`}
+        accessibilityRole="button"
       />
     );
   },
@@ -129,14 +133,14 @@ TransactionItem.displayName = 'TransactionItem';
 
 const styles = StyleSheet.create({
   listItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.05)',
   },
   rightContainer: {
     justifyContent: 'center',
-    paddingRight: 8,
+    paddingRight: spacing.sm,
   },
   avatar: {
     borderRadius: 12,
@@ -144,7 +148,7 @@ const styles = StyleSheet.create({
   amount: {
     fontWeight: '700',
   },
-  capitalize: {
+  title: {
     textTransform: 'capitalize',
     fontWeight: '700',
   },

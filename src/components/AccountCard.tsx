@@ -2,6 +2,7 @@ import React from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Avatar, Card, IconButton, Text, useTheme } from 'react-native-paper';
 import { Account, useStore, useTranslation } from '../store/useStore';
+import { spacing, lightTheme, darkTheme } from '../theme/theme';
 
 interface Props {
   account: Account;
@@ -54,7 +55,6 @@ export const AccountCard: React.FC<Props> = ({
       style={[
         styles.card,
         {
-          borderLeftColor: account.color || theme.colors.primary,
           backgroundColor: isActive
             ? theme.colors.elevation.level3
             : theme.colors.surface,
@@ -64,7 +64,15 @@ export const AccountCard: React.FC<Props> = ({
       onPress={onPress}
       onLongPress={onLongPress}
       disabled={isActive}
+      accessibilityLabel={`${translateName(account.name)}, ${t(account.type)}, ${formatCurrency(account.currentBalance, account.currency)}`}
+      accessibilityRole="button"
     >
+      <View
+        style={[
+          styles.accentTint,
+          { backgroundColor: account.color || theme.colors.primary },
+        ]}
+      />
       <Card.Content style={styles.cardContent}>
         <Avatar.Icon
           size={44}
@@ -73,7 +81,7 @@ export const AccountCard: React.FC<Props> = ({
             styles.avatar,
             { backgroundColor: account.color || theme.colors.primaryContainer },
           ]}
-          color="#fff"
+          color={theme.colors.onPrimary}
         />
         <View style={styles.content}>
           <Text variant="labelMedium" style={styles.type}>
@@ -105,22 +113,23 @@ export const AccountCard: React.FC<Props> = ({
   );
 };
 
-const defaultStyles = (theme: any) =>
+const defaultStyles = (theme: typeof lightTheme | typeof darkTheme) =>
   StyleSheet.create({
     card: {
-      marginVertical: 4,
-      marginHorizontal: 16,
-      borderLeftWidth: 6,
-      borderRadius: 16,
+      marginVertical: spacing.xs,
+      marginHorizontal: spacing.md,
+      borderRadius: theme.roundness,
       backgroundColor: theme.colors.surface,
+      overflow: 'hidden',
     },
     cardContent: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 12,
+      paddingVertical: spacing.md, // Increased for better rhythm
+      paddingHorizontal: spacing.md,
     },
     avatar: {
-      marginRight: 12,
+      marginRight: spacing.md,
     },
     content: {
       flex: 1,
@@ -131,9 +140,10 @@ const defaultStyles = (theme: any) =>
       marginVertical: 2,
     },
     type: {
-      letterSpacing: 1,
+      letterSpacing: 1.5,
       color: theme.colors.onSurfaceVariant,
-      fontWeight: '700',
+      fontWeight: '800',
+      fontSize: 10,
     },
     rightSection: {
       alignItems: 'flex-end',
@@ -144,5 +154,14 @@ const defaultStyles = (theme: any) =>
     },
     deleteButton: {
       margin: 0,
+    },
+    // New: Tinted accent background
+    accentTint: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 4,
+      opacity: 0.5,
     },
   });
