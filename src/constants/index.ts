@@ -142,9 +142,4 @@ export const GOAL_ICONS = [
   'flash',
   'leaf',
   'flower',
-  'water',
-  'cloud',
-  'moon',
-  'at',
-  'attach',
 ];
