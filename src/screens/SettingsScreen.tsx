@@ -400,7 +400,7 @@ export const SettingsScreen = () => {
         </View>
         <View style={{ height: 20 }} />
       </ScrollView>
-      <BannerAdComponent />
+      {/* <BannerAdComponent /> */}
       <TimePickerModal
         visible={timePickerVisible}
         onDismiss={onDismissTimePicker}

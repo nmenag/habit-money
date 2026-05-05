@@ -323,7 +323,7 @@ export const TransactionsScreen = () => {
         }
       />
 
-      <BannerAdComponent />
+      {/* <BannerAdComponent /> */}
 
       <FAB
         icon="plus"

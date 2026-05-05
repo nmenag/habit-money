@@ -17,7 +17,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
-import { spacing, lightTheme, darkTheme, AppTheme } from '../theme/theme';
+import { AppTheme, spacing } from '../theme/theme';
 
 export const DashboardScreen = React.memo(() => {
   const transactions = useStore((s) => s.transactions);
@@ -565,7 +565,7 @@ export const DashboardScreen = React.memo(() => {
         <View style={{ height: 20 }} />
       </ScrollView>
 
-      <BannerAdComponent />
+      {/* <BannerAdComponent /> */}
 
       <FAB
         icon="plus"
