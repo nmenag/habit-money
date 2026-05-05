@@ -143,3 +143,19 @@ export const GOAL_ICONS = [
   'leaf',
   'flower',
 ];
+
+export const getValidCategoryIcon = (
+  icon: string | null | undefined,
+): string => {
+  if (!icon || !CATEGORY_ICONS.includes(icon as any)) {
+    return 'tag';
+  }
+  return icon;
+};
+
+export const getValidGoalIcon = (icon: string | null | undefined): string => {
+  if (!icon || !GOAL_ICONS.includes(icon as any)) {
+    return 'trophy';
+  }
+  return icon;
+};

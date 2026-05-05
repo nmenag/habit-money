@@ -38,14 +38,19 @@ export const InsightsScreen = () => {
 
     let totalIncome = 0;
     let totalExpenses = 0;
+    let totalAdjustments = 0;
+    let hasAdjustments = false;
     const catExpMap: Record<string, number> = {};
 
     inRange.forEach((tx) => {
       const isAdjustment =
         tx.note && translateName(tx.note) === t('balanceAdjustment');
-      if (tx.type === 'income' && !isAdjustment) {
+      if (isAdjustment) {
+        totalAdjustments += tx.type === 'income' ? tx.amount : -tx.amount;
+        hasAdjustments = true;
+      } else if (tx.type === 'income') {
         totalIncome += tx.amount;
-      } else if (tx.type === 'expense' && !isAdjustment) {
+      } else if (tx.type === 'expense') {
         totalExpenses += tx.amount;
         if (tx.categoryId) {
           catExpMap[tx.categoryId] =
@@ -54,8 +59,10 @@ export const InsightsScreen = () => {
       }
     });
 
-    const savings = totalIncome - totalExpenses;
-    const savingsRate = totalIncome > 0 ? (savings / totalIncome) * 100 : 0;
+    const combinedIncome = totalIncome + totalAdjustments;
+    const savings = combinedIncome - totalExpenses;
+    const savingsRate =
+      totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
 
     let colorIdx = 0;
     const categoryBreakdown = Object.entries(catExpMap)
@@ -77,13 +84,20 @@ export const InsightsScreen = () => {
     const txCount = inRange.length;
     const spendingDays = new Set(
       inRange
-        .filter((tx) => tx.type === 'expense')
+        .filter((tx) => {
+          const isAdjustment =
+            tx.note && translateName(tx.note) === t('balanceAdjustment');
+          return tx.type === 'expense' && !isAdjustment;
+        })
         .map((tx) => tx.date.substring(0, 10)),
     ).size;
 
     return {
       totalIncome,
       totalExpenses,
+      totalAdjustments,
+      hasAdjustments,
+      combinedIncome,
       savings,
       savingsRate,
       categoryBreakdown,
@@ -202,7 +216,7 @@ export const InsightsScreen = () => {
           >
             <Ionicons
               name="arrow-up-circle"
-              size={20}
+              size={18}
               color={(theme.colors as any).income}
             />
             <Text
@@ -211,19 +225,56 @@ export const InsightsScreen = () => {
                 styles.miniLabel,
                 { color: (theme.colors as any).income },
               ]}
+              numberOfLines={1}
             >
-              {t('income')}
+              {t('realIncome')}
             </Text>
             <Text
-              variant="titleMedium"
+              variant="titleSmall"
               style={[
                 styles.miniValue,
-                { color: (theme.colors as any).income },
+                { color: (theme.colors as any).income, fontSize: 14 },
               ]}
             >
               {formatCurrency(filtered.totalIncome)}
             </Text>
           </Surface>
+
+          {filtered.hasAdjustments && (
+            <Surface
+              style={[
+                styles.miniCard,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
+              elevation={1}
+            >
+              <Ionicons
+                name="options-outline"
+                size={18}
+                color={theme.colors.onSurfaceVariant}
+              />
+              <Text
+                variant="labelSmall"
+                style={[
+                  styles.miniLabel,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+                numberOfLines={1}
+              >
+                {t('adjustments')}
+              </Text>
+              <Text
+                variant="titleSmall"
+                style={[
+                  styles.miniValue,
+                  { color: theme.colors.onSurfaceVariant, fontSize: 14 },
+                ]}
+              >
+                {formatCurrency(filtered.totalAdjustments)}
+              </Text>
+            </Surface>
+          )}
+
           <Surface
             style={[
               styles.miniCard,
@@ -233,23 +284,35 @@ export const InsightsScreen = () => {
           >
             <Ionicons
               name="arrow-down-circle"
-              size={20}
+              size={18}
               color={theme.colors.error}
             />
             <Text
               variant="labelSmall"
               style={[styles.miniLabel, { color: theme.colors.error }]}
+              numberOfLines={1}
             >
               {t('expenses')}
             </Text>
             <Text
-              variant="titleMedium"
-              style={[styles.miniValue, { color: theme.colors.error }]}
+              variant="titleSmall"
+              style={[
+                styles.miniValue,
+                { color: theme.colors.error, fontSize: 14 },
+              ]}
             >
               {formatCurrency(filtered.totalExpenses)}
             </Text>
           </Surface>
         </View>
+
+        {filtered.hasAdjustments && filtered.totalAdjustments !== 0 && (
+          <View style={{ marginBottom: 12, alignItems: 'center' }}>
+            <Text variant="labelSmall" style={{ color: theme.colors.outline }}>
+              {t('combinedTotal')}: {formatCurrency(filtered.combinedIncome)}
+            </Text>
+          </View>
+        )}
 
         {/* Savings Row */}
         <Surface

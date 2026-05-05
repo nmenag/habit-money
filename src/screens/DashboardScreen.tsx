@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
 import { AppTheme, spacing } from '../theme/theme';
+import { getValidCategoryIcon, getValidGoalIcon } from '../constants';
 
 export const DashboardScreen = React.memo(() => {
   const transactions = useStore((s) => s.transactions);
@@ -49,6 +50,7 @@ export const DashboardScreen = React.memo(() => {
     const { currentMonth } = analyticsReport;
     const monthlyIncome = currentMonth.income;
     const monthlyExpenses = currentMonth.expenses;
+    const monthlyAdjustments = currentMonth.adjustments;
     const remainingBalance = currentMonth.savings;
 
     // Accounts & Goals (Small arrays, fast to compute)
@@ -74,6 +76,7 @@ export const DashboardScreen = React.memo(() => {
     return {
       monthlyIncome,
       monthlyExpenses,
+      monthlyAdjustments,
       remainingBalance,
       topCategory,
       topCatAmount,
@@ -206,6 +209,28 @@ export const DashboardScreen = React.memo(() => {
                 </Text>
               </View>
             </View>
+
+            {data.monthlyAdjustments !== 0 && (
+              <View style={[styles.balanceRow, { marginTop: spacing.xs }]}>
+                <Text
+                  variant="labelSmall"
+                  style={{ color: theme.colors.outline, fontWeight: '700' }}
+                >
+                  {t('adjustments').toUpperCase()}
+                </Text>
+                <Text
+                  variant="labelMedium"
+                  style={{
+                    fontWeight: '700',
+                    color: theme.colors.onPrimaryContainer,
+                  }}
+                >
+                  {data.monthlyAdjustments > 0 ? '+' : ''}
+                  {formatCurrency(data.monthlyAdjustments)}
+                </Text>
+              </View>
+            )}
+
             <Divider style={{ marginVertical: spacing.sm, opacity: 0.3 }} />
             <View style={styles.balanceRow}>
               <Text
@@ -348,7 +373,7 @@ export const DashboardScreen = React.memo(() => {
               <View style={styles.row}>
                 <Avatar.Icon
                   size={40}
-                  icon={data.topCategory.icon || 'tag'}
+                  icon={getValidCategoryIcon(data.topCategory.icon)}
                   style={{
                     backgroundColor:
                       data.topCategory.color || theme.colors.primary,
@@ -481,7 +506,7 @@ export const DashboardScreen = React.memo(() => {
                             ? 'swap-horizontal'
                             : isAdjustment
                               ? 'scale-balance'
-                              : cat?.icon ||
+                              : getValidCategoryIcon(cat?.icon) ||
                                 (tr.type === 'income' ? 'plus' : 'minus')
                         }
                         style={{

@@ -11,7 +11,7 @@ import { getLocalDateString } from '../utils/dateUtils';
 export const OnboardingScreen = () => {
   const theme = useTheme();
   const router = useRouter();
-  const { setLanguage, loadData } = useStore();
+  const { setLanguage, setCurrency, loadData } = useStore();
   const { t } = useTranslation();
 
   const [detectedLang, setDetectedLang] = useState<Language>('en');
@@ -31,10 +31,7 @@ export const OnboardingScreen = () => {
     setLanguage(detectedLang);
 
     const db = getDb();
-    db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
-      'currency',
-      detectedCurrency,
-    ]);
+    setCurrency(detectedCurrency);
     db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
       'isFirstLaunch',
       'false',

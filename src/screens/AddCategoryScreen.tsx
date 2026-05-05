@@ -22,7 +22,11 @@ import {
   useStore,
   useTranslation,
 } from '../store/useStore';
-import { CATEGORY_ICONS as ICONS, COLORS } from '../constants';
+import {
+  CATEGORY_ICONS as ICONS,
+  COLORS,
+  getValidCategoryIcon,
+} from '../constants';
 
 export const AddCategoryScreen = () => {
   const params = useLocalSearchParams<{ category?: string }>();
@@ -49,7 +53,7 @@ export const AddCategoryScreen = () => {
     editingCategory?.type || 'expense',
   );
   const [color, setColor] = useState(editingCategory?.color || COLORS[0]);
-  const [icon, setIcon] = useState(editingCategory?.icon || ICONS[0]);
+  const [icon, setIcon] = useState(getValidCategoryIcon(editingCategory?.icon));
 
   const handleSave = () => {
     if (!name.trim()) {

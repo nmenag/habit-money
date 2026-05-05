@@ -14,7 +14,7 @@ import { Button, Text, TextInput, useTheme } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useStore, useTranslation } from '../store/useStore';
-import { GOAL_ICONS as ICONS, COLORS } from '../constants';
+import { GOAL_ICONS as ICONS, COLORS, getValidGoalIcon } from '../constants';
 import { formatNumber } from '../utils/formatters';
 import { getLocalISOString } from '../utils/dateUtils';
 
@@ -47,7 +47,7 @@ export const AddGoalScreen = () => {
     editingGoal ? formatNumber(editingGoal.targetAmount, language) : '',
   );
   const [color, setColor] = useState(editingGoal?.color || COLORS[0]);
-  const [icon, setIcon] = useState(editingGoal?.icon || ICONS[0]);
+  const [icon, setIcon] = useState(getValidGoalIcon(editingGoal?.icon));
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     editingGoal?.deadline ? parseISO(editingGoal.deadline) : undefined,
   );

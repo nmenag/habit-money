@@ -34,73 +34,24 @@ export const initDb = () => {
   }
 
   try {
-    db.execSync(
-      "ALTER TABLE accounts ADD COLUMN currency TEXT NOT NULL DEFAULT 'COP';",
-    );
-  } catch {}
-
-  try {
-    db.execSync(
-      'ALTER TABLE accounts ADD COLUMN displayOrder INTEGER DEFAULT 0;',
-    );
-  } catch {}
-
-  try {
     db.execSync(`
       CREATE TABLE IF NOT EXISTS categories (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         type TEXT DEFAULT 'expense',
-        icon TEXT,
+        icon TEXT DEFAULT 'tag',
         color TEXT,
         displayOrder INTEGER DEFAULT 0
       );
     `);
 
+    // Set default icon if missing
     db.execSync(
-      "UPDATE categories SET icon = 'controller-classic' WHERE icon = 'game-controller';",
+      "UPDATE categories SET icon = 'tag' WHERE icon IS NULL OR icon = '';",
     );
-    db.execSync(
-      "UPDATE categories SET icon = 'food' WHERE icon = 'fast-food';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'medical-bag' WHERE icon = 'medkit';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'format-list-bulleted' WHERE icon = 'list';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'briefcase' WHERE icon = 'business';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'tshirt-crew' WHERE icon = 'shirt';",
-    );
-    db.execSync("UPDATE categories SET icon = 'coffee' WHERE icon = 'cafe';");
-    db.execSync(
-      "UPDATE categories SET icon = 'dumbbell' WHERE icon = 'fitness';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'music-note' WHERE icon = 'musical-notes';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'hamburger' WHERE icon = 'fast-food';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'baby-carriage' WHERE icon = 'stroller';",
-    );
-    db.execSync(
-      "UPDATE goals SET icon = 'cash-outline' WHERE icon = 'piggy-bank';",
-    );
-    db.execSync("UPDATE goals SET icon = 'stats-chart' WHERE icon = 'chart';");
   } catch (e) {
-    console.error('Error creating/migrating categories table:', e);
+    console.error('Error creating categories table:', e);
   }
-
-  try {
-    db.execSync(
-      'ALTER TABLE categories ADD COLUMN displayOrder INTEGER DEFAULT 0;',
-    );
-  } catch {}
 
   try {
     db.execSync(`
@@ -119,35 +70,14 @@ export const initDb = () => {
   }
 
   try {
-    db.execSync('ALTER TABLE budgets ADD COLUMN categoryId TEXT;');
-  } catch {}
-
-  try {
-    db.execSync(
-      'ALTER TABLE budgets ADD COLUMN displayOrder INTEGER DEFAULT 0;',
-    );
-  } catch {}
-
-  try {
     db.execSync(`
       CREATE TABLE IF NOT EXISTS settings (
         id TEXT PRIMARY KEY,
         val TEXT NOT NULL
       );
     `);
-
-    // Migration: If table was created with old names, try to rename columns
-    // SQLite doesn't support multiple renames in one go easily, so we check columns
-    const columns = db.getAllSync<{ name: string }>(
-      'PRAGMA table_info(settings)',
-    );
-    const hasKey = columns.some((c) => c.name === 'key');
-    if (hasKey) {
-      db.execSync("ALTER TABLE settings RENAME COLUMN 'key' TO 'id'");
-      db.execSync("ALTER TABLE settings RENAME COLUMN 'value' TO 'val'");
-    }
   } catch (e) {
-    console.error('Error creating/migrating settings table:', e);
+    console.error('Error creating settings table:', e);
   }
 
   try {
@@ -159,6 +89,7 @@ export const initDb = () => {
         categoryId TEXT,
         accountId TEXT NOT NULL,
         budgetId TEXT,
+        toAccountId TEXT,
         date TEXT NOT NULL,
         note TEXT,
         FOREIGN KEY(categoryId) REFERENCES categories(id) ON DELETE SET NULL,
@@ -173,18 +104,6 @@ export const initDb = () => {
   }
 
   try {
-    db.execSync('ALTER TABLE transactions ADD COLUMN budgetId TEXT;');
-  } catch {
-    // Column might already exist
-  }
-
-  try {
-    db.execSync('ALTER TABLE transactions ADD COLUMN toAccountId TEXT;');
-  } catch {
-    // Column might already exist
-  }
-
-  try {
     db.execSync(`
       CREATE TABLE IF NOT EXISTS goals (
         id TEXT PRIMARY KEY,
@@ -192,19 +111,21 @@ export const initDb = () => {
         targetAmount REAL NOT NULL,
         currentAmount REAL NOT NULL DEFAULT 0,
         color TEXT,
-        icon TEXT,
+        icon TEXT DEFAULT 'trophy',
         deadline TEXT,
         status TEXT DEFAULT 'active',
         displayOrder INTEGER DEFAULT 0
       );
     `);
+
+    try {
+      db.execSync(
+        "UPDATE goals SET icon = 'trophy' WHERE icon IS NULL OR icon = '';",
+      );
+    } catch {}
   } catch (e) {
     console.error('Error creating goals table:', e);
   }
-
-  try {
-    db.execSync('ALTER TABLE goals ADD COLUMN displayOrder INTEGER DEFAULT 0;');
-  } catch {}
 
   const locales = Localization.getLocales();
   const langCode = locales[0]?.languageCode === 'es' ? 'es' : 'en';
@@ -309,39 +230,6 @@ export const initDb = () => {
       });
     } finally {
       statement.finalizeSync();
-    }
-  } else {
-    // Check if Investments category (ID 9) exists, if not, add it
-    const checkInvestments = db.getFirstSync<{ id: string }>(
-      "SELECT id FROM categories WHERE id = '9'",
-    );
-    if (!checkInvestments) {
-      db.runSync(
-        'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
-        ['9', t.catInvestments, 'expense', 'chart-line', '#3f51b5'],
-      );
-    }
-
-    // Check if Gifts category (ID 10) exists
-    const checkGifts = db.getFirstSync<{ id: string }>(
-      "SELECT id FROM categories WHERE id = '10'",
-    );
-    if (!checkGifts) {
-      db.runSync(
-        'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
-        ['10', t.catGifts, 'expense', 'gift', '#ff4081'],
-      );
-    }
-
-    // Check if Rent category (ID 11) exists
-    const checkRent = db.getFirstSync<{ id: string }>(
-      "SELECT id FROM categories WHERE id = '11'",
-    );
-    if (!checkRent) {
-      db.runSync(
-        'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
-        ['11', t.catRent, 'expense', 'home-city', '#795548'],
-      );
     }
   }
 

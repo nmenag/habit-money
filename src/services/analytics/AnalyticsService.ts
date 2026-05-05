@@ -3,36 +3,70 @@ import { CategoryExpense, MonthlyMetrics } from './types';
 
 export class AnalyticsService {
   private static getMonthDateRange(offset: number = 0) {
-    const date = new Date();
-    date.setMonth(date.getMonth() - offset);
+    const now = new Date();
+    const start = new Date(
+      now.getFullYear(),
+      now.getMonth() - offset,
+      1,
+      0,
+      0,
+      0,
+      0,
+    );
+    const end = new Date(
+      now.getFullYear(),
+      now.getMonth() - offset + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
 
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const formatLocal = (d: Date) =>
+      `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3, '0')}`;
 
-    const start = `${year}-${month}-01T00:00:00.000Z`;
-    const lastDay = new Date(year, date.getMonth() + 1, 0).getDate();
-    const end = `${year}-${month}-${String(lastDay).padStart(2, '0')}T23:59:59.999Z`;
-
-    return { start, end, month: `${year}-${month}` };
+    return {
+      start: formatLocal(start),
+      end: formatLocal(end),
+      month: `${start.getFullYear()}-${pad(start.getMonth() + 1)}`,
+    };
   }
 
   static async getMonthlyMetrics(offset: number = 0): Promise<MonthlyMetrics> {
     const db = getDb();
     const { start, end, month } = this.getMonthDateRange(offset);
 
-    const totals = (await db.getFirstAsync<{
-      income: number;
-      expenses: number;
+    const transactions = await db.getAllAsync<{
+      type: string;
+      amount: number;
+      note: string;
     }>(
       `
-      SELECT
-        SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
-        SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expenses
+      SELECT type, amount, note
       FROM transactions
       WHERE date >= ? AND date <= ?
     `,
       [start, end],
-    )) || { income: 0, expenses: 0 };
+    );
+
+    let income = 0;
+    let expenses = 0;
+    let adjustments = 0;
+
+    const adjustmentNotes = ['Balance Adjustment', 'Ajuste de Saldo'];
+
+    transactions.forEach((t) => {
+      const isAdjustment = t.note && adjustmentNotes.includes(t.note);
+      if (isAdjustment) {
+        adjustments += t.type === 'income' ? t.amount : -t.amount;
+      } else if (t.type === 'income') {
+        income += t.amount;
+      } else if (t.type === 'expense') {
+        expenses += t.amount;
+      }
+    });
 
     const topCategory = await db.getFirstAsync<{
       id: string;
@@ -43,7 +77,9 @@ export class AnalyticsService {
       SELECT c.id, c.name, SUM(t.amount) as amount
       FROM transactions t
       JOIN categories c ON t.categoryId = c.id
-      WHERE t.type = 'expense' AND t.date >= ? AND t.date <= ?
+      WHERE t.type = 'expense'
+        AND t.note NOT IN ('Balance Adjustment', 'Ajuste de Saldo')
+        AND t.date >= ? AND t.date <= ?
       GROUP BY c.id
       ORDER BY amount DESC
       LIMIT 1
@@ -51,15 +87,14 @@ export class AnalyticsService {
       [start, end],
     );
 
-    const income = totals.income || 0;
-    const expenses = totals.expenses || 0;
-    const savings = income - expenses;
-    const savingsRate = income > 0 ? savings / income : 0;
+    const savings = income - expenses + adjustments;
+    const savingsRate = income > 0 ? (income - expenses) / income : 0;
 
     return {
       month,
       income,
       expenses,
+      adjustments,
       savings,
       savingsRate,
       topCategory: topCategory || undefined,
@@ -86,7 +121,9 @@ export class AnalyticsService {
         MAX(c.color) as color
       FROM transactions t
       JOIN categories c ON t.categoryId = c.id
-      WHERE t.type = 'expense' AND t.date >= ? AND t.date <= ?
+      WHERE t.type = 'expense'
+        AND t.note NOT IN ('Balance Adjustment', 'Ajuste de Saldo')
+        AND t.date >= ? AND t.date <= ?
       GROUP BY c.id
       ORDER BY amount DESC
     `,
@@ -109,7 +146,9 @@ export class AnalyticsService {
       `
       SELECT COUNT(DISTINCT substr(date, 1, 10)) as count
       FROM transactions
-      WHERE type = 'expense' AND date >= ? AND date <= ?
+      WHERE type = 'expense'
+        AND note NOT IN ('Balance Adjustment', 'Ajuste de Saldo')
+        AND date >= ? AND date <= ?
     `,
       [start, end],
     );

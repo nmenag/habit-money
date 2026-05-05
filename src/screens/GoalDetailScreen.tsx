@@ -16,6 +16,7 @@ import {
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useStore, useTranslation } from '../store/useStore';
+import { getValidGoalIcon } from '../constants';
 
 export const GoalDetailScreen = () => {
   const params = useLocalSearchParams<{ goalId?: string }>();
@@ -97,7 +98,7 @@ export const GoalDetailScreen = () => {
               ]}
             >
               <Ionicons
-                name={(goal.icon as any) || 'trophy'}
+                name={getValidGoalIcon(goal.icon) as any}
                 size={48}
                 color="#fff"
               />

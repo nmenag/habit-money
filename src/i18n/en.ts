@@ -118,6 +118,9 @@ export const en = {
   updateBudget: 'Update Budget',
   saveBudget: 'Save Budget',
   balanceAdjustment: 'Balance Adjustment',
+  adjustments: 'Adjustments',
+  combinedTotal: 'Combined Total',
+  realIncome: 'Real Income',
   enterAccountName: 'Please enter an account name.',
   enterValidBalance: 'Please enter a valid balance.',
   currentBalanceLabel: 'Current Balance',
@@ -325,7 +328,7 @@ export const en = {
   onboardingDesc:
     'The simplest way to track your expenses and build better financial habits.',
   detectedLanguage: 'Detected Language',
-  detectedCurrency: 'Detected Currency',
+  detectedCurrency: 'Currency',
   getStarted: 'Continue',
   agreeToTermsPrefix: 'By continuing, you agree to our ',
   agreeToTermsAnd: ' and ',
