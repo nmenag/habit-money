@@ -10,6 +10,7 @@ import { Card, FAB, ProgressBar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { Goal, useStore, useTranslation } from '../store/useStore';
+import { getValidGoalIcon } from '../constants';
 
 export const GoalsScreen = () => {
   const { goals, formatCurrency, updateGoalsOrder } = useStore();
@@ -54,7 +55,7 @@ export const GoalsScreen = () => {
                 ]}
               >
                 <Ionicons
-                  name={(item.icon as any) || 'trophy'}
+                  name={getValidGoalIcon(item.icon) as any}
                   size={24}
                   color="#fff"
                 />

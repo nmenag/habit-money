@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
 import { AppTheme, spacing } from '../theme/theme';
+import { getValidCategoryIcon, getValidGoalIcon } from '../constants';
 
 export const DashboardScreen = React.memo(() => {
   const transactions = useStore((s) => s.transactions);
@@ -372,7 +373,7 @@ export const DashboardScreen = React.memo(() => {
               <View style={styles.row}>
                 <Avatar.Icon
                   size={40}
-                  icon={data.topCategory.icon || 'tag'}
+                  icon={getValidCategoryIcon(data.topCategory.icon)}
                   style={{
                     backgroundColor:
                       data.topCategory.color || theme.colors.primary,
@@ -505,7 +506,7 @@ export const DashboardScreen = React.memo(() => {
                             ? 'swap-horizontal'
                             : isAdjustment
                               ? 'scale-balance'
-                              : cat?.icon ||
+                              : getValidCategoryIcon(cat?.icon) ||
                                 (tr.type === 'income' ? 'plus' : 'minus')
                         }
                         style={{

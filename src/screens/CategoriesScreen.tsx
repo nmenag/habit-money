@@ -23,6 +23,7 @@ import {
   useStore,
   useTranslation,
 } from '../store/useStore';
+import { getValidCategoryIcon } from '../constants';
 
 export const CategoriesScreen = () => {
   const { categories, deleteCategory, transactions, updateCategoriesOrder } =
@@ -85,7 +86,7 @@ export const CategoriesScreen = () => {
               ]}
             >
               <MaterialCommunityIcons
-                name={(item.icon as any) || 'tag'}
+                name={getValidCategoryIcon(item.icon) as any}
                 size={22}
                 color="#fff"
               />
