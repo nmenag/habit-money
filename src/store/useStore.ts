@@ -346,7 +346,6 @@ export const useStore = create<AppState>((set, get) => ({
         'currency',
         currency,
       ]);
-      // Also update the default account if it exists and is using the old default
       db.runSync('UPDATE accounts SET currency = ? WHERE id = ?', [
         currency,
         '1',

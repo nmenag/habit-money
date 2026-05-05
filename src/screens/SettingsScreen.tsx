@@ -9,13 +9,13 @@ import {
   Text,
   useTheme,
 } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TimePickerModal } from 'react-native-paper-dates';
-import { BannerAdComponent } from '../components/BannerAdComponent';
-import { useStore, useTranslation } from '../store/useStore';
-import { backupToJSON, restoreFromJSON } from '../utils/dataBackup';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// import { BannerAdComponent } from '../components/BannerAdComponent';
 import * as Localization from 'expo-localization';
 import { NotificationService } from '../services/NotificationService';
+import { useStore, useTranslation } from '../store/useStore';
+import { backupToJSON, restoreFromJSON } from '../utils/dataBackup';
 
 export const SettingsScreen = () => {
   const {
@@ -102,7 +102,7 @@ export const SettingsScreen = () => {
   };
 
   const is24Hour = React.useMemo(() => {
-    return Localization.getLocales()[0]?.use24HourClock ?? false;
+    return (Localization.getLocales()[0] as any)?.use24HourClock ?? false;
   }, []);
 
   const formatDisplayTime = React.useCallback(
