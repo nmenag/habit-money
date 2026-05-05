@@ -51,45 +51,18 @@ export const initDb = () => {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         type TEXT DEFAULT 'expense',
-        icon TEXT,
+        icon TEXT DEFAULT 'tag',
         color TEXT,
         displayOrder INTEGER DEFAULT 0
       );
     `);
 
+    // Set default icon if missing
     db.execSync(
-      "UPDATE categories SET icon = 'controller-classic' WHERE icon = 'game-controller';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'food' WHERE icon = 'fast-food';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'medical-bag' WHERE icon = 'medkit';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'format-list-bulleted' WHERE icon = 'list';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'briefcase' WHERE icon = 'business';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'tshirt-crew' WHERE icon = 'shirt';",
-    );
-    db.execSync("UPDATE categories SET icon = 'coffee' WHERE icon = 'cafe';");
-    db.execSync(
-      "UPDATE categories SET icon = 'dumbbell' WHERE icon = 'fitness';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'music-note' WHERE icon = 'musical-notes';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'hamburger' WHERE icon = 'fast-food';",
-    );
-    db.execSync(
-      "UPDATE categories SET icon = 'baby-carriage' WHERE icon = 'stroller';",
+      "UPDATE categories SET icon = 'tag' WHERE icon IS NULL OR icon = '';",
     );
   } catch (e) {
-    console.error('Error creating/migrating categories table:', e);
+    console.error('Error creating categories table:', e);
   }
 
   try {
@@ -170,15 +143,11 @@ export const initDb = () => {
 
   try {
     db.execSync('ALTER TABLE transactions ADD COLUMN budgetId TEXT;');
-  } catch {
-    // Column might already exist
-  }
+  } catch {}
 
   try {
     db.execSync('ALTER TABLE transactions ADD COLUMN toAccountId TEXT;');
-  } catch {
-    // Column might already exist
-  }
+  } catch {}
 
   try {
     db.execSync(`
@@ -188,20 +157,16 @@ export const initDb = () => {
         targetAmount REAL NOT NULL,
         currentAmount REAL NOT NULL DEFAULT 0,
         color TEXT,
-        icon TEXT,
+        icon TEXT DEFAULT 'trophy',
         deadline TEXT,
         status TEXT DEFAULT 'active',
         displayOrder INTEGER DEFAULT 0
       );
     `);
 
-    // Migrate old icons
     try {
       db.execSync(
-        "UPDATE goals SET icon = 'cash-outline' WHERE icon = 'piggy-bank';",
-      );
-      db.execSync(
-        "UPDATE goals SET icon = 'stats-chart' WHERE icon = 'chart';",
+        "UPDATE goals SET icon = 'trophy' WHERE icon IS NULL OR icon = '';",
       );
     } catch {}
   } catch (e) {
