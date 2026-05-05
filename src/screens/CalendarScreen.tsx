@@ -34,15 +34,19 @@ export const CalendarScreen = () => {
     (acc, curr) => {
       const isAdjustment =
         curr.note && translateName(curr.note) === t('balanceAdjustment');
-      if (curr.type === 'income' && !isAdjustment) acc.income += curr.amount;
-      else if (curr.type === 'expense' && !isAdjustment)
+      if (isAdjustment) {
+        acc.adjustments += curr.type === 'income' ? curr.amount : -curr.amount;
+      } else if (curr.type === 'income') {
+        acc.income += curr.amount;
+      } else if (curr.type === 'expense') {
         acc.expense += curr.amount;
+      }
       return acc;
     },
-    { income: 0, expense: 0 },
+    { income: 0, expense: 0, adjustments: 0 },
   );
 
-  const dailyNet = dayTotals.income - dayTotals.expense;
+  const dailyNet = dayTotals.income - dayTotals.expense + dayTotals.adjustments;
 
   const handleTransactionPress = (transaction: any) => {
     router.push({
@@ -87,6 +91,15 @@ export const CalendarScreen = () => {
                 {dayTotals.expense > 0 && (
                   <Text variant="labelLarge" style={styles.expenseTotal}>
                     -{formatAmount(dayTotals.expense, formatCurrency)}
+                  </Text>
+                )}
+                {dayTotals.adjustments !== 0 && (
+                  <Text
+                    variant="labelSmall"
+                    style={{ color: theme.colors.outline }}
+                  >
+                    {dayTotals.adjustments > 0 ? '+' : ''}
+                    {formatAmount(dayTotals.adjustments, formatCurrency)} (adj)
                   </Text>
                 )}
                 <Text

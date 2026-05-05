@@ -88,10 +88,6 @@ export const initDb = () => {
     db.execSync(
       "UPDATE categories SET icon = 'baby-carriage' WHERE icon = 'stroller';",
     );
-    db.execSync(
-      "UPDATE goals SET icon = 'cash-outline' WHERE icon = 'piggy-bank';",
-    );
-    db.execSync("UPDATE goals SET icon = 'stats-chart' WHERE icon = 'chart';");
   } catch (e) {
     console.error('Error creating/migrating categories table:', e);
   }
@@ -198,6 +194,16 @@ export const initDb = () => {
         displayOrder INTEGER DEFAULT 0
       );
     `);
+
+    // Migrate old icons
+    try {
+      db.execSync(
+        "UPDATE goals SET icon = 'cash-outline' WHERE icon = 'piggy-bank';",
+      );
+      db.execSync(
+        "UPDATE goals SET icon = 'stats-chart' WHERE icon = 'chart';",
+      );
+    } catch {}
   } catch (e) {
     console.error('Error creating goals table:', e);
   }

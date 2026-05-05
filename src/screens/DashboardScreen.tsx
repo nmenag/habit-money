@@ -49,6 +49,7 @@ export const DashboardScreen = React.memo(() => {
     const { currentMonth } = analyticsReport;
     const monthlyIncome = currentMonth.income;
     const monthlyExpenses = currentMonth.expenses;
+    const monthlyAdjustments = currentMonth.adjustments;
     const remainingBalance = currentMonth.savings;
 
     // Accounts & Goals (Small arrays, fast to compute)
@@ -74,6 +75,7 @@ export const DashboardScreen = React.memo(() => {
     return {
       monthlyIncome,
       monthlyExpenses,
+      monthlyAdjustments,
       remainingBalance,
       topCategory,
       topCatAmount,
@@ -206,6 +208,28 @@ export const DashboardScreen = React.memo(() => {
                 </Text>
               </View>
             </View>
+
+            {data.monthlyAdjustments !== 0 && (
+              <View style={[styles.balanceRow, { marginTop: spacing.xs }]}>
+                <Text
+                  variant="labelSmall"
+                  style={{ color: theme.colors.outline, fontWeight: '700' }}
+                >
+                  {t('adjustments').toUpperCase()}
+                </Text>
+                <Text
+                  variant="labelMedium"
+                  style={{
+                    fontWeight: '700',
+                    color: theme.colors.onPrimaryContainer,
+                  }}
+                >
+                  {data.monthlyAdjustments > 0 ? '+' : ''}
+                  {formatCurrency(data.monthlyAdjustments)}
+                </Text>
+              </View>
+            )}
+
             <Divider style={{ marginVertical: spacing.sm, opacity: 0.3 }} />
             <View style={styles.balanceRow}>
               <Text

@@ -14,6 +14,7 @@ export interface MonthlyMetrics {
   month: string;
   income: number;
   expenses: number;
+  adjustments: number;
   savings: number;
   savingsRate: number;
   topCategory?: {
