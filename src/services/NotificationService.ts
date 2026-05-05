@@ -11,12 +11,12 @@ Notifications.setNotificationHandler({
 });
 
 export class NotificationService {
-  private static CHANNEL_ID = 'default';
+  private static CHANNEL_ID = 'habits_money_v2';
 
   static async setupChannel() {
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync(this.CHANNEL_ID, {
-        name: 'Default',
+        name: 'habits_money_v2',
         importance: Notifications.AndroidImportance.HIGH,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#16A34A',

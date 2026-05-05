@@ -39,6 +39,7 @@ export const InsightsScreen = () => {
     let totalIncome = 0;
     let totalExpenses = 0;
     let totalAdjustments = 0;
+    let hasAdjustments = false;
     const catExpMap: Record<string, number> = {};
 
     inRange.forEach((tx) => {
@@ -46,6 +47,7 @@ export const InsightsScreen = () => {
         tx.note && translateName(tx.note) === t('balanceAdjustment');
       if (isAdjustment) {
         totalAdjustments += tx.type === 'income' ? tx.amount : -tx.amount;
+        hasAdjustments = true;
       } else if (tx.type === 'income') {
         totalIncome += tx.amount;
       } else if (tx.type === 'expense') {
@@ -94,6 +96,7 @@ export const InsightsScreen = () => {
       totalIncome,
       totalExpenses,
       totalAdjustments,
+      hasAdjustments,
       combinedIncome,
       savings,
       savingsRate,
@@ -237,38 +240,40 @@ export const InsightsScreen = () => {
             </Text>
           </Surface>
 
-          <Surface
-            style={[
-              styles.miniCard,
-              { backgroundColor: theme.colors.surfaceVariant },
-            ]}
-            elevation={1}
-          >
-            <Ionicons
-              name="options-outline"
-              size={18}
-              color={theme.colors.onSurfaceVariant}
-            />
-            <Text
-              variant="labelSmall"
+          {filtered.hasAdjustments && (
+            <Surface
               style={[
-                styles.miniLabel,
-                { color: theme.colors.onSurfaceVariant },
+                styles.miniCard,
+                { backgroundColor: theme.colors.surfaceVariant },
               ]}
-              numberOfLines={1}
+              elevation={1}
             >
-              {t('adjustments')}
-            </Text>
-            <Text
-              variant="titleSmall"
-              style={[
-                styles.miniValue,
-                { color: theme.colors.onSurfaceVariant, fontSize: 14 },
-              ]}
-            >
-              {formatCurrency(filtered.totalAdjustments)}
-            </Text>
-          </Surface>
+              <Ionicons
+                name="options-outline"
+                size={18}
+                color={theme.colors.onSurfaceVariant}
+              />
+              <Text
+                variant="labelSmall"
+                style={[
+                  styles.miniLabel,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+                numberOfLines={1}
+              >
+                {t('adjustments')}
+              </Text>
+              <Text
+                variant="titleSmall"
+                style={[
+                  styles.miniValue,
+                  { color: theme.colors.onSurfaceVariant, fontSize: 14 },
+                ]}
+              >
+                {formatCurrency(filtered.totalAdjustments)}
+              </Text>
+            </Surface>
+          )}
 
           <Surface
             style={[
@@ -301,7 +306,7 @@ export const InsightsScreen = () => {
           </Surface>
         </View>
 
-        {filtered.totalAdjustments !== 0 && (
+        {filtered.hasAdjustments && filtered.totalAdjustments !== 0 && (
           <View style={{ marginBottom: 12, alignItems: 'center' }}>
             <Text variant="labelSmall" style={{ color: theme.colors.outline }}>
               {t('combinedTotal')}: {formatCurrency(filtered.combinedIncome)}
