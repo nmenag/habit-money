@@ -14,6 +14,7 @@ import { TimePickerModal } from 'react-native-paper-dates';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { useStore, useTranslation } from '../store/useStore';
 import { backupToJSON, restoreFromJSON } from '../utils/dataBackup';
+import * as Localization from 'expo-localization';
 import { NotificationService } from '../services/NotificationService';
 
 export const SettingsScreen = () => {
@@ -28,6 +29,8 @@ export const SettingsScreen = () => {
     notificationTime,
     setNotificationsEnabled,
     setNotificationTime,
+    currency,
+    setCurrency,
   } = useStore();
 
   const toggleNotifications = async () => {
@@ -98,6 +101,21 @@ export const SettingsScreen = () => {
     ]);
   };
 
+  const is24Hour = React.useMemo(() => {
+    return Localization.getLocales()[0]?.use24HourClock ?? false;
+  }, []);
+
+  const formatDisplayTime = React.useCallback(
+    (timeStr: string) => {
+      if (is24Hour) return timeStr;
+      const [hour, minute] = timeStr.split(':').map(Number);
+      const period = hour >= 12 ? 'PM' : 'AM';
+      const h = hour % 12 || 12;
+      return `${h}:${minute.toString().padStart(2, '0')} ${period}`;
+    },
+    [is24Hour],
+  );
+
   const [timePickerVisible, setTimePickerVisible] = React.useState(false);
 
   const onDismissTimePicker = React.useCallback(() => {
@@ -130,6 +148,12 @@ export const SettingsScreen = () => {
     },
     [notificationsEnabled, t, setNotificationTime],
   );
+
+  const CURRENCIES = [
+    { code: 'COP', name: 'COP ($)' },
+    { code: 'USD', name: 'USD ($)' },
+    { code: 'EUR', name: 'EUR (€)' },
+  ];
 
   const SETTINGS_LINKS = [
     { name: t('manageAccounts'), icon: 'wallet-outline', screen: '/accounts' },
@@ -273,6 +297,47 @@ export const SettingsScreen = () => {
 
         <View style={styles.section}>
           <Text variant="labelLarge" style={styles.sectionTitle}>
+            {t('detectedCurrency')}
+          </Text>
+          <Card style={styles.card} mode="contained">
+            {CURRENCIES.map((item, index) => (
+              <View key={item.code}>
+                <List.Item
+                  title={item.name}
+                  left={(props) => (
+                    <View style={styles.languageIndicator}>
+                      <Text
+                        variant="titleMedium"
+                        style={{ fontWeight: 'bold' }}
+                      >
+                        {item.code === 'EUR' ? '€' : '$'}
+                      </Text>
+                    </View>
+                  )}
+                  right={(props) =>
+                    currency === item.code ? (
+                      <List.Icon
+                        {...props}
+                        icon="check-circle"
+                        color={theme.colors.primary}
+                      />
+                    ) : null
+                  }
+                  onPress={() => setCurrency(item.code)}
+                  style={
+                    currency === item.code
+                      ? { backgroundColor: theme.colors.primaryContainer }
+                      : undefined
+                  }
+                />
+                {index < CURRENCIES.length - 1 && <Divider />}
+              </View>
+            ))}
+          </Card>
+        </View>
+
+        <View style={styles.section}>
+          <Text variant="labelLarge" style={styles.sectionTitle}>
             {t('theme')}
           </Text>
           <Card style={styles.card} mode="contained">
@@ -328,7 +393,7 @@ export const SettingsScreen = () => {
                 <Divider />
                 <List.Item
                   title={t('notificationTime') || 'Reminder Time'}
-                  description={notificationTime}
+                  description={formatDisplayTime(notificationTime)}
                   left={(props) => (
                     <List.Icon {...props} icon="clock-outline" />
                   )}
@@ -407,6 +472,7 @@ export const SettingsScreen = () => {
         onConfirm={onConfirmTimePicker}
         hours={parseInt(notificationTime.split(':')[0], 10)}
         minutes={parseInt(notificationTime.split(':')[1], 10)}
+        use24HourClock={is24Hour}
       />
     </View>
   );

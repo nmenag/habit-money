@@ -97,6 +97,7 @@ interface AppState {
   setThemePreference: (theme: 'light' | 'dark' | 'system') => void;
   setNotificationsEnabled: (enabled: boolean) => void;
   setNotificationTime: (time: string) => void;
+  setCurrency: (currency: string) => void;
   addAccount: (account: Account) => void;
   editAccount: (account: Account) => void;
   deleteAccount: (id: string) => void;
@@ -333,6 +334,26 @@ export const useStore = create<AppState>((set, get) => ({
       ]);
     } catch (error) {
       console.error('setNotificationTime DB Error:', error);
+    }
+  },
+
+  setCurrency: (currency: string) => {
+    const currencySymbol = currency === 'EUR' ? '€' : '$';
+    set({ currency, currencySymbol });
+    try {
+      const db = getDb();
+      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+        'currency',
+        currency,
+      ]);
+      // Also update the default account if it exists and is using the old default
+      db.runSync('UPDATE accounts SET currency = ? WHERE id = ?', [
+        currency,
+        '1',
+      ]);
+      get().loadData();
+    } catch (error) {
+      console.error('setCurrency DB Error:', error);
     }
   },
 

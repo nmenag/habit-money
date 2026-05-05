@@ -328,7 +328,7 @@ export const en = {
   onboardingDesc:
     'The simplest way to track your expenses and build better financial habits.',
   detectedLanguage: 'Detected Language',
-  detectedCurrency: 'Detected Currency',
+  detectedCurrency: 'Currency',
   getStarted: 'Continue',
   agreeToTermsPrefix: 'By continuing, you agree to our ',
   agreeToTermsAnd: ' and ',
