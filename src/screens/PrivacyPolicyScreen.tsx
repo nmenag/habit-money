@@ -93,9 +93,6 @@ export const PrivacyPolicyScreen = () => {
               {t('contactEmailAddress')}
             </Text>
           )}
-          {index < POLICY_SECTIONS.length - 1 && (
-            <Divider style={styles.sectionDivider} />
-          )}
         </View>
       ))}
     </ScrollView>
@@ -108,41 +105,40 @@ const createStyles = (theme: any) =>
       flex: 1,
     },
     header: {
-      marginBottom: 24,
+      marginBottom: 32,
     },
     title: {
-      fontWeight: 'bold',
+      fontWeight: '900',
       color: theme.colors.onBackground,
+      letterSpacing: 0.5,
     },
     lastUpdated: {
-      marginTop: 4,
+      marginTop: 8,
       color: theme.colors.onSurfaceVariant,
-      opacity: 0.7,
+      fontWeight: '500',
     },
     divider: {
       marginBottom: 32,
+      opacity: 0.5,
     },
     section: {
-      marginBottom: 24,
+      marginBottom: 36,
     },
     sectionTitle: {
-      marginBottom: 8,
-      fontWeight: 'bold',
-      color: theme.colors.primary,
+      marginBottom: 12,
+      fontWeight: '800',
+      color: theme.colors.onSurface,
+      letterSpacing: 0.3,
     },
     sectionContent: {
-      lineHeight: 22,
-      color: theme.colors.onBackground,
+      lineHeight: 24,
+      color: theme.colors.onSurfaceVariant,
+      fontSize: 16,
     },
     link: {
-      marginTop: 8,
+      marginTop: 12,
       color: theme.colors.primary,
-      textDecorationLine: 'underline',
       fontWeight: '600',
-    },
-    sectionDivider: {
-      marginTop: 24,
-      opacity: 0.3,
     },
     footer: {
       marginTop: 24,

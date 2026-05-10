@@ -44,6 +44,7 @@ export const es = {
     'Exporta todos los datos de la app a un archivo JSON para respaldo.',
   restoreData: 'Restaurar Datos (JSON)',
   restoreDataDesc: 'Importa datos desde un archivo JSON de respaldo.',
+  dataManagement: 'Gestión de Datos',
   restoreConfirm:
     '¿Estás seguro de que deseas restaurar los datos? Esto sobrescribirá tus datos actuales y no se puede deshacer.',
   restoreSuccess: '¡Datos restaurados con éxito!',
@@ -268,6 +269,7 @@ export const es = {
   filterByCategory: 'Categoría',
   allAccounts: 'Todas las Cuentas',
   allCategories: 'Todas las Categorías',
+  allTypes: 'Todo',
   filters: 'Filtros',
   clearFilters: 'Limpiar',
   noDataForPeriod: 'Sin datos para este periodo',

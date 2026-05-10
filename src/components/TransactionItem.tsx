@@ -10,6 +10,7 @@ import {
   useTranslation,
 } from '../store/useStore';
 import { spacing, AppTheme } from '../theme/theme';
+import { getValidCategoryIcon } from '../constants';
 
 interface Props {
   transaction: Transaction;
@@ -60,22 +61,19 @@ export const TransactionItem: React.FC<Props> = memo(
         );
       }
 
-      const displayName = category?.name ? translateName(category.name) : '?';
-      const firstLetter =
-        displayName && displayName.length > 0
-          ? displayName[0].toUpperCase()
-          : '?';
+      const iconName =
+        getValidCategoryIcon(category?.icon) || (isIncome ? 'plus' : 'minus');
 
       return (
-        <Avatar.Text
+        <Avatar.Icon
           {...props}
           size={40}
-          label={firstLetter}
+          icon={iconName}
           style={[
             styles.avatar,
             { backgroundColor: category?.color || theme.colors.surfaceVariant },
           ]}
-          labelStyle={{ color: theme.colors.onPrimary }}
+          color={theme.colors.onPrimary}
         />
       );
     };

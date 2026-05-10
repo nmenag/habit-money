@@ -56,10 +56,18 @@ export const AboutScreen = () => {
           <Text variant="labelLarge" style={styles.infoLabel}>
             {t('version')}
           </Text>
-          <Text variant="bodyMedium">{version}</Text>
+          <Text variant="bodyMedium" style={styles.infoValue}>
+            {version}
+          </Text>
         </View>
 
-        <TouchableOpacity style={styles.infoRow} onPress={handleEmail}>
+        <Divider style={{ opacity: 0.5 }} />
+
+        <TouchableOpacity
+          style={styles.infoRow}
+          onPress={handleEmail}
+          activeOpacity={0.7}
+        >
           <Text variant="labelLarge" style={styles.infoLabel}>
             {t('contactEmailLabel')}
           </Text>
@@ -85,58 +93,66 @@ const createStyles = (theme: any) =>
     },
     header: {
       alignItems: 'center',
-      marginBottom: 32,
+      marginBottom: 40,
     },
     logoImage: {
-      width: 100,
-      height: 100,
+      width: 96,
+      height: 96,
       borderRadius: 24,
-      marginBottom: 16,
-      elevation: 4,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: 'rgba(0,0,0,0.05)',
     },
     appName: {
-      fontWeight: 'bold',
+      fontWeight: '900',
       color: theme.colors.onBackground,
       marginBottom: 12,
+      letterSpacing: 0.5,
     },
     appDescription: {
       textAlign: 'center',
       color: theme.colors.onSurfaceVariant,
-      lineHeight: 22,
+      lineHeight: 24,
+      paddingHorizontal: 16,
     },
     divider: {
-      marginBottom: 24,
+      marginBottom: 32,
+      opacity: 0.5,
     },
     infoSection: {
       backgroundColor: theme.colors.surface,
       borderRadius: 16,
-      padding: 16,
-      elevation: 1,
+      paddingHorizontal: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
     },
     infoRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingVertical: 12,
+      paddingVertical: 16,
     },
     infoLabel: {
       color: theme.colors.onSurfaceVariant,
+      fontWeight: '700',
+      letterSpacing: 0.3,
+    },
+    infoValue: {
       fontWeight: '600',
+      color: theme.colors.onSurface,
     },
     link: {
       color: theme.colors.primary,
-      textDecorationLine: 'underline',
+      fontWeight: '600',
     },
     footer: {
-      marginTop: 40,
+      marginTop: 48,
       alignItems: 'center',
     },
     copyright: {
       color: theme.colors.onSurfaceVariant,
       opacity: 0.7,
+      fontWeight: '500',
+      letterSpacing: 0.5,
     },
   });
