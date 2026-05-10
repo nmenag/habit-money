@@ -134,7 +134,7 @@ export const TransactionsScreen = () => {
             styles.searchbar,
             { backgroundColor: theme.colors.surfaceVariant },
           ]}
-          inputStyle={{ fontSize: 14 }}
+          inputStyle={styles.searchInput}
           iconColor={theme.colors.onSurfaceVariant}
           elevation={0}
         />
@@ -356,6 +356,14 @@ const defaultStyles = (theme: any) =>
     searchbar: {
       height: 44,
       borderRadius: 12,
+      justifyContent: 'center',
+    },
+    searchInput: {
+      fontSize: 14,
+      alignSelf: 'center',
+      paddingVertical: 0,
+      marginVertical: 0,
+      minHeight: 0,
     },
     secondaryFiltersRow: {
       flexDirection: 'row',
