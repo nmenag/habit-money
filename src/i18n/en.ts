@@ -43,6 +43,7 @@ export const en = {
   backupDataDesc: 'Export all app data to a JSON file for backup.',
   restoreData: 'Restore Data (JSON)',
   restoreDataDesc: 'Import data from a backup JSON file.',
+  dataManagement: 'Data Management',
   restoreConfirm:
     'Are you sure you want to restore data? This will overwrite your current data and cannot be undone.',
   restoreSuccess: 'Data restored successfully!',
@@ -261,6 +262,7 @@ export const en = {
   filterByCategory: 'Category',
   allAccounts: 'All Accounts',
   allCategories: 'All Categories',
+  allTypes: 'All',
   filters: 'Filters',
   clearFilters: 'Clear',
   noDataForPeriod: 'No data for this period',

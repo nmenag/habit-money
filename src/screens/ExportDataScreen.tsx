@@ -190,7 +190,7 @@ export const ExportDataScreen = () => {
                 title={t('type')}
                 description={
                   selectedType === 'all'
-                    ? t('allTime' as any)
+                    ? t('allTypes' as any)
                     : t(selectedType as any)
                 }
                 left={(props) => <List.Icon {...props} icon="swap-vertical" />}
@@ -200,7 +200,7 @@ export const ExportDataScreen = () => {
             }
           >
             <Menu.Item
-              title={t('allTime' as any)}
+              title={t('allTypes' as any)}
               onPress={() => {
                 setSelectedType('all');
                 setTypeMenuOpen(false);

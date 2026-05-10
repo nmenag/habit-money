@@ -216,7 +216,7 @@ export const SettingsScreen = () => {
 
         <View style={styles.section}>
           <Text variant="labelLarge" style={styles.sectionTitle}>
-            {t('settings')}
+            {t('dataManagement')}
           </Text>
           <Card style={styles.card} mode="contained">
             <List.Item
