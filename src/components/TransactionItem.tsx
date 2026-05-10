@@ -61,7 +61,8 @@ export const TransactionItem: React.FC<Props> = memo(
         );
       }
 
-      const iconName = getValidCategoryIcon(category?.icon) || (isIncome ? 'plus' : 'minus');
+      const iconName =
+        getValidCategoryIcon(category?.icon) || (isIncome ? 'plus' : 'minus');
 
       return (
         <Avatar.Icon
