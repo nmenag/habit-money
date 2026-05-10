@@ -114,6 +114,38 @@ erDiagram
 | `budgetId`    | TEXT | REFERENCES budgets    | Link to a specific budget limit.     |
 | `note`        | TEXT |                       | User description.                    |
 
+### 📊 `budgets`
+
+| Column         | Type    | Constraints           | Description                            |
+| :------------- | :------ | :-------------------- | :------------------------------------- |
+| `id`           | TEXT    | PRIMARY KEY           | Unique identifier.                     |
+| `name`         | TEXT    | NOT NULL              | Budget label/name.                     |
+| `amount`       | REAL    | NOT NULL              | Monthly spending limit.                |
+| `color`        | TEXT    |                       | Hexadecimal representation of UI color.|
+| `categoryId`   | TEXT    | REFERENCES categories | Associated category (optional).        |
+| `displayOrder` | INTEGER | DEFAULT 0             | Order for manual reordering.           |
+
+### 🎯 `goals`
+
+| Column          | Type    | Constraints       | Description                            |
+| :-------------- | :------ | :---------------- | :------------------------------------- |
+| `id`            | TEXT    | PRIMARY KEY       | Unique identifier.                     |
+| `name`          | TEXT    | NOT NULL          | Goal description/name.                 |
+| `targetAmount`  | REAL    | NOT NULL          | Financial target amount.               |
+| `currentAmount` | REAL    | DEFAULT 0         | Amount saved so far.                   |
+| `color`         | TEXT    |                   | Hexadecimal representation of UI color.|
+| `icon`          | TEXT    | DEFAULT 'trophy'  | MaterialCommunityIcon icon name.       |
+| `deadline`      | TEXT    |                   | ISO target date.                       |
+| `status`        | TEXT    | DEFAULT 'active'  | `active` or `reached`.                 |
+| `displayOrder`  | INTEGER | DEFAULT 0         | Order for manual reordering.           |
+
+### ⚙️ `settings`
+
+| Column | Type | Constraints | Description                      |
+| :----- | :--- | :---------- | :------------------------------- |
+| `id`   | TEXT | PRIMARY KEY | Setting key (e.g., 'currency').  |
+| `val`  | TEXT | NOT NULL    | Setting value.                   |
+
 ---
 
 ## ⚡ Performance Optimization

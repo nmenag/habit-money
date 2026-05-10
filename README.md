@@ -10,7 +10,7 @@ Habit Money is a modern, high-performance personal finance tracker built with **
 - **Full Localization (i18n)**: Comprehensive support for English and Spanish, including localized default categories and financial insights.
 - **Visual Financial Health**:
   - **Dynamic Dashboard**: Real-time overview of net balance and monthly cash flow.
-  - **Interactive Insights**: Smart analysis of spending growth, savings rates, and frequency alerts.
+  - **Interactive Insights**: Smart analysis of spending growth, savings rates, frequency alerts, and accurate separation of real income from balance adjustments.
   - **Expense Charts**: Beautiful pie and bar charts visualizing category-wise spending and month-over-month growth.
 
 - **Smart Management**:

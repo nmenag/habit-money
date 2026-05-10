@@ -33,9 +33,9 @@ graph TD
 - **`/src/db`**: Database schema, initialization, and direct SQLite commands.
 - **`/src/i18n`**: Multi-language support (EN/ES) and translation files.
 - **`/src/screens`**: Feature-specific views (Dashboard, Settings, Goals, etc.).
-- **`/src/services`**: Complex business logic, calculation engines, and third-party integrations (AdMob).
+- **`/src/services`**: Complex business logic (`AnalyticsService`, `InsightEngine`), local reminders (`NotificationService`), and third-party integrations (AdMob).
 - **`/src/store`**: Centralized state management using Zustand. Handles persistence of critical settings.
-- **`/src/utils`**: Date formatters, CSV export logic, and mathematical helpers.
+- **`/src/utils`**: Date formatters, CSV export logic, JSON backup/restore mechanisms, and mathematical helpers.
 
 ---
 
@@ -57,9 +57,10 @@ We use **Zustand** for lightweight, performant state management.
 - All financial data is stored locally.
 - **`src/db/schema.ts`** handles table creation, indexing, and migrations.
 
-### 4. Service Layer (Analytics & Insights)
+### 4. Service Layer (Analytics, Insights, & Notifications)
 
-The **InsightEngine** analyze user data in real-time to generate financial health scores and spending alerts. This logic is separated from the UI to ensure testability and performance.
+- **`AnalyticsService` & `InsightEngine`**: Analyzes user data in real-time to generate financial health scores, tracking metrics (e.g., real income vs. balance adjustments), and spending alerts. This logic is decoupled from the UI to ensure testability and performance.
+- **`NotificationService`**: Handles scheduling and canceling of local daily/weekly reminders to encourage consistent app usage.
 
 ### 5. Localization (i18n)
 
