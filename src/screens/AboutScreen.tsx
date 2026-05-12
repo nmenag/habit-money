@@ -56,7 +56,12 @@ export const AboutScreen = () => {
           <Text variant="labelLarge" style={styles.infoLabel}>
             {t('version')}
           </Text>
-          <Text variant="bodyMedium" style={styles.infoValue}>
+          <Text
+            variant="bodyMedium"
+            style={styles.infoValue}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
             {version}
           </Text>
         </View>
@@ -71,7 +76,12 @@ export const AboutScreen = () => {
           <Text variant="labelLarge" style={styles.infoLabel}>
             {t('contactEmailLabel')}
           </Text>
-          <Text variant="bodyMedium" style={styles.link}>
+          <Text
+            variant="bodyMedium"
+            style={styles.link}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
             {t('contactEmailAddress')}
           </Text>
         </TouchableOpacity>
@@ -131,19 +141,25 @@ const createStyles = (theme: any) =>
       justifyContent: 'space-between',
       alignItems: 'center',
       paddingVertical: 16,
+      gap: 12,
     },
     infoLabel: {
       color: theme.colors.onSurfaceVariant,
       fontWeight: '700',
       letterSpacing: 0.3,
+      flexShrink: 0,
     },
     infoValue: {
       fontWeight: '600',
       color: theme.colors.onSurface,
+      flexShrink: 1,
+      textAlign: 'right',
     },
     link: {
       color: theme.colors.primary,
       fontWeight: '600',
+      flexShrink: 1,
+      textAlign: 'right',
     },
     footer: {
       marginTop: 48,

@@ -280,7 +280,7 @@ export const es = {
   appDescription:
     'Habit Money es una herramienta simple y poderosa diseñada para ayudarte a rastrear tus gastos, gestionar presupuestos y alcanzar tus metas financieras. Todos tus datos se almacenan localmente en tu dispositivo.',
   version: 'Versión',
-  contactEmailLabel: 'Correo de Contacto',
+  contactEmailLabel: 'Email',
   dataCollectionTitle: 'Recopilación de Datos',
   dataCollectionContent:
     'Habit Money NO recopila ningún dato personal. Toda la información que ingresas (transacciones, cuentas, metas) se almacena localmente en tu dispositivo y nunca se sube a nuestros servidores.',

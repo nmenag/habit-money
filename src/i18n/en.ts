@@ -273,7 +273,7 @@ export const en = {
   appDescription:
     'Habit Money is a simple and powerful tool designed to help you track your expenses, manage budgets, and reach your financial goals. All your data is stored locally on your device.',
   version: 'Version',
-  contactEmailLabel: 'Contact Email',
+  contactEmailLabel: 'Email',
   website: 'Website',
   dataCollectionTitle: 'Data Collection',
   dataCollectionContent:
