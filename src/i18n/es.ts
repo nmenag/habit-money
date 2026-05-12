@@ -99,6 +99,7 @@ export const es = {
   catInvestments: 'Inversiones',
   catGifts: 'Regalos',
   catRent: 'Arriendo',
+  catBills: 'Facturas e Impuestos',
   error: 'Error',
   enterValidAmount: 'Por favor ingresa un monto válido.',
   selectAccount: 'Por favor selecciona una cuenta.',

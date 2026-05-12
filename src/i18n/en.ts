@@ -96,6 +96,7 @@ export const en = {
   catInvestments: 'Investments',
   catGifts: 'Gifts',
   catRent: 'Rent',
+  catBills: 'Bills & Taxes',
   error: 'Error',
   enterValidAmount: 'Please enter a valid amount.',
   selectAccount: 'Please select an account.',

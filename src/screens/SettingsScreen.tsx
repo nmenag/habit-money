@@ -1,3 +1,4 @@
+import * as Localization from 'expo-localization';
 import { router } from 'expo-router';
 import React from 'react';
 import { Alert, Linking, ScrollView, StyleSheet, View } from 'react-native';
@@ -11,8 +12,7 @@ import {
 } from 'react-native-paper';
 import { TimePickerModal } from 'react-native-paper-dates';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-// import { BannerAdComponent } from '../components/BannerAdComponent';
-import * as Localization from 'expo-localization';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 import { NotificationService } from '../services/NotificationService';
 import { useStore, useTranslation } from '../store/useStore';
 import { backupToJSON, restoreFromJSON } from '../utils/dataBackup';
@@ -465,7 +465,7 @@ export const SettingsScreen = () => {
         </View>
         <View style={{ height: 20 }} />
       </ScrollView>
-      {/* <BannerAdComponent /> */}
+      <BannerAdComponent />
       <TimePickerModal
         visible={timePickerVisible}
         onDismiss={onDismissTimePicker}

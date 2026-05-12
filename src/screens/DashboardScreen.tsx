@@ -16,9 +16,9 @@ import {
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
+import { getValidCategoryIcon } from '../constants';
 import { useStore, useTranslation } from '../store/useStore';
 import { AppTheme, spacing } from '../theme/theme';
-import { getValidCategoryIcon, getValidGoalIcon } from '../constants';
 
 export const DashboardScreen = React.memo(() => {
   const transactions = useStore((s) => s.transactions);
@@ -43,7 +43,6 @@ export const DashboardScreen = React.memo(() => {
     }
   }, [analyticsReport, refreshAnalytics]);
 
-  // 3. Data layer - optimized mapping from report
   const financialData = useMemo(() => {
     if (!analyticsReport) return null;
 
@@ -53,18 +52,15 @@ export const DashboardScreen = React.memo(() => {
     const monthlyAdjustments = currentMonth.adjustments;
     const remainingBalance = currentMonth.savings;
 
-    // Accounts & Goals (Small arrays, fast to compute)
     const totalBalance = accounts.reduce((sum, a) => sum + a.currentBalance, 0);
     const activeGoals = goals.filter((g) => g.status === 'active').slice(0, 2);
     const recentTransactions = transactions.slice(0, 5);
 
-    // Budgeting logic
     const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
     const limit = totalBudget > 0 ? totalBudget : monthlyIncome;
     const ratio = limit > 0 ? monthlyExpenses / limit : 0;
     const progress = Math.min(ratio, 1);
 
-    // Top Category
     const topCatId = currentMonth.topCategory?.id;
     const topCategory = topCatId
       ? categories.find((c) => c.id === topCatId)
@@ -92,7 +88,6 @@ export const DashboardScreen = React.memo(() => {
     };
   }, [analyticsReport, accounts, goals, transactions, budgets, categories]);
 
-  // 4. UI Layer - derive colors and messages from financial data
   const uiData = useMemo(() => {
     if (!financialData) return null;
 
@@ -590,7 +585,7 @@ export const DashboardScreen = React.memo(() => {
         <View style={{ height: 20 }} />
       </ScrollView>
 
-      {/* <BannerAdComponent /> */}
+      <BannerAdComponent />
 
       <FAB
         icon="plus"

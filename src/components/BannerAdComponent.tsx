@@ -35,6 +35,7 @@ export const BannerAdComponent = () => {
         }}
         onAdFailedToLoad={(error) => {
           if (__DEV__) console.warn('Banner Ad failed to load: ', error);
+          setLoadError(true);
         }}
       />
     </View>

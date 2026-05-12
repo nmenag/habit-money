@@ -37,6 +37,7 @@ export const CURRENCIES = [
 ];
 
 export const CATEGORY_ICONS = [
+  'receipt',
   'food',
   'car',
   'bus',

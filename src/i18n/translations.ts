@@ -27,6 +27,8 @@ export const nameToKeyMapping: Record<string, string> = {
   Regalos: 'catGifts',
   Rent: 'catRent',
   Arriendo: 'catRent',
+  'Bills & Taxes': 'catBills',
+  'Facturas e Impuestos': 'catBills',
   Bank: 'defaultAccountName',
   Banco: 'defaultAccountName',
   Main: 'defaultAccountName',

@@ -213,6 +213,13 @@ export const initDb = () => {
         icon: 'home-city',
         color: '#795548',
       },
+      {
+        id: '12',
+        name: t.catBills,
+        type: 'expense',
+        icon: 'receipt',
+        color: '#ff5722',
+      },
     ];
 
     const statement = db.prepareSync(
@@ -230,6 +237,26 @@ export const initDb = () => {
       });
     } finally {
       statement.finalizeSync();
+    }
+  } else {
+    // Ensure existing databases get the new category if missing
+    try {
+      const billsCat = db.getFirstSync<{ id: string }>(
+        "SELECT id FROM categories WHERE id = '12' OR name = ? OR name = ?",
+        [t.catBills, 'Bills & Taxes'],
+      );
+      if (!billsCat) {
+        const maxOrder = db.getFirstSync<{ maxOrder: number }>(
+          'SELECT MAX(displayOrder) as maxOrder FROM categories',
+        );
+        const displayOrder = (maxOrder?.maxOrder || 0) + 1;
+        db.runSync(
+          'INSERT INTO categories (id, name, type, icon, color, displayOrder) VALUES (?, ?, ?, ?, ?, ?)',
+          ['12', t.catBills, 'expense', 'receipt', '#ff5722', displayOrder],
+        );
+      }
+    } catch (e) {
+      console.error('Error adding Bills & Taxes category to existing DB:', e);
     }
   }
 
