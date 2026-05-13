@@ -95,6 +95,8 @@ export const TransactionItem: React.FC<Props> = memo(
                     : theme.colors.error,
               },
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
           >
             {isTransfer ? '' : isIncome ? '+' : '-'}
             {formatCurrency(transaction.amount, accountCurrency)}
@@ -136,9 +138,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.05)',
   },
-  rightContainer: {
+   rightContainer: {
     justifyContent: 'center',
     paddingRight: spacing.sm,
+    flexShrink: 1,
+    marginLeft: spacing.sm,
   },
   avatar: {
     borderRadius: 12,
