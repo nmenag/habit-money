@@ -8,7 +8,7 @@ const baseWidth = 375;
 
 export const scale = (size: number) => (SCREEN_WIDTH / baseWidth) * size;
 
-export const moderateScale = (size: number, factor = 0.5) => 
+export const moderateScale = (size: number, factor = 0.5) =>
   size + (scale(size) - size) * factor;
 
 export const fontScale = (size: number) => {

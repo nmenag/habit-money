@@ -82,7 +82,11 @@ export const BudgetDetailScreen = () => {
               <View style={styles.headerRow}>
                 <Text
                   variant="titleMedium"
-                  style={{ fontWeight: '700', flexShrink: 1, fontSize: fontScale(16) }}
+                  style={{
+                    fontWeight: '700',
+                    flexShrink: 1,
+                    fontSize: fontScale(16),
+                  }}
                   numberOfLines={1}
                   adjustsFontSizeToFit
                 >

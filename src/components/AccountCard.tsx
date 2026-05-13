@@ -79,7 +79,7 @@ export const AccountCard: React.FC<Props> = ({
             <Ionicons
               name={getAccountIcon(account.type) as any}
               size={24}
-              color="#fff"
+              color={theme.colors.onPrimary}
             />
           </View>
           <View style={styles.textContainer}>

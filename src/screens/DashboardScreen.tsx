@@ -192,7 +192,13 @@ export const DashboardScreen = React.memo(() => {
                   {formatCurrency(data.monthlyIncome)}
                 </Text>
               </View>
-              <View style={{ flex: 1, alignItems: 'flex-end', marginLeft: spacing.sm }}>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: 'flex-end',
+                  marginLeft: spacing.sm,
+                }}
+              >
                 <Text
                   variant="labelSmall"
                   style={{
@@ -221,7 +227,11 @@ export const DashboardScreen = React.memo(() => {
               <View style={[styles.balanceRow, { marginTop: spacing.xs }]}>
                 <Text
                   variant="labelSmall"
-                  style={{ color: theme.colors.outline, fontWeight: '700', flex: 1 }}
+                  style={{
+                    color: theme.colors.outline,
+                    fontWeight: '700',
+                    flex: 1,
+                  }}
                   numberOfLines={1}
                 >
                   {t('adjustments').toUpperCase()}
@@ -276,8 +286,13 @@ export const DashboardScreen = React.memo(() => {
         <Card style={styles.card} mode="elevated">
           <Card.Content>
             <View style={styles.cardHeader}>
-              <Text variant="titleMedium" style={{ flex: 1 }}>{t('accounts')}</Text>
-              <TouchableOpacity onPress={() => router.push('/accounts')}>
+              <Text variant="titleMedium" style={{ flex: 1 }}>
+                {t('accounts')}
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push('/accounts')}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
                 <Text
                   variant="labelLarge"
                   style={{ color: theme.colors.primary, marginLeft: 8 }}
@@ -335,7 +350,11 @@ export const DashboardScreen = React.memo(() => {
                   </View>
                   <Text
                     variant="bodyLarge"
-                    style={{ fontWeight: 'bold', flexShrink: 1, textAlign: 'right' }}
+                    style={{
+                      fontWeight: 'bold',
+                      flexShrink: 1,
+                      textAlign: 'right',
+                    }}
                     numberOfLines={1}
                     adjustsFontSizeToFit
                   >
@@ -352,10 +371,17 @@ export const DashboardScreen = React.memo(() => {
         <Card style={styles.card} mode="elevated">
           <Card.Content>
             <View style={styles.cardHeader}>
-              <Text variant="titleMedium" style={{ flex: 1 }}>{t('spendingProgress')}</Text>
+              <Text variant="titleMedium" style={{ flex: 1 }}>
+                {t('spendingProgress')}
+              </Text>
               <Text
                 variant="titleSmall"
-                style={{ fontWeight: 'bold', flexShrink: 1, textAlign: 'right', marginLeft: 8 }}
+                style={{
+                  fontWeight: 'bold',
+                  flexShrink: 1,
+                  textAlign: 'right',
+                  marginLeft: 8,
+                }}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
@@ -384,7 +410,12 @@ export const DashboardScreen = React.memo(() => {
               {data.limit > 0 && (
                 <Text
                   variant="labelSmall"
-                  style={{ color: theme.colors.outline, flex: 1, textAlign: 'right', marginLeft: 8 }}
+                  style={{
+                    color: theme.colors.outline,
+                    flex: 1,
+                    textAlign: 'right',
+                    marginLeft: 8,
+                  }}
                   numberOfLines={1}
                   adjustsFontSizeToFit
                 >
@@ -423,7 +454,11 @@ export const DashboardScreen = React.memo(() => {
                 </View>
                 <Text
                   variant="titleMedium"
-                  style={{ fontWeight: 'bold', flexShrink: 1, textAlign: 'right' }}
+                  style={{
+                    fontWeight: 'bold',
+                    flexShrink: 1,
+                    textAlign: 'right',
+                  }}
                   numberOfLines={1}
                   adjustsFontSizeToFit
                 >
@@ -472,8 +507,13 @@ export const DashboardScreen = React.memo(() => {
           <Card style={styles.card} mode="elevated">
             <Card.Content>
               <View style={styles.cardHeader}>
-                <Text variant="titleMedium" style={{ flex: 1 }}>{t('goals')}</Text>
-                <TouchableOpacity onPress={() => router.push('/goals')}>
+                <Text variant="titleMedium" style={{ flex: 1 }}>
+                  {t('goals')}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => router.push('/goals')}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
                   <Text
                     variant="labelLarge"
                     style={{ color: theme.colors.primary, marginLeft: 8 }}
@@ -486,12 +526,19 @@ export const DashboardScreen = React.memo(() => {
                 data.activeGoals.map((goal) => (
                   <View key={goal.id} style={{ marginBottom: 16 }}>
                     <View style={styles.cardHeader}>
-                      <Text variant="bodyMedium" style={{ fontWeight: 'bold', flex: 1 }}>
+                      <Text
+                        variant="bodyMedium"
+                        style={{ fontWeight: 'bold', flex: 1 }}
+                      >
                         {goal.name}
                       </Text>
                       <Text
                         variant="labelSmall"
-                        style={{ flexShrink: 1, textAlign: 'right', marginLeft: 8 }}
+                        style={{
+                          flexShrink: 1,
+                          textAlign: 'right',
+                          marginLeft: 8,
+                        }}
                         numberOfLines={1}
                         adjustsFontSizeToFit
                       >
@@ -525,8 +572,13 @@ export const DashboardScreen = React.memo(() => {
         <Card style={styles.card} mode="elevated">
           <Card.Content>
             <View style={[styles.cardHeader, { marginBottom: 12 }]}>
-              <Text variant="titleMedium" style={{ flex: 1 }}>{t('recentTransactions')}</Text>
-              <TouchableOpacity onPress={() => router.push('/transactions')}>
+              <Text variant="titleMedium" style={{ flex: 1 }}>
+                {t('recentTransactions')}
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push('/transactions')}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
                 <Text
                   variant="labelLarge"
                   style={{ color: theme.colors.primary, marginLeft: 8 }}
@@ -561,7 +613,7 @@ export const DashboardScreen = React.memo(() => {
                                 ? theme.colors.surfaceVariant
                                 : cat?.color ||
                                   (tr.type === 'income'
-                                    ? '#16A34A'
+                                    ? theme.colors.income
                                     : theme.colors.error),
                         }}
                         color={

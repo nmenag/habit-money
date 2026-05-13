@@ -233,7 +233,10 @@ export const InsightsScreen = () => {
               variant="titleSmall"
               style={[
                 styles.miniValue,
-                { color: (theme.colors as any).income, fontSize: fontScale(14) },
+                {
+                  color: (theme.colors as any).income,
+                  fontSize: fontScale(14),
+                },
               ]}
               numberOfLines={1}
               adjustsFontSizeToFit
@@ -269,7 +272,10 @@ export const InsightsScreen = () => {
                 variant="titleSmall"
                 style={[
                   styles.miniValue,
-                  { color: theme.colors.onSurfaceVariant, fontSize: fontScale(14) },
+                  {
+                    color: theme.colors.onSurfaceVariant,
+                    fontSize: fontScale(14),
+                  },
                 ]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
@@ -428,7 +434,11 @@ export const InsightsScreen = () => {
                       variant="bodySmall"
                       style={[
                         styles.legendAmount,
-                        { color: theme.colors.onSurface, flexShrink: 1, textAlign: 'right' },
+                        {
+                          color: theme.colors.onSurface,
+                          flexShrink: 1,
+                          textAlign: 'right',
+                        },
                       ]}
                       numberOfLines={1}
                       adjustsFontSizeToFit
@@ -525,7 +535,7 @@ export const InsightsScreen = () => {
               return (
                 <Card
                   key={insight.id}
-                  style={[styles.insightCard, { borderLeftColor: iconColor }]}
+                  style={styles.insightCard}
                   mode="elevated"
                 >
                   <Card.Content style={styles.insightContent}>
@@ -699,9 +709,9 @@ const defaultStyles = (theme: any) =>
     },
     insightCard: {
       marginBottom: 12,
-      borderRadius: 16,
+      borderRadius: 20,
       backgroundColor: theme.colors.surface,
-      borderLeftWidth: 6,
+      elevation: 2,
     },
     insightContent: {
       flexDirection: 'row',

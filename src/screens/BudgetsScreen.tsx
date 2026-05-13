@@ -177,7 +177,7 @@ export const BudgetsScreen = () => {
             backgroundColor: theme.colors.primary,
           },
         ]}
-        color="#fff"
+        color={theme.colors.onPrimary}
         onPress={() => router.push('/add-budget')}
       />
     </View>
