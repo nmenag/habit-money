@@ -3,14 +3,12 @@ import { StyleSheet, View } from 'react-native';
 import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 import { useTheme } from 'react-native-paper';
 import { AdService } from '../ads/AdService';
-import { useStore } from '../store/useStore';
 
 export const BannerAdComponent = () => {
   const theme = useTheme();
   const styles = defaultStyles(theme);
-  const isPremiumUser = useStore((s) => s.isPremiumUser);
+
   const [showAd, setShowAd] = React.useState(false);
-  const [loadError, setLoadError] = React.useState(false);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -21,7 +19,7 @@ export const BannerAdComponent = () => {
 
   const adUnitId = AdService.getBannerId();
 
-  if (isPremiumUser || !showAd || loadError || !adUnitId) {
+  if (!showAd || !adUnitId) {
     return null;
   }
 
