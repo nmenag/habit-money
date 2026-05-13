@@ -11,7 +11,7 @@ import {
 import { Divider, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../store/useStore';
-import { fontScale, moderateScale } from '../utils/responsive';
+import { fontScale } from '../utils/responsive';
 
 export const AboutScreen = () => {
   const { t } = useTranslation();

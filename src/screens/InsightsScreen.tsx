@@ -1,14 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import React, { useMemo } from 'react';
-import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { Card, Surface, Text, useTheme } from 'react-native-paper';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 import { FilterBar } from '../components/FilterBar';
-import { chartColors } from '../theme/theme';
 import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
-import { BannerAdComponent } from '../components/BannerAdComponent';
+import { chartColors } from '../theme/theme';
 import { isInRange } from '../utils/dateFilters';
 
 import { SCREEN_WIDTH, fontScale, moderateScale } from '../utils/responsive';
