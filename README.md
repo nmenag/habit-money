@@ -2,6 +2,10 @@
 
 Habit Money is a modern, high-performance personal finance tracker built with **React Native** and **Expo**. It empowers users to take control of their financial life through a seamless, localized, and highly organized interface.
 
+<a href="https://play.google.com/store/apps/details?id=com.finhabit">
+  <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="60">
+</a>
+
 ## 🌟 Key Features
 
 - **Expo Router Navigation**: Modern, file-based routing architecture for robust deep linking and smooth transitions.
