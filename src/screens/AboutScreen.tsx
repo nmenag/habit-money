@@ -65,6 +65,15 @@ export const AboutScreen = () => {
             {version}
           </Text>
         </View>
+        <Divider style={{ opacity: 0.5 }} />
+        <View style={styles.infoRow}>
+          <Text variant="labelLarge" style={styles.infoLabel}>
+            {t('license')}
+          </Text>
+          <Text variant="bodyMedium" style={styles.infoValue}>
+            {t('licenseType')}
+          </Text>
+        </View>
 
         <Divider style={{ opacity: 0.5 }} />
 
@@ -89,7 +98,7 @@ export const AboutScreen = () => {
 
       <View style={styles.footer}>
         <Text variant="bodySmall" style={styles.copyright}>
-          © {new Date().getFullYear()}
+          © {new Date().getFullYear()} {appName}
         </Text>
       </View>
     </ScrollView>

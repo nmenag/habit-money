@@ -199,4 +199,4 @@ The application configuration is dynamic and handles three variants: `developmen
 
 ## 📄 License
 
-Private Project. All rights reserved.
+This project is open-source and licensed under the [MIT License](LICENSE).
