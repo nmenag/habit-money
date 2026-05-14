@@ -157,6 +157,7 @@ To generate a standalone APK directly on your machine without using EAS Cloud:
 - **Quality Control**:
   - `npm run doctor`: Validate Expo configuration and dependency health.
   - `npm run lint`: Maintain code quality and style consistency.
+  - `npm run lint:commit`: Validate commit messages (required for CI).
   - `npm run check-types`: Ensure full TypeScript type safety.
 
 ## ⚙️ Expo & EAS Configuration

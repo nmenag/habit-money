@@ -1,3 +1,4 @@
+import * as SQLite from 'expo-sqlite';
 import { AdEventType, InterstitialAd } from 'react-native-google-mobile-ads';
 import { AD_UNIT_IDS, DEV_AD_UNIT_IDS } from './AdService';
 import { getDb } from '../db/schema';
@@ -101,7 +102,7 @@ class InterstitialManager {
     }
   }
 
-  private getStats(db: any) {
+  private getStats(db: SQLite.SQLiteDatabase) {
     const lastTimeStr = db.getFirstSync<{ val: string }>(
       'SELECT val FROM settings WHERE id = ?',
       ['last_interstitial_time'],
@@ -122,7 +123,7 @@ class InterstitialManager {
     };
   }
 
-  private updateStats(db: any, time: number, date: string, count: number) {
+  private updateStats(db: SQLite.SQLiteDatabase, time: number, date: string, count: number) {
     db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
       'last_interstitial_time',
       time.toString(),
