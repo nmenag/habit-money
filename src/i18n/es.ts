@@ -1,4 +1,5 @@
 export const es = {
+  loadingApp: 'Cargando Habit Money...',
   dashboard: 'Inicio',
   transactions: 'Transacciones',
   accounts: 'Cuentas',
@@ -345,4 +346,14 @@ export const es = {
   agreeToTermsPrefix: 'Al continuar, aceptas nuestra ',
   agreeToTermsAnd: ' y ',
   termsOfUse: 'Términos de Uso',
+  currUSD: 'Dólar estadounidense',
+  currEUR: 'Euro',
+  currGBP: 'Libra esterlina',
+  currMXN: 'Peso mexicano',
+  currCOP: 'Peso colombiano',
+  currPEN: 'Sol peruano',
+  currCLP: 'Peso chileno',
+  currCAD: 'Dólar canadiense',
+  currAUD: 'Dólar australiano',
+  currNZD: 'Dólar neozelandés',
 };

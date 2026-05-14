@@ -30,10 +30,16 @@ export const COLORS = [
 ];
 
 export const CURRENCIES = [
-  { code: 'USD', name: 'US Dollar', symbol: '$' },
-  { code: 'COP', name: 'Colombian Peso', symbol: '$' },
-  { code: 'MXN', name: 'Mexican Peso', symbol: '$' },
-  { code: 'EUR', name: 'Euro', symbol: '€' },
+  { code: 'USD', name: 'US Dollar', symbol: '$', tKey: 'currUSD' },
+  { code: 'EUR', name: 'Euro', symbol: '€', tKey: 'currEUR' },
+  { code: 'GBP', name: 'British Pound', symbol: '£', tKey: 'currGBP' },
+  { code: 'MXN', name: 'Mexican Peso', symbol: '$', tKey: 'currMXN' },
+  { code: 'COP', name: 'Colombian Peso', symbol: '$', tKey: 'currCOP' },
+  { code: 'PEN', name: 'Peruvian Sol', symbol: 'S/', tKey: 'currPEN' },
+  { code: 'CLP', name: 'Chilean Peso', symbol: '$', tKey: 'currCLP' },
+  { code: 'CAD', name: 'Canadian Dollar', symbol: '$', tKey: 'currCAD' },
+  { code: 'AUD', name: 'Australian Dollar', symbol: '$', tKey: 'currAUD' },
+  { code: 'NZD', name: 'New Zealand Dollar', symbol: '$', tKey: 'currNZD' },
 ];
 
 export const CATEGORY_ICONS = [

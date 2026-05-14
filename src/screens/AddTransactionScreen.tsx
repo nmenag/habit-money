@@ -12,8 +12,8 @@ import {
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TransactionType, useStore, useTranslation } from '../store/useStore';
-import { formatNumber } from '../utils/formatters';
 import { getLocalISOString } from '../utils/dateUtils';
+import { formatNumber } from '../utils/formatters';
 
 export const AddTransactionScreen = () => {
   const params = useLocalSearchParams<{
@@ -43,6 +43,7 @@ export const AddTransactionScreen = () => {
     editTransaction,
     deleteTransaction,
     formatCurrency,
+    currency,
   } = useStore();
   const { t, language, translateName } = useTranslation();
   const theme = useTheme();
@@ -75,8 +76,6 @@ export const AddTransactionScreen = () => {
       accounts.find((a) => a.id !== selectedAccount)?.id ||
       '',
   );
-
-  const activeAccount = accounts.find((acc) => acc.id === selectedAccount);
 
   const handleSave = () => {
     if (!amount || isNaN(amount) || amount <= 0) {
@@ -184,7 +183,6 @@ export const AddTransactionScreen = () => {
   };
 
   const insets = useSafeAreaInsets();
-  const displayCurrency = activeAccount?.currency || 'COP';
 
   return (
     <View
@@ -239,7 +237,7 @@ export const AddTransactionScreen = () => {
               keyboardType="numeric"
               style={styles.amountInput}
               outlineStyle={styles.inputOutline}
-              left={<TextInput.Affix text={displayCurrency + ' '} />}
+              left={<TextInput.Affix text={currency + ' '} />}
             />
           </Tooltip>
 

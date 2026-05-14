@@ -13,10 +13,11 @@ import {
 import { Button, Text, TextInput, useTheme } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BannerAdComponent } from '../components/BannerAdComponent';
+import { COLORS, getValidGoalIcon, GOAL_ICONS as ICONS } from '../constants';
 import { useStore, useTranslation } from '../store/useStore';
-import { GOAL_ICONS as ICONS, COLORS, getValidGoalIcon } from '../constants';
-import { formatNumber } from '../utils/formatters';
 import { getLocalISOString } from '../utils/dateUtils';
+import { formatNumber } from '../utils/formatters';
 
 export const AddGoalScreen = () => {
   const params = useLocalSearchParams<{ goal?: string }>();
@@ -34,7 +35,7 @@ export const AddGoalScreen = () => {
 
   const isEditing = !!editingGoal;
 
-  const { addGoal, editGoal, formatCurrency } = useStore();
+  const { addGoal, editGoal, currency } = useStore();
   const { t, language } = useTranslation();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
@@ -114,7 +115,7 @@ export const AddGoalScreen = () => {
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: Math.max(insets.bottom, 20) + 40 },
+          { paddingBottom: Math.max(insets.bottom, 20) + 100 },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -135,9 +136,7 @@ export const AddGoalScreen = () => {
           mode="outlined"
           keyboardType="numeric"
           style={styles.textInput}
-          left={
-            <TextInput.Affix text={formatCurrency(0).replace(/[0.,]/g, '')} />
-          }
+          left={<TextInput.Affix text={currency + ' '} />}
           outlineStyle={styles.inputOutline}
         />
 
@@ -236,6 +235,7 @@ export const AddGoalScreen = () => {
           {isEditing ? t('updateGoal') : t('saveGoal')}
         </Button>
       </ScrollView>
+      <BannerAdComponent />
     </View>
   );
 };

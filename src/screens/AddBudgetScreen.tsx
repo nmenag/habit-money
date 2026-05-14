@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Budget, useStore, useTranslation } from '../store/useStore';
 import { COLORS } from '../constants';
 import { formatNumber } from '../utils/formatters';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 
 export const AddBudgetScreen = () => {
   const params = useLocalSearchParams<{ budget?: string }>();
@@ -30,7 +31,7 @@ export const AddBudgetScreen = () => {
 
   const isEditing = !!editingBudget;
 
-  const { addBudget, editBudget, categories } = useStore();
+  const { addBudget, editBudget, categories, currency } = useStore();
   const { t, language, translateName } = useTranslation();
   const theme = useTheme();
 
@@ -90,10 +91,7 @@ export const AddBudgetScreen = () => {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: Math.max(insets.bottom, 20) + 40 },
-        ]}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
       >
         <TextInput
           label={t('monthlyLimit')}
@@ -103,8 +101,7 @@ export const AddBudgetScreen = () => {
           keyboardType="numeric"
           style={styles.amountInput}
           outlineStyle={styles.inputOutline}
-          placeholder="0.00"
-          left={<TextInput.Icon icon="cash" />}
+          left={<TextInput.Affix text={currency + ' '} />}
         />
 
         <View style={styles.section}>
@@ -173,6 +170,7 @@ export const AddBudgetScreen = () => {
           {isEditing ? t('updateBudget') : t('saveBudget')}
         </Button>
       </ScrollView>
+      <BannerAdComponent />
     </View>
   );
 };

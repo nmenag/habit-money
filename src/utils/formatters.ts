@@ -12,9 +12,15 @@ export const formatCurrency = (
 ) => {
   const symbols: { [key: string]: string } = {
     USD: '$',
-    COP: '$',
-    MXN: '$',
     EUR: '€',
+    GBP: '£',
+    MXN: '$',
+    COP: '$',
+    PEN: 'S/',
+    CLP: '$',
+    CAD: '$',
+    AUD: '$',
+    NZD: '$',
   };
   const symbol = symbols[currencyCode] || '$';
 

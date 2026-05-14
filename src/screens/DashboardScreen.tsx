@@ -15,7 +15,6 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BannerAdComponent } from '../components/BannerAdComponent';
 import { getValidCategoryIcon } from '../constants';
 import { useStore, useTranslation } from '../store/useStore';
 import { AppTheme, spacing } from '../theme/theme';
@@ -148,7 +147,7 @@ export const DashboardScreen = React.memo(() => {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.monthHeader}>
+        <View style={styles.monthHeader} accessibilityRole="header">
           <Text
             variant="headlineSmall"
             style={styles.monthText}
@@ -292,6 +291,8 @@ export const DashboardScreen = React.memo(() => {
               <TouchableOpacity
                 onPress={() => router.push('/accounts')}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                accessibilityLabel={t('viewAll')}
+                accessibilityRole="button"
               >
                 <Text
                   variant="labelLarge"
@@ -328,6 +329,8 @@ export const DashboardScreen = React.memo(() => {
                     })
                   }
                   style={[styles.row, { paddingVertical: 10 }]}
+                  accessibilityLabel={`${translateName(acc.name)}, ${formatCurrency(acc.currentBalance, acc.currency)}`}
+                  accessibilityRole="button"
                 >
                   <Avatar.Icon
                     size={32}
@@ -344,7 +347,11 @@ export const DashboardScreen = React.memo(() => {
                     color={theme.colors.onPrimary}
                   />
                   <View style={{ marginLeft: 12, flex: 1 }}>
-                    <Text variant="bodyMedium" style={{ fontWeight: '700' }}>
+                    <Text
+                      variant="bodyMedium"
+                      style={{ fontWeight: '700' }}
+                      numberOfLines={1}
+                    >
                       {translateName(acc.name)}
                     </Text>
                   </View>
@@ -392,6 +399,13 @@ export const DashboardScreen = React.memo(() => {
               progress={data.progress}
               color={data.progressColor}
               style={styles.progressBar}
+              accessibilityLabel={t('spendingProgress')}
+              accessibilityValue={{
+                now: Math.round(data.progress * 100),
+                min: 0,
+                max: 100,
+                text: `${Math.round(data.progress * 100)}%`,
+              }}
             />
             <View
               style={[
@@ -513,6 +527,8 @@ export const DashboardScreen = React.memo(() => {
                 <TouchableOpacity
                   onPress={() => router.push('/goals')}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  accessibilityLabel={t('viewAll')}
+                  accessibilityRole="button"
                 >
                   <Text
                     variant="labelLarge"
@@ -529,6 +545,7 @@ export const DashboardScreen = React.memo(() => {
                       <Text
                         variant="bodyMedium"
                         style={{ fontWeight: 'bold', flex: 1 }}
+                        numberOfLines={1}
                       >
                         {goal.name}
                       </Text>
@@ -553,6 +570,15 @@ export const DashboardScreen = React.memo(() => {
                       )}
                       color={goal.color || theme.colors.primary}
                       style={styles.progressBar}
+                      accessibilityLabel={`${goal.name} ${t('progress')}`}
+                      accessibilityValue={{
+                        now: Math.round(
+                          (goal.currentAmount / goal.targetAmount) * 100,
+                        ),
+                        min: 0,
+                        max: 100,
+                        text: `${Math.round((goal.currentAmount / goal.targetAmount) * 100)}%`,
+                      }}
                     />
                   </View>
                 ))
@@ -578,6 +604,8 @@ export const DashboardScreen = React.memo(() => {
               <TouchableOpacity
                 onPress={() => router.push('/transactions')}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                accessibilityLabel={t('seeAll')}
+                accessibilityRole="button"
               >
                 <Text
                   variant="labelLarge"
@@ -594,7 +622,12 @@ export const DashboardScreen = React.memo(() => {
                   tr.note && translateName(tr.note) === t('balanceAdjustment');
                 return (
                   <View key={tr.id}>
-                    <View style={[styles.row, { paddingVertical: 12 }]}>
+                    <TouchableOpacity
+                      onPress={() => router.push('/transactions')}
+                      style={[styles.row, { paddingVertical: 12 }]}
+                      accessibilityLabel={`${tr.note || translateName(cat?.name || 'Other')}, ${tr.type === 'income' ? '+' : '-'}${formatCurrency(tr.amount)}, ${format(parseISO(tr.date), 'MMM dd', { locale: language === 'es' ? esLocale : enUS })}`}
+                      accessibilityRole="button"
+                    >
                       <Avatar.Icon
                         size={36}
                         icon={
@@ -667,7 +700,7 @@ export const DashboardScreen = React.memo(() => {
                             : '-'}
                         {formatCurrency(tr.amount)}
                       </Text>
-                    </View>
+                    </TouchableOpacity>
                     {index < data.recentTransactions.length - 1 && <Divider />}
                   </View>
                 );
@@ -690,8 +723,6 @@ export const DashboardScreen = React.memo(() => {
 
         <View style={{ height: 20 }} />
       </ScrollView>
-
-      <BannerAdComponent />
 
       <FAB
         icon="plus"

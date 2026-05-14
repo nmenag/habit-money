@@ -1,4 +1,5 @@
 export const en = {
+  loadingApp: 'Loading Habit Money...',
   dashboard: 'Dashboard',
   transactions: 'Transactions',
   accounts: 'Accounts',
@@ -338,4 +339,14 @@ export const en = {
   agreeToTermsPrefix: 'By continuing, you agree to our ',
   agreeToTermsAnd: ' and ',
   termsOfUse: 'Terms of Use',
+  currUSD: 'US Dollar',
+  currEUR: 'Euro',
+  currGBP: 'British Pound',
+  currMXN: 'Mexican Peso',
+  currCOP: 'Colombian Peso',
+  currPEN: 'Peruvian Sol',
+  currCLP: 'Chilean Peso',
+  currCAD: 'Canadian Dollar',
+  currAUD: 'Australian Dollar',
+  currNZD: 'New Zealand Dollar',
 };

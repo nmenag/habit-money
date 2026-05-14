@@ -6,6 +6,7 @@ import {
   Card,
   Divider,
   List,
+  Menu,
   Switch,
   Text,
   useTheme,
@@ -16,6 +17,7 @@ import { BannerAdComponent } from '../components/BannerAdComponent';
 import { NotificationService } from '../services/NotificationService';
 import { useStore, useTranslation } from '../store/useStore';
 import { backupToJSON, restoreFromJSON } from '../utils/dataBackup';
+import { CURRENCIES } from '../constants';
 
 export const SettingsScreen = () => {
   const {
@@ -23,7 +25,6 @@ export const SettingsScreen = () => {
     setThemePreference,
     themePreference,
     loadData,
-    incrementActionCounter,
     checkAndShowAd,
     notificationsEnabled,
     notificationTime,
@@ -84,8 +85,7 @@ export const SettingsScreen = () => {
 
   const handleBackupJSON = async () => {
     await backupToJSON();
-    incrementActionCounter();
-    checkAndShowAd();
+    await checkAndShowAd();
   };
 
   const handleRestoreJSON = () => {
@@ -117,6 +117,8 @@ export const SettingsScreen = () => {
   );
 
   const [timePickerVisible, setTimePickerVisible] = React.useState(false);
+  const [languageMenuVisible, setLanguageMenuVisible] = React.useState(false);
+  const [currencyMenuVisible, setCurrencyMenuVisible] = React.useState(false);
 
   const onDismissTimePicker = React.useCallback(() => {
     setTimePickerVisible(false);
@@ -148,12 +150,6 @@ export const SettingsScreen = () => {
     },
     [notificationsEnabled, t, setNotificationTime],
   );
-
-  const CURRENCIES = [
-    { code: 'COP', name: 'COP ($)' },
-    { code: 'USD', name: 'USD ($)' },
-    { code: 'EUR', name: 'EUR (€)' },
-  ];
 
   const SETTINGS_LINKS = [
     { name: t('manageAccounts'), icon: 'wallet-outline', screen: '/accounts' },
@@ -187,10 +183,9 @@ export const SettingsScreen = () => {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <ScrollView
-        style={{ flex: 1 }}
         contentContainerStyle={{
           paddingTop: insets.top > 0 ? 0 : 16,
-          paddingBottom: (insets.bottom || 0) + 40,
+          paddingBottom: (insets.bottom || 0) + 100,
         }}
       >
         <View style={styles.section}>
@@ -256,43 +251,58 @@ export const SettingsScreen = () => {
             {t('language')}
           </Text>
           <Card style={styles.card} mode="contained">
-            {LANGUAGES.map((item, index) => (
-              <View key={item.code}>
+            <Menu
+              visible={languageMenuVisible}
+              onDismiss={() => setLanguageMenuVisible(false)}
+              anchor={
                 <List.Item
-                  title={item.name}
+                  title={LANGUAGES.find((l) => l.code === language)?.name}
+                  description={t('changeLanguageDesc')}
                   left={(props) => (
-                    <View style={styles.languageIndicator}>
+                    <View style={styles.textIconContainer}>
                       <Text
                         variant="titleMedium"
-                        style={{ fontWeight: 'bold' }}
+                        style={{
+                          fontWeight: 'bold',
+                          color: theme.colors.primary,
+                        }}
                       >
-                        {item.label}
+                        {LANGUAGES.find((l) => l.code === language)?.label}
                       </Text>
                     </View>
                   )}
-                  right={(props) =>
-                    language === item.code ? (
-                      <List.Icon
-                        {...props}
-                        icon="check-circle"
-                        color={theme.colors.primary}
-                      />
-                    ) : null
-                  }
-                  onPress={() => setLanguage(item.code as any)}
-                  style={
-                    language === item.code
-                      ? { backgroundColor: theme.colors.primaryContainer }
-                      : undefined
-                  }
+                  right={(props) => (
+                    <List.Icon {...props} icon="chevron-down" />
+                  )}
+                  onPress={() => setLanguageMenuVisible(true)}
                 />
-                {index < LANGUAGES.length - 1 && <Divider />}
-              </View>
-            ))}
+              }
+              contentStyle={{ backgroundColor: theme.colors.elevation.level3 }}
+            >
+              {LANGUAGES.map((item) => {
+                const isSelected = language === item.code;
+                return (
+                  <Menu.Item
+                    key={item.code}
+                    onPress={() => {
+                      setLanguage(item.code as any);
+                      setLanguageMenuVisible(false);
+                    }}
+                    title={item.name}
+                    leadingIcon={isSelected ? 'check' : 'translate-variant'}
+                    titleStyle={{
+                      color: isSelected
+                        ? theme.colors.primary
+                        : theme.colors.onSurface,
+                      fontWeight: isSelected ? 'bold' : 'normal',
+                      fontSize: 16,
+                    }}
+                    style={{ minWidth: 220 }}
+                  />
+                );
+              })}
+            </Menu>
           </Card>
-          <Text variant="bodySmall" style={styles.sectionInfoText}>
-            {t('changeLanguageDesc')}
-          </Text>
         </View>
 
         <View style={styles.section}>
@@ -300,39 +310,61 @@ export const SettingsScreen = () => {
             {t('detectedCurrency')}
           </Text>
           <Card style={styles.card} mode="contained">
-            {CURRENCIES.map((item, index) => (
-              <View key={item.code}>
+            <Menu
+              visible={currencyMenuVisible}
+              onDismiss={() => setCurrencyMenuVisible(false)}
+              anchor={
                 <List.Item
-                  title={item.name}
+                  title={t(
+                    CURRENCIES.find((c) => c.code === currency)?.tKey as any,
+                  )}
                   left={(props) => (
-                    <View style={styles.languageIndicator}>
+                    <View style={styles.textIconContainer}>
                       <Text
                         variant="titleMedium"
-                        style={{ fontWeight: 'bold' }}
+                        style={{
+                          fontWeight: 'bold',
+                          color: theme.colors.primary,
+                        }}
                       >
-                        {item.code === 'EUR' ? '€' : '$'}
+                        {CURRENCIES.find((c) => c.code === currency)?.symbol ||
+                          '$'}
                       </Text>
                     </View>
                   )}
-                  right={(props) =>
-                    currency === item.code ? (
-                      <List.Icon
-                        {...props}
-                        icon="check-circle"
-                        color={theme.colors.primary}
-                      />
-                    ) : null
-                  }
-                  onPress={() => setCurrency(item.code)}
-                  style={
-                    currency === item.code
-                      ? { backgroundColor: theme.colors.primaryContainer }
-                      : undefined
-                  }
+                  right={(props) => (
+                    <List.Icon {...props} icon="chevron-down" />
+                  )}
+                  onPress={() => setCurrencyMenuVisible(true)}
                 />
-                {index < CURRENCIES.length - 1 && <Divider />}
-              </View>
-            ))}
+              }
+              contentStyle={{ backgroundColor: theme.colors.elevation.level3 }}
+            >
+              <ScrollView style={{ maxHeight: 300 }}>
+                {CURRENCIES.map((item) => {
+                  const isSelected = currency === item.code;
+                  return (
+                    <Menu.Item
+                      key={item.code}
+                      onPress={() => {
+                        setCurrency(item.code);
+                        setCurrencyMenuVisible(false);
+                      }}
+                      title={`${t(item.tKey as any)} (${item.code})`}
+                      leadingIcon={isSelected ? 'check' : 'cash-multiple'}
+                      titleStyle={{
+                        color: isSelected
+                          ? theme.colors.primary
+                          : theme.colors.onSurface,
+                        fontWeight: isSelected ? 'bold' : 'normal',
+                        fontSize: 16,
+                      }}
+                      style={{ minWidth: 220 }}
+                    />
+                  );
+                })}
+              </ScrollView>
+            </Menu>
           </Card>
         </View>
 
@@ -463,7 +495,6 @@ export const SettingsScreen = () => {
             />
           </Card>
         </View>
-        <View style={{ height: 20 }} />
       </ScrollView>
       <BannerAdComponent />
       <TimePickerModal
@@ -499,14 +530,10 @@ const defaultStyles = (theme: any) =>
       borderRadius: 16,
       overflow: 'hidden',
     },
-    languageIndicator: {
-      width: 48,
-      height: 48,
-      borderRadius: 12,
-      backgroundColor: 'rgba(0,0,0,0.05)',
+    textIconContainer: {
+      width: 40,
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: 8,
     },
     sectionInfoText: {
       color: theme.colors.onSurfaceVariant,
