@@ -295,16 +295,18 @@ export const useStore = create<AppState>((set, get) => ({
 
   setLanguage: (lang: Language) => {
     set({ language: lang });
-    try {
-      const db = getDb();
-      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
-        'language',
-        lang,
-      ]);
-    } catch (error) {
-      console.error('setLanguage DB Error:', error);
-    }
-    get().refreshAnalytics();
+    setTimeout(() => {
+      try {
+        const db = getDb();
+        db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+          'language',
+          lang,
+        ]);
+        get().refreshAnalytics();
+      } catch (error) {
+        console.error('setLanguage DB Error:', error);
+      }
+    }, 0);
   },
 
   setThemePreference: (theme: 'light' | 'dark' | 'system') => {
@@ -361,17 +363,21 @@ export const useStore = create<AppState>((set, get) => ({
     };
     const currencySymbol = symbols[currency] || '$';
     set({ currency, currencySymbol });
-    try {
-      const db = getDb();
-      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
-        'currency',
-        currency,
-      ]);
-      db.runSync('UPDATE accounts SET currency = ?', [currency]);
-      get().loadData();
-    } catch (error) {
-      console.error('setCurrency DB Error:', error);
-    }
+
+    // Defer heavy DB and reload work to keep UI responsive
+    setTimeout(() => {
+      try {
+        const db = getDb();
+        db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+          'currency',
+          currency,
+        ]);
+        db.runSync('UPDATE accounts SET currency = ?', [currency]);
+        get().loadData();
+      } catch (error) {
+        console.error('setCurrency DB Error:', error);
+      }
+    }, 0);
   },
 
   addAccount: (account) => {
@@ -853,7 +859,7 @@ export const useStore = create<AppState>((set, get) => ({
         console.error('refreshAnalytics Error:', error);
         analyticsDebounceTimer = null;
       }
-    }, 300); // debounce for UI responsiveness
+    }, 300);
   },
 
   updateAccountsOrder: (accounts) => {

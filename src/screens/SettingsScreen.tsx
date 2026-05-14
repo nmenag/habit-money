@@ -259,10 +259,13 @@ export const SettingsScreen = () => {
                   title={LANGUAGES.find((l) => l.code === language)?.name}
                   description={t('changeLanguageDesc')}
                   left={(props) => (
-                    <View style={styles.languageIndicator}>
+                    <View style={styles.textIconContainer}>
                       <Text
                         variant="titleMedium"
-                        style={{ fontWeight: 'bold' }}
+                        style={{
+                          fontWeight: 'bold',
+                          color: theme.colors.primary,
+                        }}
                       >
                         {LANGUAGES.find((l) => l.code === language)?.label}
                       </Text>
@@ -276,17 +279,28 @@ export const SettingsScreen = () => {
               }
               contentStyle={{ backgroundColor: theme.colors.elevation.level3 }}
             >
-              {LANGUAGES.map((item) => (
-                <Menu.Item
-                  key={item.code}
-                  onPress={() => {
-                    setLanguage(item.code as any);
-                    setLanguageMenuVisible(false);
-                  }}
-                  title={item.name}
-                  trailingIcon={language === item.code ? 'check' : undefined}
-                />
-              ))}
+              {LANGUAGES.map((item) => {
+                const isSelected = language === item.code;
+                return (
+                  <Menu.Item
+                    key={item.code}
+                    onPress={() => {
+                      setLanguage(item.code as any);
+                      setLanguageMenuVisible(false);
+                    }}
+                    title={item.name}
+                    leadingIcon={isSelected ? 'check' : 'translate-variant'}
+                    titleStyle={{
+                      color: isSelected
+                        ? theme.colors.primary
+                        : theme.colors.onSurface,
+                      fontWeight: isSelected ? 'bold' : 'normal',
+                      fontSize: 16,
+                    }}
+                    style={{ minWidth: 220 }}
+                  />
+                );
+              })}
             </Menu>
           </Card>
         </View>
@@ -305,10 +319,13 @@ export const SettingsScreen = () => {
                     CURRENCIES.find((c) => c.code === currency)?.tKey as any,
                   )}
                   left={(props) => (
-                    <View style={styles.languageIndicator}>
+                    <View style={styles.textIconContainer}>
                       <Text
                         variant="titleMedium"
-                        style={{ fontWeight: 'bold' }}
+                        style={{
+                          fontWeight: 'bold',
+                          color: theme.colors.primary,
+                        }}
                       >
                         {CURRENCIES.find((c) => c.code === currency)?.symbol ||
                           '$'}
@@ -324,17 +341,28 @@ export const SettingsScreen = () => {
               contentStyle={{ backgroundColor: theme.colors.elevation.level3 }}
             >
               <ScrollView style={{ maxHeight: 300 }}>
-                {CURRENCIES.map((item) => (
-                  <Menu.Item
-                    key={item.code}
-                    onPress={() => {
-                      setCurrency(item.code);
-                      setCurrencyMenuVisible(false);
-                    }}
-                    title={`${t(item.tKey as any)} (${item.code})`}
-                    trailingIcon={currency === item.code ? 'check' : undefined}
-                  />
-                ))}
+                {CURRENCIES.map((item) => {
+                  const isSelected = currency === item.code;
+                  return (
+                    <Menu.Item
+                      key={item.code}
+                      onPress={() => {
+                        setCurrency(item.code);
+                        setCurrencyMenuVisible(false);
+                      }}
+                      title={`${t(item.tKey as any)} (${item.code})`}
+                      leadingIcon={isSelected ? 'check' : 'cash-multiple'}
+                      titleStyle={{
+                        color: isSelected
+                          ? theme.colors.primary
+                          : theme.colors.onSurface,
+                        fontWeight: isSelected ? 'bold' : 'normal',
+                        fontSize: 16,
+                      }}
+                      style={{ minWidth: 220 }}
+                    />
+                  );
+                })}
               </ScrollView>
             </Menu>
           </Card>
@@ -502,14 +530,10 @@ const defaultStyles = (theme: any) =>
       borderRadius: 16,
       overflow: 'hidden',
     },
-    languageIndicator: {
-      width: 48,
-      height: 48,
-      borderRadius: 12,
-      backgroundColor: 'rgba(0,0,0,0.05)',
+    textIconContainer: {
+      width: 40,
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: 8,
     },
     sectionInfoText: {
       color: theme.colors.onSurfaceVariant,

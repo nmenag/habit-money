@@ -24,7 +24,7 @@ export const DEV_AD_UNIT_IDS = {
   INTERSTITIAL: TestIds.INTERSTITIAL,
 };
 
-const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+const COOLDOWN_MS = 5 * 60 * 1000;
 const MAX_PER_DAY = 3;
 
 let interstitial: InterstitialAd | null = null;
@@ -46,7 +46,7 @@ const createInterstitial = () => {
 
   interstitial.addAdEventListener(AdEventType.CLOSED, () => {
     isLoaded = false;
-    interstitial?.load(); // Preload next one
+    interstitial?.load();
   });
 
   interstitial.load();
@@ -66,7 +66,6 @@ export const AdService = {
       const db = getDb();
       if (!db) return;
 
-      // Check frequency limits
       const now = Date.now();
       const lastAdTimeStr = db.getFirstSync<{ val: string }>(
         'SELECT val FROM settings WHERE id = ?',
@@ -86,20 +85,16 @@ export const AdService = {
       const todayDate = new Date().toISOString().split('T')[0];
       let dailyCount = dailyCountStr ? parseInt(dailyCountStr, 10) : 0;
 
-      // Reset count if it's a new day
       if (lastAdDate !== todayDate) {
         dailyCount = 0;
       }
 
-      // Frequency Checks
       if (now - lastAdTime < COOLDOWN_MS) return;
       if (dailyCount >= MAX_PER_DAY) return;
 
-      // Show Ad
       if (interstitial && isLoaded) {
         interstitial.show();
 
-        // Update persisted stats
         db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
           'last_interstitial_time',
           now.toString(),
@@ -113,7 +108,6 @@ export const AdService = {
           (dailyCount + 1).toString(),
         ]);
       } else {
-        // If not loaded, try to load it for next time
         interstitial?.load();
       }
     } catch (error) {

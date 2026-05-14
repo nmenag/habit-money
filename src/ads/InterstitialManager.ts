@@ -3,8 +3,8 @@ import { AdEventType, InterstitialAd } from 'react-native-google-mobile-ads';
 import { AD_UNIT_IDS, DEV_AD_UNIT_IDS } from './AdService';
 import { getDb } from '../db/schema';
 
-const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes between ads
-const MAX_PER_DAY = 3; // Maximum ads per day
+const COOLDOWN_MS = 5 * 60 * 1000;
+const MAX_PER_DAY = 3;
 
 class InterstitialManager {
   private interstitial: InterstitialAd | null = null;
@@ -18,9 +18,6 @@ class InterstitialManager {
       : AD_UNIT_IDS.INTERSTITIAL;
   }
 
-  /**
-   * Initializes the ad service and starts preloading the first ad.
-   */
   public init() {
     if (this.interstitial) return;
 
@@ -35,13 +32,12 @@ class InterstitialManager {
 
       this.interstitial.addAdEventListener(AdEventType.CLOSED, () => {
         this.loaded = false;
-        this.load(); // Preload next ad immediately
+        this.load();
       });
 
       this.interstitial.addAdEventListener(AdEventType.ERROR, (error) => {
         if (__DEV__) console.warn('Interstitial Ad Error: ', error);
         this.loaded = false;
-        // Retry loading after a delay if it fails
         setTimeout(() => this.load(), 30000);
       });
 
@@ -51,19 +47,12 @@ class InterstitialManager {
     }
   }
 
-  /**
-   * Preloads an ad in the background.
-   */
   public load() {
     if (this.interstitial && !this.loaded) {
       this.interstitial.load();
     }
   }
 
-  /**
-   * Shows an interstitial ad if it meets all frequency and placement rules.
-   * This method is non-blocking and handles its own errors.
-   */
   public async show() {
     try {
       const db = getDb();
@@ -71,31 +60,26 @@ class InterstitialManager {
 
       const now = Date.now();
 
-      // 1. Minimum cooldown check (in-memory fast check)
       if (now - this.lastRequestTime < COOLDOWN_MS) return;
 
-      // 2. Load persisted stats from DB
       const stats = this.getStats(db);
       const todayDate = new Date().toISOString().split('T')[0];
 
       let dailyCount = stats.dailyCount;
       if (stats.lastDate !== todayDate) {
-        dailyCount = 0; // Reset for a new day
+        dailyCount = 0;
       }
 
-      // 3. Frequency & Cooldown checks (persisted)
       if (now - stats.lastTime < COOLDOWN_MS) return;
       if (dailyCount >= MAX_PER_DAY) return;
 
-      // 4. Show the ad if loaded
       if (this.loaded && this.interstitial) {
         this.lastRequestTime = now;
         await this.interstitial.show();
 
-        // Update persisted stats
         this.updateStats(db, now, todayDate, dailyCount + 1);
       } else {
-        this.load(); // Try to load for next time
+        this.load();
       }
     } catch (error) {
       console.error('InterstitialManager show() Error:', error);
@@ -123,7 +107,12 @@ class InterstitialManager {
     };
   }
 
-  private updateStats(db: SQLite.SQLiteDatabase, time: number, date: string, count: number) {
+  private updateStats(
+    db: SQLite.SQLiteDatabase,
+    time: number,
+    date: string,
+    count: number,
+  ) {
     db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
       'last_interstitial_time',
       time.toString(),
