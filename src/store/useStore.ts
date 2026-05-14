@@ -82,7 +82,6 @@ interface AppState {
   themePreference: 'light' | 'dark' | 'system';
   isLoaded: boolean;
   isPremiumUser: boolean;
-  actionCounter: number;
   analyticsReport: AnalyticsReport | null;
 
   notificationsEnabled: boolean;
@@ -125,7 +124,6 @@ interface AppState {
   deleteGoal: (id: string) => void;
   contributeToGoal: (id: string, amount: number) => void;
 
-  incrementActionCounter: () => void;
   checkAndShowAd: () => Promise<void>;
   formatCurrency: (amount: number, currencyCode?: string) => string;
   refreshAnalytics: () => Promise<void>;
@@ -146,7 +144,6 @@ export const useStore = create<AppState>((set, get) => ({
   themePreference: 'system',
   isLoaded: false,
   isPremiumUser: false,
-  actionCounter: 0,
   analyticsReport: null,
   notificationsEnabled: false,
   notificationTime: '20:00',
@@ -511,8 +508,6 @@ export const useStore = create<AppState>((set, get) => ({
       };
     });
 
-    get().incrementActionCounter();
-    get().checkAndShowAd();
     get().refreshAnalytics();
   },
 
@@ -588,8 +583,6 @@ export const useStore = create<AppState>((set, get) => ({
       );
 
       get().loadData();
-      get().incrementActionCounter();
-      get().checkAndShowAd();
       get().refreshAnalytics();
     } catch (error) {
       console.error('editTransaction Error:', error);
@@ -650,8 +643,6 @@ export const useStore = create<AppState>((set, get) => ({
       };
     });
 
-    get().incrementActionCounter();
-    get().checkAndShowAd();
     get().refreshAnalytics();
   },
 
@@ -825,6 +816,10 @@ export const useStore = create<AppState>((set, get) => ({
             : g,
         ),
       }));
+
+      if (newStatus === 'completed') {
+        get().checkAndShowAd();
+      }
     }
   },
 
@@ -837,18 +832,10 @@ export const useStore = create<AppState>((set, get) => ({
     );
   },
 
-  incrementActionCounter: () => {
-    set((state) => ({ actionCounter: state.actionCounter + 1 }));
-  },
-
   checkAndShowAd: async () => {
-    const { actionCounter, isPremiumUser } = get();
+    const { isPremiumUser } = get();
     if (isPremiumUser) return;
-
-    if (actionCounter >= 3) {
-      await interstitialManager.show();
-      set({ actionCounter: 0 });
-    }
+    await interstitialManager.show();
   },
 
   refreshAnalytics: async () => {

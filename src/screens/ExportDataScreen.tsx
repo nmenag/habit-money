@@ -77,200 +77,201 @@ export const ExportDataScreen = () => {
       t,
       translateName,
     );
-    incrementActionCounter();
-    checkAndShowAd();
+    await checkAndShowAd();
   };
 
   return (
-    <ScrollView
+    <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
     >
-      <View style={styles.header}>
-        <Text variant="headlineSmall" style={styles.title}>
-          {t('exportData')}
-        </Text>
-        <Text
-          variant="bodyMedium"
-          style={{ color: theme.colors.onSurfaceVariant }}
-        >
-          {t('exportDataDesc')}
-        </Text>
-      </View>
-
-      <View style={styles.section}>
-        <Text variant="labelLarge" style={styles.sectionTitle}>
-          {t('filterCustomRange' as any)}
-        </Text>
-        <FilterBar />
-      </View>
-
-      <View style={styles.section}>
-        <Text variant="labelLarge" style={styles.sectionTitle}>
-          {t('filters')}
-        </Text>
-        <Card style={styles.card} mode="contained">
-          <Menu
-            visible={accountMenuOpen}
-            onDismiss={() => setAccountMenuOpen(false)}
-            anchor={
-              <List.Item
-                title={t('filterByAccount' as any)}
-                description={
-                  activeAccount
-                    ? translateName(activeAccount.name)
-                    : t('allAccounts' as any)
-                }
-                left={(props) => <List.Icon {...props} icon="bank-outline" />}
-                right={(props) => <List.Icon {...props} icon="chevron-down" />}
-                onPress={() => setAccountMenuOpen(true)}
-              />
-            }
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
+      >
+        <View style={styles.header}>
+          <Text variant="headlineSmall" style={styles.title}>
+            {t('exportData')}
+          </Text>
+          <Text
+            variant="bodyMedium"
+            style={{ color: theme.colors.onSurfaceVariant }}
           >
-            <Menu.Item
-              title={t('allAccounts' as any)}
-              onPress={() => {
-                setSelectedAccountId(null);
-                setAccountMenuOpen(false);
-              }}
-            />
-            {accounts.map((acc) => (
+            {t('exportDataDesc')}
+          </Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text variant="labelLarge" style={styles.sectionTitle}>
+            {t('filterCustomRange' as any)}
+          </Text>
+          <FilterBar />
+        </View>
+
+        <View style={styles.section}>
+          <Text variant="labelLarge" style={styles.sectionTitle}>
+            {t('filters')}
+          </Text>
+          <Card style={styles.card} mode="contained">
+            <Menu
+              visible={accountMenuOpen}
+              onDismiss={() => setAccountMenuOpen(false)}
+              anchor={
+                <List.Item
+                  title={t('filterByAccount' as any)}
+                  description={
+                    activeAccount
+                      ? translateName(activeAccount.name)
+                      : t('allAccounts' as any)
+                  }
+                  left={(props) => <List.Icon {...props} icon="bank-outline" />}
+                  right={(props) => <List.Icon {...props} icon="chevron-down" />}
+                  onPress={() => setAccountMenuOpen(true)}
+                />
+              }
+            >
               <Menu.Item
-                key={acc.id}
-                title={translateName(acc.name)}
+                title={t('allAccounts' as any)}
                 onPress={() => {
-                  setSelectedAccountId(acc.id);
+                  setSelectedAccountId(null);
                   setAccountMenuOpen(false);
                 }}
               />
-            ))}
-          </Menu>
-          <Divider />
-          <Menu
-            visible={categoryMenuOpen}
-            onDismiss={() => setCategoryMenuOpen(false)}
-            anchor={
-              <List.Item
-                title={t('filterByCategory' as any)}
-                description={
-                  activeCategory
-                    ? translateName(activeCategory.name)
-                    : t('allCategories' as any)
-                }
-                left={(props) => <List.Icon {...props} icon="tag-outline" />}
-                right={(props) => <List.Icon {...props} icon="chevron-down" />}
-                onPress={() => setCategoryMenuOpen(true)}
-              />
-            }
-          >
-            <Menu.Item
-              title={t('allCategories' as any)}
-              onPress={() => {
-                setSelectedCategoryId(null);
-                setCategoryMenuOpen(false);
-              }}
-            />
-            {categories.map((cat) => (
+              {accounts.map((acc) => (
+                <Menu.Item
+                  key={acc.id}
+                  title={translateName(acc.name)}
+                  onPress={() => {
+                    setSelectedAccountId(acc.id);
+                    setAccountMenuOpen(false);
+                  }}
+                />
+              ))}
+            </Menu>
+            <Divider />
+            <Menu
+              visible={categoryMenuOpen}
+              onDismiss={() => setCategoryMenuOpen(false)}
+              anchor={
+                <List.Item
+                  title={t('filterByCategory' as any)}
+                  description={
+                    activeCategory
+                      ? translateName(activeCategory.name)
+                      : t('allCategories' as any)
+                  }
+                  left={(props) => <List.Icon {...props} icon="tag-outline" />}
+                  right={(props) => <List.Icon {...props} icon="chevron-down" />}
+                  onPress={() => setCategoryMenuOpen(true)}
+                />
+              }
+            >
               <Menu.Item
-                key={cat.id}
-                title={translateName(cat.name)}
+                title={t('allCategories' as any)}
                 onPress={() => {
-                  setSelectedCategoryId(cat.id);
+                  setSelectedCategoryId(null);
                   setCategoryMenuOpen(false);
                 }}
               />
-            ))}
-          </Menu>
-          <Divider />
-          <Menu
-            visible={typeMenuOpen}
-            onDismiss={() => setTypeMenuOpen(false)}
-            anchor={
-              <List.Item
-                title={t('type')}
-                description={
-                  selectedType === 'all'
-                    ? t('allTypes' as any)
-                    : t(selectedType as any)
-                }
-                left={(props) => <List.Icon {...props} icon="swap-vertical" />}
-                right={(props) => <List.Icon {...props} icon="chevron-down" />}
-                onPress={() => setTypeMenuOpen(true)}
-              />
-            }
-          >
-            <Menu.Item
-              title={t('allTypes' as any)}
-              onPress={() => {
-                setSelectedType('all');
-                setTypeMenuOpen(false);
-              }}
-            />
-            <Menu.Item
-              title={t('income')}
-              onPress={() => {
-                setSelectedType('income');
-                setTypeMenuOpen(false);
-              }}
-            />
-            <Menu.Item
-              title={t('expense')}
-              onPress={() => {
-                setSelectedType('expense');
-                setTypeMenuOpen(false);
-              }}
-            />
-            <Menu.Item
-              title={t('transfer')}
-              onPress={() => {
-                setSelectedType('transfer');
-                setTypeMenuOpen(false);
-              }}
-            />
-          </Menu>
-        </Card>
-      </View>
-
-      <View style={styles.summarySection}>
-        <Card
-          style={[
-            styles.summaryCard,
-            { backgroundColor: theme.colors.primaryContainer },
-          ]}
-          mode="contained"
-        >
-          <View style={styles.summaryContent}>
-            <View>
-              <Text
-                variant="titleMedium"
-                style={{
-                  color: theme.colors.onPrimaryContainer,
-                  fontWeight: 'bold',
-                }}
-              >
-                {filteredTransactions.length}
-              </Text>
-              <Text
-                variant="labelSmall"
-                style={{ color: theme.colors.onPrimaryContainer }}
-              >
-                {t('transactions')}
-              </Text>
-            </View>
-            <Button
-              mode="contained"
-              icon="file-export"
-              onPress={handleExport}
-              disabled={filteredTransactions.length === 0}
+              {categories.map((cat) => (
+                <Menu.Item
+                  key={cat.id}
+                  title={translateName(cat.name)}
+                  onPress={() => {
+                    setSelectedCategoryId(cat.id);
+                    setCategoryMenuOpen(false);
+                  }}
+                />
+              ))}
+            </Menu>
+            <Divider />
+            <Menu
+              visible={typeMenuOpen}
+              onDismiss={() => setTypeMenuOpen(false)}
+              anchor={
+                <List.Item
+                  title={t('type')}
+                  description={
+                    selectedType === 'all'
+                      ? t('allTypes' as any)
+                      : t(selectedType as any)
+                  }
+                  left={(props) => <List.Icon {...props} icon="swap-vertical" />}
+                  right={(props) => <List.Icon {...props} icon="chevron-down" />}
+                  onPress={() => setTypeMenuOpen(true)}
+                />
+              }
             >
-              {t('exportData')}
-            </Button>
-          </View>
-        </Card>
-      </View>
+              <Menu.Item
+                title={t('allTypes' as any)}
+                onPress={() => {
+                  setSelectedType('all');
+                  setTypeMenuOpen(false);
+                }}
+              />
+              <Menu.Item
+                title={t('income')}
+                onPress={() => {
+                  setSelectedType('income');
+                  setTypeMenuOpen(false);
+                }}
+              />
+              <Menu.Item
+                title={t('expense')}
+                onPress={() => {
+                  setSelectedType('expense');
+                  setTypeMenuOpen(false);
+                }}
+              />
+              <Menu.Item
+                title={t('transfer')}
+                onPress={() => {
+                  setSelectedType('transfer');
+                  setTypeMenuOpen(false);
+                }}
+              />
+            </Menu>
+          </Card>
+        </View>
 
+        <View style={styles.summarySection}>
+          <Card
+            style={[
+              styles.summaryCard,
+              { backgroundColor: theme.colors.primaryContainer },
+            ]}
+            mode="contained"
+          >
+            <View style={styles.summaryContent}>
+              <View>
+                <Text
+                  variant="titleMedium"
+                  style={{
+                    color: theme.colors.onPrimaryContainer,
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {filteredTransactions.length}
+                </Text>
+                <Text
+                  variant="labelSmall"
+                  style={{ color: theme.colors.onPrimaryContainer }}
+                >
+                  {t('transactions')}
+                </Text>
+              </View>
+              <Button
+                mode="contained"
+                icon="file-export"
+                onPress={handleExport}
+                disabled={filteredTransactions.length === 0}
+              >
+                {t('exportData')}
+              </Button>
+            </View>
+          </Card>
+        </View>
+      </ScrollView>
       <BannerAdComponent />
-    </ScrollView>
+    </View>
   );
 };
 

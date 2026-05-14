@@ -25,7 +25,6 @@ export const SettingsScreen = () => {
     setThemePreference,
     themePreference,
     loadData,
-    incrementActionCounter,
     checkAndShowAd,
     notificationsEnabled,
     notificationTime,
@@ -86,8 +85,7 @@ export const SettingsScreen = () => {
 
   const handleBackupJSON = async () => {
     await backupToJSON();
-    incrementActionCounter();
-    checkAndShowAd();
+    await checkAndShowAd();
   };
 
   const handleRestoreJSON = () => {
@@ -185,10 +183,9 @@ export const SettingsScreen = () => {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <ScrollView
-        style={{ flex: 1 }}
         contentContainerStyle={{
           paddingTop: insets.top > 0 ? 0 : 16,
-          paddingBottom: (insets.bottom || 0) + 40,
+          paddingBottom: (insets.bottom || 0) + 100,
         }}
       >
         <View style={styles.section}>
@@ -470,7 +467,7 @@ export const SettingsScreen = () => {
             />
           </Card>
         </View>
-        <View style={{ height: 20 }} />
+
       </ScrollView>
       <BannerAdComponent />
       <TimePickerModal

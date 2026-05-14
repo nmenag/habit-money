@@ -90,7 +90,7 @@ export const GoalDetailScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}>
         <Card style={styles.headerCard}>
           <View style={styles.headerContent}>
             <View

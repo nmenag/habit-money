@@ -5,23 +5,20 @@ import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AdService } from '../ads/AdService';
 
-export const BannerAdComponent = () => {
-  const theme = useTheme();
+interface BannerAdProps {
+  offset?: number;
+}
+
+export const BannerAdComponent = ({ offset = 0 }: BannerAdProps) => {
+  const [showAd, setShowAd] = React.useState(true);
+  const [loadError, setLoadError] = React.useState(false);
   const insets = useSafeAreaInsets();
-  const styles = defaultStyles(theme, insets);
-
-  const [showAd, setShowAd] = React.useState(false);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowAd(true);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+  const theme = useTheme();
+  const styles = defaultStyles(theme, insets, offset);
 
   const adUnitId = AdService.getBannerId();
 
-  if (!showAd || !adUnitId) {
+  if (!showAd || !adUnitId || loadError) {
     return null;
   }
 
@@ -41,20 +38,21 @@ export const BannerAdComponent = () => {
   );
 };
 
-const defaultStyles = (theme: any, insets: any) =>
+const defaultStyles = (theme: any, insets: any, offset: number) =>
   StyleSheet.create({
     container: {
       position: 'absolute',
-      bottom: 0,
+      bottom: offset,
       left: 0,
       right: 0,
-      alignItems: 'center',
-      justifyContent: 'center',
       width: '100%',
       backgroundColor: theme.colors.surface,
       borderTopWidth: 1,
       borderTopColor: theme.colors.outlineVariant,
-      paddingBottom: insets.bottom > 0 ? insets.bottom : 0,
+      paddingBottom: insets.bottom > 0 && offset === 0 ? insets.bottom : 0,
+      alignItems: 'center',
+      justifyContent: 'center',
       zIndex: 1000,
+      elevation: 5,
     },
   });

@@ -115,7 +115,7 @@ export const AddGoalScreen = () => {
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: Math.max(insets.bottom, 20) + 40 },
+          { paddingBottom: Math.max(insets.bottom, 20) + 100 },
         ]}
         showsVerticalScrollIndicator={false}
       >

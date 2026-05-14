@@ -29,6 +29,13 @@ export const InsightsScreen = () => {
 
   React.useEffect(() => {
     loadFullData();
+
+    // Show interstitial occasionally (30% chance)
+    if (Math.random() < 0.3) {
+      setTimeout(() => {
+        useStore.getState().checkAndShowAd();
+      }, 1500);
+    }
   }, [loadFullData]);
 
   const filtered = useMemo(() => {
@@ -595,7 +602,7 @@ export const InsightsScreen = () => {
           </View>
         )}
 
-        <View style={{ height: 40 }} />
+
       </ScrollView>
       <BannerAdComponent />
     </View>
@@ -609,6 +616,7 @@ const defaultStyles = (theme: any) =>
     },
     content: {
       padding: moderateScale(16),
+      paddingBottom: 100,
     },
     rangeBadge: {
       flexDirection: 'row',
