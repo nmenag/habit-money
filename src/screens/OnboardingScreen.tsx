@@ -7,6 +7,8 @@ import { getDb } from '../db/schema';
 import { Language } from '../i18n/translations';
 import { useStore, useTranslation } from '../store/useStore';
 import { getLocalDateString } from '../utils/dateUtils';
+import { CURRENCIES } from '../constants';
+import { ScrollView } from 'react-native';
 
 export const OnboardingScreen = () => {
   const theme = useTheme();
@@ -121,7 +123,12 @@ export const OnboardingScreen = () => {
               >
                 {t('detectedCurrency')}
               </Text>
-              <Text variant="titleMedium">{detectedCurrency}</Text>
+              <Text variant="titleMedium">
+                {t(
+                  CURRENCIES.find((c) => c.code === detectedCurrency)
+                    ?.tKey as any,
+                )}
+              </Text>
             </View>
             <Menu
               visible={currencyMenuVisible}
@@ -135,10 +142,17 @@ export const OnboardingScreen = () => {
                   {detectedCurrency}
                 </Button>
               }
+              contentStyle={{ backgroundColor: theme.colors.elevation.level3 }}
             >
-              <Menu.Item onPress={() => selectCurrency('COP')} title="COP" />
-              <Menu.Item onPress={() => selectCurrency('USD')} title="USD" />
-              <Menu.Item onPress={() => selectCurrency('EUR')} title="EUR" />
+              <ScrollView style={{ maxHeight: 300 }}>
+                {CURRENCIES.map((curr) => (
+                  <Menu.Item
+                    key={curr.code}
+                    onPress={() => selectCurrency(curr.code)}
+                    title={`${t(curr.tKey as any)} (${curr.code})`}
+                  />
+                ))}
+              </ScrollView>
             </Menu>
           </View>
         </Surface>

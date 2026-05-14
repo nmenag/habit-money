@@ -17,11 +17,13 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useStore, useTranslation } from '../store/useStore';
 import { getValidGoalIcon } from '../constants';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 
 export const GoalDetailScreen = () => {
   const params = useLocalSearchParams<{ goalId?: string }>();
   const goalId = params.goalId;
-  const { goals, formatCurrency, deleteGoal, contributeToGoal } = useStore();
+  const { goals, formatCurrency, deleteGoal, contributeToGoal, currency } =
+    useStore();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
@@ -291,11 +293,8 @@ export const GoalDetailScreen = () => {
               keyboardType="numeric"
               mode="outlined"
               autoFocus
-              left={
-                <TextInput.Affix
-                  text={formatCurrency(0).replace(/[0.,]/g, '')}
-                />
-              }
+              outlineStyle={{ borderRadius: 16 }}
+              left={<TextInput.Affix text={currency + ' '} />}
             />
           </Dialog.Content>
           <Dialog.Actions>
@@ -310,6 +309,7 @@ export const GoalDetailScreen = () => {
           </Dialog.Actions>
         </Dialog>
       </Portal>
+      <BannerAdComponent />
     </View>
   );
 };

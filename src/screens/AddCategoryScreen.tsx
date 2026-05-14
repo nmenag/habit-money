@@ -27,6 +27,7 @@ import {
   COLORS,
   getValidCategoryIcon,
 } from '../constants';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 
 export const AddCategoryScreen = () => {
   const params = useLocalSearchParams<{ category?: string }>();
@@ -183,6 +184,7 @@ export const AddCategoryScreen = () => {
           {isEditing ? t('updateCategory') : t('saveCategory')}
         </Button>
       </ScrollView>
+      <BannerAdComponent />
     </View>
   );
 };

@@ -15,7 +15,6 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BannerAdComponent } from '../components/BannerAdComponent';
 import { getValidCategoryIcon } from '../constants';
 import { useStore, useTranslation } from '../store/useStore';
 import { AppTheme, spacing } from '../theme/theme';
@@ -724,8 +723,6 @@ export const DashboardScreen = React.memo(() => {
 
         <View style={{ height: 20 }} />
       </ScrollView>
-
-      <BannerAdComponent />
 
       <FAB
         icon="plus"

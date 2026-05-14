@@ -6,6 +6,7 @@ import {
   Card,
   Divider,
   List,
+  Menu,
   Switch,
   Text,
   useTheme,
@@ -16,6 +17,7 @@ import { BannerAdComponent } from '../components/BannerAdComponent';
 import { NotificationService } from '../services/NotificationService';
 import { useStore, useTranslation } from '../store/useStore';
 import { backupToJSON, restoreFromJSON } from '../utils/dataBackup';
+import { CURRENCIES } from '../constants';
 
 export const SettingsScreen = () => {
   const {
@@ -117,6 +119,8 @@ export const SettingsScreen = () => {
   );
 
   const [timePickerVisible, setTimePickerVisible] = React.useState(false);
+  const [languageMenuVisible, setLanguageMenuVisible] = React.useState(false);
+  const [currencyMenuVisible, setCurrencyMenuVisible] = React.useState(false);
 
   const onDismissTimePicker = React.useCallback(() => {
     setTimePickerVisible(false);
@@ -148,12 +152,6 @@ export const SettingsScreen = () => {
     },
     [notificationsEnabled, t, setNotificationTime],
   );
-
-  const CURRENCIES = [
-    { code: 'COP', name: 'COP ($)' },
-    { code: 'USD', name: 'USD ($)' },
-    { code: 'EUR', name: 'EUR (€)' },
-  ];
 
   const SETTINGS_LINKS = [
     { name: t('manageAccounts'), icon: 'wallet-outline', screen: '/accounts' },
@@ -256,43 +254,44 @@ export const SettingsScreen = () => {
             {t('language')}
           </Text>
           <Card style={styles.card} mode="contained">
-            {LANGUAGES.map((item, index) => (
-              <View key={item.code}>
+            <Menu
+              visible={languageMenuVisible}
+              onDismiss={() => setLanguageMenuVisible(false)}
+              anchor={
                 <List.Item
-                  title={item.name}
+                  title={LANGUAGES.find((l) => l.code === language)?.name}
+                  description={t('changeLanguageDesc')}
                   left={(props) => (
                     <View style={styles.languageIndicator}>
                       <Text
                         variant="titleMedium"
                         style={{ fontWeight: 'bold' }}
                       >
-                        {item.label}
+                        {LANGUAGES.find((l) => l.code === language)?.label}
                       </Text>
                     </View>
                   )}
-                  right={(props) =>
-                    language === item.code ? (
-                      <List.Icon
-                        {...props}
-                        icon="check-circle"
-                        color={theme.colors.primary}
-                      />
-                    ) : null
-                  }
-                  onPress={() => setLanguage(item.code as any)}
-                  style={
-                    language === item.code
-                      ? { backgroundColor: theme.colors.primaryContainer }
-                      : undefined
-                  }
+                  right={(props) => (
+                    <List.Icon {...props} icon="chevron-down" />
+                  )}
+                  onPress={() => setLanguageMenuVisible(true)}
                 />
-                {index < LANGUAGES.length - 1 && <Divider />}
-              </View>
-            ))}
+              }
+              contentStyle={{ backgroundColor: theme.colors.elevation.level3 }}
+            >
+              {LANGUAGES.map((item) => (
+                <Menu.Item
+                  key={item.code}
+                  onPress={() => {
+                    setLanguage(item.code as any);
+                    setLanguageMenuVisible(false);
+                  }}
+                  title={item.name}
+                  trailingIcon={language === item.code ? 'check' : undefined}
+                />
+              ))}
+            </Menu>
           </Card>
-          <Text variant="bodySmall" style={styles.sectionInfoText}>
-            {t('changeLanguageDesc')}
-          </Text>
         </View>
 
         <View style={styles.section}>
@@ -300,39 +299,47 @@ export const SettingsScreen = () => {
             {t('detectedCurrency')}
           </Text>
           <Card style={styles.card} mode="contained">
-            {CURRENCIES.map((item, index) => (
-              <View key={item.code}>
+            <Menu
+              visible={currencyMenuVisible}
+              onDismiss={() => setCurrencyMenuVisible(false)}
+              anchor={
                 <List.Item
-                  title={item.name}
+                  title={t(
+                    CURRENCIES.find((c) => c.code === currency)?.tKey as any,
+                  )}
                   left={(props) => (
                     <View style={styles.languageIndicator}>
                       <Text
                         variant="titleMedium"
                         style={{ fontWeight: 'bold' }}
                       >
-                        {item.code === 'EUR' ? '€' : '$'}
+                        {CURRENCIES.find((c) => c.code === currency)?.symbol ||
+                          '$'}
                       </Text>
                     </View>
                   )}
-                  right={(props) =>
-                    currency === item.code ? (
-                      <List.Icon
-                        {...props}
-                        icon="check-circle"
-                        color={theme.colors.primary}
-                      />
-                    ) : null
-                  }
-                  onPress={() => setCurrency(item.code)}
-                  style={
-                    currency === item.code
-                      ? { backgroundColor: theme.colors.primaryContainer }
-                      : undefined
-                  }
+                  right={(props) => (
+                    <List.Icon {...props} icon="chevron-down" />
+                  )}
+                  onPress={() => setCurrencyMenuVisible(true)}
                 />
-                {index < CURRENCIES.length - 1 && <Divider />}
-              </View>
-            ))}
+              }
+              contentStyle={{ backgroundColor: theme.colors.elevation.level3 }}
+            >
+              <ScrollView style={{ maxHeight: 300 }}>
+                {CURRENCIES.map((item) => (
+                  <Menu.Item
+                    key={item.code}
+                    onPress={() => {
+                      setCurrency(item.code);
+                      setCurrencyMenuVisible(false);
+                    }}
+                    title={`${t(item.tKey as any)} (${item.code})`}
+                    trailingIcon={currency === item.code ? 'check' : undefined}
+                  />
+                ))}
+              </ScrollView>
+            </Menu>
           </Card>
         </View>
 

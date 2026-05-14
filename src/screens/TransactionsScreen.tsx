@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { Chip, FAB, Menu, Searchbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BannerAdComponent } from '../components/BannerAdComponent';
 import { FilterBar } from '../components/FilterBar';
 import { TransactionItem } from '../components/TransactionItem';
 import { useFilterStore } from '../store/useFilterStore';
@@ -322,8 +321,6 @@ export const TransactionsScreen = () => {
           </View>
         }
       />
-
-      <BannerAdComponent />
 
       <FAB
         icon="plus"

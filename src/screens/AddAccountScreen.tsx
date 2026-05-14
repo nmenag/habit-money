@@ -25,6 +25,7 @@ import {
 } from '../store/useStore';
 import { CURRENCIES, COLORS } from '../constants';
 import { formatNumber } from '../utils/formatters';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 import { getLocalISOString } from '../utils/dateUtils';
 
 export const AddAccountScreen = () => {
@@ -43,7 +44,7 @@ export const AddAccountScreen = () => {
 
   const isEditing = !!editingAccount;
 
-  const { addAccount, editAccount, addTransaction } = useStore();
+  const { addAccount, editAccount, addTransaction, currency } = useStore();
   const { t, language } = useTranslation();
   const theme = useTheme();
 
@@ -54,9 +55,6 @@ export const AddAccountScreen = () => {
   );
   const [balance, setBalance] = useState(editingAccount?.currentBalance || 0);
   const [color, setColor] = useState(editingAccount?.color || COLORS[0]);
-  const [selectedCurrency, setSelectedCurrency] = useState(
-    editingAccount?.currency || 'COP',
-  );
 
   const handleSave = () => {
     if (!name.trim()) {
@@ -72,7 +70,7 @@ export const AddAccountScreen = () => {
         name: name.trim(),
         type: type,
         color: color,
-        currency: selectedCurrency,
+        currency: currency,
         currentBalance: editingAccount.currentBalance,
       });
 
@@ -98,7 +96,7 @@ export const AddAccountScreen = () => {
         initialBalance: finalBalance,
         currentBalance: finalBalance,
         color: color,
-        currency: selectedCurrency,
+        currency: currency,
         displayOrder: 0,
       });
     }
@@ -164,28 +162,8 @@ export const AddAccountScreen = () => {
             keyboardType="numeric"
             style={styles.input}
             outlineStyle={styles.inputOutline}
-            left={<TextInput.Affix text={selectedCurrency + ' '} />}
+            left={<TextInput.Affix text={currency + ' '} />}
           />
-        </View>
-
-        <View style={styles.section}>
-          <Text variant="titleMedium" style={styles.sectionTitle}>
-            {t('currency')}
-          </Text>
-          <View style={styles.chipsContainer}>
-            {CURRENCIES.map((c) => (
-              <Chip
-                key={c.code}
-                selected={selectedCurrency === c.code}
-                onPress={() => setSelectedCurrency(c.code)}
-                style={styles.chip}
-                showSelectedOverlay
-                mode="flat"
-              >
-                {c.code}
-              </Chip>
-            ))}
-          </View>
         </View>
 
         <View style={styles.section}>
@@ -224,6 +202,7 @@ export const AddAccountScreen = () => {
           {isEditing ? t('updateAccount') : t('saveAccount')}
         </Button>
       </ScrollView>
+      <BannerAdComponent />
     </View>
   );
 };

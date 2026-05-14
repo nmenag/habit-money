@@ -2,11 +2,13 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 import { useTheme } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AdService } from '../ads/AdService';
 
 export const BannerAdComponent = () => {
   const theme = useTheme();
-  const styles = defaultStyles(theme);
+  const insets = useSafeAreaInsets();
+  const styles = defaultStyles(theme, insets);
 
   const [showAd, setShowAd] = React.useState(false);
 
@@ -27,7 +29,7 @@ export const BannerAdComponent = () => {
     <View style={styles.container}>
       <BannerAd
         unitId={adUnitId}
-        size={BannerAdSize.LARGE_ANCHORED_ADAPTIVE_BANNER}
+        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
         requestOptions={{
           requestNonPersonalizedAdsOnly: true,
         }}
@@ -39,14 +41,20 @@ export const BannerAdComponent = () => {
   );
 };
 
-const defaultStyles = (theme: any) =>
+const defaultStyles = (theme: any, insets: any) =>
   StyleSheet.create({
     container: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
       alignItems: 'center',
       justifyContent: 'center',
       width: '100%',
       backgroundColor: theme.colors.surface,
       borderTopWidth: 1,
-      borderTopColor: '#eee',
+      borderTopColor: theme.colors.outlineVariant,
+      paddingBottom: insets.bottom > 0 ? insets.bottom : 0,
+      zIndex: 1000,
     },
   });

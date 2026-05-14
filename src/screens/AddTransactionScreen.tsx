@@ -43,6 +43,7 @@ export const AddTransactionScreen = () => {
     editTransaction,
     deleteTransaction,
     formatCurrency,
+    currency,
   } = useStore();
   const { t, language, translateName } = useTranslation();
   const theme = useTheme();
@@ -184,7 +185,6 @@ export const AddTransactionScreen = () => {
   };
 
   const insets = useSafeAreaInsets();
-  const displayCurrency = activeAccount?.currency || 'COP';
 
   return (
     <View
@@ -239,7 +239,7 @@ export const AddTransactionScreen = () => {
               keyboardType="numeric"
               style={styles.amountInput}
               outlineStyle={styles.inputOutline}
-              left={<TextInput.Affix text={displayCurrency + ' '} />}
+              left={<TextInput.Affix text={currency + ' '} />}
             />
           </Tooltip>
 

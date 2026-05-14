@@ -228,7 +228,19 @@ export const useStore = create<AppState>((set, get) => ({
       categories,
       language: finalLanguage,
       currency: currencySetting?.val || 'COP',
-      currencySymbol: currencySetting?.val === 'EUR' ? '€' : '$',
+      currencySymbol:
+        {
+          USD: '$',
+          EUR: '€',
+          GBP: '£',
+          MXN: '$',
+          COP: '$',
+          PEN: 'S/',
+          CLP: '$',
+          CAD: '$',
+          AUD: '$',
+          NZD: '$',
+        }[currencySetting?.val || 'COP'] || '$',
       themePreference:
         (themeSetting?.val as 'light' | 'dark' | 'system') || 'system',
       isPremiumUser: premiumSetting?.val === 'true',
@@ -338,7 +350,19 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   setCurrency: (currency: string) => {
-    const currencySymbol = currency === 'EUR' ? '€' : '$';
+    const symbols: { [key: string]: string } = {
+      USD: '$',
+      EUR: '€',
+      GBP: '£',
+      MXN: '$',
+      COP: '$',
+      PEN: 'S/',
+      CLP: '$',
+      CAD: '$',
+      AUD: '$',
+      NZD: '$',
+    };
+    const currencySymbol = symbols[currency] || '$';
     set({ currency, currencySymbol });
     try {
       const db = getDb();
@@ -346,10 +370,7 @@ export const useStore = create<AppState>((set, get) => ({
         'currency',
         currency,
       ]);
-      db.runSync('UPDATE accounts SET currency = ? WHERE id = ?', [
-        currency,
-        '1',
-      ]);
+      db.runSync('UPDATE accounts SET currency = ?', [currency]);
       get().loadData();
     } catch (error) {
       console.error('setCurrency DB Error:', error);
