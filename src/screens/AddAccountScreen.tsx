@@ -10,23 +10,22 @@ import {
 } from 'react-native';
 import {
   Button,
-  Chip,
   SegmentedButtons,
   Text,
   TextInput,
   useTheme,
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BannerAdComponent } from '../components/BannerAdComponent';
+import { COLORS } from '../constants';
 import {
   Account,
   AccountType,
   useStore,
   useTranslation,
 } from '../store/useStore';
-import { CURRENCIES, COLORS } from '../constants';
-import { formatNumber } from '../utils/formatters';
-import { BannerAdComponent } from '../components/BannerAdComponent';
 import { getLocalISOString } from '../utils/dateUtils';
+import { formatNumber } from '../utils/formatters';
 
 export const AddAccountScreen = () => {
   const params = useLocalSearchParams<{ account?: string }>();

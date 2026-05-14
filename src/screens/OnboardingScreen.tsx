@@ -1,14 +1,13 @@
 import * as Localization from 'expo-localization';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Image, Linking, StyleSheet, View } from 'react-native';
+import { Image, Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Menu, Surface, Text, useTheme } from 'react-native-paper';
 import { getDb } from '../db/schema';
 import { Language } from '../i18n/translations';
 import { useStore, useTranslation } from '../store/useStore';
 import { getLocalDateString } from '../utils/dateUtils';
 import { CURRENCIES } from '../constants';
-import { ScrollView } from 'react-native';
 
 export const OnboardingScreen = () => {
   const theme = useTheme();

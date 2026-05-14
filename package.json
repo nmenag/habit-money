@@ -1,7 +1,7 @@
 {
   "name": "habit-money",
   "main": "expo-router/entry",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -12,7 +12,7 @@
     "check-types": "tsc --noEmit",
     "doctor": "npx expo-doctor",
     "routes": "expo export --platform android",
-    "commitlint": "commitlint --edit"
+    "lint:commit": "commitlint --edit"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

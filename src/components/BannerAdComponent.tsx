@@ -10,8 +10,8 @@ interface BannerAdProps {
 }
 
 export const BannerAdComponent = ({ offset = 0 }: BannerAdProps) => {
-  const [showAd, setShowAd] = React.useState(true);
-  const [loadError, setLoadError] = React.useState(false);
+  const [showAd] = React.useState(true);
+  const [loadError] = React.useState(false);
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const styles = defaultStyles(theme, insets, offset);

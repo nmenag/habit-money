@@ -601,8 +601,6 @@ export const InsightsScreen = () => {
             </Text>
           </View>
         )}
-
-
       </ScrollView>
       <BannerAdComponent />
     </View>

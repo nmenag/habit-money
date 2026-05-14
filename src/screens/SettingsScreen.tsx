@@ -467,7 +467,6 @@ export const SettingsScreen = () => {
             />
           </Card>
         </View>
-
       </ScrollView>
       <BannerAdComponent />
       <TimePickerModal

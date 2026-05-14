@@ -18,13 +18,7 @@ import { exportTransactionsToCSV } from '../utils/csvExport';
 import { isInRange } from '../utils/dateFilters';
 
 export const ExportDataScreen = () => {
-  const {
-    transactions,
-    accounts,
-    categories,
-    incrementActionCounter,
-    checkAndShowAd,
-  } = useStore();
+  const { transactions, accounts, categories, checkAndShowAd } = useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
@@ -123,7 +117,9 @@ export const ExportDataScreen = () => {
                       : t('allAccounts' as any)
                   }
                   left={(props) => <List.Icon {...props} icon="bank-outline" />}
-                  right={(props) => <List.Icon {...props} icon="chevron-down" />}
+                  right={(props) => (
+                    <List.Icon {...props} icon="chevron-down" />
+                  )}
                   onPress={() => setAccountMenuOpen(true)}
                 />
               }
@@ -159,7 +155,9 @@ export const ExportDataScreen = () => {
                       : t('allCategories' as any)
                   }
                   left={(props) => <List.Icon {...props} icon="tag-outline" />}
-                  right={(props) => <List.Icon {...props} icon="chevron-down" />}
+                  right={(props) => (
+                    <List.Icon {...props} icon="chevron-down" />
+                  )}
                   onPress={() => setCategoryMenuOpen(true)}
                 />
               }
@@ -194,8 +192,12 @@ export const ExportDataScreen = () => {
                       ? t('allTypes' as any)
                       : t(selectedType as any)
                   }
-                  left={(props) => <List.Icon {...props} icon="swap-vertical" />}
-                  right={(props) => <List.Icon {...props} icon="chevron-down" />}
+                  left={(props) => (
+                    <List.Icon {...props} icon="swap-vertical" />
+                  )}
+                  right={(props) => (
+                    <List.Icon {...props} icon="chevron-down" />
+                  )}
                   onPress={() => setTypeMenuOpen(true)}
                 />
               }

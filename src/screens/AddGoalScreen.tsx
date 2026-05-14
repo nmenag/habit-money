@@ -13,11 +13,11 @@ import {
 import { Button, Text, TextInput, useTheme } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useStore, useTranslation } from '../store/useStore';
-import { GOAL_ICONS as ICONS, COLORS, getValidGoalIcon } from '../constants';
-import { formatNumber } from '../utils/formatters';
-import { getLocalISOString } from '../utils/dateUtils';
 import { BannerAdComponent } from '../components/BannerAdComponent';
+import { COLORS, getValidGoalIcon, GOAL_ICONS as ICONS } from '../constants';
+import { useStore, useTranslation } from '../store/useStore';
+import { getLocalISOString } from '../utils/dateUtils';
+import { formatNumber } from '../utils/formatters';
 
 export const AddGoalScreen = () => {
   const params = useLocalSearchParams<{ goal?: string }>();
@@ -35,7 +35,7 @@ export const AddGoalScreen = () => {
 
   const isEditing = !!editingGoal;
 
-  const { addGoal, editGoal, formatCurrency, currency } = useStore();
+  const { addGoal, editGoal, currency } = useStore();
   const { t, language } = useTranslation();
   const insets = useSafeAreaInsets();
   const theme = useTheme();
