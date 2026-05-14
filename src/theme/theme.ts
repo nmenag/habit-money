@@ -1,4 +1,13 @@
-import { MD3DarkTheme, MD3LightTheme, useTheme } from 'react-native-paper';
+import {
+  DarkTheme as NavigationDarkTheme,
+  DefaultTheme as NavigationDefaultTheme,
+} from '@react-navigation/native';
+import {
+  adaptNavigationTheme,
+  MD3DarkTheme,
+  MD3LightTheme,
+  useTheme,
+} from 'react-native-paper';
 
 const palette = {
   green: {
@@ -119,7 +128,31 @@ export const darkTheme = {
     warningContainer: '#451A03',
     elevation: {
       ...MD3DarkTheme.colors.elevation,
-      level1: '#111817',
     },
   },
+};
+
+const { LightTheme, DarkTheme } = adaptNavigationTheme({
+  reactNavigationLight: NavigationDefaultTheme,
+  reactNavigationDark: NavigationDarkTheme,
+});
+
+export const CombinedDefaultTheme = {
+  ...LightTheme,
+  ...lightTheme,
+  colors: {
+    ...LightTheme.colors,
+    ...lightTheme.colors,
+  },
+  fonts: lightTheme.fonts,
+};
+
+export const CombinedDarkTheme = {
+  ...DarkTheme,
+  ...darkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    ...darkTheme.colors,
+  },
+  fonts: darkTheme.fonts,
 };

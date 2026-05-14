@@ -1,4 +1,5 @@
 export const es = {
+  loadingApp: 'Cargando Habit Money...',
   dashboard: 'Inicio',
   transactions: 'Transacciones',
   accounts: 'Cuentas',

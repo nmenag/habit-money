@@ -1,55 +1,33 @@
-import {
-  NavigationContainer,
-  DarkTheme as NavigationDarkTheme,
-  DefaultTheme as NavigationDefaultTheme,
-} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, useColorScheme, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Text as RNText,
+  useColorScheme,
+  View,
+} from 'react-native';
 import mobileAds from 'react-native-google-mobile-ads';
+import { PaperProvider } from 'react-native-paper';
 import { interstitialManager } from './src/ads/InterstitialManager';
 import { initDb } from './src/db/schema';
 import { AppNavigator } from './src/navigation/AppNavigator';
-import { useStore } from './src/store/useStore';
+import { useStore, useTranslation } from './src/store/useStore';
 
-import { adaptNavigationTheme, PaperProvider } from 'react-native-paper';
 import {
   en as paperDatesEn,
   es as paperDatesEs,
   registerTranslation,
 } from 'react-native-paper-dates';
-import { darkTheme, lightTheme } from './src/theme/theme';
+import { CombinedDarkTheme, CombinedDefaultTheme } from './src/theme/theme';
 
 registerTranslation('en', paperDatesEn);
 registerTranslation('es', paperDatesEs);
 
-const { LightTheme, DarkTheme } = adaptNavigationTheme({
-  reactNavigationLight: NavigationDefaultTheme,
-  reactNavigationDark: NavigationDarkTheme,
-});
-
-const CombinedDefaultTheme = {
-  ...LightTheme,
-  ...lightTheme,
-  colors: {
-    ...LightTheme.colors,
-    ...lightTheme.colors,
-  },
-  fonts: lightTheme.fonts,
-};
-const CombinedDarkTheme = {
-  ...DarkTheme,
-  ...darkTheme,
-  colors: {
-    ...DarkTheme.colors,
-    ...darkTheme.colors,
-  },
-  fonts: darkTheme.fonts,
-};
-
 export default function App() {
   const [dbInitialized, setDbInitialized] = useState(false);
   const { loadData, isLoaded, themePreference } = useStore();
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
 
   const isDarkTheme =
@@ -58,10 +36,13 @@ export default function App() {
   const theme = isDarkTheme ? CombinedDarkTheme : CombinedDefaultTheme;
 
   useEffect(() => {
+    // Disable console logs in production
     if (!__DEV__) {
-      console.log = () => {};
-      console.info = () => {};
-      console.warn = () => {};
+      const noop = () => {};
+      console.log = noop;
+      console.info = noop;
+      console.warn = noop;
+      console.error = noop;
     }
 
     const setup = async () => {
@@ -101,6 +82,16 @@ export default function App() {
         }}
       >
         <ActivityIndicator size="large" color={theme.colors.primary} />
+        <RNText
+          style={{
+            marginTop: 16,
+            color: theme.colors.onSurfaceVariant,
+            fontWeight: '600',
+            fontSize: 16,
+          }}
+        >
+          {t('loadingApp')}
+        </RNText>
       </View>
     );
   }
