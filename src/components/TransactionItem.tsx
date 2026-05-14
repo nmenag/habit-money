@@ -23,6 +23,7 @@ export const TransactionItem: React.FC<Props> = memo(
     const formatCurrency = useStore((state) => state.formatCurrency);
     const { t, language, translateName } = useTranslation();
     const theme = useTheme<AppTheme>();
+    const styles = defaultStyles(theme);
 
     const isIncome = transaction.type === 'income';
     const account = accounts.find((a) => a.id === transaction.accountId);
@@ -95,6 +96,8 @@ export const TransactionItem: React.FC<Props> = memo(
                     : theme.colors.error,
               },
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
           >
             {isTransfer ? '' : isIncome ? '+' : '-'}
             {formatCurrency(transaction.amount, accountCurrency)}
@@ -129,25 +132,28 @@ export const TransactionItem: React.FC<Props> = memo(
 
 TransactionItem.displayName = 'TransactionItem';
 
-const styles = StyleSheet.create({
-  listItem: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
-  },
-  rightContainer: {
-    justifyContent: 'center',
-    paddingRight: spacing.sm,
-  },
-  avatar: {
-    borderRadius: 12,
-  },
-  amount: {
-    fontWeight: '700',
-  },
-  title: {
-    textTransform: 'capitalize',
-    fontWeight: '700',
-  },
-});
+const defaultStyles = (theme: AppTheme) =>
+  StyleSheet.create({
+    listItem: {
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.outlineVariant,
+    },
+    rightContainer: {
+      justifyContent: 'center',
+      paddingRight: spacing.sm,
+      flexShrink: 1,
+      marginLeft: spacing.sm,
+    },
+    avatar: {
+      borderRadius: 12,
+    },
+    amount: {
+      fontWeight: '700',
+    },
+    title: {
+      textTransform: 'capitalize',
+      fontWeight: '700',
+    },
+  });

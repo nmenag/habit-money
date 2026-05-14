@@ -845,7 +845,7 @@ export const useStore = create<AppState>((set, get) => ({
         console.error('refreshAnalytics Error:', error);
         analyticsDebounceTimer = null;
       }
-    }, 300); // 300ms debounce for UI responsiveness
+    }, 300); // debounce for UI responsiveness
   },
 
   updateAccountsOrder: (accounts) => {

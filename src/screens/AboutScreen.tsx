@@ -11,6 +11,7 @@ import {
 import { Divider, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../store/useStore';
+import { fontScale } from '../utils/responsive';
 
 export const AboutScreen = () => {
   const { t } = useTranslation();
@@ -127,12 +128,14 @@ const createStyles = (theme: any) =>
       color: theme.colors.onBackground,
       marginBottom: 12,
       letterSpacing: 0.5,
+      fontSize: fontScale(24),
     },
     appDescription: {
       textAlign: 'center',
       color: theme.colors.onSurfaceVariant,
-      lineHeight: 24,
+      lineHeight: fontScale(24),
       paddingHorizontal: 16,
+      fontSize: fontScale(16),
     },
     divider: {
       marginBottom: 32,

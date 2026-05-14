@@ -35,6 +35,7 @@ const palette = {
     400: '#FBBF24',
     500: '#F59E0B',
     600: '#D97706',
+    700: '#B45309',
   },
 };
 
@@ -86,10 +87,10 @@ export const lightTheme = {
     surface: palette.slate[50], // Tinted white
     background: '#F8FAFC',
     onSurface: palette.slate[900],
-    onSurfaceVariant: palette.slate[600],
-    income: palette.green[600],
+    onSurfaceVariant: palette.slate[700],
+    income: palette.green[700],
     incomeContainer: palette.green[100],
-    warning: palette.amber[600],
+    warning: palette.amber[700],
     warningContainer: '#FEF3C7',
     elevation: {
       ...MD3LightTheme.colors.elevation,

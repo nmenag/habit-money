@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../store/useStore';
+import { fontScale, moderateScale } from '../utils/responsive';
 
 export const BudgetDetailScreen = () => {
   const params = useLocalSearchParams<{ budgetId: string }>();
@@ -71,17 +72,31 @@ export const BudgetDetailScreen = () => {
               }}
               color="#fff"
             />
-            <Text variant="headlineSmall" style={styles.budgetName}>
+            <Text
+              variant="headlineSmall"
+              style={[styles.budgetName, { fontSize: fontScale(24) }]}
+            >
               {category?.name ? translateName(category.name) : t('budgets')}
             </Text>
             <View style={styles.progressSection}>
               <View style={styles.headerRow}>
-                <Text variant="titleMedium" style={{ fontWeight: '700' }}>
+                <Text
+                  variant="titleMedium"
+                  style={{
+                    fontWeight: '700',
+                    flexShrink: 1,
+                    fontSize: fontScale(16),
+                  }}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
                   {formatCurrency(spent)}
                 </Text>
                 <Text
                   variant="titleMedium"
-                  style={{ color: theme.colors.outline }}
+                  style={{ color: theme.colors.outline, marginLeft: 4 }}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
                 >
                   / {formatCurrency(budget.amount)}
                 </Text>
@@ -94,7 +109,9 @@ export const BudgetDetailScreen = () => {
               <View style={styles.headerRow}>
                 <Text
                   variant="labelMedium"
-                  style={{ color: theme.colors.onSurfaceVariant }}
+                  style={{ color: theme.colors.onSurfaceVariant, flex: 1 }}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
                 >
                   {t('remainingAmount')}: {formatCurrency(remaining)}
                 </Text>
@@ -185,11 +202,11 @@ const defaultStyles = (theme: any) =>
       flex: 1,
     },
     headerCard: {
-      margin: 16,
-      marginTop: 24,
+      margin: moderateScale(16),
+      marginTop: moderateScale(24),
       borderRadius: 24,
       backgroundColor: theme.colors.surfaceVariant,
-      paddingVertical: 24,
+      paddingVertical: moderateScale(24),
     },
     headerContent: {
       alignItems: 'center',

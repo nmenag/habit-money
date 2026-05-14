@@ -79,7 +79,7 @@ export const AccountCard: React.FC<Props> = ({
             <Ionicons
               name={getAccountIcon(account.type) as any}
               size={24}
-              color="#fff"
+              color={theme.colors.onPrimary}
             />
           </View>
           <View style={styles.textContainer}>
@@ -105,6 +105,8 @@ export const AccountCard: React.FC<Props> = ({
                       : theme.colors.onSurface,
                 },
               ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
             >
               {formatCurrency(account.currentBalance, account.currency)}
             </Text>
@@ -168,6 +170,7 @@ const defaultStyles = (theme: AppTheme) =>
     balanceContainer: {
       alignItems: 'flex-end',
       marginRight: 8,
+      flexShrink: 1,
     },
     balanceText: {
       fontWeight: '800',

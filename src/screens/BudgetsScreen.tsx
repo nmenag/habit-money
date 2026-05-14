@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../components/BannerAdComponent';
 import { Budget, useStore, useTranslation } from '../store/useStore';
+import { fontScale, moderateScale } from '../utils/responsive';
 
 export const BudgetsScreen = () => {
   const {
@@ -96,7 +97,12 @@ export const BudgetsScreen = () => {
                 <Text variant="titleLarge" style={styles.name}>
                   {category?.name ? translateName(category.name) : t('budgets')}
                 </Text>
-                <Text variant="bodyMedium" style={styles.limitText}>
+                <Text
+                  variant="bodyMedium"
+                  style={styles.limitText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
                   {formatCurrency(spent)} / {formatCurrency(item.amount)}
                 </Text>
               </View>
@@ -115,7 +121,12 @@ export const BudgetsScreen = () => {
             />
 
             <View style={styles.footerRow}>
-              <Text variant="labelSmall" style={styles.remainingText}>
+              <Text
+                variant="labelSmall"
+                style={[styles.remainingText, { flex: 1 }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
                 {t('remainingAmount')}: {formatCurrency(remaining)}
               </Text>
               <Text variant="labelSmall" style={styles.percentageText}>
@@ -166,7 +177,7 @@ export const BudgetsScreen = () => {
             backgroundColor: theme.colors.primary,
           },
         ]}
-        color="#fff"
+        color={theme.colors.onPrimary}
         onPress={() => router.push('/add-budget')}
       />
     </View>
@@ -179,7 +190,7 @@ const defaultStyles = (theme: any) =>
       flex: 1,
     },
     listContent: {
-      paddingTop: 8,
+      paddingTop: moderateScale(8),
     },
     card: {
       marginVertical: 8,
@@ -199,6 +210,7 @@ const defaultStyles = (theme: any) =>
     name: {
       fontWeight: '800',
       color: theme.colors.onSurface,
+      fontSize: fontScale(18),
     },
     limitText: {
       color: theme.colors.onSurface,

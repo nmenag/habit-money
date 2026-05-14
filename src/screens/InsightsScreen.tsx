@@ -1,17 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import React, { useMemo } from 'react';
-import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { Card, Surface, Text, useTheme } from 'react-native-paper';
+import { BannerAdComponent } from '../components/BannerAdComponent';
 import { FilterBar } from '../components/FilterBar';
-import { chartColors } from '../theme/theme';
 import { useFilterStore } from '../store/useFilterStore';
 import { useStore, useTranslation } from '../store/useStore';
-import { BannerAdComponent } from '../components/BannerAdComponent';
+import { chartColors } from '../theme/theme';
 import { isInRange } from '../utils/dateFilters';
 
-const screenWidth = Dimensions.get('window').width;
+import { SCREEN_WIDTH, fontScale, moderateScale } from '../utils/responsive';
 
 export const InsightsScreen = () => {
   const {
@@ -233,8 +233,13 @@ export const InsightsScreen = () => {
               variant="titleSmall"
               style={[
                 styles.miniValue,
-                { color: (theme.colors as any).income, fontSize: 14 },
+                {
+                  color: (theme.colors as any).income,
+                  fontSize: fontScale(14),
+                },
               ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
             >
               {formatCurrency(filtered.totalIncome)}
             </Text>
@@ -267,8 +272,13 @@ export const InsightsScreen = () => {
                 variant="titleSmall"
                 style={[
                   styles.miniValue,
-                  { color: theme.colors.onSurfaceVariant, fontSize: 14 },
+                  {
+                    color: theme.colors.onSurfaceVariant,
+                    fontSize: fontScale(14),
+                  },
                 ]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
               >
                 {formatCurrency(filtered.totalAdjustments)}
               </Text>
@@ -298,8 +308,10 @@ export const InsightsScreen = () => {
               variant="titleSmall"
               style={[
                 styles.miniValue,
-                { color: theme.colors.error, fontSize: 14 },
+                { color: theme.colors.error, fontSize: fontScale(14) },
               ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
             >
               {formatCurrency(filtered.totalExpenses)}
             </Text>
@@ -335,6 +347,8 @@ export const InsightsScreen = () => {
                     ? (theme.colors as any).income
                     : theme.colors.error,
               }}
+              numberOfLines={1}
+              adjustsFontSizeToFit
             >
               {filtered.savingsRate.toFixed(1)}%
             </Text>
@@ -382,7 +396,7 @@ export const InsightsScreen = () => {
                     ((d.population / filtered.totalExpenses) * 100).toFixed(1),
                   ),
                 }))}
-                width={screenWidth - 64}
+                width={SCREEN_WIDTH - 64}
                 height={200}
                 chartConfig={{
                   color: (opacity = 1) => `rgba(0,0,0,${opacity})`,
@@ -420,8 +434,14 @@ export const InsightsScreen = () => {
                       variant="bodySmall"
                       style={[
                         styles.legendAmount,
-                        { color: theme.colors.onSurface },
+                        {
+                          color: theme.colors.onSurface,
+                          flexShrink: 1,
+                          textAlign: 'right',
+                        },
                       ]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
                     >
                       {formatCurrency(item.amount)}
                     </Text>
@@ -450,7 +470,7 @@ export const InsightsScreen = () => {
               </Text>
               <BarChart
                 data={barData}
-                width={screenWidth - 64}
+                width={SCREEN_WIDTH - 64}
                 height={220}
                 yAxisLabel={currencySymbol}
                 yAxisSuffix=""
@@ -515,7 +535,7 @@ export const InsightsScreen = () => {
               return (
                 <Card
                   key={insight.id}
-                  style={[styles.insightCard, { borderLeftColor: iconColor }]}
+                  style={styles.insightCard}
                   mode="elevated"
                 >
                   <Card.Content style={styles.insightContent}>
@@ -588,7 +608,7 @@ const defaultStyles = (theme: any) =>
       flex: 1,
     },
     content: {
-      padding: 16,
+      padding: moderateScale(16),
     },
     rangeBadge: {
       flexDirection: 'row',
@@ -689,9 +709,9 @@ const defaultStyles = (theme: any) =>
     },
     insightCard: {
       marginBottom: 12,
-      borderRadius: 16,
+      borderRadius: 20,
       backgroundColor: theme.colors.surface,
-      borderLeftWidth: 6,
+      elevation: 2,
     },
     insightContent: {
       flexDirection: 'row',
