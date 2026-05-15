@@ -5,28 +5,12 @@ export const COLORS = [
   '#673ab7', // Deep Purple
   '#3f51b5', // Indigo
   '#2196f3', // Blue
-  '#03a9f4', // Light Blue
-  '#00bcd4', // Cyan
   '#009688', // Teal
   '#4caf50', // Green
-  '#8bc34a', // Light Green
-  '#cddc39', // Lime
-  '#ffeb3b', // Yellow
   '#ffc107', // Amber
   '#ff9800', // Orange
-  '#ff5722', // Deep Orange
   '#795548', // Brown
-  '#9e9e9e', // Grey
   '#607d8b', // Blue Grey
-  '#1a1a1a', // Black
-  '#d32f2f', // Dark Red
-  '#c2185b', // Dark Pink
-  '#7b1fa2', // Dark Purple
-  '#512da8', // Dark Deep Purple
-  '#303f9f', // Dark Indigo
-  '#1976d2', // Dark Blue
-  '#0288d1', // Dark Light Blue
-  '#0097a7', // Dark Cyan
 ];
 
 export const CURRENCIES = [
@@ -43,112 +27,49 @@ export const CURRENCIES = [
 ];
 
 export const CATEGORY_ICONS = [
-  'receipt',
-  'food',
-  'car',
-  'bus',
-  'subway',
-  'bicycle',
-  'home',
-  'home-city',
-  'controller-classic',
-  'medical-bag',
-  'format-list-bulleted',
   'cash',
   'wallet',
-  'piggy-bank',
   'bank',
-  'bank-transfer',
   'credit-card',
-  'cart',
-  'airplane',
-  'briefcase',
-  'school',
-  'tshirt-crew',
-  'coffee',
-  'dumbbell',
-  'music-note',
+  'piggy-bank',
   'chart-line',
-  'trending-up',
-  'pizza',
-  'hamburger',
-  'food-apple',
-  'beer',
-  'glass-wine',
-  'ice-cream',
+  'receipt',
+  'cart',
+  'tshirt-crew',
+  'food',
   'gas-station',
-  'movie-open',
-  'ticket',
-  'laptop',
+  'home',
+  'car',
+  'airplane',
+  'medical-bag',
+  'school',
+  'briefcase',
   'cellphone',
-  'television',
-  'newspaper',
-  'book-open-variant',
   'gift',
   'heart',
-  'star',
-  'church',
-  'paw',
-  'dog',
-  'cat',
-  'baby-carriage',
 ];
 
 export const GOAL_ICONS = [
   'trophy',
-  'car',
   'home',
+  'car',
   'airplane',
+  'school',
   'cart',
   'gift',
-  'school',
-  'medkit',
   'star',
   'heart',
-  'sunny',
-  'umbrella',
-  'bicycle',
-  'bus',
-  'boat',
-  'train',
-  'cafe',
-  'restaurant',
-  'fast-food',
-  'beer',
-  'wine',
-  'pizza',
-  'ice-cream',
-  'barbell',
-  'musical-notes',
-  'camera',
-  'laptop',
-  'desktop',
-  'phone-portrait',
-  'watch',
-  'book',
-  'newspaper',
   'briefcase',
+  'laptop',
   'wallet',
   'cash',
-  'cash-outline',
   'trending-up',
-  'stats-chart',
-  'fitness',
-  'medical',
-  'paw',
-  'car-sport',
-  'construct',
-  'build',
-  'color-palette',
-  'brush',
+  'bicycle',
+  'camera',
   'game-controller',
-  'headset',
-  'tv',
-  'radio',
-  'infinite',
-  'flash',
-  'leaf',
-  'flower',
+  'watch',
+  'medkit',
+  'umbrella',
 ];
 
 export const getValidCategoryIcon = (
