@@ -95,6 +95,7 @@ export const AddCategoryScreen = () => {
           styles.content,
           { paddingBottom: Math.max(insets.bottom, 20) + 100 },
         ]}
+        showsVerticalScrollIndicator={false}
       >
         <TextInput
           label={t('categoryName')}

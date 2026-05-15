@@ -127,6 +127,7 @@ export const AddAccountScreen = () => {
           styles.content,
           { paddingBottom: Math.max(insets.bottom, 20) + 100 },
         ]}
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.inputGroup}>
           <TextInput

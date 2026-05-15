@@ -91,7 +91,11 @@ export const AddBudgetScreen = () => {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: Math.max(insets.bottom, 20) + 100 },
+        ]}
+        showsVerticalScrollIndicator={false}
       >
         <TextInput
           label={t('monthlyLimit')}
