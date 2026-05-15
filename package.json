@@ -1,7 +1,7 @@
 {
   "name": "habit-money",
   "main": "expo-router/entry",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -26,7 +26,7 @@
     "expo-application": "~55.0.15",
     "expo-build-properties": "~55.0.14",
     "expo-constants": "^55.0.15",
-    "expo-dev-client": "~55.0.33",
+    "expo-dev-client": "~55.0.34",
     "expo-document-picker": "~55.0.13",
     "expo-file-system": "~55.0.17",
     "expo-font": "~55.0.6",

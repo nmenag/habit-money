@@ -1,3 +1,5 @@
+const packageJson = require('./package.json');
+
 const getAppVariant = () => {
   return process.env.APP_VARIANT || 'production';
 };
@@ -33,7 +35,7 @@ module.exports = {
   expo: {
     name: getAppName(),
     slug: 'fin-habit',
-    version: '1.1.8',
+    version: packageJson.version,
     orientation: 'portrait',
     icon: getIcon(),
     scheme: 'habitmoney',
