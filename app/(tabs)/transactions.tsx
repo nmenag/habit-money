@@ -1,1 +1,1 @@
-export { TransactionsScreen as default } from '../../src/screens/TransactionsScreen';
+export { TransactionsScreen as default } from '../../src/features/transactions';
