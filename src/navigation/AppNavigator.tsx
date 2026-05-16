@@ -3,83 +3,93 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { Suspense, lazy } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { DashboardScreen } from '../screens/DashboardScreen';
+import { DashboardScreen } from '../features/dashboard';
 import { useTranslation } from '../store/useStore';
 
-// Lazy load non-essential screens
+// Lazy load non-essential screens from feature barrels
 const AccountsScreen = lazy(() =>
-  import('../screens/AccountsScreen').then((m) => ({
+  import('../features/accounts').then((m) => ({
     default: m.AccountsScreen,
   })),
 );
 const AddAccountScreen = lazy(() =>
-  import('../screens/AddAccountScreen').then((m) => ({
+  import('../features/accounts').then((m) => ({
     default: m.AddAccountScreen,
   })),
 );
+const AccountDetailScreen = lazy(() =>
+  import('../features/accounts').then((m) => ({
+    default: m.AccountDetailScreen,
+  })),
+);
 const AddBudgetScreen = lazy(() =>
-  import('../screens/AddBudgetScreen').then((m) => ({
+  import('../features/budgets').then((m) => ({
     default: m.AddBudgetScreen,
   })),
 );
-const AddCategoryScreen = lazy(() =>
-  import('../screens/AddCategoryScreen').then((m) => ({
-    default: m.AddCategoryScreen,
-  })),
-);
-const AddTransactionScreen = lazy(() =>
-  import('../screens/AddTransactionScreen').then((m) => ({
-    default: m.AddTransactionScreen,
-  })),
-);
 const BudgetsScreen = lazy(() =>
-  import('../screens/BudgetsScreen').then((m) => ({
+  import('../features/budgets').then((m) => ({
     default: m.BudgetsScreen,
   })),
 );
+const BudgetDetailScreen = lazy(() =>
+  import('../features/budgets').then((m) => ({
+    default: m.BudgetDetailScreen,
+  })),
+);
+const AddCategoryScreen = lazy(() =>
+  import('../features/categories').then((m) => ({
+    default: m.AddCategoryScreen,
+  })),
+);
 const CategoriesScreen = lazy(() =>
-  import('../screens/CategoriesScreen').then((m) => ({
+  import('../features/categories').then((m) => ({
     default: m.CategoriesScreen,
   })),
 );
 const InsightsScreen = lazy(() =>
-  import('../screens/InsightsScreen').then((m) => ({
+  import('../features/insights').then((m) => ({
     default: m.InsightsScreen,
   })),
 );
 const SettingsScreen = lazy(() =>
-  import('../screens/SettingsScreen').then((m) => ({
+  import('../features/settings').then((m) => ({
     default: m.SettingsScreen,
   })),
 );
+const AddTransactionScreen = lazy(() =>
+  import('../features/transactions').then((m) => ({
+    default: m.AddTransactionScreen,
+  })),
+);
 const TransactionsScreen = lazy(() =>
-  import('../screens/TransactionsScreen').then((m) => ({
+  import('../features/transactions').then((m) => ({
     default: m.TransactionsScreen,
   })),
 );
 const CalendarScreen = lazy(() =>
-  import('../screens/CalendarScreen').then((m) => ({
+  import('../features/transactions').then((m) => ({
     default: m.CalendarScreen,
   })),
 );
 const GoalsScreen = lazy(() =>
-  import('../screens/GoalsScreen').then((m) => ({ default: m.GoalsScreen })),
+  import('../features/goals').then((m) => ({ default: m.GoalsScreen })),
 );
 const AddGoalScreen = lazy(() =>
-  import('../screens/AddGoalScreen').then((m) => ({
+  import('../features/goals').then((m) => ({
     default: m.AddGoalScreen,
   })),
 );
 const GoalDetailScreen = lazy(() =>
-  import('../screens/GoalDetailScreen').then((m) => ({
+  import('../features/goals').then((m) => ({
     default: m.GoalDetailScreen,
   })),
 );
 const AboutScreen = lazy(() =>
-  import('../screens/AboutScreen').then((m) => ({ default: m.AboutScreen })),
+  import('../features/settings').then((m) => ({ default: m.AboutScreen })),
 );
 const PrivacyPolicyScreen = lazy(() =>
-  import('../screens/PrivacyPolicyScreen').then((m) => ({
+  import('../features/settings').then((m) => ({
     default: m.PrivacyPolicyScreen,
   })),
 );
@@ -185,6 +195,11 @@ export const AppNavigator = () => {
         options={{ title: t('manageAccounts') }}
       />
       <Stack.Screen
+        name="AccountDetail"
+        component={withSuspense(AccountDetailScreen)}
+        options={{ title: 'Account Details' }}
+      />
+      <Stack.Screen
         name="Categories"
         component={withSuspense(CategoriesScreen)}
         options={{ title: t('manageCategories') }}
@@ -193,6 +208,11 @@ export const AppNavigator = () => {
         name="Budgets"
         component={withSuspense(BudgetsScreen)}
         options={{ title: t('manageBudgets') }}
+      />
+      <Stack.Screen
+        name="BudgetDetail"
+        component={withSuspense(BudgetDetailScreen)}
+        options={{ title: 'Budget Details' }}
       />
       <Stack.Screen
         name="Calendar"

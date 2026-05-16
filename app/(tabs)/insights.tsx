@@ -1,1 +1,1 @@
-export { InsightsScreen as default } from '../../src/screens/InsightsScreen';
+export { InsightsScreen as default } from '../../src/features/insights';

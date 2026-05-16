@@ -1,50 +1,8 @@
-export type InsightLevel = 'info' | 'positive' | 'warning' | 'critical';
-
-export interface Insight {
-  id: string;
-  title: string;
-  message: string;
-  level: InsightLevel;
-  category: string;
-  recommendation?: string;
-  timestamp: string;
-}
-
-export interface MonthlyMetrics {
-  month: string;
-  income: number;
-  expenses: number;
-  adjustments: number;
-  savings: number;
-  savingsRate: number;
-  topCategory?: {
-    id: string;
-    name: string;
-    amount: number;
-  };
-}
-
-export interface CategoryExpense {
-  categoryId: string;
-  categoryName: string;
-  amount: number;
-  percentage: number;
-  color: string;
-}
-
-export interface AnalyticsReport {
-  currentMonth: MonthlyMetrics;
-  previousMonth: MonthlyMetrics;
-  categoryExpenses: CategoryExpense[];
-  previousCategoryExpenses: CategoryExpense[];
-  budgets: {
-    categoryId: string;
-    categoryName: string;
-    amount: number;
-    spent: number;
-    exceeded: boolean;
-  }[];
-  spendingDays: number;
-  expenseGrowth: number;
-  insights: Insight[];
-}
+// Backward-compat shim — types have moved to features/insights/services/
+export type {
+  AnalyticsReport,
+  Insight,
+  InsightLevel,
+  MonthlyMetrics,
+  CategoryExpense,
+} from '../../features/insights/services/types';
