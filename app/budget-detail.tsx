@@ -1,2 +1,1 @@
-import { BudgetDetailScreen } from '../src/features/budgets';
-export default BudgetDetailScreen;
+export { BudgetDetailScreen as default } from '../src/features/budgets';

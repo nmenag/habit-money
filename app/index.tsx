@@ -11,7 +11,6 @@ export default function Index() {
     const checkFirstLaunch = async () => {
       try {
         const db = getDb();
-        // The table is created by initDb which runs in _layout.tsx
         const row = db.getFirstSync<{ val: string }>(
           "SELECT val FROM settings WHERE id = 'isFirstLaunch'",
         );
@@ -23,7 +22,6 @@ export default function Index() {
         if ((row && row.val === 'false') || (txCount && txCount.count > 0)) {
           setFirstLaunch(false);
         } else {
-          // If no row found or it's not 'false', then it's the first launch
           setFirstLaunch(true);
         }
       } catch (e) {

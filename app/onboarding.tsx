@@ -1,5 +1,1 @@
-import { OnboardingScreen } from '../src/features/settings';
-
-export default function Onboarding() {
-  return <OnboardingScreen />;
-}
+export { OnboardingScreen as default } from '../src/features/settings';

@@ -1,6 +1,1 @@
-import React from 'react';
-import { ExportDataScreen } from '../src/features/settings';
-
-export default function ExportDataRoute() {
-  return <ExportDataScreen />;
-}
+export { ExportDataScreen as default } from '../src/features/settings';
