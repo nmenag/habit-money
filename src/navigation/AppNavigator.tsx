@@ -133,6 +133,8 @@ const TabNavigator = () => {
         tabBarActiveTintColor: '#2196f3',
         tabBarInactiveTintColor: 'gray',
         headerShown: true,
+        lazy: true,
+        detachPreviousScreen: true,
       })}
     >
       <Tab.Screen

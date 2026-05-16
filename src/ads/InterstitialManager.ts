@@ -19,7 +19,9 @@ class InterstitialManager {
   }
 
   public init() {
-    if (this.interstitial) return;
+    if (this.interstitial) {
+      this.interstitial.removeAllListeners();
+    }
 
     try {
       this.interstitial = InterstitialAd.createForAdRequest(this.adUnitId, {
@@ -38,6 +40,7 @@ class InterstitialManager {
       this.interstitial.addAdEventListener(AdEventType.ERROR, (error) => {
         if (__DEV__) console.warn('Interstitial Ad Error: ', error);
         this.loaded = false;
+        // Exponential backoff or simple delay
         setTimeout(() => this.load(), 30000);
       });
 

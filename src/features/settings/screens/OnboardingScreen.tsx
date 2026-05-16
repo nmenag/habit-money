@@ -1,7 +1,8 @@
+import { Image } from 'expo-image';
 import * as Localization from 'expo-localization';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Image, Linking, ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Menu, Surface, Text, useTheme } from 'react-native-paper';
 import { getDb } from '../../../db/schema';
 import { Language } from '../../../i18n/translations';
@@ -64,8 +65,10 @@ export const OnboardingScreen = () => {
       <View style={styles.content}>
         <Surface style={styles.imageContainer} elevation={0}>
           <Image
-            source={require('../../../../assets/icon.png')}
+            source={require('../../../../assets/images/icon.png')}
             style={styles.logoImage}
+            contentFit="contain"
+            transition={200}
           />
         </Surface>
 

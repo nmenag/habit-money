@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { enUS, es } from 'date-fns/locale';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
@@ -29,18 +29,25 @@ export const FilterBar: React.FC = React.memo(() => {
   const theme = useTheme();
   const { t } = useTranslation();
   const language = useStore((s) => s.language);
-  const { selectedRange, setFilter, setCustomRange, clearFilter } =
-    useFilterStore();
+
+  // Use granular selectors
+  const selectedRange = useFilterStore((s) => s.selectedRange);
+  const setFilter = useFilterStore((s) => s.setFilter);
+  const setCustomRange = useFilterStore((s) => s.setCustomRange);
+  const clearFilter = useFilterStore((s) => s.clearFilter);
 
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const handleSelect = (option: FilterOption) => {
-    if (option.type === 'custom') {
-      setPickerOpen(true);
-    } else {
-      setFilter(option.type);
-    }
-  };
+  const handleSelect = useCallback(
+    (type: FilterType) => {
+      if (type === 'custom') {
+        setPickerOpen(true);
+      } else {
+        setFilter(type);
+      }
+    },
+    [setFilter],
+  );
 
   const onDismiss = useCallback(() => {
     setPickerOpen(false);
@@ -65,24 +72,34 @@ export const FilterBar: React.FC = React.memo(() => {
     [setCustomRange],
   );
 
-  const getLabel = (option: FilterOption): string => {
-    const raw = t(option.labelKey as any);
-    return raw === option.labelKey ? option.short : raw;
-  };
-
   const activeType = selectedRange.type;
   const isFiltered = activeType !== 'allTime';
 
-  const customSummary =
-    activeType === 'custom'
-      ? `${format(selectedRange.startDate, 'MMM d', {
-          locale: language === 'es' ? es : enUS,
-        })} – ${format(selectedRange.endDate, 'MMM d, yyyy', {
-          locale: language === 'es' ? es : enUS,
-        })}`
-      : null;
+  const customSummary = useMemo(
+    () =>
+      activeType === 'custom'
+        ? `${format(new Date(selectedRange.startDate), 'MMM d', {
+            locale: language === 'es' ? es : enUS,
+          })} – ${format(new Date(selectedRange.endDate), 'MMM d, yyyy', {
+            locale: language === 'es' ? es : enUS,
+          })}`
+        : null,
+    [activeType, selectedRange.startDate, selectedRange.endDate, language],
+  );
 
   const locale = language === 'es' ? 'es' : 'en';
+
+  const handleClear = useCallback(
+    (e: any) => {
+      e.stopPropagation();
+      clearFilter();
+    },
+    [clearFilter],
+  );
+
+  const handleOpenPicker = useCallback(() => {
+    setPickerOpen(true);
+  }, []);
 
   return (
     <View
@@ -102,11 +119,13 @@ export const FilterBar: React.FC = React.memo(() => {
         {FILTER_OPTIONS.map((option) => {
           const isActive = activeType === option.type;
           const isAllTime = option.type === 'allTime';
+          const label = t(option.labelKey as any);
+          const displayLabel = label === option.labelKey ? option.short : label;
 
           return (
             <TouchableOpacity
               key={option.type}
-              onPress={() => handleSelect(option)}
+              onPress={() => handleSelect(option.type)}
               activeOpacity={0.7}
               style={[
                 styles.chip,
@@ -122,21 +141,13 @@ export const FilterBar: React.FC = React.memo(() => {
                 },
               ]}
             >
-              {option.type === 'custom' && (
+              {(option.type === 'custom' || isAllTime) && (
                 <Ionicons
-                  name="calendar-outline"
-                  size={12}
-                  color={
-                    isActive
-                      ? theme.colors.onPrimary
-                      : theme.colors.onSurfaceVariant
+                  name={
+                    option.type === 'custom'
+                      ? 'calendar-outline'
+                      : 'infinite-outline'
                   }
-                  style={{ marginRight: 4 }}
-                />
-              )}
-              {isAllTime && (
-                <Ionicons
-                  name="infinite-outline"
                   size={12}
                   color={
                     isActive
@@ -157,15 +168,12 @@ export const FilterBar: React.FC = React.memo(() => {
                   fontSize: 12,
                 }}
               >
-                {getLabel(option)}
+                {displayLabel}
               </Text>
 
               {isActive && isFiltered && (
                 <TouchableOpacity
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    clearFilter();
-                  }}
+                  onPress={handleClear}
                   hitSlop={6}
                   style={styles.chipClose}
                 >
@@ -183,7 +191,7 @@ export const FilterBar: React.FC = React.memo(() => {
 
       {customSummary && (
         <TouchableOpacity
-          onPress={() => setPickerOpen(true)}
+          onPress={handleOpenPicker}
           activeOpacity={0.8}
           style={[
             styles.customBadge,

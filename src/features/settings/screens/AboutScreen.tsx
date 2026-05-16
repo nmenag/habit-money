@@ -1,7 +1,7 @@
+import { Image } from 'expo-image';
 import Constants from 'expo-constants';
 import React from 'react';
 import {
-  Image,
   Linking,
   ScrollView,
   StyleSheet,
@@ -39,8 +39,10 @@ export const AboutScreen = () => {
     >
       <View style={styles.header}>
         <Image
-          source={require('../../../../assets/icon.png')}
+          source={require('../../../../assets/images/icon.png') as any}
           style={styles.logoImage}
+          contentFit="contain"
+          transition={200}
         />
         <Text variant="headlineMedium" style={styles.appName}>
           {appName}

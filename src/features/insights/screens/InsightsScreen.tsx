@@ -18,29 +18,30 @@ import {
 } from '../../../utils/responsive';
 
 export const InsightsScreen = () => {
-  const {
-    transactions,
-    categories,
-    analyticsReport,
-    formatCurrency,
-    currencySymbol,
-    loadFullData,
-  } = useStore();
+  const transactions = useStore((s) => s.transactions);
+  const categories = useStore((s) => s.categories);
+  const analyticsReport = useStore((s) => s.analyticsReport);
+  const formatCurrency = useStore((s) => s.formatCurrency);
+  const currencySymbol = useStore((s) => s.currencySymbol);
+  const loadFullData = useStore((s) => s.loadFullData);
+  const checkAndShowAd = useStore((s) => s.checkAndShowAd);
+
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
-  const { selectedRange } = useFilterStore();
+  const selectedRange = useFilterStore((s) => s.selectedRange);
 
   React.useEffect(() => {
     loadFullData();
 
     // Show interstitial occasionally (30% chance)
     if (Math.random() < 0.3) {
-      setTimeout(() => {
-        useStore.getState().checkAndShowAd();
+      const timer = setTimeout(() => {
+        checkAndShowAd();
       }, 1500);
+      return () => clearTimeout(timer);
     }
-  }, [loadFullData]);
+  }, [loadFullData, checkAndShowAd]);
 
   const filtered = useMemo(() => {
     const inRange = transactions.filter((tx) =>
@@ -117,33 +118,38 @@ export const InsightsScreen = () => {
     };
   }, [transactions, categories, selectedRange, t, translateName]);
 
-  const barData = analyticsReport
-    ? {
-        labels: [t('previousMonth'), t('currentMonth')],
-        datasets: [
-          {
-            data: [
-              analyticsReport.previousMonth.expenses,
-              analyticsReport.currentMonth.expenses,
-            ],
-            colors: [
-              (_opacity = 1) => theme.colors.primaryContainer,
-              (_opacity = 1) => theme.colors.primary,
-            ],
-          },
-        ],
-      }
-    : null;
+  const barData = useMemo(() => {
+    if (!analyticsReport) return null;
+    return {
+      labels: [t('previousMonth'), t('currentMonth')],
+      datasets: [
+        {
+          data: [
+            analyticsReport.previousMonth.expenses,
+            analyticsReport.currentMonth.expenses,
+          ],
+          colors: [
+            (_opacity = 1) => theme.colors.primaryContainer,
+            (_opacity = 1) => theme.colors.primary,
+          ],
+        },
+      ],
+    };
+  }, [analyticsReport, t, theme.colors]);
 
   const expenseGrowth = analyticsReport?.expenseGrowth ?? 0;
 
-  const pieData = filtered.categoryBreakdown.map((ce) => ({
-    name: translateName(ce.name),
-    population: ce.amount,
-    color: ce.color,
-    legendFontColor: theme.colors.onSurfaceVariant,
-    legendFontSize: 11,
-  }));
+  const pieData = useMemo(
+    () =>
+      filtered.categoryBreakdown.map((ce) => ({
+        name: translateName(ce.name),
+        population: ce.amount,
+        color: ce.color,
+        legendFontColor: theme.colors.onSurfaceVariant,
+        legendFontSize: 11,
+      })),
+    [filtered.categoryBreakdown, translateName, theme.colors.onSurfaceVariant],
+  );
 
   const rangeLabel = useMemo(() => {
     const { type, startDate, endDate } = selectedRange;
@@ -156,15 +162,112 @@ export const InsightsScreen = () => {
     return `${format(startDate, 'MMM d')} – ${format(endDate, 'MMM d, yyyy')}`;
   }, [selectedRange, t]);
 
-  const chartConfig = {
-    backgroundGradientFrom: theme.colors.surface,
-    backgroundGradientTo: theme.colors.surface,
-    color: (opacity = 1) => theme.colors.primary,
-    labelColor: (opacity = 1) => theme.colors.onSurface,
-    strokeWidth: 2,
-    barPercentage: 0.6,
-    useShadowColorFromDataset: false,
-  };
+  const chartConfig = useMemo(
+    () => ({
+      backgroundGradientFrom: theme.colors.surface,
+      backgroundGradientTo: theme.colors.surface,
+      color: (opacity = 1) => theme.colors.primary,
+      labelColor: (opacity = 1) => theme.colors.onSurface,
+      strokeWidth: 2,
+      barPercentage: 0.6,
+      useShadowColorFromDataset: false,
+    }),
+    [theme.colors],
+  );
+
+  const memoizedPieChart = useMemo(() => {
+    if (pieData.length === 0) return null;
+    return (
+      <PieChart
+        data={pieData.map((d) => ({
+          ...d,
+          name: '',
+          population: parseFloat(
+            ((d.population / filtered.totalExpenses) * 100).toFixed(1),
+          ),
+        }))}
+        width={SCREEN_WIDTH - 64}
+        height={200}
+        chartConfig={{
+          color: (opacity = 1) => `rgba(0,0,0,${opacity})`,
+        }}
+        accessor="population"
+        backgroundColor="transparent"
+        paddingLeft="50"
+        absolute
+        hasLegend={false}
+      />
+    );
+  }, [pieData, filtered.totalExpenses]);
+
+  const memoizedLegend = useMemo(
+    () => (
+      <View style={styles.legendList}>
+        {filtered.categoryBreakdown.map((item, i) => (
+          <View key={i} style={styles.legendRow}>
+            <View style={[styles.legendDot, { backgroundColor: item.color }]} />
+            <Text
+              variant="bodySmall"
+              style={styles.legendName}
+              numberOfLines={1}
+            >
+              {item.name}
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={{ color: theme.colors.onSurfaceVariant }}
+            >
+              {item.percentage}%
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={[
+                styles.legendAmount,
+                {
+                  color: theme.colors.onSurface,
+                  flexShrink: 1,
+                  textAlign: 'right',
+                },
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {formatCurrency(item.amount)}
+            </Text>
+          </View>
+        ))}
+      </View>
+    ),
+    [
+      filtered.categoryBreakdown,
+      theme.colors,
+      formatCurrency,
+      styles.legendAmount,
+      styles.legendDot,
+      styles.legendList,
+      styles.legendName,
+      styles.legendRow,
+    ],
+  );
+
+  const memoizedBarChart = useMemo(() => {
+    if (!barData) return null;
+    return (
+      <BarChart
+        data={barData}
+        width={SCREEN_WIDTH - 64}
+        height={220}
+        yAxisLabel={currencySymbol}
+        yAxisSuffix=""
+        chartConfig={chartConfig}
+        verticalLabelRotation={0}
+        fromZero
+        withCustomBarColorFromData
+        flatColor
+        style={styles.chart}
+      />
+    );
+  }, [barData, currencySymbol, chartConfig, styles.chart]);
 
   return (
     <View
@@ -399,66 +502,8 @@ export const InsightsScreen = () => {
               <Text variant="titleMedium" style={styles.chartTitle}>
                 {t('chartTitle')}
               </Text>
-              <PieChart
-                data={pieData.map((d) => ({
-                  ...d,
-                  name: '',
-                  population: parseFloat(
-                    ((d.population / filtered.totalExpenses) * 100).toFixed(1),
-                  ),
-                }))}
-                width={SCREEN_WIDTH - 64}
-                height={200}
-                chartConfig={{
-                  color: (opacity = 1) => `rgba(0,0,0,${opacity})`,
-                }}
-                accessor="population"
-                backgroundColor="transparent"
-                paddingLeft="50"
-                absolute
-                hasLegend={false}
-              />
-              {/* Category Legend */}
-              <View style={styles.legendList}>
-                {filtered.categoryBreakdown.map((item, i) => (
-                  <View key={i} style={styles.legendRow}>
-                    <View
-                      style={[
-                        styles.legendDot,
-                        { backgroundColor: item.color },
-                      ]}
-                    />
-                    <Text
-                      variant="bodySmall"
-                      style={styles.legendName}
-                      numberOfLines={1}
-                    >
-                      {item.name}
-                    </Text>
-                    <Text
-                      variant="bodySmall"
-                      style={{ color: theme.colors.onSurfaceVariant }}
-                    >
-                      {item.percentage}%
-                    </Text>
-                    <Text
-                      variant="bodySmall"
-                      style={[
-                        styles.legendAmount,
-                        {
-                          color: theme.colors.onSurface,
-                          flexShrink: 1,
-                          textAlign: 'right',
-                        },
-                      ]}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                    >
-                      {formatCurrency(item.amount)}
-                    </Text>
-                  </View>
-                ))}
-              </View>
+              {memoizedPieChart}
+              {memoizedLegend}
             </Card.Content>
           </Card>
         )}
@@ -479,19 +524,7 @@ export const InsightsScreen = () => {
               >
                 {t('basedOnLastMonths')}
               </Text>
-              <BarChart
-                data={barData}
-                width={SCREEN_WIDTH - 64}
-                height={220}
-                yAxisLabel={currencySymbol}
-                yAxisSuffix=""
-                chartConfig={chartConfig}
-                verticalLabelRotation={0}
-                fromZero
-                withCustomBarColorFromData
-                flatColor
-                style={styles.chart}
-              />
+              {memoizedBarChart}
               <View style={styles.growthContainer}>
                 <Text
                   variant="headlineMedium"

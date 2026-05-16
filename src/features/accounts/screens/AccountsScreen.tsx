@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
@@ -13,16 +13,49 @@ import { AccountCard } from '../components/AccountCard';
 import { Account, useStore, useTranslation } from '../../../store/useStore';
 
 export const AccountsScreen = () => {
-  const { accounts, deleteAccount, updateAccountsOrder } = useStore();
+  const accounts = useStore((s) => s.accounts);
+  const deleteAccount = useStore((s) => s.deleteAccount);
+  const updateAccountsOrder = useStore((s) => s.updateAccountsOrder);
+
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
-
-  const handleAddAccount = () => {
-    router.push('/add-account');
-  };
-
   const insets = useSafeAreaInsets();
+
+  const handleAddAccount = useCallback(() => {
+    router.push('/add-account');
+  }, []);
+
+  const handleAccountPress = useCallback((id: string) => {
+    router.push({
+      pathname: '/account-detail',
+      params: { accountId: id },
+    });
+  }, []);
+
+  const handleDeleteAccount = useCallback(
+    (id: string) => {
+      deleteAccount(id);
+    },
+    [deleteAccount],
+  );
+
+  const renderItem = useCallback(
+    ({ item, drag, isActive }: RenderItemParams<Account>) => (
+      <ScaleDecorator>
+        <AccountCard
+          account={item}
+          onDelete={
+            accounts.length > 1 ? () => handleDeleteAccount(item.id) : undefined
+          }
+          onPress={() => handleAccountPress(item.id)}
+          onLongPress={drag}
+          isActive={isActive}
+        />
+      </ScaleDecorator>
+    ),
+    [accounts.length, handleDeleteAccount, handleAccountPress],
+  );
 
   return (
     <View
@@ -36,24 +69,7 @@ export const AccountsScreen = () => {
           styles.listContent,
           { paddingBottom: insets.bottom + 140 },
         ]}
-        renderItem={({ item, drag, isActive }: RenderItemParams<Account>) => (
-          <ScaleDecorator>
-            <AccountCard
-              account={item}
-              onDelete={
-                accounts.length > 1 ? () => deleteAccount(item.id) : undefined
-              }
-              onPress={() =>
-                router.push({
-                  pathname: '/account-detail',
-                  params: { accountId: item.id },
-                })
-              }
-              onLongPress={drag}
-              isActive={isActive}
-            />
-          </ScaleDecorator>
-        )}
+        renderItem={renderItem}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Ionicons

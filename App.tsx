@@ -36,28 +36,30 @@ export default function App() {
   const theme = isDarkTheme ? CombinedDarkTheme : CombinedDefaultTheme;
 
   useEffect(() => {
-    // Disable console logs in production
+    // Disable console logs in production more efficiently
     if (!__DEV__) {
       const noop = () => {};
-      console.log = noop;
-      console.info = noop;
-      console.warn = noop;
-      console.error = noop;
+      ['log', 'info', 'warn', 'error'].forEach((key) => {
+        (console as any)[key] = noop;
+      });
     }
 
     const setup = async () => {
       try {
+        // Run DB init
         initDb();
         setDbInitialized(true);
 
-        setTimeout(async () => {
+        // Defer ads and other non-critical heavy init
+        const { InteractionManager } = require('react-native');
+        InteractionManager.runAfterInteractions(async () => {
           try {
             await mobileAds().initialize();
             interstitialManager.init();
           } catch (e) {
-            if (__DEV__) console.warn('Ads init failed:', e);
+            // Silently fail ads in production
           }
-        }, 2000);
+        });
       } catch (e) {
         console.error('Failed to initialize local DB', e);
       }

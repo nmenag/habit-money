@@ -9,7 +9,7 @@ interface BannerAdProps {
   offset?: number;
 }
 
-export const BannerAdComponent = ({ offset = 0 }: BannerAdProps) => {
+export const BannerAdComponent = React.memo(({ offset = 0 }: BannerAdProps) => {
   const [showAd] = React.useState(true);
   const [loadError] = React.useState(false);
   const insets = useSafeAreaInsets();
@@ -36,7 +36,9 @@ export const BannerAdComponent = ({ offset = 0 }: BannerAdProps) => {
       />
     </View>
   );
-};
+});
+
+BannerAdComponent.displayName = 'BannerAdComponent';
 
 const defaultStyles = (theme: any, insets: any, offset: number) =>
   StyleSheet.create({

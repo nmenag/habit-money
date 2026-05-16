@@ -2,14 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { format, parseISO } from 'date-fns';
 import { enUS, es } from 'date-fns/locale';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useMemo, useState } from 'react';
-import {
-  FlatList,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Chip, FAB, Menu, Searchbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FilterBar } from '../components/FilterBar';
@@ -18,14 +12,24 @@ import { useFilterStore } from '../../../store/useFilterStore';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { isInRange } from '../../../utils/dateFilters';
 
+import { FlashList } from '@shopify/flash-list';
+
+const TypedFlashList = FlashList as any;
+
 export const TransactionsScreen = () => {
   const params = useLocalSearchParams<{ accountId?: string }>();
-  const { transactions, accounts, categories, language, loadFullData } =
-    useStore();
+
+  // Granular selectors to prevent re-renders when other state changes
+  const transactions = useStore((s) => s.transactions);
+  const accounts = useStore((s) => s.accounts);
+  const categories = useStore((s) => s.categories);
+  const language = useStore((s) => s.language);
+  const loadFullData = useStore((s) => s.loadFullData);
+
   const { t, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
-  const { selectedRange } = useFilterStore();
+  const selectedRange = useFilterStore((s) => s.selectedRange);
   const insets = useSafeAreaInsets();
 
   React.useEffect(() => {
@@ -42,12 +46,21 @@ export const TransactionsScreen = () => {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
 
-  const activeAccount = selectedAccountId
-    ? accounts.find((a) => a.id === selectedAccountId)
-    : null;
-  const activeCategory = selectedCategoryId
-    ? categories.find((c) => c.id === selectedCategoryId)
-    : null;
+  const activeAccount = useMemo(
+    () =>
+      selectedAccountId
+        ? accounts.find((a) => a.id === selectedAccountId)
+        : null,
+    [selectedAccountId, accounts],
+  );
+
+  const activeCategory = useMemo(
+    () =>
+      selectedCategoryId
+        ? categories.find((c) => c.id === selectedCategoryId)
+        : null,
+    [selectedCategoryId, categories],
+  );
 
   const hasActiveFilters = !!(
     searchQuery ||
@@ -55,21 +68,20 @@ export const TransactionsScreen = () => {
     selectedCategoryId
   );
 
-  const clearAllFilters = () => {
+  const clearAllFilters = useCallback(() => {
     setSearchQuery('');
     setSelectedAccountId(null);
     setSelectedCategoryId(null);
-  };
+  }, []);
 
   const filteredTransactions = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     return transactions.filter((tx) => {
       if (!isInRange(tx.date, selectedRange)) return false;
-
       if (selectedAccountId && tx.accountId !== selectedAccountId) return false;
-
       if (selectedCategoryId && tx.categoryId !== selectedCategoryId)
         return false;
+
       if (query) {
         const cat = categories.find((c) => c.id === tx.categoryId);
         const acc = accounts.find((a) => a.id === tx.accountId);
@@ -77,13 +89,13 @@ export const TransactionsScreen = () => {
         const catName = (cat?.name || '').toLowerCase();
         const accName = (acc?.name || '').toLowerCase();
         const amt = String(tx.amount);
-        if (
-          !note.includes(query) &&
-          !catName.includes(query) &&
-          !accName.includes(query) &&
-          !amt.includes(query)
-        )
-          return false;
+
+        return (
+          note.includes(query) ||
+          catName.includes(query) ||
+          accName.includes(query) ||
+          amt.includes(query)
+        );
       }
 
       return true;
@@ -98,24 +110,75 @@ export const TransactionsScreen = () => {
     accounts,
   ]);
 
-  const groupedTransactions = useMemo(() => {
+  const flattenedData = useMemo(() => {
     const dateMap: Record<string, typeof filteredTransactions> = {};
     filteredTransactions.forEach((tx) => {
       const key = tx.date.substring(0, 10);
       if (!dateMap[key]) dateMap[key] = [];
       dateMap[key].push(tx);
     });
-    return Object.entries(dateMap)
-      .map(([date, items]) => ({ date, items }))
-      .sort((a, b) => b.date.localeCompare(a.date));
+
+    const sortedDates = Object.keys(dateMap).sort((a, b) => b.localeCompare(a));
+    const result: any[] = [];
+    const stickyHeaderIndices: number[] = [];
+
+    sortedDates.forEach((date) => {
+      stickyHeaderIndices.push(result.length);
+      result.push({ rowType: 'header', title: date });
+      dateMap[date].forEach((tx) => {
+        result.push({ rowType: 'item', ...tx });
+      });
+    });
+
+    return { data: result, stickyHeaderIndices };
   }, [filteredTransactions]);
 
-  const handleTransactionPress = (transaction: any) => {
+  const handleTransactionPress = useCallback((transaction: any) => {
     router.push({
       pathname: '/add-transaction',
       params: { transaction: JSON.stringify(transaction), isEditing: 'true' },
     });
-  };
+  }, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: any }) => {
+      if (item.rowType === 'header') {
+        return (
+          <View
+            style={[
+              styles.sectionHeader,
+              { backgroundColor: theme.colors.background, height: 32 },
+            ]}
+          >
+            <Text
+              variant="labelSmall"
+              style={[
+                styles.sectionHeaderText,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              {format(parseISO(item.title), 'EEEE, MMMM d', {
+                locale: language === 'es' ? es : enUS,
+              })}
+            </Text>
+          </View>
+        );
+      }
+
+      const category = categories.find((c) => c.id === item.categoryId);
+      return (
+        <TouchableOpacity
+          onPress={() => handleTransactionPress(item)}
+          activeOpacity={0.7}
+        >
+          <TransactionItem transaction={item} category={category} />
+        </TouchableOpacity>
+      );
+    },
+    [categories, handleTransactionPress, theme, language, styles],
+  );
+
+  const getItemType = useCallback((item: any) => item.rowType, []);
 
   return (
     <View
@@ -247,7 +310,6 @@ export const TransactionsScreen = () => {
             </Chip>
           )}
         </ScrollView>
-
         <View style={styles.countBadge}>
           <Text
             variant="labelSmall"
@@ -257,70 +319,42 @@ export const TransactionsScreen = () => {
           </Text>
         </View>
       </View>
-      <FlatList
-        data={groupedTransactions}
-        keyExtractor={(item) => item.date}
-        contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 16 }}
-        renderItem={({ item: group }) => (
-          <View>
-            <View
-              style={[
-                styles.sectionHeader,
-                { backgroundColor: theme.colors.background },
-              ]}
-            >
-              <Text
-                variant="labelSmall"
-                style={[
-                  styles.sectionHeaderText,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
-              >
-                {format(parseISO(group.date), 'EEEE, MMMM d', {
-                  locale: language === 'es' ? es : enUS,
-                })}
+      <View style={{ flex: 1 }}>
+        <TypedFlashList
+          data={flattenedData.data as any[]}
+          keyExtractor={(item: any) => item.id || item.title}
+          renderItem={renderItem}
+          getItemType={getItemType}
+          estimatedItemSize={72}
+          stickyHeaderIndices={flattenedData.stickyHeaderIndices}
+          contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 16 }}
+          ListEmptyComponent={
+            <View style={styles.empty}>
+              <Ionicons
+                name="search-outline"
+                size={56}
+                color={theme.colors.outlineVariant}
+              />
+              <Text variant="bodyLarge" style={styles.emptyText}>
+                {t('noTransactions')}
               </Text>
-            </View>
-            {group.items.map((tx) => {
-              const category = categories.find((c) => c.id === tx.categoryId);
-              return (
+              {hasActiveFilters && (
                 <TouchableOpacity
-                  key={tx.id}
-                  onPress={() => handleTransactionPress(tx)}
-                  activeOpacity={0.7}
+                  onPress={clearAllFilters}
+                  style={styles.clearLink}
                 >
-                  <TransactionItem transaction={tx} category={category} />
+                  <Text
+                    variant="labelMedium"
+                    style={{ color: theme.colors.primary }}
+                  >
+                    {t('clearFilters' as any)}
+                  </Text>
                 </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Ionicons
-              name="search-outline"
-              size={56}
-              color={theme.colors.outlineVariant}
-            />
-            <Text variant="bodyLarge" style={styles.emptyText}>
-              {t('noTransactions')}
-            </Text>
-            {hasActiveFilters && (
-              <TouchableOpacity
-                onPress={clearAllFilters}
-                style={styles.clearLink}
-              >
-                <Text
-                  variant="labelMedium"
-                  style={{ color: theme.colors.primary }}
-                >
-                  {t('clearFilters' as any)}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        }
-      />
+              )}
+            </View>
+          }
+        />
+      </View>
 
       <FAB
         icon="plus"

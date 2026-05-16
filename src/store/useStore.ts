@@ -2,6 +2,7 @@
 // Consumers should import useStore and useTranslation from this file as before.
 // Entity types are imported from ./types to avoid circular dependencies.
 
+import React from 'react';
 import { create } from 'zustand';
 import { getTranslatedName, translations } from '../i18n/translations';
 import { createAccountsSlice, AccountsSlice } from './slices/accountsSlice';
@@ -52,25 +53,27 @@ export const useStore = create<AppStore>()((...args) => ({
 export const useTranslation = () => {
   const language = useStore((state) => state.language);
 
-  const t = (
-    key: keyof typeof translations.en,
-    params?: Record<string, string | number>,
-  ) => {
-    const langSet = translations[language] || translations.en;
-    let text = langSet[key] || translations.en[key] || String(key);
+  return React.useMemo(() => {
+    const t = (
+      key: keyof typeof translations.en,
+      params?: Record<string, string | number>,
+    ) => {
+      const langSet = translations[language] || translations.en;
+      let text = langSet[key] || translations.en[key] || String(key);
 
-    if (params) {
-      Object.entries(params).forEach(([k, v]) => {
-        text = text.replace(`{{${k}}}`, String(v));
-      });
-    }
+      if (params) {
+        Object.entries(params).forEach(([k, v]) => {
+          text = text.replace(`{{${k}}}`, String(v));
+        });
+      }
 
-    return text;
-  };
+      return text;
+    };
 
-  const translateName = (name: string) => {
-    return getTranslatedName(name, language);
-  };
+    const translateName = (name: string) => {
+      return getTranslatedName(name, language);
+    };
 
-  return { t, language, translateName };
+    return { t, language, translateName };
+  }, [language]);
 };

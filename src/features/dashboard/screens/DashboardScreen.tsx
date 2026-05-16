@@ -21,6 +21,7 @@ import { AppTheme, spacing } from '../../../theme/theme';
 import { fontScale, moderateScale } from '../../../utils/responsive';
 
 export const DashboardScreen = React.memo(() => {
+  // Use granular selectors to avoid unnecessary re-renders
   const transactions = useStore((s) => s.transactions);
   const categories = useStore((s) => s.categories);
   const goals = useStore((s) => s.goals);
@@ -28,14 +29,14 @@ export const DashboardScreen = React.memo(() => {
   const accounts = useStore((s) => s.accounts);
   const isLoaded = useStore((s) => s.isLoaded);
   const formatCurrency = useStore((s) => s.formatCurrency);
+  const analyticsReport = useStore((s) => s.analyticsReport);
+  const refreshAnalytics = useStore((s) => s.refreshAnalytics);
+  const language = useStore((s) => s.language);
 
-  const { t, language, translateName } = useTranslation();
+  const { t, translateName } = useTranslation();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
-
-  const analyticsReport = useStore((s) => s.analyticsReport);
-  const refreshAnalytics = useStore((s) => s.refreshAnalytics);
 
   React.useEffect(() => {
     if (!analyticsReport) {
@@ -88,7 +89,7 @@ export const DashboardScreen = React.memo(() => {
     };
   }, [analyticsReport, accounts, goals, transactions, budgets, categories]);
 
-  const uiData = useMemo(() => {
+  const data = useMemo(() => {
     if (!financialData) return null;
 
     const { ratio, insightMessage, monthlyExpenses, monthlyIncome } =
@@ -107,19 +108,12 @@ export const DashboardScreen = React.memo(() => {
     }
 
     return {
+      ...financialData,
       progressColor,
       progressMessage,
       insight: insightMessage || t('insightKeepGoing'),
     };
   }, [financialData, theme, t]);
-
-  const data = useMemo(() => {
-    if (!financialData || !uiData) return null;
-    return {
-      ...financialData,
-      ...uiData,
-    };
-  }, [financialData, uiData]);
 
   const currentMonthDisplay = useMemo(() => {
     const now = new Date();
