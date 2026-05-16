@@ -1,1 +1,1 @@
-export { AddGoalScreen as default } from '../src/screens/AddGoalScreen';
+export { AddGoalScreen as default } from '../src/features/goals';

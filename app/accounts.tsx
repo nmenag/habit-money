@@ -1,1 +1,1 @@
-export { AccountsScreen as default } from '../src/screens/AccountsScreen';
+export { AccountsScreen as default } from '../src/features/accounts';

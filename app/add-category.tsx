@@ -1,1 +1,1 @@
-export { AddCategoryScreen as default } from '../src/screens/AddCategoryScreen';
+export { AddCategoryScreen as default } from '../src/features/categories';

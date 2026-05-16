@@ -15,6 +15,10 @@ export const initDb = () => {
   const db = getDb();
 
   db.execSync('PRAGMA journal_mode = WAL;');
+  db.execSync('PRAGMA synchronous = NORMAL;');
+  db.execSync('PRAGMA cache_size = -2000;');
+  db.execSync('PRAGMA temp_store = MEMORY;');
+  db.execSync('PRAGMA mmap_size = 300000000;');
 
   try {
     db.execSync(`

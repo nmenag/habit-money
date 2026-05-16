@@ -1,1 +1,1 @@
-export { CategoriesScreen as default } from '../src/screens/CategoriesScreen';
+export { CategoriesScreen as default } from '../src/features/categories';

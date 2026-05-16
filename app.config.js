@@ -22,8 +22,8 @@ const getAppName = () => {
 const isDev = variant === 'development';
 
 const getIcon = () => {
-  if (isDev) return './assets/icon-dev.png';
-  return './assets/icon.png';
+  if (isDev) return './assets/images/icon-dev.png';
+  return './assets/images/icon.png';
 };
 
 const getAdaptiveForeground = () => {
@@ -101,6 +101,7 @@ module.exports = {
         {
           android: {
             enableProguardInReleaseBuilds: true,
+            enableShrinkResourcesInReleaseBuilds: true,
           },
         },
       ],

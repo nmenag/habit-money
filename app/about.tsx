@@ -1,1 +1,1 @@
-export { AboutScreen as default } from '../src/screens/AboutScreen';
+export { AboutScreen as default } from '../src/features/settings';

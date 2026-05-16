@@ -1,1 +1,1 @@
-export { BudgetsScreen as default } from '../src/screens/BudgetsScreen';
+export { BudgetsScreen as default } from '../src/features/budgets';
