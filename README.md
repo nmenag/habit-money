@@ -9,6 +9,7 @@ Habit Money is a modern, high-performance personal finance tracker built with **
 ## 🌟 Key Features
 
 - **Expo Router Navigation**: Modern, file-based routing architecture for robust deep linking and smooth transitions.
+- **First-Launch Onboarding**: Detects system language and currency on first run, letting users confirm or customize their locale settings before entering the app.
 - **Dedicated Settings Tab**: A centralized hub for managing Accounts, Categories, Budgets, and Goals, keeping the main dashboard clean and focused.
 - **Interactive Reordering**: Full **Drag & Drop** support for Accounts, Categories, Budgets, and Goals, allowing for personal organization and layout customization.
 - **Full Localization (i18n)**: Comprehensive support for English and Spanish, including localized default categories and financial insights.
@@ -28,13 +29,13 @@ Habit Money is a modern, high-performance personal finance tracker built with **
   - **Smart Reminders**: Automated daily and weekly notifications to help you stay consistent with your financial tracking.
 
 - **Data Mobility & Security**:
-  - **Export to CSV**: Download full transaction history for external spreadsheet analysis.
+  - **Export to CSV**: Download full transaction history with date-range filters for external spreadsheet analysis.
   - **JSON Backup & Restore**: Securely export and import all application data to local JSON files for long-term data protection.
 - **Compliance & Privacy**:
   - **About the App**: Specialized section for branding, versioning, and developer contact.
   - **Privacy Policy**: Built-in, professional privacy policy compliant with Google Store requirements.
 - **Premium Branding & UI**:
-  - **High-Resolution Iconry**: Custom, professionally designed app icons for Production and Preview builds.
+  - **High-Resolution Iconography**: Custom, professionally designed app icons for Production and Preview builds.
   - **Android Adaptive Icons**: Full support for adaptive layers (Android 13+ material themed icons).
 - **Monetization**: Seamlessly integrated Google Mobile Ads (Banner and Interstitial) with test mode for development.
 
@@ -42,12 +43,14 @@ Habit Money is a modern, high-performance personal finance tracker built with **
 
 - **Core**: [Expo SDK 55](https://expo.dev) & React Native 0.83 — [Architecture Details](docs/ARCHITECTURE.md)
 - **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/) (File-based navigation)
-- **State**: [Zustand](https://github.com/pmndrs/zustand) (Atomic & Persisted state)
-- **Database**: [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) (High-performance local storage) — [Schema Details](docs/DATABASE_DESIGN.md)
-- **UI Components**: [React Native Paper](https://reactnativepaper.com/) (Material Design 3)
-- **Gestures**: [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/) & [react-native-draggable-flatlist](https://github.com/computerjazz/react-native-draggable-flatlist)
+- **State**: [Zustand v5](https://github.com/pmndrs/zustand) (Sliced & Persisted state)
+- **Database**: [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) (High-performance local storage, WAL mode) — [Schema Details](docs/DATABASE_DESIGN.md)
+- **UI Components**: [React Native Paper v5](https://reactnativepaper.com/) (Material Design 3)
+- **Performance Lists**: [@shopify/flash-list](https://shopify.github.io/flash-list/) (High-performance FlatList replacement)
+- **Gestures & Animation**: [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/) & [react-native-reanimated v4](https://docs.swmansion.com/react-native-reanimated/)
+- **Drag & Drop**: [react-native-draggable-flatlist](https://github.com/computerjazz/react-native-draggable-flatlist)
 - **Visualization**: [react-native-chart-kit](https://github.com/indiespirit/react-native-chart-kit)
-- **Utilities**: `date-fns`, `expo-localization`
+- **Utilities**: `date-fns v4`, `expo-localization`
 
 ## 🚀 Getting Started
 

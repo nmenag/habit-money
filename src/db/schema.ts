@@ -49,7 +49,6 @@ export const initDb = () => {
       );
     `);
 
-    // Set default icon if missing
     db.execSync(
       "UPDATE categories SET icon = 'tag' WHERE icon IS NULL OR icon = '';",
     );
@@ -243,7 +242,6 @@ export const initDb = () => {
       statement.finalizeSync();
     }
   } else {
-    // Ensure existing databases get the new category if missing
     try {
       const billsCat = db.getFirstSync<{ id: string }>(
         "SELECT id FROM categories WHERE id = '12' OR name = ? OR name = ?",

@@ -8,12 +8,12 @@ Habit Money is an Expo-based cross-platform mobile application designed with a *
 
 ```mermaid
 graph TD
-    UI[Presentation Layer: Screens & Components]
+    UI[Presentation Layer: Feature Screens & Shared Components]
     NAV[Navigation Layer: Expo Router]
-    STORE[State Layer: Zustand Store]
-    DB[Data Layer: SQLite]
-    SERVICE[Service Layer: Analytics & Insights]
-    UTILS[Utility Layer: Formatters & Calculations]
+    STORE[State Layer: Zustand Sliced Store]
+    DB[Data Layer: SQLite WAL]
+    SERVICE[Service Layer: Analytics, Insights & Notifications]
+    UTILS[Utility Layer: Formatters, Calculations & Backup]
 
     UI --> NAV
     UI --> STORE
@@ -27,15 +27,52 @@ graph TD
 
 ## 📂 Project Structure
 
-- **`/app`**: Expo Router root. Defines the file-based navigation (tabs, stacks).
-- **`/assets`**: App icons, splash screens, and constant images.
-- **`/src/components`**: Reusable UI elements (transaction items, cards, charts).
-- **`/src/db`**: Database schema, initialization, and direct SQLite commands.
-- **`/src/i18n`**: Multi-language support (EN/ES) and translation files.
-- **`/src/screens`**: Feature-specific views (Dashboard, Settings, Goals, etc.).
-- **`/src/services`**: Complex business logic (`AnalyticsService`, `InsightEngine`), local reminders (`NotificationService`), and third-party integrations (AdMob).
-- **`/src/store`**: Centralized state management using Zustand. Handles persistence of critical settings.
-- **`/src/utils`**: Date formatters, CSV export logic, JSON backup/restore mechanisms, and mathematical helpers.
+The codebase follows a **feature-based architecture**. Each domain (dashboard, transactions, accounts, etc.) owns its screens, components, and feature-specific services, colocated under `src/features/<feature-name>/`. Shared, cross-cutting concerns live in dedicated top-level directories.
+
+```
+fin-habit/
+├── app/                        # Expo Router entry: file-based navigation (tabs & stacks)
+│   ├── (tabs)/                 # Bottom-tab routes
+│   └── *.tsx                   # Stack routes (add-account, add-transaction, goals, etc.)
+├── assets/                     # App icons, splash screen, and static images
+├── src/
+│   ├── features/               # Feature modules (colocated screens, components & services)
+│   │   ├── accounts/
+│   │   ├── budgets/
+│   │   ├── categories/
+│   │   ├── dashboard/
+│   │   ├── goals/
+│   │   ├── insights/
+│   │   ├── settings/
+│   │   └── transactions/
+│   ├── shared/
+│   │   └── components/         # Truly reusable UI primitives (cards, modals, pickers…)
+│   ├── db/
+│   │   └── schema.ts           # Table creation, indexing, and migrations
+│   ├── store/
+│   │   ├── useStore.ts         # Root Zustand store (combines all slices)
+│   │   ├── useFilterStore.ts   # Scoped transaction-filter state
+│   │   ├── types.ts            # Global store type definitions
+│   │   └── slices/             # Domain slices (accounts, categories, transactions, …)
+│   ├── services/
+│   │   ├── analytics/          # AnalyticsService, InsightEngine, AnalyticsManager
+│   │   └── NotificationService.ts
+│   ├── i18n/                   # Translations (en.ts / es.ts) and locale helpers
+│   ├── theme/                  # Color tokens and Material Design 3 theme config
+│   ├── constants/              # App-wide constants (colors, icon sets, currencies…)
+│   ├── navigation/             # Navigation helpers and typed route params
+│   ├── ads/                    # AdMob banner/interstitial wrappers
+│   └── utils/
+│       ├── csvExport.ts        # CSV generation and sharing
+│       ├── dataBackup.ts       # JSON backup and restore logic
+│       ├── dateFilters.ts      # Date-range filtering helpers
+│       ├── dateUtils.ts        # UTC/local conversion utilities
+│       ├── formatters.ts       # Currency and number formatting
+│       ├── responsive.ts       # Screen-size helpers
+│       └── scoreCalculator.ts  # Financial health score computation
+├── docs/                       # Architecture, database design, and legal docs
+└── seeds/                      # Seed data for development and testing
+```
 
 ---
 
@@ -45,32 +82,54 @@ graph TD
 
 The UI is built with **React Native Paper** (Material Design 3), ensuring a premium, consistent look. Navigation is handled by **Expo Router**, which provides a robust, file-based routing system similar to Next.js.
 
-### 2. State Management (Zustand)
+Each feature module exports its screens and components through a barrel `index.ts`, keeping imports clean and enforcing feature boundaries.
 
-We use **Zustand** for lightweight, performant state management.
+### 2. State Management (Zustand — Sliced Store)
 
-- **`useStore`**: Manages global app data (Accounts, Transactions) and UI state (Dark Mode, Language).
-- **`useFilterStore`**: Handles scoped state for transaction filtering across the app.
+We use **Zustand v5** with a **sliced store pattern** for lightweight, performant state management. Each domain slice lives in `src/store/slices/` and is composed into the root store in `useStore.ts`.
+
+| Slice               | Responsibility                               |
+| ------------------- | -------------------------------------------- |
+| `accountsSlice`     | Account CRUD and balance management          |
+| `categoriesSlice`   | Category CRUD and ordering                   |
+| `budgetsSlice`      | Budget CRUD and spending-limit tracking      |
+| `goalsSlice`        | Goal CRUD and progress tracking              |
+| `transactionsSlice` | Transaction CRUD, filtering, and totals      |
+| `settingsSlice`     | Language, currency, theme, and notifications |
+
+- **`useFilterStore`**: Dedicated store for transaction filter state (date range, type, category), keeping filter logic isolated from the main data store.
 
 ### 3. Data Persistence (SQLite)
 
-- All financial data is stored locally.
-- **`src/db/schema.ts`** handles table creation, indexing, and migrations.
+- All financial data is stored **locally** on the device — no cloud sync, no external API calls.
+- **`src/db/schema.ts`** handles table creation, indexing, and forward-only migrations.
+- **WAL mode** is enabled for improved concurrency and write performance.
+- Key indexes on `transactions(date)`, `transactions(accountId)`, and `transactions(categoryId)` ensure fast filtering even with thousands of records.
+
+See [DATABASE_DESIGN.md](DATABASE_DESIGN.md) for the full schema and ERD.
 
 ### 4. Service Layer (Analytics, Insights, & Notifications)
 
-- **`AnalyticsService` & `InsightEngine`**: Analyzes user data in real-time to generate financial health scores, tracking metrics (e.g., real income vs. balance adjustments), and spending alerts. This logic is decoupled from the UI to ensure testability and performance.
-- **`NotificationService`**: Handles scheduling and canceling of local daily/weekly reminders to encourage consistent app usage.
+- **`AnalyticsService`**: Queries SQLite directly to compute spending totals, income vs. balance-adjustment breakdowns, and category-level growth rates.
+- **`InsightEngine`**: Wraps `AnalyticsService` to derive actionable insights (savings rate, frequency alerts, financial health score).
+- **`AnalyticsManager`**: Facade that aggregates and caches insight data for the Insights screen.
+- **`NotificationService`**: Schedules and cancels local daily/weekly reminders via `expo-notifications` to encourage consistent app usage.
+
+All service logic is decoupled from the UI layer to maximize testability and enable future unit tests.
 
 ### 5. Localization (i18n)
 
-Full internationalization is built-in. Every string in the app is keyed in `en.ts` or `es.ts`, and the locale is automatically detected on the first launch via `expo-localization`.
+Full internationalization is built-in using `expo-localization`. Every user-facing string is keyed in `src/i18n/en.ts` or `src/i18n/es.ts`. On first launch, the **Onboarding** flow auto-detects the system locale and lets the user confirm or override the language and currency before entering the app.
 
 ---
 
 ## ⚡ Key Design Patterns
 
-- **Separation of Concerns**: UI components focus on rendering, while Stores handle data fetching and logic.
-- **Immutable State**: Zustand stores are updated via pure functions to ensure predictable UI updates.
-- **UTC Standardization**: All dates are processed in UTC at the core level to prevent time-drift or calculation errors across locales.
-- **Lazy Loading**: Complex visual assets like charts are only rendered when needed to maintain app fluidity.
+- **Feature-Based Architecture**: Screens, components, and feature-specific services are colocated per domain. This keeps the codebase navigable and prevents cross-feature coupling.
+- **Barrel Exports**: Each feature exposes a single `index.ts` entry point, enforcing a clean public API for every module.
+- **Separation of Concerns**: UI components are responsible only for rendering. Stores handle data fetching, mutations, and derived state. Services handle business logic.
+- **Sliced Zustand Store**: State is divided into domain slices and composed at the root store level, making each slice independently understandable and easy to extend.
+- **Immutable State**: Zustand stores are updated via pure setter functions to ensure predictable UI updates and simple debugging.
+- **UTC Standardization**: All dates are stored and processed in UTC at the core level to prevent time-drift or calculation errors across locales. Display formatting applies the device timezone only at the presentation layer.
+- **Lazy Rendering**: Complex visual assets (charts, heavy lists) are only rendered when the relevant screen is focused, using `useFocusEffect` and `FlashList` for optimal fluidity.
+- **Performance Lists**: `@shopify/flash-list` replaces standard `FlatList` throughout the app, delivering significantly better scroll performance with large transaction datasets.

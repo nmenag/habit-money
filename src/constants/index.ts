@@ -1,16 +1,16 @@
 export const COLORS = [
-  '#f44336', // Red
-  '#e91e63', // Pink
-  '#9c27b0', // Purple
-  '#673ab7', // Deep Purple
-  '#3f51b5', // Indigo
-  '#2196f3', // Blue
-  '#009688', // Teal
-  '#4caf50', // Green
-  '#ffc107', // Amber
-  '#ff9800', // Orange
-  '#795548', // Brown
-  '#607d8b', // Blue Grey
+  '#f44336',
+  '#e91e63',
+  '#9c27b0',
+  '#673ab7',
+  '#3f51b5',
+  '#2196f3',
+  '#009688',
+  '#4caf50',
+  '#ffc107',
+  '#ff9800',
+  '#795548',
+  '#607d8b',
 ];
 
 export const CURRENCIES = [
