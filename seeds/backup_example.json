@@ -1,27 +1,47 @@
 {
   "version": 1,
-  "timestamp": "2026-05-14T21:00:00.000Z",
+  "timestamp": "2026-05-16T22:15:00.000Z",
   "data": {
     "accounts": [
       {
         "id": "acc-1",
-        "name": "Checking",
+        "name": "Main Checking",
         "type": "bank",
-        "initialBalance": 1000.0,
-        "currentBalance": 850.0,
+        "initialBalance": 3500000.0,
+        "currentBalance": 7870500.0,
         "color": "#2196f3",
         "currency": "COP",
         "displayOrder": 0
       },
       {
         "id": "acc-2",
-        "name": "Savings",
-        "type": "savings",
-        "initialBalance": 5000.0,
-        "currentBalance": 5150.0,
+        "name": "Emergency Savings",
+        "type": "bank",
+        "initialBalance": 10000000.0,
+        "currentBalance": 11500000.0,
         "color": "#4caf50",
         "currency": "COP",
         "displayOrder": 1
+      },
+      {
+        "id": "acc-3",
+        "name": "Cash Wallet",
+        "type": "cash",
+        "initialBalance": 500000.0,
+        "currentBalance": 375000.0,
+        "color": "#607d8b",
+        "currency": "COP",
+        "displayOrder": 2
+      },
+      {
+        "id": "acc-4",
+        "name": "Cashback Card",
+        "type": "credit",
+        "initialBalance": 0.0,
+        "currentBalance": -140000.0,
+        "color": "#ff9800",
+        "currency": "COP",
+        "displayOrder": 3
       }
     ],
     "categories": [
@@ -42,73 +62,533 @@
         "displayOrder": 1
       },
       {
+        "id": "3",
+        "name": "Housing",
+        "type": "expense",
+        "icon": "home",
+        "color": "#9c27b0",
+        "displayOrder": 2
+      },
+      {
+        "id": "4",
+        "name": "Entertainment",
+        "type": "expense",
+        "icon": "controller-classic",
+        "color": "#ff9800",
+        "displayOrder": 3
+      },
+      {
+        "id": "5",
+        "name": "Health",
+        "type": "expense",
+        "icon": "medical-bag",
+        "color": "#e91e63",
+        "displayOrder": 4
+      },
+      {
+        "id": "6",
+        "name": "Other",
+        "type": "expense",
+        "icon": "format-list-bulleted",
+        "color": "#607d8b",
+        "displayOrder": 5
+      },
+      {
         "id": "7",
         "name": "Salary",
         "type": "income",
         "icon": "cash",
-        "color": "#4caf50",
-        "displayOrder": 2
+        "color": "#16A34A",
+        "displayOrder": 6
+      },
+      {
+        "id": "8",
+        "name": "Other Income",
+        "type": "income",
+        "icon": "wallet",
+        "color": "#009688",
+        "displayOrder": 7
+      },
+      {
+        "id": "9",
+        "name": "Investments",
+        "type": "expense",
+        "icon": "chart-line",
+        "color": "#3f51b5",
+        "displayOrder": 8
+      },
+      {
+        "id": "10",
+        "name": "Gifts",
+        "type": "expense",
+        "icon": "gift",
+        "color": "#ff4081",
+        "displayOrder": 9
+      },
+      {
+        "id": "11",
+        "name": "Rent",
+        "type": "expense",
+        "icon": "home-city",
+        "color": "#795548",
+        "displayOrder": 10
+      },
+      {
+        "id": "12",
+        "name": "Bills & Taxes",
+        "type": "expense",
+        "icon": "receipt",
+        "color": "#ff5722",
+        "displayOrder": 11
       }
     ],
     "transactions": [
       {
         "id": "tx-1",
         "type": "income",
-        "amount": 1500.0,
+        "amount": 3500000.0,
         "categoryId": "7",
         "accountId": "acc-1",
         "budgetId": null,
         "date": "2026-03-01T08:00:00.000Z",
-        "note": "Monthly Pay"
+        "note": "Salary March"
       },
       {
         "id": "tx-2",
         "type": "expense",
-        "amount": 150.0,
-        "categoryId": "2",
+        "amount": 1200000.0,
+        "categoryId": "11",
         "accountId": "acc-1",
         "budgetId": null,
-        "date": "2026-03-05T12:00:00.000Z",
-        "note": "Fuel"
+        "date": "2026-03-02T10:00:00.000Z",
+        "note": "Apartment Rent"
       },
       {
         "id": "tx-3",
+        "type": "expense",
+        "amount": 45500.0,
+        "categoryId": "1",
+        "accountId": "acc-1",
+        "budgetId": "b-1",
+        "date": "2026-03-03T12:30:00.000Z",
+        "note": "Supermarket Groceries"
+      },
+      {
+        "id": "tx-4",
+        "type": "expense",
+        "amount": 120000.0,
+        "categoryId": "12",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-03-05T09:15:00.000Z",
+        "note": "Internet & Water Bill"
+      },
+      {
+        "id": "tx-5",
+        "type": "expense",
+        "amount": 15000.0,
+        "categoryId": "2",
+        "accountId": "acc-3",
+        "budgetId": "b-2",
+        "date": "2026-03-07T18:00:00.000Z",
+        "note": "Cab to Mall"
+      },
+      {
+        "id": "tx-6",
         "type": "transfer",
-        "amount": 150.0,
+        "amount": 500000.0,
         "categoryId": null,
         "accountId": "acc-1",
         "toAccountId": "acc-2",
         "budgetId": null,
-        "date": "2026-03-10T10:00:00.000Z",
-        "note": "Auto-save"
+        "date": "2026-03-10T11:00:00.000Z",
+        "note": "Monthly Savings Transfer"
+      },
+      {
+        "id": "tx-7",
+        "type": "expense",
+        "amount": 55000.0,
+        "categoryId": "4",
+        "accountId": "acc-4",
+        "budgetId": "b-3",
+        "date": "2026-03-12T07:00:00.000Z",
+        "note": "Netflix & Spotify Subscriptions"
+      },
+      {
+        "id": "tx-8",
+        "type": "expense",
+        "amount": 120000.0,
+        "categoryId": "1",
+        "accountId": "acc-4",
+        "budgetId": "b-1",
+        "date": "2026-03-14T20:30:00.000Z",
+        "note": "Dinner with friends"
+      },
+      {
+        "id": "tx-9",
+        "type": "income",
+        "amount": 250000.0,
+        "categoryId": "8",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-03-15T14:00:00.000Z",
+        "note": "Freelance Design work"
+      },
+      {
+        "id": "tx-10",
+        "type": "expense",
+        "amount": 85000.0,
+        "categoryId": "5",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-03-18T10:00:00.000Z",
+        "note": "Pharmacy Medicine"
+      },
+      {
+        "id": "tx-11",
+        "type": "expense",
+        "amount": 65000.0,
+        "categoryId": "1",
+        "accountId": "acc-1",
+        "budgetId": "b-1",
+        "date": "2026-03-20T11:45:00.000Z",
+        "note": "Local Market Groceries"
+      },
+      {
+        "id": "tx-12",
+        "type": "expense",
+        "amount": 300000.0,
+        "categoryId": "9",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-03-22T09:00:00.000Z",
+        "note": "Index Fund Purchase"
+      },
+      {
+        "id": "tx-13",
+        "type": "expense",
+        "amount": 80000.0,
+        "categoryId": "10",
+        "accountId": "acc-3",
+        "budgetId": null,
+        "date": "2026-03-25T16:00:00.000Z",
+        "note": "Birthday Gift for Mother"
+      },
+      {
+        "id": "tx-14",
+        "type": "expense",
+        "amount": 32000.0,
+        "categoryId": "2",
+        "accountId": "acc-4",
+        "budgetId": "b-2",
+        "date": "2026-03-28T15:20:00.000Z",
+        "note": "Uber to Airport"
+      },
+      {
+        "id": "tx-15",
+        "type": "transfer",
+        "amount": 207000.0,
+        "categoryId": null,
+        "accountId": "acc-1",
+        "toAccountId": "acc-4",
+        "budgetId": null,
+        "date": "2026-03-30T17:00:00.000Z",
+        "note": "Credit Card Payment"
+      },
+      {
+        "id": "tx-16",
+        "type": "income",
+        "amount": 3500000.0,
+        "categoryId": "7",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-04-01T08:00:00.000Z",
+        "note": "Salary April"
+      },
+      {
+        "id": "tx-17",
+        "type": "expense",
+        "amount": 1200000.0,
+        "categoryId": "11",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-04-02T10:00:00.000Z",
+        "note": "Apartment Rent"
+      },
+      {
+        "id": "tx-18",
+        "type": "expense",
+        "amount": 50000.0,
+        "categoryId": "1",
+        "accountId": "acc-1",
+        "budgetId": "b-1",
+        "date": "2026-04-03T13:00:00.000Z",
+        "note": "Supermarket Groceries"
+      },
+      {
+        "id": "tx-19",
+        "type": "expense",
+        "amount": 125000.0,
+        "categoryId": "12",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-04-05T09:00:00.000Z",
+        "note": "Electricity & Gas Bill"
+      },
+      {
+        "id": "tx-20",
+        "type": "expense",
+        "amount": 24000.0,
+        "categoryId": "2",
+        "accountId": "acc-1",
+        "budgetId": "b-2",
+        "date": "2026-04-06T18:30:00.000Z",
+        "note": "Metro Card Recharge"
+      },
+      {
+        "id": "tx-21",
+        "type": "transfer",
+        "amount": 500000.0,
+        "categoryId": null,
+        "accountId": "acc-1",
+        "toAccountId": "acc-2",
+        "budgetId": null,
+        "date": "2026-04-10T11:00:00.000Z",
+        "note": "Monthly Savings Transfer"
+      },
+      {
+        "id": "tx-22",
+        "type": "expense",
+        "amount": 55000.0,
+        "categoryId": "4",
+        "accountId": "acc-4",
+        "budgetId": "b-3",
+        "date": "2026-04-12T07:00:00.000Z",
+        "note": "Netflix & Spotify Subscriptions"
+      },
+      {
+        "id": "tx-23",
+        "type": "income",
+        "amount": 400000.0,
+        "categoryId": "8",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-04-15T15:00:00.000Z",
+        "note": "Sold Old Camera"
+      },
+      {
+        "id": "tx-24",
+        "type": "expense",
+        "amount": 180000.0,
+        "categoryId": "4",
+        "accountId": "acc-1",
+        "budgetId": "b-3",
+        "date": "2026-04-18T19:00:00.000Z",
+        "note": "Concert Tickets"
+      },
+      {
+        "id": "tx-25",
+        "type": "expense",
+        "amount": 95000.0,
+        "categoryId": "1",
+        "accountId": "acc-4",
+        "budgetId": "b-1",
+        "date": "2026-04-22T13:30:00.000Z",
+        "note": "Lunch Meetings"
+      },
+      {
+        "id": "tx-26",
+        "type": "expense",
+        "amount": 30000.0,
+        "categoryId": "6",
+        "accountId": "acc-3",
+        "budgetId": null,
+        "date": "2026-04-24T10:00:00.000Z",
+        "note": "House Cleaning Supplies"
+      },
+      {
+        "id": "tx-27",
+        "type": "transfer",
+        "amount": 150000.0,
+        "categoryId": null,
+        "accountId": "acc-1",
+        "toAccountId": "acc-4",
+        "budgetId": null,
+        "date": "2026-04-28T17:00:00.000Z",
+        "note": "Credit Card Payment"
+      },
+      {
+        "id": "tx-28",
+        "type": "income",
+        "amount": 3500000.0,
+        "categoryId": "7",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-05-01T08:00:00.000Z",
+        "note": "Salary May"
+      },
+      {
+        "id": "tx-29",
+        "type": "expense",
+        "amount": 1200000.0,
+        "categoryId": "11",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-05-02T10:00:00.000Z",
+        "note": "Apartment Rent"
+      },
+      {
+        "id": "tx-30",
+        "type": "expense",
+        "amount": 48000.0,
+        "categoryId": "1",
+        "accountId": "acc-1",
+        "budgetId": "b-1",
+        "date": "2026-05-03T12:00:00.000Z",
+        "note": "Supermarket Groceries"
+      },
+      {
+        "id": "tx-31",
+        "type": "expense",
+        "amount": 130000.0,
+        "categoryId": "12",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-05-05T09:15:00.000Z",
+        "note": "Internet & Water Bill"
+      },
+      {
+        "id": "tx-32",
+        "type": "expense",
+        "amount": 150000.0,
+        "categoryId": "5",
+        "accountId": "acc-1",
+        "budgetId": null,
+        "date": "2026-05-08T14:30:00.000Z",
+        "note": "Dental Checkup"
+      },
+      {
+        "id": "tx-33",
+        "type": "transfer",
+        "amount": 500000.0,
+        "categoryId": null,
+        "accountId": "acc-1",
+        "toAccountId": "acc-2",
+        "budgetId": null,
+        "date": "2026-05-10T11:00:00.000Z",
+        "note": "Monthly Savings Transfer"
+      },
+      {
+        "id": "tx-34",
+        "type": "expense",
+        "amount": 55000.0,
+        "categoryId": "4",
+        "accountId": "acc-4",
+        "budgetId": "b-3",
+        "date": "2026-05-12T07:00:00.000Z",
+        "note": "Netflix & Spotify Subscriptions"
+      },
+      {
+        "id": "tx-35",
+        "type": "expense",
+        "amount": 85000.0,
+        "categoryId": "1",
+        "accountId": "acc-4",
+        "budgetId": "b-1",
+        "date": "2026-05-14T20:00:00.000Z",
+        "note": "Food Delivery"
       }
     ],
     "budgets": [
       {
         "id": "b-1",
-        "name": "Dining",
-        "amount": 300.0,
+        "name": "Food",
+        "amount": 350000.0,
         "color": "#f44336",
         "categoryId": "1",
         "displayOrder": 0
+      },
+      {
+        "id": "b-2",
+        "name": "Transport",
+        "amount": 150000.0,
+        "color": "#2196f3",
+        "categoryId": "2",
+        "displayOrder": 1
+      },
+      {
+        "id": "b-3",
+        "name": "Entertainment",
+        "amount": 200000.0,
+        "color": "#ff9800",
+        "categoryId": "4",
+        "displayOrder": 2
       }
     ],
     "goals": [
       {
         "id": "g-1",
         "name": "Emergencies",
-        "targetAmount": 10000.0,
-        "currentAmount": 5150.0,
+        "targetAmount": 15000000.0,
+        "currentAmount": 11500000.0,
         "color": "#3f51b5",
-        "icon": "shield-check",
+        "icon": "umbrella",
         "deadline": "2026-12-31",
         "status": "active",
         "displayOrder": 0
+      },
+      {
+        "id": "g-2",
+        "name": "New Laptop",
+        "targetAmount": 4500000.0,
+        "currentAmount": 1200000.0,
+        "color": "#ffc107",
+        "icon": "laptop",
+        "deadline": "2026-08-31",
+        "status": "active",
+        "displayOrder": 1
+      },
+      {
+        "id": "g-3",
+        "name": "Japan Trip",
+        "targetAmount": 12000000.0,
+        "currentAmount": 12000000.0,
+        "color": "#009688",
+        "icon": "airplane",
+        "deadline": "2026-04-30",
+        "status": "completed",
+        "displayOrder": 2
       }
     ],
     "settings": [
-      { "id": "currency", "val": "COP" },
-      { "id": "onboarding_completed", "val": "true" }
+      {
+        "id": "currency",
+        "val": "COP"
+      },
+      {
+        "id": "language",
+        "val": "es"
+      },
+      {
+        "id": "premium",
+        "val": "true"
+      },
+      {
+        "id": "themePreference",
+        "val": "system"
+      },
+      {
+        "id": "notificationsEnabled",
+        "val": "true"
+      },
+      {
+        "id": "notificationTime",
+        "val": "20:00"
+      },
+      {
+        "id": "onboarding_completed",
+        "val": "true"
+      }
     ]
   }
 }
