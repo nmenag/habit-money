@@ -78,9 +78,13 @@ fin-habit/
 
 ## 🧩 Architectural Layers
 
-### 1. Presentation & Navigation
+### 1. Presentation, Navigation, & Accessibility
 
 The UI is built with **React Native Paper** (Material Design 3), ensuring a premium, consistent look. Navigation is handled by **Expo Router**, which provides a robust, file-based routing system similar to Next.js.
+
+- **Theme Casting Pattern**: To achieve absolute type safety, we cast standard `useTheme()` to `AppTheme` (e.g. `useTheme<AppTheme>()`). This gives the presentation layer fully typed access to custom branded colors (like `income`, `incomeContainer`, `warningContainer`, and `errorContainer`) without resorting to fragile `(theme.colors as any)` cast overrides.
+- **Dynamic Dark Mode Contrast**: Legend containers and boundaries avoid hardcoded borders, binding dynamically to theme-level tokens (like `theme.colors.outlineVariant`) so grid layouts retain crisp visibility in high-contrast and dark mode environments.
+- **Universal Accessibility (WCAG)**: Graphical canvases (Pie and Bar SVG charts), summary metric panels, and dynamic progress bars are fitted with native `accessible={true}` configurations and descriptive `accessibilityLabel` parameters to ensure that VoiceOver and TalkBack screen-reader users receive clear, spoken reports of their financial health.
 
 Each feature module exports its screens and components through a barrel `index.ts`, keeping imports clean and enforcing feature boundaries.
 

@@ -58,7 +58,7 @@ export const TransactionItem: React.FC<Props> = memo(
                 styles.avatar,
                 { backgroundColor: theme.colors.tertiary },
               ]}
-              color={theme.colors.onPrimary}
+              color={theme.colors.onSecondary}
             />
           );
         }

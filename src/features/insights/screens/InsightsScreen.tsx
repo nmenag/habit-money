@@ -1,14 +1,15 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
-import { Card, Surface, Text, useTheme } from 'react-native-paper';
+import { Card, ProgressBar, Text, useTheme } from 'react-native-paper';
+import { getValidCategoryIcon } from '../../../constants';
 import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
 import { FilterBar } from '../../transactions/components/FilterBar';
 import { useFilterStore } from '../../../store/useFilterStore';
 import { useStore, useTranslation } from '../../../store/useStore';
-import { chartColors } from '../../../theme/theme';
+import { AppTheme, chartColors } from '../../../theme/theme';
 import { isInRange } from '../../../utils/dateFilters';
 
 import {
@@ -27,7 +28,7 @@ export const InsightsScreen = () => {
   const checkAndShowAd = useStore((s) => s.checkAndShowAd);
 
   const { t, translateName } = useTranslation();
-  const theme = useTheme();
+  const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const selectedRange = useFilterStore((s) => s.selectedRange);
 
@@ -88,6 +89,7 @@ export const InsightsScreen = () => {
           name: cat?.name ? translateName(cat.name) : t('other'),
           amount,
           color,
+          icon: cat?.icon,
           percentage: pct.toFixed(1),
         };
       })
@@ -205,7 +207,18 @@ export const InsightsScreen = () => {
       <View style={styles.legendList}>
         {filtered.categoryBreakdown.map((item, i) => (
           <View key={i} style={styles.legendRow}>
-            <View style={[styles.legendDot, { backgroundColor: item.color }]} />
+            <View
+              style={[
+                styles.legendIconContainer,
+                { backgroundColor: item.color },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name={getValidCategoryIcon(item.icon) as any}
+                size={14}
+                color="#fff"
+              />
+            </View>
             <Text
               variant="bodySmall"
               style={styles.legendName}
@@ -215,7 +228,10 @@ export const InsightsScreen = () => {
             </Text>
             <Text
               variant="bodySmall"
-              style={{ color: theme.colors.onSurfaceVariant }}
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                fontWeight: '600',
+              }}
             >
               {item.percentage}%
             </Text>
@@ -243,7 +259,7 @@ export const InsightsScreen = () => {
       theme.colors,
       formatCurrency,
       styles.legendAmount,
-      styles.legendDot,
+      styles.legendIconContainer,
       styles.legendList,
       styles.legendName,
       styles.legendRow,
@@ -321,115 +337,124 @@ export const InsightsScreen = () => {
 
         {/* Summary Cards */}
         <View style={styles.summaryContainer}>
-          <Surface
+          <Card
             style={[
               styles.miniCard,
-              { backgroundColor: (theme.colors as any).incomeContainer },
+              { backgroundColor: theme.colors.incomeContainer },
             ]}
-            elevation={1}
+            mode="contained"
+            accessible={true}
+            accessibilityLabel={`${t('realIncome')}: ${formatCurrency(filtered.totalIncome)}`}
           >
-            <Ionicons
-              name="arrow-up-circle"
-              size={18}
-              color={(theme.colors as any).income}
-            />
-            <Text
-              variant="labelSmall"
-              style={[
-                styles.miniLabel,
-                { color: (theme.colors as any).income },
-              ]}
-              numberOfLines={1}
-            >
-              {t('realIncome')}
-            </Text>
-            <Text
-              variant="titleSmall"
-              style={[
-                styles.miniValue,
-                {
-                  color: (theme.colors as any).income,
-                  fontSize: fontScale(14),
-                },
-              ]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              {formatCurrency(filtered.totalIncome)}
-            </Text>
-          </Surface>
-
-          {filtered.hasAdjustments && (
-            <Surface
-              style={[
-                styles.miniCard,
-                { backgroundColor: theme.colors.surfaceVariant },
-              ]}
-              elevation={1}
-            >
+            <Card.Content style={styles.miniCardContent}>
               <Ionicons
-                name="options-outline"
-                size={18}
-                color={theme.colors.onSurfaceVariant}
+                name="arrow-up-circle"
+                size={20}
+                color={theme.colors.income}
               />
               <Text
                 variant="labelSmall"
-                style={[
-                  styles.miniLabel,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
+                style={[styles.miniLabel, { color: theme.colors.income }]}
                 numberOfLines={1}
               >
-                {t('adjustments')}
+                {t('realIncome')}
               </Text>
               <Text
                 variant="titleSmall"
                 style={[
                   styles.miniValue,
                   {
-                    color: theme.colors.onSurfaceVariant,
+                    color: theme.colors.income,
                     fontSize: fontScale(14),
                   },
                 ]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
-                {formatCurrency(filtered.totalAdjustments)}
+                {formatCurrency(filtered.totalIncome)}
               </Text>
-            </Surface>
+            </Card.Content>
+          </Card>
+
+          {filtered.hasAdjustments && (
+            <Card
+              style={[
+                styles.miniCard,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
+              mode="contained"
+              accessible={true}
+              accessibilityLabel={`${t('adjustments')}: ${formatCurrency(filtered.totalAdjustments)}`}
+            >
+              <Card.Content style={styles.miniCardContent}>
+                <Ionicons
+                  name="options-outline"
+                  size={20}
+                  color={theme.colors.onSurfaceVariant}
+                />
+                <Text
+                  variant="labelSmall"
+                  style={[
+                    styles.miniLabel,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {t('adjustments')}
+                </Text>
+                <Text
+                  variant="titleSmall"
+                  style={[
+                    styles.miniValue,
+                    {
+                      color: theme.colors.onSurfaceVariant,
+                      fontSize: fontScale(14),
+                    },
+                  ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {formatCurrency(filtered.totalAdjustments)}
+                </Text>
+              </Card.Content>
+            </Card>
           )}
 
-          <Surface
+          <Card
             style={[
               styles.miniCard,
               { backgroundColor: theme.colors.errorContainer },
             ]}
-            elevation={1}
+            mode="contained"
+            accessible={true}
+            accessibilityLabel={`${t('expenses')}: ${formatCurrency(filtered.totalExpenses)}`}
           >
-            <Ionicons
-              name="arrow-down-circle"
-              size={18}
-              color={theme.colors.error}
-            />
-            <Text
-              variant="labelSmall"
-              style={[styles.miniLabel, { color: theme.colors.error }]}
-              numberOfLines={1}
-            >
-              {t('expenses')}
-            </Text>
-            <Text
-              variant="titleSmall"
-              style={[
-                styles.miniValue,
-                { color: theme.colors.error, fontSize: fontScale(14) },
-              ]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              {formatCurrency(filtered.totalExpenses)}
-            </Text>
-          </Surface>
+            <Card.Content style={styles.miniCardContent}>
+              <Ionicons
+                name="arrow-down-circle"
+                size={20}
+                color={theme.colors.error}
+              />
+              <Text
+                variant="labelSmall"
+                style={[styles.miniLabel, { color: theme.colors.error }]}
+                numberOfLines={1}
+              >
+                {t('expenses')}
+              </Text>
+              <Text
+                variant="titleSmall"
+                style={[
+                  styles.miniValue,
+                  { color: theme.colors.error, fontSize: fontScale(14) },
+                ]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {formatCurrency(filtered.totalExpenses)}
+              </Text>
+            </Card.Content>
+          </Card>
         </View>
 
         {filtered.hasAdjustments && filtered.totalAdjustments !== 0 && (
@@ -440,64 +465,101 @@ export const InsightsScreen = () => {
           </View>
         )}
 
-        {/* Savings Row */}
-        <Surface
-          style={[styles.savingsRow, { backgroundColor: theme.colors.surface }]}
-          elevation={1}
+        {/* Savings Row - Contained Card with Progress Visualizer */}
+        <Card
+          style={[
+            styles.savingsCard,
+            { backgroundColor: theme.colors.surface },
+          ]}
+          mode="elevated"
+          accessible={true}
+          accessibilityLabel={`${t('savingsRateTitle')}: ${filtered.savingsRate.toFixed(1)}%. ${t('spendingFrequencyTitle')}: ${filtered.spendingDays} ${t('daysLabel')}, ${filtered.txCount} ${filtered.txCount === 1 ? 'transaction' : 'transactions'}`}
         >
-          <View style={styles.savingsItem}>
-            <Text
-              variant="labelSmall"
-              style={{ color: theme.colors.onSurfaceVariant }}
-            >
-              {t('savingsRateTitle')}
-            </Text>
-            <Text
-              variant="titleLarge"
-              style={{
-                fontWeight: '900',
-                color:
-                  filtered.savingsRate >= 0
-                    ? (theme.colors as any).income
-                    : theme.colors.error,
-              }}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              {filtered.savingsRate.toFixed(1)}%
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.savingsDivider,
-              { backgroundColor: theme.colors.outlineVariant },
-            ]}
-          />
-          <View style={styles.savingsItem}>
-            <Text
-              variant="labelSmall"
-              style={{ color: theme.colors.onSurfaceVariant }}
-            >
-              {t('spendingFrequencyTitle')}
-            </Text>
-            <Text
-              variant="titleLarge"
-              style={{ fontWeight: '900', color: theme.colors.onSurface }}
-            >
-              {filtered.spendingDays}{' '}
+          <Card.Content style={styles.savingsRow}>
+            <View style={styles.savingsItem}>
               <Text
-                variant="bodySmall"
-                style={{ color: theme.colors.onSurfaceVariant }}
+                variant="labelSmall"
+                style={{
+                  color: theme.colors.onSurfaceVariant,
+                  fontWeight: '700',
+                }}
               >
-                {t('daysLabel')}
+                {t('savingsRateTitle')}
               </Text>
-            </Text>
-          </View>
-        </Surface>
+              <Text
+                variant="titleLarge"
+                style={{
+                  fontWeight: '900',
+                  color:
+                    filtered.savingsRate >= 0
+                      ? theme.colors.income
+                      : theme.colors.error,
+                  marginTop: 4,
+                }}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {filtered.savingsRate.toFixed(1)}%
+              </Text>
+              <ProgressBar
+                progress={Math.max(0, Math.min(1, filtered.savingsRate / 100))}
+                color={
+                  filtered.savingsRate >= 0
+                    ? theme.colors.income
+                    : theme.colors.error
+                }
+                style={styles.savingsProgress}
+              />
+            </View>
+            <View
+              style={[
+                styles.savingsDivider,
+                { backgroundColor: theme.colors.outlineVariant },
+              ]}
+            />
+            <View style={styles.savingsItem}>
+              <Text
+                variant="labelSmall"
+                style={{
+                  color: theme.colors.onSurfaceVariant,
+                  fontWeight: '700',
+                }}
+              >
+                {t('spendingFrequencyTitle')}
+              </Text>
+              <Text
+                variant="titleLarge"
+                style={{
+                  fontWeight: '900',
+                  color: theme.colors.onSurface,
+                  marginTop: 4,
+                }}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {filtered.spendingDays}{' '}
+                <Text
+                  variant="bodySmall"
+                  style={{
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                  }}
+                >
+                  {t('daysLabel')}
+                </Text>
+              </Text>
+            </View>
+          </Card.Content>
+        </Card>
 
         {/* Category Pie Chart */}
         {pieData.length > 0 && (
-          <Card style={styles.card} mode="elevated">
+          <Card
+            style={styles.card}
+            mode="elevated"
+            accessible={true}
+            accessibilityLabel={`${t('chartTitle')}. ${t('categoryPieChartDescription' as any) || 'Pie chart showing category spending breakdown'}`}
+          >
             <Card.Content>
               <Text variant="titleMedium" style={styles.chartTitle}>
                 {t('chartTitle')}
@@ -510,7 +572,12 @@ export const InsightsScreen = () => {
 
         {/* Month-over-month Bar Chart (always shows global data) */}
         {barData && (
-          <Card style={styles.card} mode="elevated">
+          <Card
+            style={styles.card}
+            mode="elevated"
+            accessible={true}
+            accessibilityLabel={`${t('expenseGrowthTitle')}. ${t('monthlyBarChartDescription' as any) || 'Bar chart showing monthly expense comparisons'}`}
+          >
             <Card.Content>
               <Text variant="titleMedium" style={styles.chartTitle}>
                 {t('expenseGrowthTitle')}
@@ -534,7 +601,7 @@ export const InsightsScreen = () => {
                       color:
                         expenseGrowth > 0
                           ? theme.colors.error
-                          : (theme.colors as any).income,
+                          : theme.colors.income,
                     },
                   ]}
                 >
@@ -557,23 +624,23 @@ export const InsightsScreen = () => {
             </Text>
             {analyticsReport.insights.map((insight) => {
               let iconName: any = 'information-circle-outline';
-              let iconColor = '#2196f3';
-              let backgroundColor = 'rgba(33, 150, 243, 0.1)';
+              let iconColor = theme.colors.primary;
+              let backgroundColor = theme.colors.primaryContainer;
 
               if (insight.level === 'critical' || insight.level === 'warning') {
                 iconName = 'alert-circle-outline';
                 iconColor =
                   insight.level === 'critical'
                     ? theme.colors.error
-                    : (theme.colors as any).warning;
+                    : theme.colors.warning;
                 backgroundColor =
                   insight.level === 'critical'
                     ? theme.colors.errorContainer
-                    : (theme.colors as any).warningContainer;
+                    : theme.colors.warningContainer;
               } else if (insight.level === 'positive') {
                 iconName = 'checkmark-circle-outline';
-                iconColor = (theme.colors as any).income;
-                backgroundColor = (theme.colors as any).incomeContainer;
+                iconColor = theme.colors.income;
+                backgroundColor = theme.colors.incomeContainer;
               }
 
               return (
@@ -670,8 +737,11 @@ const defaultStyles = (theme: any) =>
     },
     miniCard: {
       flex: 1,
-      padding: 14,
-      borderRadius: 16,
+      borderRadius: theme.roundness,
+    },
+    miniCardContent: {
+      paddingVertical: 12,
+      paddingHorizontal: 8,
       alignItems: 'flex-start',
       gap: 4,
     },
@@ -679,20 +749,35 @@ const defaultStyles = (theme: any) =>
       fontWeight: '700',
       textTransform: 'uppercase',
       fontSize: 10,
+      marginTop: 4,
     },
     miniValue: {
       fontWeight: '900',
     },
-    savingsRow: {
-      flexDirection: 'row',
+    savingsCard: {
       borderRadius: 16,
       marginBottom: 16,
-      overflow: 'hidden',
+    },
+    savingsRow: {
+      flexDirection: 'row',
+      padding: 0,
     },
     savingsItem: {
       flex: 1,
-      padding: 16,
+      paddingVertical: 12,
+      paddingHorizontal: 8,
       alignItems: 'center',
+    },
+    savingsProgress: {
+      height: 4,
+      borderRadius: 2,
+      marginTop: 8,
+      width: '80%',
+    },
+    spendingFrequencySub: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 8,
     },
     savingsDivider: {
       width: 1,
@@ -724,12 +809,14 @@ const defaultStyles = (theme: any) =>
       alignItems: 'center',
       paddingVertical: 8,
       borderBottomWidth: 1,
-      borderBottomColor: 'rgba(0,0,0,0.04)',
+      borderBottomColor: theme.colors.outlineVariant,
     },
-    legendDot: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
+    legendIconContainer: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
       marginRight: 10,
     },
     legendName: {

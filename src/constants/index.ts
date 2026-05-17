@@ -1,14 +1,17 @@
 export const COLORS = [
   '#f44336',
   '#e91e63',
+  '#ff4081',
   '#9c27b0',
   '#673ab7',
   '#3f51b5',
   '#2196f3',
   '#009688',
   '#4caf50',
+  '#16A34A',
   '#ffc107',
   '#ff9800',
+  '#ff5722',
   '#795548',
   '#607d8b',
 ];
@@ -39,6 +42,7 @@ export const CATEGORY_ICONS = [
   'food',
   'gas-station',
   'home',
+  'home-city',
   'car',
   'airplane',
   'medical-bag',
@@ -47,6 +51,9 @@ export const CATEGORY_ICONS = [
   'cellphone',
   'gift',
   'heart',
+  'controller-classic',
+  'format-list-bulleted',
+  'tag',
 ];
 
 export const GOAL_ICONS = [

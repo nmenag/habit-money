@@ -44,10 +44,12 @@ export const AddAccountScreen = () => {
   const isEditing = !!editingAccount;
 
   const { addAccount, editAccount, addTransaction, currency } = useStore();
-  const { t, language } = useTranslation();
+  const { t, language, translateName } = useTranslation();
   const theme = useTheme();
 
-  const [name, setName] = useState(editingAccount?.name || '');
+  const [name, setName] = useState(
+    editingAccount ? translateName(editingAccount.name) : '',
+  );
   const [type, setType] = useState<AccountType>(editingAccount?.type || 'cash');
   const [displayBalance, setDisplayBalance] = useState(
     editingAccount ? formatNumber(editingAccount.currentBalance, language) : '',

@@ -10,21 +10,24 @@ Habit Money is a modern, high-performance personal finance tracker built with **
 
 - **Expo Router Navigation**: Modern, file-based routing architecture for robust deep linking and smooth transitions.
 - **First-Launch Onboarding**: Detects system language and currency on first run, letting users confirm or customize their locale settings before entering the app.
+- **Dynamic Ledger Grid**: Beautiful standalone contained Material Design 3 cards separating Real Income, Expenses, and Remaining Balance with responsive font sizing, directional icon badges, and dynamic container styling for positive vs. negative cash flows.
 - **Dedicated Settings Tab**: A centralized hub for managing Accounts, Categories, Budgets, and Goals, keeping the main dashboard clean and focused.
 - **Interactive Reordering**: Full **Drag & Drop** support for Accounts, Categories, Budgets, and Goals, allowing for personal organization and layout customization.
-- **Full Localization (i18n)**: Comprehensive support for English and Spanish, including localized default categories and financial insights.
+- **Category & Account Localizer**: Fixed editing translations so that default categories (e.g., Food, Rent, Salary) and default accounts (e.g., Bank) initialize using the active translation language, rather than English fallbacks.
 - **Visual Financial Health**:
   - **Dynamic Dashboard**: Real-time overview of net balance and monthly cash flow.
-  - **Interactive Insights**: Smart analysis of spending growth, savings rates, frequency alerts, and accurate separation of real income from balance adjustments.
-  - **Expense Charts**: Beautiful pie and bar charts visualizing category-wise spending and month-over-month growth.
+  - **Interactive Insights**: Smart analysis of spending growth, savings rates with a dynamic ProgressBar visualizer, frequency alerts, and accurate separation of real income from balance adjustments.
+  - **Expense Charts**: Beautiful, responsive pie and bar charts visualizing category-wise spending and month-over-month growth.
+  - **Full WCAG Screen Reader Accessibility**: SVG charts, summaries, and metrics now support native `accessible={true}` and custom `accessibilityLabel` parameters for 100% VoiceOver and TalkBack screen-reader coverage.
 
 - **Smart Management**:
   - **Account Tracking**: Manage multiple financial sources (Cash, Bank, Credit).
   - **Financial Goals**: Set targets (e.g., "New Car") and track progress with estimated monthly savings.
   - **Budgeting**: Define monthly spending limits per category with real-time percentage and remaining balance tracking.
 - **Customization & UX**:
-  - **Expanded Palette**: Choice of 40+ premium colors and over 100+ specialized icons for categories and goals.
-  - **Dark Mode Ready**: Premium look and feel in any lighting.
+  - **Expanded Registry & Palette**: Added pre-seeded icons (`home-city` for Rent, `controller-classic` for Entertainment, `format-list-bulleted` for Other) and pre-seeded colors (`#16A34A` for Salary, `#ff4081` for Gifts, `#ff5722` for Bills & Taxes) directly into editing choice grids.
+  - **Ergonomic FAB Placement**: List absolute button offsets optimized to hover close to the bottom tab bar (where no banner ads reside to cause overlaps) for comfortable reachability.
+  - **Dark Mode Ready**: Sleek, high-contrast layouts utilising themed outline tokens (`theme.colors.outlineVariant`) to ensure visible legend boundaries under dark mode.
   - **Local Timezone Support**: Accurate financial reporting based on your device's local time, ensuring transactions align with your real-world calendar.
   - **Smart Reminders**: Automated daily and weekly notifications to help you stay consistent with your financial tracking.
 

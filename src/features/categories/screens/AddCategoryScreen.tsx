@@ -46,10 +46,12 @@ export const AddCategoryScreen = () => {
   const isEditing = !!editingCategory;
 
   const { addCategory, editCategory } = useStore();
-  const { t } = useTranslation();
+  const { t, translateName } = useTranslation();
   const theme = useTheme();
 
-  const [name, setName] = useState(editingCategory?.name || '');
+  const [name, setName] = useState(
+    editingCategory ? translateName(editingCategory.name) : '',
+  );
   const [type, setType] = useState<TransactionType>(
     editingCategory?.type || 'expense',
   );

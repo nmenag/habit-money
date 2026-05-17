@@ -151,129 +151,154 @@ export const DashboardScreen = React.memo(() => {
             {currentMonthDisplay}
           </Text>
         </View>
-
-        {/* 1. Main Balance Summary - Contained for hierarchy */}
         <Card
           style={[
             styles.card,
-            { backgroundColor: theme.colors.primaryContainer },
+            {
+              backgroundColor:
+                data.remainingBalance >= 0
+                  ? theme.colors.incomeContainer
+                  : theme.colors.errorContainer,
+            },
           ]}
           mode="contained"
         >
           <Card.Content>
-            <View style={styles.balanceRow}>
-              <View style={{ flex: 1 }}>
-                <Text
-                  variant="labelSmall"
-                  style={{
-                    color: theme.colors.onPrimaryContainer,
-                    fontWeight: '800',
-                    letterSpacing: 0.8,
-                  }}
-                  numberOfLines={1}
-                >
-                  {t('monthlyIncome').toUpperCase()}
-                </Text>
-                <Text
-                  style={[
-                    styles.amountText,
-                    { color: theme.colors.income, fontSize: fontScale(22) },
-                  ]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {formatCurrency(data.monthlyIncome)}
-                </Text>
-              </View>
-              <View
+            <View style={styles.remainingHeader}>
+              <Text
+                variant="labelSmall"
                 style={{
-                  flex: 1,
-                  alignItems: 'flex-end',
-                  marginLeft: spacing.sm,
+                  color: theme.colors.onSurfaceVariant,
+                  fontWeight: '800',
+                  letterSpacing: 0.8,
                 }}
               >
-                <Text
-                  variant="labelSmall"
-                  style={{
-                    color: theme.colors.onPrimaryContainer,
-                    fontWeight: '800',
-                    letterSpacing: 0.8,
-                  }}
-                  numberOfLines={1}
-                >
-                  {t('monthlyExpenses').toUpperCase()}
-                </Text>
-                <Text
-                  style={[
-                    styles.amountText,
-                    { color: theme.colors.error, fontSize: fontScale(22) },
-                  ]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {formatCurrency(data.monthlyExpenses)}
-                </Text>
-              </View>
-            </View>
-
-            {data.monthlyAdjustments !== 0 && (
-              <View style={[styles.balanceRow, { marginTop: spacing.xs }]}>
-                <Text
-                  variant="labelSmall"
-                  style={{
-                    color: theme.colors.outline,
-                    fontWeight: '700',
-                    flex: 1,
-                  }}
-                  numberOfLines={1}
-                >
-                  {t('adjustments').toUpperCase()}
-                </Text>
-                <Text
-                  variant="labelMedium"
-                  style={{
-                    fontWeight: '700',
-                    color: theme.colors.onPrimaryContainer,
-                    flexShrink: 1,
-                    textAlign: 'right',
-                    marginLeft: 8,
-                  }}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {data.monthlyAdjustments > 0 ? '+' : ''}
-                  {formatCurrency(data.monthlyAdjustments)}
-                </Text>
-              </View>
-            )}
-
-            <Divider style={{ marginVertical: spacing.sm, opacity: 0.3 }} />
-            <View style={styles.balanceRow}>
-              <Text
-                variant="titleMedium"
-                style={{ color: theme.colors.onPrimaryContainer }}
-              >
-                {t('remaining')}
+                {t('remaining').toUpperCase()}
               </Text>
-              <Text
-                variant="titleLarge"
-                style={{
-                  fontWeight: '900',
+              <Avatar.Icon
+                size={24}
+                icon={
+                  data.remainingBalance >= 0 ? 'trending-up' : 'trending-down'
+                }
+                style={{ backgroundColor: 'transparent' }}
+                color={
+                  data.remainingBalance >= 0
+                    ? theme.colors.income
+                    : theme.colors.error
+                }
+              />
+            </View>
+            <Text
+              style={[
+                styles.amountText,
+                {
                   color:
                     data.remainingBalance >= 0
                       ? theme.colors.income
                       : theme.colors.error,
-                  flex: 1,
-                  textAlign: 'right',
-                }}
+                  fontSize: fontScale(32),
+                  lineHeight: fontScale(38),
+                  marginTop: spacing.xs,
+                },
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {formatCurrency(data.remainingBalance)}
+            </Text>
+
+            {data.monthlyAdjustments !== 0 && (
+              <View style={styles.adjustmentsRow}>
+                <Ionicons
+                  name="information-circle-outline"
+                  size={16}
+                  color={theme.colors.onSurfaceVariant}
+                />
+                <Text
+                  variant="bodySmall"
+                  style={[
+                    styles.adjustmentsText,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {t('adjustments')}: {data.monthlyAdjustments > 0 ? '+' : ''}
+                  {formatCurrency(data.monthlyAdjustments)}
+                </Text>
+              </View>
+            )}
+          </Card.Content>
+        </Card>
+
+        {/* Separated Flow row: Incomes & Expenses side-by-side */}
+        <View style={styles.flowRow}>
+          {/* Income Container */}
+          <Card
+            style={[styles.flowCard, { marginRight: spacing.xs }]}
+            mode="elevated"
+          >
+            <Card.Content style={styles.flowCardContent}>
+              <View style={styles.flowHeader}>
+                <Avatar.Icon
+                  size={28}
+                  icon="arrow-up-bold"
+                  style={{ backgroundColor: theme.colors.incomeContainer }}
+                  color={theme.colors.income}
+                />
+                <Text
+                  variant="labelSmall"
+                  style={[
+                    styles.flowLabel,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {t('monthlyIncome')}
+                </Text>
+              </View>
+              <Text
+                style={[styles.flowAmount, { color: theme.colors.income }]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
-                {formatCurrency(data.remainingBalance)}
+                {formatCurrency(data.monthlyIncome)}
               </Text>
-            </View>
-          </Card.Content>
-        </Card>
+            </Card.Content>
+          </Card>
+
+          {/* Expenses Container */}
+          <Card
+            style={[styles.flowCard, { marginLeft: spacing.xs }]}
+            mode="elevated"
+          >
+            <Card.Content style={styles.flowCardContent}>
+              <View style={styles.flowHeader}>
+                <Avatar.Icon
+                  size={28}
+                  icon="arrow-down-bold"
+                  style={{ backgroundColor: theme.colors.errorContainer }}
+                  color={theme.colors.error}
+                />
+                <Text
+                  variant="labelSmall"
+                  style={[
+                    styles.flowLabel,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {t('monthlyExpenses')}
+                </Text>
+              </View>
+              <Text
+                style={[styles.flowAmount, { color: theme.colors.error }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {formatCurrency(data.monthlyExpenses)}
+              </Text>
+            </Card.Content>
+          </Card>
+        </View>
 
         {/* AA. Accounts Summary */}
         <Card style={styles.card} mode="elevated">
@@ -644,9 +669,11 @@ export const DashboardScreen = React.memo(() => {
                                     : theme.colors.error),
                         }}
                         color={
-                          isAdjustment
-                            ? theme.colors.onSurfaceVariant
-                            : theme.colors.onPrimary
+                          tr.type === 'transfer'
+                            ? theme.colors.onSecondary
+                            : isAdjustment
+                              ? theme.colors.onSurfaceVariant
+                              : theme.colors.onPrimary
                         }
                       />
                       <View style={{ marginLeft: 12, flex: 1 }}>
@@ -723,7 +750,7 @@ export const DashboardScreen = React.memo(() => {
         style={[
           styles.fab,
           {
-            bottom: (insets.bottom || 0) + 120,
+            bottom: (insets.bottom || 0) + 16,
             backgroundColor: theme.colors.primary,
           },
         ]}
@@ -782,6 +809,49 @@ const defaultStyles = (theme: AppTheme) =>
     amountText: {
       fontSize: fontScale(18),
       fontWeight: '900',
+    },
+    remainingHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    flowRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: spacing.md,
+    },
+    flowCard: {
+      flex: 1,
+      borderRadius: theme.roundness,
+    },
+    flowCardContent: {
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.sm,
+    },
+    flowHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    flowLabel: {
+      marginLeft: spacing.xs + 2,
+      fontWeight: '800',
+      flex: 1,
+    },
+    flowAmount: {
+      fontSize: fontScale(18),
+      fontWeight: '900',
+    },
+    adjustmentsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: spacing.sm,
+      opacity: 0.8,
+    },
+    adjustmentsText: {
+      marginLeft: 4,
+      fontWeight: '700',
+      fontSize: fontScale(12),
     },
     progressBar: {
       height: 8,
