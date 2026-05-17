@@ -2,8 +2,15 @@ import { Image } from 'expo-image';
 import * as Localization from 'expo-localization';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Linking, ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Menu, Surface, Text, useTheme } from 'react-native-paper';
+import {
+  Linking,
+  ScrollView,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+} from 'react-native';
+import { Button, Menu, Text, useTheme } from 'react-native-paper';
+import { Ionicons } from '@expo/vector-icons';
 import { getDb } from '../../../db/schema';
 import { Language } from '../../../i18n/translations';
 import { useStore, useTranslation } from '../../../store/useStore';
@@ -62,48 +69,104 @@ export const OnboardingScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <View style={styles.content}>
-        <Surface style={styles.imageContainer} elevation={0}>
-          <Image
-            source={require('../../../../assets/images/icon.png')}
-            style={styles.logoImage}
-            contentFit="contain"
-            transition={200}
-          />
-        </Surface>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.heroSection}>
+          <View style={styles.logoWrapper}>
+            <Image
+              source={require('../../../../assets/images/icon.png')}
+              style={styles.logoImage}
+              contentFit="contain"
+              transition={300}
+            />
+            <View
+              style={[
+                styles.glowEffect,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+          </View>
 
-        <Text variant="headlineLarge" style={styles.title}>
-          {t('onboardingWelcome')}
-        </Text>
+          <Text style={[styles.title, { color: theme.colors.onBackground }]}>
+            {t('onboardingWelcome')}
+          </Text>
 
-        <Text variant="bodyLarge" style={styles.description}>
-          {t('onboardingDesc')}
-        </Text>
+          <Text
+            style={[
+              styles.description,
+              { color: theme.colors.onSurfaceVariant },
+            ]}
+          >
+            {t('onboardingDesc')}
+          </Text>
+        </View>
 
-        <Surface style={styles.settingsCard} elevation={1}>
-          <View style={styles.settingRow}>
-            <View style={{ flex: 1 }}>
-              <Text
-                variant="labelLarge"
-                style={{ color: theme.colors.secondary }}
-              >
-                {t('detectedLanguage')}
-              </Text>
-              <Text variant="titleMedium">
-                {detectedLang === 'es' ? t('spanish') : t('english')}
-              </Text>
-            </View>
+        <View style={styles.preferencesSection}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: theme.colors.onSurfaceVariant },
+            ]}
+          >
+            {t('preferences') || 'Preferences'}
+          </Text>
+
+          <View
+            style={[
+              styles.settingsCard,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
             <Menu
               visible={langMenuVisible}
               onDismiss={() => setLangMenuVisible(false)}
               anchor={
-                <Button
-                  mode="outlined"
+                <TouchableOpacity
+                  style={styles.settingRow}
+                  activeOpacity={0.7}
                   onPress={() => setLangMenuVisible(true)}
-                  compact
                 >
-                  {detectedLang === 'es' ? t('spanish') : t('english')}
-                </Button>
+                  <View
+                    style={[
+                      styles.iconBox,
+                      { backgroundColor: theme.colors.primaryContainer },
+                    ]}
+                  >
+                    <Ionicons
+                      name="earth"
+                      size={20}
+                      color={theme.colors.primary}
+                    />
+                  </View>
+                  <View style={styles.settingTextContainer}>
+                    <Text
+                      style={[
+                        styles.settingLabel,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {t('detectedLanguage')}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.settingValue,
+                        { color: theme.colors.onSurface },
+                      ]}
+                    >
+                      {detectedLang === 'es' ? t('spanish') : t('english')}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-down"
+                    size={20}
+                    color={theme.colors.onSurfaceVariant}
+                  />
+                </TouchableOpacity>
               }
             >
               <Menu.Item
@@ -115,34 +178,60 @@ export const OnboardingScreen = () => {
                 title={t('spanish')}
               />
             </Menu>
-          </View>
-
-          <View style={styles.settingRow}>
-            <View style={{ flex: 1 }}>
-              <Text
-                variant="labelLarge"
-                style={{ color: theme.colors.secondary }}
-              >
-                {t('detectedCurrency')}
-              </Text>
-              <Text variant="titleMedium">
-                {t(
-                  CURRENCIES.find((c) => c.code === detectedCurrency)
-                    ?.tKey as any,
-                )}
-              </Text>
-            </View>
+            <View
+              style={[
+                styles.divider,
+                { backgroundColor: theme.colors.outlineVariant },
+              ]}
+            />
             <Menu
               visible={currencyMenuVisible}
               onDismiss={() => setCurrencyMenuVisible(false)}
               anchor={
-                <Button
-                  mode="outlined"
+                <TouchableOpacity
+                  style={styles.settingRow}
+                  activeOpacity={0.7}
                   onPress={() => setCurrencyMenuVisible(true)}
-                  compact
                 >
-                  {detectedCurrency}
-                </Button>
+                  <View
+                    style={[
+                      styles.iconBox,
+                      { backgroundColor: theme.colors.primaryContainer },
+                    ]}
+                  >
+                    <Ionicons
+                      name="cash-outline"
+                      size={20}
+                      color={theme.colors.primary}
+                    />
+                  </View>
+                  <View style={styles.settingTextContainer}>
+                    <Text
+                      style={[
+                        styles.settingLabel,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {t('detectedCurrency')}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.settingValue,
+                        { color: theme.colors.onSurface },
+                      ]}
+                    >
+                      {t(
+                        CURRENCIES.find((c) => c.code === detectedCurrency)
+                          ?.tKey as any,
+                      )}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-down"
+                    size={20}
+                    color={theme.colors.onSurfaceVariant}
+                  />
+                </TouchableOpacity>
               }
               contentStyle={{ backgroundColor: theme.colors.elevation.level3 }}
             >
@@ -157,32 +246,27 @@ export const OnboardingScreen = () => {
               </ScrollView>
             </Menu>
           </View>
-        </Surface>
-      </View>
+        </View>
+      </ScrollView>
 
-      <View style={styles.footer}>
+      <View
+        style={[styles.footer, { backgroundColor: theme.colors.background }]}
+      >
         <Text
-          variant="bodySmall"
-          style={{ textAlign: 'center', opacity: 0.7, marginBottom: 16 }}
+          style={[styles.termsText, { color: theme.colors.onSurfaceVariant }]}
         >
-          {t('agreeToTermsPrefix')}
+          {t('agreeToTermsPrefix')}{' '}
           <Text
-            style={{
-              textDecorationLine: 'underline',
-              color: theme.colors.primary,
-            }}
+            style={[styles.termsLink, { color: theme.colors.primary }]}
             onPress={() =>
               Linking.openURL('https://nmenag.github.io/fin-habit/privacy.html')
             }
           >
             {t('privacyPolicy')}
-          </Text>
-          {t('agreeToTermsAnd')}
+          </Text>{' '}
+          {t('agreeToTermsAnd')}{' '}
           <Text
-            style={{
-              textDecorationLine: 'underline',
-              color: theme.colors.primary,
-            }}
+            style={[styles.termsLink, { color: theme.colors.primary }]}
             onPress={() =>
               Linking.openURL('https://nmenag.github.io/fin-habit/terms.html')
             }
@@ -190,6 +274,7 @@ export const OnboardingScreen = () => {
             {t('termsOfUse')}
           </Text>
         </Text>
+
         <Button
           mode="contained"
           onPress={handleContinue}
@@ -208,59 +293,135 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     padding: 24,
+    paddingTop: 60,
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  imageContainer: {
-    marginBottom: 40,
+  heroSection: {
     alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 48,
+  },
+  logoWrapper: {
+    position: 'relative',
+    marginBottom: 32,
   },
   logoImage: {
     width: 120,
     height: 120,
-    borderRadius: 28,
+    borderRadius: 32,
+    zIndex: 2,
   },
-  logoText: {
-    fontSize: 48,
-    fontWeight: 'bold',
+  glowEffect: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    right: -10,
+    bottom: -10,
+    borderRadius: 60,
+    opacity: 0.15,
+    zIndex: 1,
+    transform: [{ scale: 1.1 }],
+    filter: 'blur(10px)',
   },
   title: {
+    fontSize: 36,
+    fontWeight: '900',
     textAlign: 'center',
-    fontWeight: 'bold',
     marginBottom: 16,
+    letterSpacing: -1,
+    lineHeight: 42,
   },
   description: {
+    fontSize: 16,
     textAlign: 'center',
-    opacity: 0.7,
-    marginBottom: 40,
-    paddingHorizontal: 20,
+    fontWeight: '500',
+    paddingHorizontal: 16,
+    lineHeight: 24,
+  },
+  preferencesSection: {
+    width: '100%',
+    maxWidth: 600,
+    alignSelf: 'center',
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginBottom: 12,
+    marginLeft: 8,
   },
   settingsCard: {
-    width: '100%',
-    padding: 20,
-    borderRadius: 16,
-    gap: 20,
+    borderRadius: 24,
+    borderWidth: 1,
+    overflow: 'hidden',
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 16,
+    paddingVertical: 20,
+  },
+  iconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  settingTextContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  settingLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  settingValue: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  divider: {
+    height: 1,
+    marginLeft: 72,
   },
   footer: {
     padding: 24,
-    paddingBottom: 48,
+    paddingBottom: 40,
+    width: '100%',
+    maxWidth: 600,
+    alignSelf: 'center',
+  },
+  termsText: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 18,
+  },
+  termsLink: {
+    textDecorationLine: 'underline',
+    fontWeight: '700',
   },
   button: {
-    borderRadius: 12,
+    borderRadius: 100,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   buttonContent: {
-    height: 56,
+    height: 60,
   },
   buttonLabel: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

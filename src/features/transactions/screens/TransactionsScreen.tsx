@@ -19,7 +19,6 @@ const TypedFlashList = FlashList as any;
 export const TransactionsScreen = () => {
   const params = useLocalSearchParams<{ accountId?: string }>();
 
-  // Granular selectors to prevent re-renders when other state changes
   const transactions = useStore((s) => s.transactions);
   const accounts = useStore((s) => s.accounts);
   const categories = useStore((s) => s.categories);

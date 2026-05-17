@@ -142,6 +142,9 @@ export const en = {
   associatedCategoryOpt: 'Associated Category (Optional)',
   spentOf: 'spent of',
   noBudgets: 'No budgets found. Create one to track your spending limits!',
+  noBudget: 'No Budget',
+  today: 'Today',
+  yesterday: 'Yesterday',
   budgetUsedError:
     'This budget is used in one or more transactions. Remove it from those transactions first.',
   cannotDelete: 'Cannot delete',

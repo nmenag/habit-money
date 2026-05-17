@@ -1,7 +1,14 @@
 import * as Localization from 'expo-localization';
 import { router } from 'expo-router';
 import React from 'react';
-import { Alert, Linking, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import {
   Card,
   Divider,
@@ -297,7 +304,7 @@ export const SettingsScreen = () => {
                       fontWeight: isSelected ? 'bold' : 'normal',
                       fontSize: 16,
                     }}
-                    style={{ minWidth: 220 }}
+                    style={{ minWidth: 200 }}
                   />
                 );
               })}
@@ -340,30 +347,33 @@ export const SettingsScreen = () => {
               }
               contentStyle={{ backgroundColor: theme.colors.elevation.level3 }}
             >
-              <ScrollView style={{ maxHeight: 300 }}>
-                {CURRENCIES.map((item) => {
-                  const isSelected = currency === item.code;
-                  return (
-                    <Menu.Item
-                      key={item.code}
-                      onPress={() => {
-                        setCurrency(item.code);
-                        setCurrencyMenuVisible(false);
-                      }}
-                      title={`${t(item.tKey as any)} (${item.code})`}
-                      leadingIcon={isSelected ? 'check' : 'cash-multiple'}
-                      titleStyle={{
-                        color: isSelected
-                          ? theme.colors.primary
-                          : theme.colors.onSurface,
-                        fontWeight: isSelected ? 'bold' : 'normal',
-                        fontSize: 16,
-                      }}
-                      style={{ minWidth: 220 }}
-                    />
-                  );
-                })}
-              </ScrollView>
+              <View style={{ maxHeight: 300, minWidth: 200 }}>
+                <FlatList
+                  data={CURRENCIES}
+                  keyExtractor={(item) => item.code}
+                  initialNumToRender={10}
+                  renderItem={({ item }) => {
+                    const isSelected = currency === item.code;
+                    return (
+                      <Menu.Item
+                        onPress={() => {
+                          setCurrency(item.code);
+                          setCurrencyMenuVisible(false);
+                        }}
+                        title={`${t(item.tKey as any)} (${item.code})`}
+                        leadingIcon={isSelected ? 'check' : 'cash-multiple'}
+                        titleStyle={{
+                          color: isSelected
+                            ? theme.colors.primary
+                            : theme.colors.onSurface,
+                          fontWeight: isSelected ? 'bold' : 'normal',
+                          fontSize: 16,
+                        }}
+                      />
+                    );
+                  }}
+                />
+              </View>
             </Menu>
           </Card>
         </View>
@@ -416,6 +426,8 @@ export const SettingsScreen = () => {
                   <Switch
                     value={notificationsEnabled}
                     onValueChange={toggleNotifications}
+                    accessibilityLabel={t('notifications') || 'Notifications'}
+                    accessibilityRole="switch"
                   />
                 </View>
               )}
@@ -463,7 +475,11 @@ export const SettingsScreen = () => {
               title={t('buyMeACoffee')}
               description={t('donateDesc')}
               left={(props) => (
-                <List.Icon {...props} icon="coffee" color="#FF5E5B" />
+                <List.Icon
+                  {...props}
+                  icon="coffee"
+                  color={theme.colors.primary}
+                />
               )}
               right={(props) => <List.Icon {...props} icon="open-in-new" />}
               onPress={handleDonate}
@@ -531,7 +547,7 @@ const defaultStyles = (theme: any) =>
       overflow: 'hidden',
     },
     textIconContainer: {
-      width: 40,
+      minWidth: 40,
       justifyContent: 'center',
       alignItems: 'center',
     },
