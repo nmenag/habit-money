@@ -16,10 +16,12 @@ import { Language } from '../../../i18n/translations';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { getLocalDateString } from '../../../utils/dateUtils';
 import { CURRENCIES } from '../../../constants';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const OnboardingScreen = () => {
   const theme = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { setLanguage, setCurrency, loadData } = useStore();
   const { t } = useTranslation();
 
@@ -250,7 +252,13 @@ export const OnboardingScreen = () => {
       </ScrollView>
 
       <View
-        style={[styles.footer, { backgroundColor: theme.colors.background }]}
+        style={[
+          styles.footer,
+          {
+            backgroundColor: theme.colors.background,
+            paddingBottom: Math.max(insets.bottom + 24, 48),
+          },
+        ]}
       >
         <Text
           style={[styles.termsText, { color: theme.colors.onSurfaceVariant }]}

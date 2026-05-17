@@ -1,5 +1,11 @@
 import { router, useLocalSearchParams, Stack } from 'expo-router';
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import React, {
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+} from 'react';
 import {
   Alert,
   ScrollView,
@@ -74,14 +80,30 @@ export const AddTransactionScreen = () => {
   const [type, setType] = useState<TransactionType>(
     editingTransaction?.type || 'expense',
   );
-  const [displayAmount, setDisplayAmount] = useState(
-    editingTransaction
-      ? formatNumber(Math.abs(editingTransaction.amount), language)
-      : '',
-  );
   const [amount, setAmount] = useState(
     editingTransaction ? Math.abs(editingTransaction.amount) : 0,
   );
+  const [displayAmount, setDisplayAmount] = useState(() => {
+    if (!editingTransaction) return '';
+    const absVal = Math.abs(editingTransaction.amount);
+    const isDecimal = currency !== 'COP' && currency !== 'CLP';
+    if (!isDecimal) {
+      return formatNumber(absVal, language);
+    } else {
+      const decimalSep = language === 'es' ? ',' : '.';
+      const thousandSep = language === 'es' ? '.' : ',';
+      const parts = absVal.toString().split('.');
+      const integerPart = parts[0];
+      const decimalPart = parts[1] ? parts[1].substring(0, 2) : '';
+      const formattedInt = integerPart.replace(
+        /\B(?=(\d{3})+(?!\d))/g,
+        thousandSep,
+      );
+      return decimalPart
+        ? formattedInt + decimalSep + decimalPart
+        : formattedInt;
+    }
+  });
   const [note, setNote] = useState(editingTransaction?.note || '');
   const [selectedAccount, setSelectedAccount] = useState(
     editingTransaction?.accountId || params.accountId || accounts[0]?.id || '',
@@ -116,6 +138,66 @@ export const AddTransactionScreen = () => {
   );
   const [budgetSheetOpen, setBudgetSheetOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isAmountFocused, setIsAmountFocused] = useState(false);
+
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setIsKeyboardOpen(true);
+      },
+    );
+    const hideSubscription = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setIsKeyboardOpen(false);
+      },
+    );
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  const handleNoteFocus = () => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 150);
+  };
+
+  const activeColors = useMemo(() => {
+    switch (type) {
+      case 'expense':
+        return {
+          bg: theme.dark ? '#2A1818' : '#FFF5F5',
+          border: theme.dark ? '#5E2727' : '#FEE2E2',
+          badgeBg: theme.dark ? '#3A1E1E' : '#FEE2E2',
+          text: theme.colors.error,
+          badgeText: theme.colors.error,
+        };
+      case 'income':
+        return {
+          bg: theme.dark ? '#0E1F15' : '#F0FDF4',
+          border: theme.dark ? '#1E462E' : '#DCFCE7',
+          badgeBg: theme.dark ? '#1A3324' : '#DCFCE7',
+          text: (theme.colors as any).income || '#15803D',
+          badgeText: (theme.colors as any).income || '#15803D',
+        };
+      case 'transfer':
+        return {
+          bg: theme.dark ? '#0F1E2E' : '#F0F9FF',
+          border: theme.dark ? '#1E3A5F' : '#E0F2FE',
+          badgeBg: theme.dark ? '#1E293B' : '#E0F2FE',
+          text: theme.colors.primary,
+          badgeText: theme.colors.primary,
+        };
+    }
+  }, [type, theme]);
 
   const openAccountSheet = (targetType: 'from' | 'to') => {
     setTargetAccountType(targetType);
@@ -252,18 +334,78 @@ export const AddTransactionScreen = () => {
     router.back();
   };
 
+  const formatAmountInput = useCallback(
+    (text: string, isDecimal: boolean) => {
+      const thousandSep = language === 'es' ? '.' : ',';
+      const decimalSep = language === 'es' ? ',' : '.';
+
+      if (!isDecimal) {
+        const onlyDigits = text.replace(/\D/g, '');
+        if (onlyDigits === '') return '';
+        return onlyDigits.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSep);
+      } else {
+        const cleanText = text.replace(/[^0-9.,]/g, '');
+        if (cleanText === '') return '';
+
+        let firstSepIdx = cleanText.indexOf('.');
+        if (firstSepIdx === -1) {
+          firstSepIdx = cleanText.indexOf(',');
+        }
+
+        if (firstSepIdx === -1) {
+          return cleanText.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSep);
+        } else {
+          const integerPart = cleanText
+            .substring(0, firstSepIdx)
+            .replace(/\D/g, '');
+          const decimalPart = cleanText
+            .substring(firstSepIdx + 1)
+            .replace(/\D/g, '')
+            .substring(0, 2);
+
+          const formattedInt = integerPart.replace(
+            /\B(?=(\d{3})+(?!\d))/g,
+            thousandSep,
+          );
+          return formattedInt + decimalSep + decimalPart;
+        }
+      }
+    },
+    [language],
+  );
+
+  const parseAmountText = useCallback(
+    (formattedText: string, isDecimal: boolean) => {
+      if (formattedText === '') return 0;
+      if (!isDecimal) {
+        const clean = formattedText.replace(/\D/g, '');
+        return clean === '' ? 0 : parseInt(clean, 10);
+      } else {
+        const thousandSep = language === 'es' ? '.' : ',';
+        const decimalSep = language === 'es' ? ',' : '.';
+
+        let clean = formattedText.split(thousandSep).join('');
+        clean = clean.replace(decimalSep, '.');
+
+        const parsed = parseFloat(clean);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+    },
+    [language],
+  );
+
   const handleAmountChange = (text: string) => {
-    const onlyDigits = text.replace(/\D/g, '');
-    if (onlyDigits === '') {
+    const isDecimal = currency !== 'COP' && currency !== 'CLP';
+    const formatted = formatAmountInput(text, isDecimal);
+
+    if (formatted === '') {
       setDisplayAmount('');
       setAmount(0);
       return;
     }
-    const num = parseInt(onlyDigits, 10);
-    setAmount(num);
-    const separator = language === 'es' ? '.' : ',';
-    const formatted = onlyDigits.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+
     setDisplayAmount(formatted);
+    setAmount(parseAmountText(formatted, isDecimal));
   };
 
   const onConfirmDate = useCallback((params: { date: Date | undefined }) => {
@@ -276,17 +418,6 @@ export const AddTransactionScreen = () => {
   const onDismissDatePicker = useCallback(() => {
     setDatePickerOpen(false);
   }, []);
-
-  const tabColor = useMemo(() => {
-    switch (type) {
-      case 'expense':
-        return theme.colors.error;
-      case 'income':
-        return (theme.colors as any).income || '#15803D';
-      case 'transfer':
-        return theme.colors.primary;
-    }
-  }, [type, theme]);
 
   const formattedDateText = useMemo(() => {
     const locale = language === 'es' ? es : enUS;
@@ -501,6 +632,7 @@ export const AddTransactionScreen = () => {
         }}
       />
       <ScrollView
+        ref={scrollViewRef}
         style={{ flex: 1 }}
         contentContainerStyle={[
           styles.scrollContent,
@@ -521,9 +653,11 @@ export const AddTransactionScreen = () => {
           style={[
             styles.amountHeroCard,
             {
-              backgroundColor: theme.colors.surface,
-              borderColor: theme.colors.outlineVariant,
-              borderWidth: 1,
+              backgroundColor: activeColors.bg,
+              borderColor: activeColors.border,
+              borderWidth: 1.5,
+              paddingVertical: isKeyboardOpen ? 8 : 16,
+              marginBottom: isKeyboardOpen ? 8 : 16,
             },
           ]}
         >
@@ -531,7 +665,11 @@ export const AddTransactionScreen = () => {
             variant="labelSmall"
             style={[
               styles.amountLabel,
-              { color: theme.colors.onSurfaceVariant },
+              {
+                color: activeColors.text,
+                opacity: 0.8,
+                marginBottom: isKeyboardOpen ? 4 : 8,
+              },
             ]}
           >
             {t('amount').toUpperCase()}
@@ -542,13 +680,13 @@ export const AddTransactionScreen = () => {
               style={[
                 styles.currencyBadge,
                 {
-                  backgroundColor: theme.dark ? '#1A3324' : '#DCFCE7',
-                  borderColor: '#22C55E',
+                  backgroundColor: activeColors.badgeBg,
+                  borderColor: activeColors.text,
                   borderWidth: 1,
                 },
               ]}
             >
-              <Text style={[styles.currencyText, { color: '#22C55E' }]}>
+              <Text style={[styles.currencyText, { color: activeColors.text }]}>
                 {currency}
               </Text>
             </View>
@@ -557,14 +695,24 @@ export const AddTransactionScreen = () => {
               <RNTextInput
                 value={displayAmount}
                 onChangeText={handleAmountChange}
-                keyboardType="numeric"
-                placeholder="0"
-                placeholderTextColor={tabColor + '20'}
-                style={[styles.amountTextInputCentered, { color: tabColor }]}
-                selectionColor={tabColor}
+                keyboardType="decimal-pad"
+                placeholder={isAmountFocused ? '' : '0'}
+                placeholderTextColor={theme.colors.outlineVariant}
+                style={[
+                  styles.amountTextInputCentered,
+                  {
+                    color: activeColors.text,
+                    fontSize: isKeyboardOpen ? 26 : 36,
+                  },
+                ]}
+                selectionColor={activeColors.text}
                 textAlign="center"
+                onFocus={() => setIsAmountFocused(true)}
+                onBlur={() => setIsAmountFocused(false)}
               />
             </View>
+
+            <View style={styles.spacer} />
 
             {amount > 0 && (
               <TouchableOpacity
@@ -577,7 +725,7 @@ export const AddTransactionScreen = () => {
                 <Ionicons
                   name="close-circle"
                   size={24}
-                  color={theme.colors.onSurfaceVariant + '88'}
+                  color={activeColors.text + '88'}
                 />
               </TouchableOpacity>
             )}
@@ -707,12 +855,18 @@ export const AddTransactionScreen = () => {
           <RNTextInput
             value={note}
             onChangeText={setNote}
-            placeholder={t('notePlaceholder')}
+            placeholder={t('notePlaceholder') || 'Add a note...'}
             placeholderTextColor={theme.colors.onSurfaceVariant + '70'}
-            style={[styles.notesInput, { color: theme.colors.onSurface }]}
-            multiline={false}
+            style={[
+              styles.notesInput,
+              { color: theme.colors.onSurface, maxHeight: 100 },
+            ]}
+            multiline={true}
+            numberOfLines={1}
             returnKeyType="done"
+            blurOnSubmit={true}
             onSubmitEditing={Keyboard.dismiss}
+            onFocus={handleNoteFocus}
           />
         </View>
       </ScrollView>
@@ -1132,7 +1286,9 @@ export const AddTransactionScreen = () => {
               ? 'rgba(10, 17, 15, 0.95)'
               : 'rgba(248, 250, 252, 0.95)',
             borderColor: theme.colors.outlineVariant,
-            paddingBottom: isKeyboardOpen ? 12 : Math.max(insets.bottom, 16),
+            paddingBottom: isKeyboardOpen
+              ? 12
+              : Math.max(insets.bottom + 24, 48),
             maxWidth: 600,
             width: '100%',
             alignSelf: 'center',
@@ -1221,10 +1377,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   currencyBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    width: 56,
+    height: 32,
     borderRadius: 14,
-    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   currencyText: {
     fontSize: 14,
@@ -1233,6 +1390,9 @@ const styles = StyleSheet.create({
   amountInputWrapper: {
     flex: 1,
     justifyContent: 'center',
+  },
+  spacer: {
+    width: 56,
   },
   amountTextInputCentered: {
     fontSize: 36,
@@ -1243,12 +1403,12 @@ const styles = StyleSheet.create({
   amountClearBtn: {
     padding: 4,
     position: 'absolute',
-    right: 0,
+    right: 12,
   },
   quickChipsScroll: {
     flexDirection: 'row',
     gap: 8,
-    paddingTop: 16,
+    paddingVertical: 4,
     paddingHorizontal: 4,
   },
   quickChip: {
@@ -1487,16 +1647,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   menuContainer: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 16,
+    paddingBottom: 24,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 12,
+    paddingVertical: 18,
+    paddingHorizontal: 16,
     borderRadius: 16,
+    marginVertical: 2,
   },
   menuIconBg: {
     width: 40,
@@ -1512,7 +1673,7 @@ const styles = StyleSheet.create({
   },
   menuDivider: {
     height: 1,
-    marginVertical: 4,
+    marginVertical: 12,
     opacity: 0.6,
   },
 });

@@ -750,7 +750,7 @@ export const DashboardScreen = React.memo(() => {
         style={[
           styles.fab,
           {
-            bottom: (insets.bottom || 0) + 16,
+            bottom: Math.max((insets.bottom || 0) + 24, 96),
             backgroundColor: theme.colors.primary,
           },
         ]}
