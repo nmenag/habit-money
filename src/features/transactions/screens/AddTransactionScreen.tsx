@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, Stack } from 'expo-router';
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import {
   Alert,
@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   LayoutAnimation,
-  Dimensions,
+  useWindowDimensions,
   TextInput as RNTextInput,
   UIManager,
   Keyboard,
@@ -42,8 +42,10 @@ import {
 import { getLocalISOString } from '../../../utils/dateUtils';
 import { formatNumber } from '../../../utils/formatters';
 import { getValidCategoryIcon } from '../../../constants';
+import { BottomSheet } from '../../../shared/components';
 
 export const AddTransactionScreen = () => {
+  const { width } = useWindowDimensions();
   const params = useLocalSearchParams<{
     transaction?: string;
     isEditing?: string;
@@ -107,8 +109,8 @@ export const AddTransactionScreen = () => {
   );
   const [selectedToAccount, setSelectedToAccount] = useState(
     editingTransaction?.toAccountId ||
-      accounts.find((a) => a.id !== selectedAccount)?.id ||
-      '',
+    accounts.find((a) => a.id !== selectedAccount)?.id ||
+    '',
   );
 
   const [selectedDate, setSelectedDate] = useState<Date>(
@@ -124,6 +126,7 @@ export const AddTransactionScreen = () => {
     'from',
   );
   const [budgetSheetOpen, setBudgetSheetOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const openAccountSheet = (targetType: 'from' | 'to') => {
     setTargetAccountType(targetType);
@@ -152,7 +155,6 @@ export const AddTransactionScreen = () => {
     };
   }, []);
 
-  // Budget Suggestion Logic on Category Change
   useEffect(() => {
     if (type === 'expense' && selectedCategory) {
       const matchingBudget = budgets.find(
@@ -319,7 +321,6 @@ export const AddTransactionScreen = () => {
     }
   };
 
-  // Helper to compute budget usage spent/progress dynamically
   const getBudgetUsage = useCallback(
     (bud: Budget) => {
       const spent = transactions
@@ -337,7 +338,6 @@ export const AddTransactionScreen = () => {
     [transactions],
   );
 
-  // Selected entities objects
   const selectedCategoryObj = useMemo(() => {
     return categories.find((c) => c.id === selectedCategory);
   }, [categories, selectedCategory]);
@@ -363,7 +363,8 @@ export const AddTransactionScreen = () => {
 
   // Segmented Type Selector Component
   const CustomSegmentedControl = () => {
-    const tabWidth = (Dimensions.get('window').width - 32 - 8) / 3;
+    const containerWidth = Math.min(width, 600);
+    const tabWidth = (containerWidth - 32 - 8) / 3;
 
     const getColors = () => {
       switch (type) {
@@ -486,78 +487,7 @@ export const AddTransactionScreen = () => {
     );
   };
 
-  // Reusable Bottom Sheet Modal
-  const BottomSheet = ({
-    visible,
-    onClose,
-    title,
-    children,
-  }: {
-    visible: boolean;
-    onClose: () => void;
-    title: string;
-    children: React.ReactNode;
-  }) => {
-    return (
-      <Modal
-        transparent
-        visible={visible}
-        animationType="slide"
-        onRequestClose={onClose}
-      >
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity
-            style={styles.modalBackdrop}
-            activeOpacity={1}
-            onPress={onClose}
-          />
-          <View
-            style={[
-              styles.modalContent,
-              {
-                backgroundColor: theme.colors.surface,
-                borderTopLeftRadius: 28,
-                borderTopRightRadius: 28,
-                paddingBottom: Math.max(insets.bottom, 20),
-              },
-            ]}
-          >
-            <View style={styles.modalHandleContainer}>
-              <View
-                style={[
-                  styles.modalHandle,
-                  { backgroundColor: theme.colors.outlineVariant },
-                ]}
-              />
-            </View>
 
-            <View style={styles.modalHeader}>
-              <Text
-                variant="titleMedium"
-                style={{ fontWeight: '800', color: theme.colors.onSurface }}
-              >
-                {title}
-              </Text>
-              <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
-                <Ionicons
-                  name="close"
-                  size={22}
-                  color={theme.colors.onSurfaceVariant}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.modalScrollContent}
-            >
-              {children}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
 
   return (
     <KeyboardAvoidingView
@@ -565,17 +495,42 @@ export const AddTransactionScreen = () => {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
+      <Stack.Screen
+        options={{
+          title: isEditing ? t('editTransaction') : t('addTransaction'),
+          headerRight: () =>
+            isEditing ? (
+              <TouchableOpacity
+                onPress={() => setMenuOpen(true)}
+                style={{ padding: 8, marginRight: -8 }}
+                activeOpacity={0.7}
+              >
+                <Ionicons
+                  name="ellipsis-horizontal"
+                  size={22}
+                  color={theme.colors.onSurface}
+                />
+              </TouchableOpacity>
+            ) : null,
+        }}
+      />
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingBottom: 24,
+            maxWidth: 600,
+            width: '100%',
+            alignSelf: 'center',
+          },
+        ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        {/* 1. Transaction Type Segmented Control */}
         <CustomSegmentedControl />
 
-        {/* 2. Amount Hero Section */}
         <View
           style={[
             styles.amountHeroCard,
@@ -597,7 +552,6 @@ export const AddTransactionScreen = () => {
           </Text>
 
           <View style={styles.amountInputContainer}>
-            {/* Currency Selector Pill */}
             <View
               style={[
                 styles.currencyBadge,
@@ -644,7 +598,6 @@ export const AddTransactionScreen = () => {
           </View>
         </View>
 
-        {/* 3. Account Selector */}
         {type !== 'transfer' ? (
           <TouchableOpacity
             style={[
@@ -718,7 +671,6 @@ export const AddTransactionScreen = () => {
           </TouchableOpacity>
         ) : (
           <View style={styles.transferAccountsGroup}>
-            {/* From Account */}
             <TouchableOpacity
               style={[
                 styles.selectorCard,
@@ -791,7 +743,6 @@ export const AddTransactionScreen = () => {
               </View>
             </TouchableOpacity>
 
-            {/* To Account */}
             <TouchableOpacity
               style={[
                 styles.selectorCard,
@@ -865,7 +816,6 @@ export const AddTransactionScreen = () => {
           </View>
         )}
 
-        {/* 4. Category Selector (Hidden for Transfers) */}
         {type !== 'transfer' && (
           <TouchableOpacity
             style={[
@@ -927,7 +877,6 @@ export const AddTransactionScreen = () => {
           </TouchableOpacity>
         )}
 
-        {/* 5. Budget Selector (Only for Expense) */}
         {type === 'expense' && budgets.length > 0 && (
           <TouchableOpacity
             style={[
@@ -981,12 +930,12 @@ export const AddTransactionScreen = () => {
                     >
                       {selectedBudgetObj
                         ? translateName(
-                            selectedBudgetObj.name ||
-                              categories.find(
-                                (c) => c.id === selectedBudgetObj.categoryId,
-                              )?.name ||
-                              t('budgets'),
-                          )
+                          selectedBudgetObj.name ||
+                          categories.find(
+                            (c) => c.id === selectedBudgetObj.categoryId,
+                          )?.name ||
+                          t('budgets'),
+                        )
                         : t('noBudget')}
                     </Text>
                   </View>
@@ -1046,7 +995,6 @@ export const AddTransactionScreen = () => {
           </TouchableOpacity>
         )}
 
-        {/* 6. Date & Time (Compact row card) */}
         <TouchableOpacity
           style={[
             styles.compactRowCard,
@@ -1101,7 +1049,6 @@ export const AddTransactionScreen = () => {
           />
         </TouchableOpacity>
 
-        {/* 7. Notes (Compact input below Date) */}
         <View
           style={[
             styles.notesCard,
@@ -1132,7 +1079,6 @@ export const AddTransactionScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Date picking modal */}
       <DatePickerModal
         locale={language === 'es' ? 'es' : 'en'}
         mode="single"
@@ -1142,7 +1088,6 @@ export const AddTransactionScreen = () => {
         onConfirm={onConfirmDate}
       />
 
-      {/* Category Bottom Sheet */}
       <BottomSheet
         visible={categorySheetOpen}
         onClose={() => setCategorySheetOpen(false)}
@@ -1194,7 +1139,6 @@ export const AddTransactionScreen = () => {
         </View>
       </BottomSheet>
 
-      {/* Account Bottom Sheet */}
       <BottomSheet
         visible={accountSheetOpen}
         onClose={() => setAccountSheetOpen(false)}
@@ -1488,6 +1432,64 @@ export const AddTransactionScreen = () => {
         })}
       </BottomSheet>
 
+      {/* Transaction Actions Menu Bottom Sheet */}
+      <BottomSheet
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        title={t('transactionOptions') || 'Transaction Options'}
+      >
+        <View style={styles.menuContainer}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              setMenuOpen(false);
+              handleDuplicate();
+            }}
+          >
+            <Ionicons
+              name="duplicate-outline"
+              size={22}
+              color={theme.colors.primary}
+              style={{ marginRight: 16 }}
+            />
+            <Text
+              variant="bodyLarge"
+              style={[styles.menuItemText, { color: theme.colors.onSurface }]}
+            >
+              {t('duplicate')}
+            </Text>
+          </TouchableOpacity>
+
+          <View
+            style={[
+              styles.menuDivider,
+              { backgroundColor: theme.colors.outlineVariant },
+            ]}
+          />
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              setMenuOpen(false);
+              handleDelete();
+            }}
+          >
+            <Ionicons
+              name="trash-outline"
+              size={22}
+              color={theme.colors.error}
+              style={{ marginRight: 16 }}
+            />
+            <Text
+              variant="bodyLarge"
+              style={[styles.menuItemText, { color: theme.colors.error }]}
+            >
+              {t('delete')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </BottomSheet>
+
       {/* Sticky Bottom CTA Container */}
       <View
         style={[
@@ -1498,6 +1500,9 @@ export const AddTransactionScreen = () => {
               : 'rgba(248, 250, 252, 0.95)',
             borderColor: theme.colors.outlineVariant,
             paddingBottom: isKeyboardOpen ? 12 : Math.max(insets.bottom, 16),
+            maxWidth: 600,
+            width: '100%',
+            alignSelf: 'center',
           },
         ]}
       >
@@ -1515,65 +1520,6 @@ export const AddTransactionScreen = () => {
               {isEditing ? t('update') : t('saveTransaction')}
             </Text>
           </TouchableOpacity>
-
-          {/* Secondary Action Row in Edit Mode (Hidden when keyboard is open) */}
-          {isEditing && !isKeyboardOpen && (
-            <View style={styles.secondaryActionsRow}>
-              <TouchableOpacity
-                style={[
-                  styles.secondaryActionBtn,
-                  {
-                    borderColor: theme.colors.outlineVariant,
-                    backgroundColor: theme.colors.surface,
-                  },
-                ]}
-                onPress={handleDuplicate}
-                activeOpacity={0.8}
-              >
-                <MaterialCommunityIcons
-                  name="content-copy"
-                  size={16}
-                  color={theme.colors.primary}
-                />
-                <Text
-                  variant="labelMedium"
-                  style={[
-                    styles.secondaryActionBtnText,
-                    { color: theme.colors.primary },
-                  ]}
-                >
-                  {t('duplicate')}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.secondaryActionBtn,
-                  {
-                    borderColor: theme.colors.outlineVariant,
-                    backgroundColor: theme.colors.surface,
-                  },
-                ]}
-                onPress={handleDelete}
-                activeOpacity={0.8}
-              >
-                <MaterialCommunityIcons
-                  name="trash-can-outline"
-                  size={16}
-                  color={theme.colors.error}
-                />
-                <Text
-                  variant="labelMedium"
-                  style={[
-                    styles.secondaryActionBtnText,
-                    { color: theme.colors.error },
-                  ]}
-                >
-                  {t('delete')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
         </View>
       </View>
     </KeyboardAvoidingView>
@@ -1812,47 +1758,6 @@ const styles = StyleSheet.create({
   },
 
   // Modal bottom sheets
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  modalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
-  modalContent: {
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    elevation: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-  },
-  modalHandleContainer: {
-    width: '100%',
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-  },
-  modalCloseBtn: {
-    padding: 4,
-  },
-  modalScrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-  },
   modalGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -1926,7 +1831,6 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  // Sticky bottom action buttons
   bottomBarContainer: {
     paddingHorizontal: 16,
     paddingTop: 12,
@@ -1958,29 +1862,33 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 16,
   },
-  secondaryActionsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 4,
-    marginBottom: 4,
+  menuContainer: {
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 16,
   },
-  secondaryActionBtn: {
-    flex: 1,
-    height: 48,
-    borderRadius: 16,
-    borderWidth: 1,
+  menuItem: {
     flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+  },
+  menuIconBg: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.02,
-    shadowRadius: 2,
+    marginRight: 16,
   },
-  secondaryActionBtnText: {
-    fontSize: 13,
-    fontWeight: '700',
+  menuItemText: {
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  menuDivider: {
+    height: 1,
+    marginVertical: 4,
+    opacity: 0.6,
   },
 });
