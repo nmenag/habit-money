@@ -23,7 +23,7 @@ interface ExpenseFormFieldsProps {
   currentBudgetUsage: { spent: number; progress: number; remaining: number };
 }
 
-export const ExpenseFormFields: React.FC<ExpenseFormFieldsProps> = ({
+export const ExpenseFormFields = React.memo(({
   theme,
   styles,
   t,
@@ -39,7 +39,7 @@ export const ExpenseFormFields: React.FC<ExpenseFormFieldsProps> = ({
   budgets,
   categories,
   currentBudgetUsage,
-}) => {
+}: ExpenseFormFieldsProps) => {
   return (
     <>
       <TouchableOpacity
@@ -53,6 +53,9 @@ export const ExpenseFormFields: React.FC<ExpenseFormFieldsProps> = ({
         ]}
         onPress={() => openAccountSheet('from')}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={`${t('withdrawFrom') || 'Withdraw from'}: ${selectedAccountObj ? translateName(selectedAccountObj.name) : t('selectAccount')}, ${t('balance') || 'balance'}: ${selectedAccountObj ? formatCurrency(selectedAccountObj.currentBalance) : ''}`}
+        accessibilityHint={t('changeAccountHint') || 'Double tap to select a different account'}
       >
         <View style={styles.selectorCardLeft}>
           <View
@@ -125,6 +128,9 @@ export const ExpenseFormFields: React.FC<ExpenseFormFieldsProps> = ({
         ]}
         onPress={() => setCategorySheetOpen(true)}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={`${t('categories') || 'Category'}: ${selectedCategoryObj ? translateName(selectedCategoryObj.name) : t('selectCategory') || 'Select Category'}`}
+        accessibilityHint={t('changeCategoryHint') || 'Double tap to select a category'}
       >
         <View style={styles.selectorCardLeft}>
           <View
@@ -185,6 +191,9 @@ export const ExpenseFormFields: React.FC<ExpenseFormFieldsProps> = ({
           ]}
           onPress={() => setBudgetSheetOpen(true)}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={`${t('budgets') || 'Budget'}: ${selectedBudgetObj ? translateName(selectedBudgetObj.name || categories.find(c => c.id === selectedBudgetObj.categoryId)?.name || t('budgets')) : t('noBudget')}${selectedBudgetObj ? ', ' + formatCurrency(currentBudgetUsage.spent) + ' of ' + formatCurrency(selectedBudgetObj.amount) + ' spent' : ''}`}
+          accessibilityHint={t('changeBudgetHint') || 'Double tap to select a budget'}
         >
           <View style={{ flex: 1 }}>
             <View style={styles.budgetCardTop}>
@@ -291,4 +300,7 @@ export const ExpenseFormFields: React.FC<ExpenseFormFieldsProps> = ({
       )}
     </>
   );
-};
+});
+
+ExpenseFormFields.displayName = 'ExpenseFormFields';
+

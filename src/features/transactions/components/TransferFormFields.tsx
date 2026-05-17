@@ -16,7 +16,7 @@ interface TransferFormFieldsProps {
   openAccountSheet: (type: 'from' | 'to') => void;
 }
 
-export const TransferFormFields: React.FC<TransferFormFieldsProps> = ({
+export const TransferFormFields = React.memo(({
   theme,
   styles,
   t,
@@ -26,7 +26,7 @@ export const TransferFormFields: React.FC<TransferFormFieldsProps> = ({
   selectedAccountObj,
   selectedToAccountObj,
   openAccountSheet,
-}) => {
+}: TransferFormFieldsProps) => {
   return (
     <View style={styles.transferAccountsGroup}>
       <TouchableOpacity
@@ -41,6 +41,9 @@ export const TransferFormFields: React.FC<TransferFormFieldsProps> = ({
         ]}
         onPress={() => openAccountSheet('from')}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={`${t('withdrawFrom') || 'From Account'}: ${selectedAccountObj ? translateName(selectedAccountObj.name) : t('selectAccount')}, ${t('balance') || 'balance'}: ${selectedAccountObj ? formatCurrency(selectedAccountObj.currentBalance) : ''}`}
+        accessibilityHint={t('changeAccountHint') || 'Double tap to select a different source account'}
       >
         <View style={styles.selectorCardLeft}>
           <View
@@ -112,6 +115,9 @@ export const TransferFormFields: React.FC<TransferFormFieldsProps> = ({
         ]}
         onPress={() => openAccountSheet('to')}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={`${t('depositTo') || 'To Account'}: ${selectedToAccountObj ? translateName(selectedToAccountObj.name) : t('selectAccount')}, ${t('balance') || 'balance'}: ${selectedToAccountObj ? formatCurrency(selectedToAccountObj.currentBalance) : ''}`}
+        accessibilityHint={t('changeAccountHint') || 'Double tap to select a different destination account'}
       >
         <View style={styles.selectorCardLeft}>
           <View
@@ -173,4 +179,7 @@ export const TransferFormFields: React.FC<TransferFormFieldsProps> = ({
       </TouchableOpacity>
     </View>
   );
-};
+});
+
+TransferFormFields.displayName = 'TransferFormFields';
+
