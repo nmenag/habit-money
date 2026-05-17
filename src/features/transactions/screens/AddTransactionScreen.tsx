@@ -40,8 +40,182 @@ import { ExpenseFormFields } from '../components/ExpenseFormFields';
 import { IncomeFormFields } from '../components/IncomeFormFields';
 import { TransferFormFields } from '../components/TransferFormFields';
 
-export const AddTransactionScreen = () => {
+const addAlpha = (color: string, opacity: number): string => {
+  if (!color) return 'transparent';
+  if (color.startsWith('rgba') || color.startsWith('hsla')) {
+    return color;
+  }
+  if (color.startsWith('rgb')) {
+    return color.replace('rgb', 'rgba').replace(')', `, ${opacity})`);
+  }
+  let hex = color.replace('#', '');
+  if (hex.length === 3) {
+    hex = hex.split('').map((char) => char + char).join('');
+  }
+  if (hex.length === 6) {
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  }
+  return color;
+};
+
+interface CustomSegmentedControlProps {
+  type: TransactionType;
+  setType: (type: TransactionType) => void;
+  categories: any[];
+  setSelectedCategory: (id: string) => void;
+}
+
+const CustomSegmentedControl: React.FC<CustomSegmentedControlProps> = React.memo(({
+  type,
+  setType,
+  categories,
+  setSelectedCategory,
+}) => {
   const { width } = useWindowDimensions();
+  const theme = useTheme();
+  const { t } = useTranslation();
+
+  const containerWidth = Math.min(width, 600);
+  const tabWidth = (containerWidth - 32 - 8) / 3;
+
+  const getColors = () => {
+    switch (type) {
+      case 'expense':
+        return {
+          bg: theme.dark ? '#3A1E1E' : '#FEE2E2',
+          text: theme.colors.error,
+        };
+      case 'income':
+        return {
+          bg: theme.dark ? '#1A3324' : '#DCFCE7',
+          text: (theme.colors as any).income || '#15803D',
+        };
+      case 'transfer':
+        return {
+          bg: theme.dark ? '#1E293B' : '#E0F2FE',
+          text: theme.colors.primary,
+        };
+    }
+  };
+
+  const activeColors = getColors();
+
+  const handleSelectType = (newType: TransactionType) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setType(newType);
+
+    const newAvailable = categories.filter((c) => c.type === newType);
+    if (newAvailable.length > 0) {
+      setSelectedCategory(newAvailable[0].id);
+    } else {
+      setSelectedCategory('');
+    }
+  };
+
+  return (
+    <View
+      style={[
+        styles.tabContainer,
+        { backgroundColor: theme.colors.surfaceVariant },
+      ]}
+    >
+      <View
+        style={[
+          styles.tabIndicator,
+          {
+            width: tabWidth,
+            backgroundColor: activeColors.bg,
+            transform: [
+              {
+                translateX:
+                  type === 'expense'
+                    ? 4
+                    : type === 'income'
+                      ? tabWidth + 4
+                      : tabWidth * 2 + 4,
+              },
+            ],
+          },
+        ]}
+      />
+
+      <TouchableOpacity
+        style={styles.tabButton}
+        onPress={() => handleSelectType('expense')}
+        activeOpacity={0.8}
+        accessibilityRole="tab"
+        accessibilityState={{ selected: type === 'expense' }}
+        accessibilityLabel={t('expense') || 'Expense'}
+        accessibilityHint={t('switchToExpenseHint' as any) || 'Switches transaction type to expense'}
+      >
+        <Text
+          style={[
+            styles.tabText,
+            { color: theme.colors.onSurfaceVariant },
+            type === 'expense' && {
+              color: activeColors.text,
+              fontWeight: '800',
+            },
+          ]}
+        >
+          {t('expense')}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.tabButton}
+        onPress={() => handleSelectType('income')}
+        activeOpacity={0.8}
+        accessibilityRole="tab"
+        accessibilityState={{ selected: type === 'income' }}
+        accessibilityLabel={t('income') || 'Income'}
+        accessibilityHint={t('switchToIncomeHint' as any) || 'Switches transaction type to income'}
+      >
+        <Text
+          style={[
+            styles.tabText,
+            { color: theme.colors.onSurfaceVariant },
+            type === 'income' && {
+              color: activeColors.text,
+              fontWeight: '800',
+            },
+          ]}
+        >
+          {t('income')}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.tabButton}
+        onPress={() => handleSelectType('transfer')}
+        activeOpacity={0.8}
+        accessibilityRole="tab"
+        accessibilityState={{ selected: type === 'transfer' }}
+        accessibilityLabel={t('transfer') || 'Transfer'}
+        accessibilityHint={t('switchToTransferHint' as any) || 'Switches transaction type to transfer'}
+      >
+        <Text
+          style={[
+            styles.tabText,
+            { color: theme.colors.onSurfaceVariant },
+            type === 'transfer' && {
+              color: activeColors.text,
+              fontWeight: '800',
+            },
+          ]}
+        >
+          {t('transfer')}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+});
+CustomSegmentedControl.displayName = 'CustomSegmentedControl';
+
+export const AddTransactionScreen = () => {
   const params = useLocalSearchParams<{
     transaction?: string;
     isEditing?: string;
@@ -203,28 +377,6 @@ export const AddTransactionScreen = () => {
     setTargetAccountType(targetType);
     setAccountSheetOpen(true);
   };
-
-  useEffect(() => {
-    const showSubscription = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setIsKeyboardOpen(true);
-      },
-    );
-    const hideSubscription = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setIsKeyboardOpen(false);
-      },
-    );
-
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
-  }, []);
 
   useEffect(() => {
     if (type === 'expense' && selectedCategory) {
@@ -441,21 +593,37 @@ export const AddTransactionScreen = () => {
     }
   };
 
-  const getBudgetUsage = useCallback(
-    (bud: Budget) => {
-      const spent = transactions
+  const budgetUsages = useMemo(() => {
+    const map: Record<
+      string,
+      { spent: number; progress: number; remaining: number }
+    > = {};
+
+    const expenses = transactions.filter((t) => t.type === 'expense');
+
+    for (const bud of budgets) {
+      const spent = expenses
         .filter((t) => {
           const matchesBudget = t.budgetId === bud.id;
           const matchesCategory =
             bud.categoryId && t.categoryId === bud.categoryId;
-          return (matchesBudget || matchesCategory) && t.type === 'expense';
+          return matchesBudget || matchesCategory;
         })
         .reduce((sum, t) => sum + t.amount, 0);
+
       const progress = bud.amount > 0 ? Math.min(spent / bud.amount, 1) : 0;
       const remaining = Math.max(bud.amount - spent, 0);
-      return { spent, progress, remaining };
+      map[bud.id] = { spent, progress, remaining };
+    }
+
+    return map;
+  }, [transactions, budgets]);
+
+  const getBudgetUsage = useCallback(
+    (bud: Budget) => {
+      return budgetUsages[bud.id] || { spent: 0, progress: 0, remaining: 0 };
     },
-    [transactions],
+    [budgetUsages],
   );
 
   const selectedCategoryObj = useMemo(() => {
@@ -481,131 +649,6 @@ export const AddTransactionScreen = () => {
     return { spent: 0, progress: 0, remaining: 0 };
   }, [selectedBudgetObj, getBudgetUsage]);
 
-  const CustomSegmentedControl = () => {
-    const containerWidth = Math.min(width, 600);
-    const tabWidth = (containerWidth - 32 - 8) / 3;
-
-    const getColors = () => {
-      switch (type) {
-        case 'expense':
-          return {
-            bg: theme.dark ? '#3A1E1E' : '#FEE2E2',
-            text: theme.colors.error,
-          };
-        case 'income':
-          return {
-            bg: theme.dark ? '#1A3324' : '#DCFCE7',
-            text: (theme.colors as any).income || '#15803D',
-          };
-        case 'transfer':
-          return {
-            bg: theme.dark ? '#1E293B' : '#E0F2FE',
-            text: theme.colors.primary,
-          };
-      }
-    };
-
-    const activeColors = getColors();
-
-    const handleSelectType = (newType: TransactionType) => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setType(newType);
-
-      const newAvailable = categories.filter((c) => c.type === newType);
-      if (newAvailable.length > 0) {
-        setSelectedCategory(newAvailable[0].id);
-      } else {
-        setSelectedCategory('');
-      }
-    };
-
-    return (
-      <View
-        style={[
-          styles.tabContainer,
-          { backgroundColor: theme.colors.surfaceVariant },
-        ]}
-      >
-        <View
-          style={[
-            styles.tabIndicator,
-            {
-              width: tabWidth,
-              backgroundColor: activeColors.bg,
-              transform: [
-                {
-                  translateX:
-                    type === 'expense'
-                      ? 4
-                      : type === 'income'
-                        ? tabWidth + 4
-                        : tabWidth * 2 + 4,
-                },
-              ],
-            },
-          ]}
-        />
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => handleSelectType('expense')}
-          activeOpacity={0.8}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              { color: theme.colors.onSurfaceVariant },
-              type === 'expense' && {
-                color: activeColors.text,
-                fontWeight: '800',
-              },
-            ]}
-          >
-            {t('expense')}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => handleSelectType('income')}
-          activeOpacity={0.8}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              { color: theme.colors.onSurfaceVariant },
-              type === 'income' && {
-                color: activeColors.text,
-                fontWeight: '800',
-              },
-            ]}
-          >
-            {t('income')}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => handleSelectType('transfer')}
-          activeOpacity={0.8}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              { color: theme.colors.onSurfaceVariant },
-              type === 'transfer' && {
-                color: activeColors.text,
-                fontWeight: '800',
-              },
-            ]}
-          >
-            {t('transfer')}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -621,6 +664,10 @@ export const AddTransactionScreen = () => {
                 onPress={() => setMenuOpen(true)}
                 style={{ padding: 8, marginRight: -8 }}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={t('transactionOptions') || 'Transaction options'}
+                accessibilityHint={t('openMenuHint' as any) || 'Opens options menu'}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Ionicons
                   name="ellipsis-horizontal"
@@ -647,7 +694,12 @@ export const AddTransactionScreen = () => {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        <CustomSegmentedControl />
+        <CustomSegmentedControl
+          type={type}
+          setType={setType}
+          categories={categories}
+          setSelectedCategory={setSelectedCategory}
+        />
 
         <View
           style={[
@@ -698,6 +750,8 @@ export const AddTransactionScreen = () => {
                 keyboardType="decimal-pad"
                 placeholder={isAmountFocused ? '' : '0'}
                 placeholderTextColor={theme.colors.outlineVariant}
+                accessibilityLabel={t('amount') || 'Amount'}
+                accessibilityHint={t('amountInputHint' as any) || 'Enter the transaction value'}
                 style={[
                   styles.amountTextInputCentered,
                   {
@@ -721,11 +775,15 @@ export const AddTransactionScreen = () => {
                   setAmount(0);
                 }}
                 style={styles.amountClearBtn}
+                accessibilityRole="button"
+                accessibilityLabel={t('clearAmount' as any) || 'Clear amount'}
+                accessibilityHint={t('clearAmountHint' as any) || 'Resets the transaction amount to zero'}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               >
                 <Ionicons
                   name="close-circle"
                   size={24}
-                  color={activeColors.text + '88'}
+                  color={addAlpha(activeColors.text, 0.53)}
                 />
               </TouchableOpacity>
             )}
@@ -793,12 +851,15 @@ export const AddTransactionScreen = () => {
           ]}
           onPress={() => setDatePickerOpen(true)}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={`${t('date') || 'Date'}: ${formattedDateText}`}
+          accessibilityHint={t('changeDateHint' as any) || 'Double tap to open calendar selector'}
         >
           <View style={styles.selectorCardLeft}>
             <View
               style={[
                 styles.selectorIconBg,
-                { backgroundColor: theme.colors.primary + '15' },
+                { backgroundColor: addAlpha(theme.colors.primary, 0.08) },
               ]}
             >
               <Ionicons
@@ -856,7 +917,9 @@ export const AddTransactionScreen = () => {
             value={note}
             onChangeText={setNote}
             placeholder={t('notePlaceholder') || 'Add a note...'}
-            placeholderTextColor={theme.colors.onSurfaceVariant + '70'}
+            placeholderTextColor={addAlpha(theme.colors.onSurfaceVariant, 0.44)}
+            accessibilityLabel={t('notePlaceholder') || 'Notes'}
+            accessibilityHint={t('notesInputHint' as any) || 'Optional text description of this transaction'}
             style={[
               styles.notesInput,
               { color: theme.colors.onSurface, maxHeight: 100 },
@@ -896,14 +959,18 @@ export const AddTransactionScreen = () => {
                   styles.modalGridItem,
                   isSelected && {
                     backgroundColor: theme.dark
-                      ? `${catColor}20`
-                      : `${catColor}10`,
+                      ? addAlpha(catColor, 0.12)
+                      : addAlpha(catColor, 0.06),
                   },
                 ]}
                 onPress={() => {
                   setSelectedCategory(cat.id);
                   setCategorySheetOpen(false);
                 }}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityLabel={translateName(cat.name)}
+                accessibilityHint={t('selectCategoryHint' as any) || 'Sets the transaction category to ' + translateName(cat.name)}
               >
                 <View
                   style={[styles.modalGridIcon, { backgroundColor: catColor }]}
@@ -964,7 +1031,9 @@ export const AddTransactionScreen = () => {
                   styles.modalListItem,
                   { borderColor: theme.colors.outlineVariant },
                   isSelected && {
-                    backgroundColor: theme.dark ? '#1A3324' : '#DCFCE7',
+                    backgroundColor: theme.dark
+                      ? addAlpha(accColor, 0.16)
+                      : addAlpha(accColor, 0.08),
                   },
                 ]}
                 onPress={() => {
@@ -975,6 +1044,10 @@ export const AddTransactionScreen = () => {
                   }
                   setAccountSheetOpen(false);
                 }}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityLabel={`${translateName(acc.name)}, ${acc.type.toUpperCase()}, ${t('balance' as any) || 'balance'}: ${formatCurrency(acc.currentBalance)}`}
+                accessibilityHint={t('selectAccountHint' as any) || 'Selects this account'}
               >
                 <View style={styles.modalListItemLeft}>
                   <View
@@ -1053,13 +1126,19 @@ export const AddTransactionScreen = () => {
             styles.modalListItem,
             { borderColor: theme.colors.outlineVariant },
             selectedBudget === '' && {
-              backgroundColor: theme.dark ? '#1E293B' : '#F1F5F9',
+              backgroundColor: theme.dark
+                ? addAlpha(theme.colors.outline, 0.16)
+                : addAlpha(theme.colors.outline, 0.08),
             },
           ]}
           onPress={() => {
             setSelectedBudget('');
             setBudgetSheetOpen(false);
           }}
+          accessibilityRole="button"
+          accessibilityState={{ selected: selectedBudget === '' }}
+          accessibilityLabel={t('noBudget') || 'No budget'}
+          accessibilityHint={t('clearBudgetHint' as any) || 'Clears the budget association'}
         >
           <View style={styles.modalListItemLeft}>
             <View
@@ -1121,14 +1200,18 @@ export const AddTransactionScreen = () => {
                 { borderColor: theme.colors.outlineVariant },
                 isSelected && {
                   backgroundColor: theme.dark
-                    ? `${budColor}15`
-                    : `${budColor}08`,
+                    ? addAlpha(budColor, 0.16)
+                    : addAlpha(budColor, 0.08),
                 },
               ]}
               onPress={() => {
                 setSelectedBudget(bud.id);
                 setBudgetSheetOpen(false);
               }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+              accessibilityLabel={`${translateName(bud.name || cat?.name || t('budgets'))}, ${formatCurrency(usage.spent)} of ${formatCurrency(bud.amount)} spent`}
+              accessibilityHint={t('selectBudgetHint' as any) || 'Selects this budget'}
             >
               <View style={styles.modalListItemRow}>
                 <View style={styles.modalListItemLeft}>
@@ -1233,6 +1316,9 @@ export const AddTransactionScreen = () => {
               setMenuOpen(false);
               handleDuplicate();
             }}
+            accessibilityRole="button"
+            accessibilityLabel={t('duplicate') || 'Duplicate transaction'}
+            accessibilityHint={t('duplicateHint' as any) || 'Creates an identical copy of this transaction'}
           >
             <Ionicons
               name="duplicate-outline"
@@ -1261,6 +1347,9 @@ export const AddTransactionScreen = () => {
               setMenuOpen(false);
               handleDelete();
             }}
+            accessibilityRole="button"
+            accessibilityLabel={t('delete') || 'Delete transaction'}
+            accessibilityHint={t('deleteHint' as any) || 'Deletes this transaction permanently'}
           >
             <Ionicons
               name="trash-outline"
@@ -1303,6 +1392,9 @@ export const AddTransactionScreen = () => {
             ]}
             onPress={handleSave}
             activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel={isEditing ? t('update') : t('saveTransaction')}
+            accessibilityHint={t('saveTransactionHint' as any) || 'Saves changes and records transaction'}
           >
             <Text variant="labelLarge" style={styles.primaryActionBtnText}>
               {isEditing ? t('update') : t('saveTransaction')}
@@ -1347,7 +1439,6 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#8A9A9D',
   },
 
   amountHeroCard: {
@@ -1404,22 +1495,6 @@ const styles = StyleSheet.create({
     padding: 4,
     position: 'absolute',
     right: 12,
-  },
-  quickChipsScroll: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 4,
-  },
-  quickChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  quickChipText: {
-    fontSize: 12,
-    fontWeight: '700',
   },
 
   selectorCard: {

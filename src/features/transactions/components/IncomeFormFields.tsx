@@ -18,7 +18,7 @@ interface IncomeFormFieldsProps {
   setCategorySheetOpen: (open: boolean) => void;
 }
 
-export const IncomeFormFields: React.FC<IncomeFormFieldsProps> = ({
+export const IncomeFormFields = React.memo(({
   theme,
   styles,
   t,
@@ -29,7 +29,7 @@ export const IncomeFormFields: React.FC<IncomeFormFieldsProps> = ({
   openAccountSheet,
   selectedCategoryObj,
   setCategorySheetOpen,
-}) => {
+}: IncomeFormFieldsProps) => {
   return (
     <>
       <TouchableOpacity
@@ -43,6 +43,9 @@ export const IncomeFormFields: React.FC<IncomeFormFieldsProps> = ({
         ]}
         onPress={() => openAccountSheet('from')}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={`${t('depositTo') || 'Deposit to'}: ${selectedAccountObj ? translateName(selectedAccountObj.name) : t('selectAccount')}, ${t('balance') || 'balance'}: ${selectedAccountObj ? formatCurrency(selectedAccountObj.currentBalance) : ''}`}
+        accessibilityHint={t('changeAccountHint') || 'Double tap to select a different account'}
       >
         <View style={styles.selectorCardLeft}>
           <View
@@ -115,6 +118,9 @@ export const IncomeFormFields: React.FC<IncomeFormFieldsProps> = ({
         ]}
         onPress={() => setCategorySheetOpen(true)}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={`${t('categories') || 'Category'}: ${selectedCategoryObj ? translateName(selectedCategoryObj.name) : t('selectCategory') || 'Select Category'}`}
+        accessibilityHint={t('changeCategoryHint') || 'Double tap to select a category'}
       >
         <View style={styles.selectorCardLeft}>
           <View
@@ -163,4 +169,7 @@ export const IncomeFormFields: React.FC<IncomeFormFieldsProps> = ({
       </TouchableOpacity>
     </>
   );
-};
+});
+
+IncomeFormFields.displayName = 'IncomeFormFields';
+
