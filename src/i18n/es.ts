@@ -146,6 +146,9 @@ export const es = {
   spentOf: 'gastado de',
   noBudgets:
     'No se encontraron presupuestos. ¡Crea uno para rastrear tus límites de gastos!',
+  noBudget: 'Sin presupuesto',
+  today: 'Hoy',
+  yesterday: 'Ayer',
   cannotDelete: 'No se puede eliminar',
   confirmDelete: '¿Estás seguro de que deseas eliminar',
   budgetUsedError:

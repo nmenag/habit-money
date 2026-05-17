@@ -9,13 +9,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   LayoutAnimation,
-  Image,
   Dimensions,
   TextInput as RNTextInput,
   UIManager,
   Keyboard,
+  Modal,
 } from 'react-native';
-import { Text, useTheme, IconButton } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { format, isToday, isYesterday } from 'date-fns';
@@ -23,7 +23,10 @@ import { enUS, es } from 'date-fns/locale';
 import { DatePickerModal } from 'react-native-paper-dates';
 
 if (Platform.OS === 'android') {
-  if (UIManager.setLayoutAnimationEnabledExperimental) {
+  if (
+    UIManager.setLayoutAnimationEnabledExperimental &&
+    !(global as any).RN$NewArchitecture
+  ) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
   }
 }
@@ -33,6 +36,8 @@ import {
   useStore,
   useTranslation,
   Category,
+  Budget,
+  Account,
 } from '../../../store/useStore';
 import { getLocalISOString } from '../../../utils/dateUtils';
 import { formatNumber } from '../../../utils/formatters';
@@ -62,12 +67,14 @@ export const AddTransactionScreen = () => {
     accounts,
     categories,
     budgets,
+    transactions,
     addTransaction,
     editTransaction,
     deleteTransaction,
     formatCurrency,
     currency,
   } = useStore();
+
   const { t, language, translateName } = useTranslation();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -110,6 +117,19 @@ export const AddTransactionScreen = () => {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
+  // Bottom sheets open state
+  const [categorySheetOpen, setCategorySheetOpen] = useState(false);
+  const [accountSheetOpen, setAccountSheetOpen] = useState(false);
+  const [targetAccountType, setTargetAccountType] = useState<'from' | 'to'>(
+    'from',
+  );
+  const [budgetSheetOpen, setBudgetSheetOpen] = useState(false);
+
+  const openAccountSheet = (targetType: 'from' | 'to') => {
+    setTargetAccountType(targetType);
+    setAccountSheetOpen(true);
+  };
+
   useEffect(() => {
     const showSubscription = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
@@ -131,6 +151,22 @@ export const AddTransactionScreen = () => {
       hideSubscription.remove();
     };
   }, []);
+
+  // Budget Suggestion Logic on Category Change
+  useEffect(() => {
+    if (type === 'expense' && selectedCategory) {
+      const matchingBudget = budgets.find(
+        (b) => b.categoryId === selectedCategory,
+      );
+      if (matchingBudget) {
+        setSelectedBudget(matchingBudget.id);
+      } else {
+        setSelectedBudget('');
+      }
+    } else {
+      setSelectedBudget('');
+    }
+  }, [selectedCategory, type, budgets]);
 
   const handleSave = () => {
     if (!amount || isNaN(amount) || amount <= 0) {
@@ -255,7 +291,7 @@ export const AddTransactionScreen = () => {
       case 'expense':
         return theme.colors.error;
       case 'income':
-        return (theme.colors as any).income || '#4CAF50';
+        return (theme.colors as any).income || '#15803D';
       case 'transfer':
         return theme.colors.primary;
     }
@@ -264,15 +300,68 @@ export const AddTransactionScreen = () => {
   const formattedDateText = useMemo(() => {
     const locale = language === 'es' ? es : enUS;
     if (isToday(selectedDate)) {
-      return language === 'es' ? 'Hoy' : 'Today';
+      return t('today');
     }
     if (isYesterday(selectedDate)) {
-      return language === 'es' ? 'Ayer' : 'Yesterday';
+      return t('yesterday');
     }
     return format(selectedDate, 'EEEE, MMM d', { locale });
-  }, [selectedDate, language]);
+  }, [selectedDate, language, t]);
 
-  // Custom Animated Segmented Control
+  const getAccountIcon = (accType?: string) => {
+    switch (accType) {
+      case 'credit':
+        return 'credit-card-outline';
+      case 'cash':
+        return 'wallet-outline';
+      default:
+        return 'bank-outline';
+    }
+  };
+
+  // Helper to compute budget usage spent/progress dynamically
+  const getBudgetUsage = useCallback(
+    (bud: Budget) => {
+      const spent = transactions
+        .filter((t) => {
+          const matchesBudget = t.budgetId === bud.id;
+          const matchesCategory =
+            bud.categoryId && t.categoryId === bud.categoryId;
+          return (matchesBudget || matchesCategory) && t.type === 'expense';
+        })
+        .reduce((sum, t) => sum + t.amount, 0);
+      const progress = bud.amount > 0 ? Math.min(spent / bud.amount, 1) : 0;
+      const remaining = Math.max(bud.amount - spent, 0);
+      return { spent, progress, remaining };
+    },
+    [transactions],
+  );
+
+  // Selected entities objects
+  const selectedCategoryObj = useMemo(() => {
+    return categories.find((c) => c.id === selectedCategory);
+  }, [categories, selectedCategory]);
+
+  const selectedAccountObj = useMemo(() => {
+    return accounts.find((a) => a.id === selectedAccount);
+  }, [accounts, selectedAccount]);
+
+  const selectedToAccountObj = useMemo(() => {
+    return accounts.find((a) => a.id === selectedToAccount);
+  }, [accounts, selectedToAccount]);
+
+  const selectedBudgetObj = useMemo(() => {
+    return budgets.find((b) => b.id === selectedBudget);
+  }, [budgets, selectedBudget]);
+
+  const currentBudgetUsage = useMemo(() => {
+    if (selectedBudgetObj) {
+      return getBudgetUsage(selectedBudgetObj);
+    }
+    return { spent: 0, progress: 0, remaining: 0 };
+  }, [selectedBudgetObj, getBudgetUsage]);
+
+  // Segmented Type Selector Component
   const CustomSegmentedControl = () => {
     const tabWidth = (Dimensions.get('window').width - 32 - 8) / 3;
 
@@ -286,7 +375,7 @@ export const AddTransactionScreen = () => {
         case 'income':
           return {
             bg: theme.dark ? '#1A3324' : '#DCFCE7',
-            text: (theme.colors as any).income || '#4CAF50',
+            text: (theme.colors as any).income || '#15803D',
           };
         case 'transfer':
           return {
@@ -345,6 +434,7 @@ export const AddTransactionScreen = () => {
           <Text
             style={[
               styles.tabText,
+              { color: theme.colors.onSurfaceVariant },
               type === 'expense' && {
                 color: activeColors.text,
                 fontWeight: '800',
@@ -363,6 +453,7 @@ export const AddTransactionScreen = () => {
           <Text
             style={[
               styles.tabText,
+              { color: theme.colors.onSurfaceVariant },
               type === 'income' && {
                 color: activeColors.text,
                 fontWeight: '800',
@@ -381,6 +472,7 @@ export const AddTransactionScreen = () => {
           <Text
             style={[
               styles.tabText,
+              { color: theme.colors.onSurfaceVariant },
               type === 'transfer' && {
                 color: activeColors.text,
                 fontWeight: '800',
@@ -394,213 +486,76 @@ export const AddTransactionScreen = () => {
     );
   };
 
-  // Smart Account Carousel Selector
-  const AccountSelector = ({
-    selected,
-    onSelect,
-    excludeId,
-    label,
+  // Reusable Bottom Sheet Modal
+  const BottomSheet = ({
+    visible,
+    onClose,
+    title,
+    children,
   }: {
-    selected: string;
-    onSelect: (id: string) => void;
-    excludeId?: string;
-    label: string;
+    visible: boolean;
+    onClose: () => void;
+    title: string;
+    children: React.ReactNode;
   }) => {
-    const filteredAccounts = accounts.filter((a) => a.id !== excludeId);
-
     return (
-      <View style={styles.section}>
-        <Text
-          variant="titleMedium"
-          style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
-        >
-          {label}
-        </Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.accountScroll}
-        >
-          {filteredAccounts.map((acc) => {
-            const isSelected = selected === acc.id;
-            const accColor = acc.color || theme.colors.primary;
-
-            const getAccIcon = () => {
-              switch (acc.type) {
-                case 'credit':
-                  return 'credit-card-outline';
-                case 'cash':
-                  return 'wallet-outline';
-                default:
-                  return 'bank-outline';
-              }
-            };
-
-            return (
-              <TouchableOpacity
-                key={acc.id}
-                style={[
-                  styles.accountCard,
-                  {
-                    backgroundColor: isSelected
-                      ? theme.dark
-                        ? `${accColor}22`
-                        : `${accColor}11`
-                      : theme.colors.surface,
-                    borderColor: isSelected
-                      ? accColor
-                      : theme.colors.outlineVariant,
-                    borderWidth: isSelected ? 2 : 1,
-                    // Dynamically disable native shadows on selected cards to prevent muddy/weird black shadow leakage through translucent colors
-                    elevation: isSelected ? 0 : 1,
-                    shadowOpacity: isSelected ? 0 : 0.05,
-                  },
-                ]}
-                onPress={() => onSelect(acc.id)}
-                activeOpacity={0.8}
-              >
-                <View style={styles.accountCardHeader}>
-                  <View
-                    style={[
-                      styles.accountIconBg,
-                      {
-                        backgroundColor: isSelected
-                          ? accColor
-                          : theme.colors.surfaceVariant,
-                      },
-                    ]}
-                  >
-                    <MaterialCommunityIcons
-                      name={getAccIcon()}
-                      size={16}
-                      color={
-                        isSelected
-                          ? theme.colors.onPrimary
-                          : theme.colors.onSurfaceVariant
-                      }
-                    />
-                  </View>
-                  {isSelected && (
-                    <View
-                      style={[
-                        styles.checkmarkBadge,
-                        { backgroundColor: accColor },
-                      ]}
-                    >
-                      <Ionicons name="checkmark" size={10} color="#fff" />
-                    </View>
-                  )}
-                </View>
-                <View style={styles.accountCardFooter}>
-                  <Text
-                    variant="labelSmall"
-                    style={[
-                      styles.accountCardName,
-                      {
-                        color: isSelected
-                          ? theme.colors.onSurface
-                          : theme.colors.onSurfaceVariant,
-                      },
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {translateName(acc.name)}
-                  </Text>
-                  <Text
-                    variant="titleSmall"
-                    style={[
-                      styles.accountCardBalance,
-                      { color: theme.colors.onSurface },
-                    ]}
-                  >
-                    {formatCurrency(acc.currentBalance)}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
-    );
-  };
-
-  // Modern Category Grid
-  const CategoryGrid = () => {
-    const handleSelectCategory = (catId: string) => {
-      setSelectedCategory(catId);
-      const matchingBudget = budgets.find((b) => b.categoryId === catId);
-      if (matchingBudget) setSelectedBudget(matchingBudget.id);
-    };
-
-    const renderCategoryItem = (cat: Category) => {
-      const isSelected = selectedCategory === cat.id;
-      const catColor = cat.color || theme.colors.primary;
-      const iconName = getValidCategoryIcon(cat.icon);
-
-      return (
-        <TouchableOpacity
-          key={cat.id}
-          style={[
-            styles.categoryItem,
-            isSelected && [
-              styles.categoryItemActive,
-              {
-                backgroundColor: theme.dark ? `${catColor}15` : `${catColor}08`,
-              },
-            ],
-          ]}
-          onPress={() => handleSelectCategory(cat.id)}
-          activeOpacity={0.7}
-        >
+      <Modal
+        transparent
+        visible={visible}
+        animationType="slide"
+        onRequestClose={onClose}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={onClose}
+          />
           <View
             style={[
-              styles.categoryIconOuter,
-              isSelected && {
-                borderColor: catColor,
+              styles.modalContent,
+              {
+                backgroundColor: theme.colors.surface,
+                borderTopLeftRadius: 28,
+                borderTopRightRadius: 28,
+                paddingBottom: Math.max(insets.bottom, 20),
               },
             ]}
           >
-            <View
-              style={[styles.categoryIconInner, { backgroundColor: catColor }]}
-            >
-              <MaterialCommunityIcons
-                name={iconName as any}
-                size={22}
-                color="#fff"
+            <View style={styles.modalHandleContainer}>
+              <View
+                style={[
+                  styles.modalHandle,
+                  { backgroundColor: theme.colors.outlineVariant },
+                ]}
               />
             </View>
+
+            <View style={styles.modalHeader}>
+              <Text
+                variant="titleMedium"
+                style={{ fontWeight: '800', color: theme.colors.onSurface }}
+              >
+                {title}
+              </Text>
+              <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
+                <Ionicons
+                  name="close"
+                  size={22}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.modalScrollContent}
+            >
+              {children}
+            </ScrollView>
           </View>
-          <Text
-            variant="labelSmall"
-            style={[
-              styles.categoryLabel,
-              isSelected
-                ? { color: theme.colors.onSurface, fontWeight: '700' }
-                : { color: theme.colors.onSurfaceVariant },
-            ]}
-            numberOfLines={1}
-          >
-            {translateName(cat.name)}
-          </Text>
-        </TouchableOpacity>
-      );
-    };
-
-    return (
-      <View style={styles.section}>
-        <View style={styles.sectionHeaderRow}>
-          <Text
-            variant="titleMedium"
-            style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
-          >
-            {t('categories')}
-          </Text>
         </View>
-
-        <View style={styles.categoryGridRow}>
-          {availableCategories.map(renderCategoryItem)}
-        </View>
-      </View>
+      </Modal>
     );
   };
 
@@ -611,156 +566,19 @@ export const AddTransactionScreen = () => {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: isKeyboardOpen ? 100 : 160 }, // Dynamically adjust padding bottom to maximize visibility when keyboard is open and avoid button overlap
-        ]}
+        style={{ flex: 1 }}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
+        {/* 1. Transaction Type Segmented Control */}
         <CustomSegmentedControl />
 
-        {/* Amount center card panel */}
+        {/* 2. Amount Hero Section */}
         <View
           style={[
-            styles.amountCard,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: theme.colors.outlineVariant,
-              borderWidth: 1,
-            },
-          ]}
-        >
-          <View style={styles.amountHeader}>
-            <Text variant="bodySmall" style={styles.amountLabel}>
-              {language === 'es' ? 'MONTO' : 'AMOUNT'}
-            </Text>
-          </View>
-
-          <View style={styles.amountInputRow}>
-            <Text style={[styles.currencySymbol, { color: tabColor }]}>
-              {currency}
-            </Text>
-            <RNTextInput
-              value={displayAmount}
-              onChangeText={handleAmountChange}
-              keyboardType="numeric"
-              placeholder="0"
-              placeholderTextColor={tabColor + '30'}
-              style={[styles.amountTextInput, { color: tabColor }]}
-              selectionColor={tabColor}
-            />
-            {amount > 0 && (
-              <TouchableOpacity
-                onPress={() => {
-                  setDisplayAmount('');
-                  setAmount(0);
-                }}
-                style={styles.clearBtn}
-              >
-                <Ionicons
-                  name="close-circle"
-                  size={22}
-                  color={theme.colors.onSurfaceVariant + 'aa'}
-                />
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-
-        {/* Smart account cards */}
-        <AccountSelector
-          selected={selectedAccount}
-          onSelect={setSelectedAccount}
-          label={
-            type === 'expense'
-              ? t('withdrawFrom')
-              : type === 'transfer'
-                ? t('withdrawFrom')
-                : t('depositTo')
-          }
-        />
-
-        {type === 'transfer' && (
-          <AccountSelector
-            selected={selectedToAccount}
-            onSelect={setSelectedToAccount}
-            excludeId={selectedAccount}
-            label={t('depositTo')}
-          />
-        )}
-
-        {/* Categories picker grid */}
-        {type !== 'transfer' && <CategoryGrid />}
-
-        {/* Budgets picker if any */}
-        {type !== 'transfer' && budgets.length > 0 && (
-          <View style={styles.section}>
-            <Text
-              variant="titleMedium"
-              style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
-            >
-              {t('budgets')}
-            </Text>
-            <View style={styles.chipsRow}>
-              {budgets.map((bud) => {
-                const isSelected = selectedBudget === bud.id;
-                const budColor =
-                  bud.color ||
-                  categories.find((c) => c.id === bud.categoryId)?.color ||
-                  theme.colors.primary;
-
-                return (
-                  <TouchableOpacity
-                    key={bud.id}
-                    style={[
-                      styles.budgetChip,
-                      {
-                        backgroundColor: isSelected
-                          ? theme.dark
-                            ? `${budColor}25`
-                            : `${budColor}15`
-                          : theme.colors.surface,
-                        borderColor: isSelected
-                          ? budColor
-                          : theme.colors.outlineVariant,
-                        borderWidth: isSelected ? 2 : 1,
-                      },
-                    ]}
-                    onPress={() =>
-                      setSelectedBudget(selectedBudget === bud.id ? '' : bud.id)
-                    }
-                    activeOpacity={0.8}
-                  >
-                    <View
-                      style={[styles.budgetDot, { backgroundColor: budColor }]}
-                    />
-                    <Text
-                      variant="labelMedium"
-                      style={[
-                        styles.budgetLabel,
-                        isSelected
-                          ? { color: theme.colors.onSurface, fontWeight: '700' }
-                          : { color: theme.colors.onSurfaceVariant },
-                      ]}
-                    >
-                      {translateName(
-                        categories.find((c) => c.id === bud.categoryId)?.name ||
-                          t('budgets'),
-                      )}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-        )}
-
-        {/* Unified details panel (Notes, Date) */}
-        <View
-          style={[
-            styles.detailsCard,
+            styles.amountHeroCard,
             {
               backgroundColor: theme.colors.surface,
               borderColor: theme.colors.outlineVariant,
@@ -769,68 +587,548 @@ export const AddTransactionScreen = () => {
           ]}
         >
           <Text
-            variant="titleMedium"
-            style={[styles.detailsTitle, { color: theme.colors.onSurface }]}
+            variant="labelSmall"
+            style={[
+              styles.amountLabel,
+              { color: theme.colors.onSurfaceVariant },
+            ]}
           >
-            {language === 'es' ? 'Detalles Adicionales' : 'Additional Details'}
+            {t('amount').toUpperCase()}
           </Text>
 
-          <View
-            style={[
-              styles.notesContainer,
-              {
-                backgroundColor: theme.colors.background,
-                borderColor: theme.colors.outlineVariant,
-                borderWidth: 1,
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="pencil-outline"
-              size={18}
-              color={theme.colors.onSurfaceVariant}
-              style={{ marginRight: 8 }}
-            />
-            <RNTextInput
-              value={note}
-              onChangeText={setNote}
-              placeholder={t('notePlaceholder')}
-              placeholderTextColor={theme.colors.onSurfaceVariant + '70'}
-              style={[styles.notesInput, { color: theme.colors.onSurface }]}
-              multiline={false}
-              returnKeyType="done"
-              onSubmitEditing={Keyboard.dismiss}
-            />
-          </View>
+          <View style={styles.amountInputContainer}>
+            {/* Currency Selector Pill */}
+            <View
+              style={[
+                styles.currencyBadge,
+                {
+                  backgroundColor: theme.dark ? '#1A3324' : '#DCFCE7',
+                  borderColor: '#22C55E',
+                  borderWidth: 1,
+                },
+              ]}
+            >
+              <Text style={[styles.currencyText, { color: '#22C55E' }]}>
+                {currency}
+              </Text>
+            </View>
 
+            <View style={styles.amountInputWrapper}>
+              <RNTextInput
+                value={displayAmount}
+                onChangeText={handleAmountChange}
+                keyboardType="numeric"
+                placeholder="0"
+                placeholderTextColor={tabColor + '20'}
+                style={[styles.amountTextInputCentered, { color: tabColor }]}
+                selectionColor={tabColor}
+                textAlign="center"
+              />
+            </View>
+
+            {amount > 0 && (
+              <TouchableOpacity
+                onPress={() => {
+                  setDisplayAmount('');
+                  setAmount(0);
+                }}
+                style={styles.amountClearBtn}
+              >
+                <Ionicons
+                  name="close-circle"
+                  size={24}
+                  color={theme.colors.onSurfaceVariant + '88'}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* 3. Account Selector */}
+        {type !== 'transfer' ? (
           <TouchableOpacity
             style={[
-              styles.detailPill,
+              styles.selectorCard,
               {
-                backgroundColor: theme.colors.background,
+                backgroundColor: theme.colors.surface,
                 borderColor: theme.colors.outlineVariant,
                 borderWidth: 1,
-                height: 44,
               },
             ]}
-            onPress={() => setDatePickerOpen(true)}
-            activeOpacity={0.8}
+            onPress={() => openAccountSheet('from')}
+            activeOpacity={0.7}
           >
-            <Ionicons
-              name="calendar-outline"
-              size={18}
-              color={theme.colors.primary}
-              style={{ marginRight: 8 }}
-            />
-            <Text
-              variant="bodyMedium"
-              style={{ fontWeight: '600', color: theme.colors.onSurface }}
-            >
-              {language === 'es'
-                ? `Fecha: ${formattedDateText}`
-                : `Date: ${formattedDateText}`}
-            </Text>
+            <View style={styles.selectorCardLeft}>
+              <View
+                style={[
+                  styles.selectorIconBg,
+                  {
+                    backgroundColor:
+                      selectedAccountObj?.color || theme.colors.primary,
+                  },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name={getAccountIcon(selectedAccountObj?.type)}
+                  size={20}
+                  color="#fff"
+                />
+              </View>
+              <View style={styles.selectorCardTextCol}>
+                <Text
+                  variant="labelSmall"
+                  style={[
+                    styles.selectorCardLabel,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {type === 'expense' ? t('withdrawFrom') : t('depositTo')}
+                </Text>
+                <Text
+                  variant="bodyMedium"
+                  style={[
+                    styles.selectorCardValue,
+                    { color: theme.colors.onSurface },
+                  ]}
+                >
+                  {selectedAccountObj
+                    ? translateName(selectedAccountObj.name)
+                    : t('selectAccount')}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.selectorCardRight}>
+              <Text
+                variant="titleSmall"
+                style={[
+                  styles.selectorCardBalance,
+                  { color: theme.colors.onSurface },
+                ]}
+              >
+                {selectedAccountObj
+                  ? formatCurrency(selectedAccountObj.currentBalance)
+                  : ''}
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={18}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </View>
           </TouchableOpacity>
+        ) : (
+          <View style={styles.transferAccountsGroup}>
+            {/* From Account */}
+            <TouchableOpacity
+              style={[
+                styles.selectorCard,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.outlineVariant,
+                  borderWidth: 1,
+                  marginBottom: 12,
+                },
+              ]}
+              onPress={() => openAccountSheet('from')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.selectorCardLeft}>
+                <View
+                  style={[
+                    styles.selectorIconBg,
+                    {
+                      backgroundColor:
+                        selectedAccountObj?.color || theme.colors.primary,
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name={getAccountIcon(selectedAccountObj?.type)}
+                    size={20}
+                    color="#fff"
+                  />
+                </View>
+                <View style={styles.selectorCardTextCol}>
+                  <Text
+                    variant="labelSmall"
+                    style={[
+                      styles.selectorCardLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('withdrawFrom') || 'From Account'}
+                  </Text>
+                  <Text
+                    variant="bodyMedium"
+                    style={[
+                      styles.selectorCardValue,
+                      { color: theme.colors.onSurface },
+                    ]}
+                  >
+                    {selectedAccountObj
+                      ? translateName(selectedAccountObj.name)
+                      : t('selectAccount')}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.selectorCardRight}>
+                <Text
+                  variant="titleSmall"
+                  style={[
+                    styles.selectorCardBalance,
+                    { color: theme.colors.onSurface },
+                  ]}
+                >
+                  {selectedAccountObj
+                    ? formatCurrency(selectedAccountObj.currentBalance)
+                    : ''}
+                </Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </View>
+            </TouchableOpacity>
+
+            {/* To Account */}
+            <TouchableOpacity
+              style={[
+                styles.selectorCard,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.outlineVariant,
+                  borderWidth: 1,
+                },
+              ]}
+              onPress={() => openAccountSheet('to')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.selectorCardLeft}>
+                <View
+                  style={[
+                    styles.selectorIconBg,
+                    {
+                      backgroundColor:
+                        selectedToAccountObj?.color || theme.colors.primary,
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name={getAccountIcon(selectedToAccountObj?.type)}
+                    size={20}
+                    color="#fff"
+                  />
+                </View>
+                <View style={styles.selectorCardTextCol}>
+                  <Text
+                    variant="labelSmall"
+                    style={[
+                      styles.selectorCardLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('depositTo') || 'To Account'}
+                  </Text>
+                  <Text
+                    variant="bodyMedium"
+                    style={[
+                      styles.selectorCardValue,
+                      { color: theme.colors.onSurface },
+                    ]}
+                  >
+                    {selectedToAccountObj
+                      ? translateName(selectedToAccountObj.name)
+                      : t('selectAccount')}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.selectorCardRight}>
+                <Text
+                  variant="titleSmall"
+                  style={[
+                    styles.selectorCardBalance,
+                    { color: theme.colors.onSurface },
+                  ]}
+                >
+                  {selectedToAccountObj
+                    ? formatCurrency(selectedToAccountObj.currentBalance)
+                    : ''}
+                </Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* 4. Category Selector (Hidden for Transfers) */}
+        {type !== 'transfer' && (
+          <TouchableOpacity
+            style={[
+              styles.selectorCard,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.outlineVariant,
+                borderWidth: 1,
+                marginTop: 16,
+              },
+            ]}
+            onPress={() => setCategorySheetOpen(true)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.selectorCardLeft}>
+              <View
+                style={[
+                  styles.selectorIconBg,
+                  {
+                    backgroundColor:
+                      selectedCategoryObj?.color || theme.colors.primary,
+                  },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name={getValidCategoryIcon(selectedCategoryObj?.icon) as any}
+                  size={20}
+                  color="#fff"
+                />
+              </View>
+              <View style={styles.selectorCardTextCol}>
+                <Text
+                  variant="labelSmall"
+                  style={[
+                    styles.selectorCardLabel,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {t('categories') || 'Category'}
+                </Text>
+                <Text
+                  variant="bodyMedium"
+                  style={[
+                    styles.selectorCardValue,
+                    { color: theme.colors.onSurface },
+                  ]}
+                >
+                  {selectedCategoryObj
+                    ? translateName(selectedCategoryObj.name)
+                    : t('selectCategory') || 'Select Category'}
+                </Text>
+              </View>
+            </View>
+            <Ionicons
+              name="chevron-forward"
+              size={18}
+              color={theme.colors.onSurfaceVariant}
+            />
+          </TouchableOpacity>
+        )}
+
+        {/* 5. Budget Selector (Only for Expense) */}
+        {type === 'expense' && budgets.length > 0 && (
+          <TouchableOpacity
+            style={[
+              styles.selectorCard,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.outlineVariant,
+                borderWidth: 1,
+                marginTop: 16,
+              },
+            ]}
+            onPress={() => setBudgetSheetOpen(true)}
+            activeOpacity={0.7}
+          >
+            <View style={{ flex: 1 }}>
+              <View style={styles.budgetCardTop}>
+                <View style={styles.selectorCardLeft}>
+                  <View
+                    style={[
+                      styles.selectorIconBg,
+                      {
+                        backgroundColor:
+                          selectedBudgetObj?.color || theme.colors.outline,
+                      },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={
+                        selectedBudgetObj ? 'wallet-outline' : 'slash-forward'
+                      }
+                      size={20}
+                      color="#fff"
+                    />
+                  </View>
+                  <View style={styles.selectorCardTextCol}>
+                    <Text
+                      variant="labelSmall"
+                      style={[
+                        styles.selectorCardLabel,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {t('budgets') || 'Budget'}
+                    </Text>
+                    <Text
+                      variant="bodyMedium"
+                      style={[
+                        styles.selectorCardValue,
+                        { color: theme.colors.onSurface },
+                      ]}
+                    >
+                      {selectedBudgetObj
+                        ? translateName(
+                            selectedBudgetObj.name ||
+                              categories.find(
+                                (c) => c.id === selectedBudgetObj.categoryId,
+                              )?.name ||
+                              t('budgets'),
+                          )
+                        : t('noBudget')}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.selectorCardRight}>
+                  {selectedBudgetObj && (
+                    <Text
+                      variant="labelSmall"
+                      style={[
+                        styles.budgetUsageText,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {formatCurrency(currentBudgetUsage.spent)} of{' '}
+                      {formatCurrency(selectedBudgetObj.amount)}
+                    </Text>
+                  )}
+                  <Ionicons
+                    name="chevron-forward"
+                    size={18}
+                    color={theme.colors.onSurfaceVariant}
+                  />
+                </View>
+              </View>
+
+              {selectedBudgetObj && (
+                <View style={styles.budgetProgressContainer}>
+                  <View
+                    style={[
+                      styles.budgetProgressBarBg,
+                      { backgroundColor: theme.colors.outlineVariant },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.budgetProgressBarFill,
+                        {
+                          backgroundColor:
+                            selectedBudgetObj.color || theme.colors.primary,
+                          width: `${currentBudgetUsage.progress * 100}%`,
+                        },
+                      ]}
+                    />
+                  </View>
+                  <Text
+                    variant="labelSmall"
+                    style={[
+                      styles.budgetPercentText,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {Math.round(currentBudgetUsage.progress * 100)}%
+                  </Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        )}
+
+        {/* 6. Date & Time (Compact row card) */}
+        <TouchableOpacity
+          style={[
+            styles.compactRowCard,
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.outlineVariant,
+              borderWidth: 1,
+              marginTop: 16,
+            },
+          ]}
+          onPress={() => setDatePickerOpen(true)}
+          activeOpacity={0.7}
+        >
+          <View style={styles.selectorCardLeft}>
+            <View
+              style={[
+                styles.selectorIconBg,
+                { backgroundColor: theme.colors.primary + '15' },
+              ]}
+            >
+              <Ionicons
+                name="calendar-outline"
+                size={20}
+                color={theme.colors.primary}
+              />
+            </View>
+            <View style={styles.selectorCardTextCol}>
+              <Text
+                variant="labelSmall"
+                style={[
+                  styles.selectorCardLabel,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {t('date').toUpperCase()}
+              </Text>
+              <Text
+                variant="bodyMedium"
+                style={[
+                  styles.selectorCardValue,
+                  { color: theme.colors.onSurface },
+                ]}
+              >
+                {formattedDateText}
+              </Text>
+            </View>
+          </View>
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={theme.colors.onSurfaceVariant}
+          />
+        </TouchableOpacity>
+
+        {/* 7. Notes (Compact input below Date) */}
+        <View
+          style={[
+            styles.notesCard,
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.outlineVariant,
+              borderWidth: 1,
+              marginTop: 12,
+            },
+          ]}
+        >
+          <MaterialCommunityIcons
+            name="pencil-outline"
+            size={18}
+            color={theme.colors.onSurfaceVariant}
+            style={{ marginRight: 8 }}
+          />
+          <RNTextInput
+            value={note}
+            onChangeText={setNote}
+            placeholder={t('notePlaceholder')}
+            placeholderTextColor={theme.colors.onSurfaceVariant + '70'}
+            style={[styles.notesInput, { color: theme.colors.onSurface }]}
+            multiline={false}
+            returnKeyType="done"
+            onSubmitEditing={Keyboard.dismiss}
+          />
         </View>
       </ScrollView>
 
@@ -844,100 +1142,439 @@ export const AddTransactionScreen = () => {
         onConfirm={onConfirmDate}
       />
 
-      {/* Fixed Sticky Action CTA Bottom Bar */}
+      {/* Category Bottom Sheet */}
+      <BottomSheet
+        visible={categorySheetOpen}
+        onClose={() => setCategorySheetOpen(false)}
+        title={t('categories') || 'Select Category'}
+      >
+        <View style={styles.modalGrid}>
+          {availableCategories.map((cat) => {
+            const isSelected = selectedCategory === cat.id;
+            const catColor = cat.color || theme.colors.primary;
+            return (
+              <TouchableOpacity
+                key={cat.id}
+                style={[
+                  styles.modalGridItem,
+                  isSelected && {
+                    backgroundColor: theme.dark
+                      ? `${catColor}20`
+                      : `${catColor}10`,
+                  },
+                ]}
+                onPress={() => {
+                  setSelectedCategory(cat.id);
+                  setCategorySheetOpen(false);
+                }}
+              >
+                <View
+                  style={[styles.modalGridIcon, { backgroundColor: catColor }]}
+                >
+                  <MaterialCommunityIcons
+                    name={getValidCategoryIcon(cat.icon) as any}
+                    size={24}
+                    color="#fff"
+                  />
+                </View>
+                <Text
+                  variant="labelSmall"
+                  style={{
+                    fontWeight: isSelected ? '700' : '400',
+                    color: theme.colors.onSurface,
+                    marginTop: 6,
+                    textAlign: 'center',
+                  }}
+                >
+                  {translateName(cat.name)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </BottomSheet>
+
+      {/* Account Bottom Sheet */}
+      <BottomSheet
+        visible={accountSheetOpen}
+        onClose={() => setAccountSheetOpen(false)}
+        title={
+          targetAccountType === 'from'
+            ? t('withdrawFrom') || 'Select Account'
+            : t('depositTo') || 'Deposit To Account'
+        }
+      >
+        {accounts
+          .filter((acc) => {
+            // In transfer mode, exclude selected accounts reciprocally
+            if (type === 'transfer') {
+              if (targetAccountType === 'from') {
+                return acc.id !== selectedToAccount;
+              } else {
+                return acc.id !== selectedAccount;
+              }
+            }
+            return true;
+          })
+          .map((acc) => {
+            const isSelected =
+              targetAccountType === 'from'
+                ? selectedAccount === acc.id
+                : selectedToAccount === acc.id;
+            const accColor = acc.color || theme.colors.primary;
+            return (
+              <TouchableOpacity
+                key={acc.id}
+                style={[
+                  styles.modalListItem,
+                  { borderColor: theme.colors.outlineVariant },
+                  isSelected && {
+                    backgroundColor: theme.dark ? '#1A3324' : '#DCFCE7',
+                  },
+                ]}
+                onPress={() => {
+                  if (targetAccountType === 'from') {
+                    setSelectedAccount(acc.id);
+                  } else {
+                    setSelectedToAccount(acc.id);
+                  }
+                  setAccountSheetOpen(false);
+                }}
+              >
+                <View style={styles.modalListItemLeft}>
+                  <View
+                    style={[
+                      styles.selectorIconBg,
+                      { backgroundColor: accColor },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={getAccountIcon(acc.type)}
+                      size={18}
+                      color="#fff"
+                    />
+                  </View>
+                  <View style={{ marginLeft: 12 }}>
+                    <Text
+                      variant="bodyMedium"
+                      style={{
+                        fontWeight: '600',
+                        color: theme.colors.onSurface,
+                      }}
+                    >
+                      {translateName(acc.name)}
+                    </Text>
+                    <Text
+                      variant="labelSmall"
+                      style={{ color: theme.colors.onSurfaceVariant }}
+                    >
+                      {acc.type.toUpperCase()}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.modalListItemRight}>
+                  <Text
+                    variant="bodyMedium"
+                    style={{
+                      fontWeight: '700',
+                      color: theme.colors.onSurface,
+                      marginRight: 12,
+                    }}
+                  >
+                    {formatCurrency(acc.currentBalance)}
+                  </Text>
+                  <View
+                    style={[
+                      styles.radioOuter,
+                      {
+                        borderColor: isSelected
+                          ? theme.colors.primary
+                          : theme.colors.outlineVariant,
+                      },
+                    ]}
+                  >
+                    {isSelected && (
+                      <View
+                        style={[
+                          styles.radioInner,
+                          { backgroundColor: theme.colors.primary },
+                        ]}
+                      />
+                    )}
+                  </View>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+      </BottomSheet>
+
+      {/* Budget Bottom Sheet */}
+      <BottomSheet
+        visible={budgetSheetOpen}
+        onClose={() => setBudgetSheetOpen(false)}
+        title={t('budgets') || 'Select Budget'}
+      >
+        {/* No Budget Option */}
+        <TouchableOpacity
+          style={[
+            styles.modalListItem,
+            { borderColor: theme.colors.outlineVariant },
+            selectedBudget === '' && {
+              backgroundColor: theme.dark ? '#1E293B' : '#F1F5F9',
+            },
+          ]}
+          onPress={() => {
+            setSelectedBudget('');
+            setBudgetSheetOpen(false);
+          }}
+        >
+          <View style={styles.modalListItemLeft}>
+            <View
+              style={[
+                styles.selectorIconBg,
+                { backgroundColor: theme.colors.outline },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="slash-forward"
+                size={18}
+                color="#fff"
+              />
+            </View>
+            <Text
+              variant="bodyMedium"
+              style={{
+                fontWeight: '600',
+                color: theme.colors.onSurface,
+                marginLeft: 12,
+              }}
+            >
+              {t('noBudget')}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.radioOuter,
+              {
+                borderColor:
+                  selectedBudget === ''
+                    ? theme.colors.primary
+                    : theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            {selectedBudget === '' && (
+              <View
+                style={[
+                  styles.radioInner,
+                  { backgroundColor: theme.colors.primary },
+                ]}
+              />
+            )}
+          </View>
+        </TouchableOpacity>
+
+        {/* Budgets list */}
+        {budgets.map((bud) => {
+          const isSelected = selectedBudget === bud.id;
+          const budColor = bud.color || theme.colors.primary;
+          const usage = getBudgetUsage(bud);
+          const cat = categories.find((c) => c.id === bud.categoryId);
+          return (
+            <TouchableOpacity
+              key={bud.id}
+              style={[
+                styles.modalListItemCol,
+                { borderColor: theme.colors.outlineVariant },
+                isSelected && {
+                  backgroundColor: theme.dark
+                    ? `${budColor}15`
+                    : `${budColor}08`,
+                },
+              ]}
+              onPress={() => {
+                setSelectedBudget(bud.id);
+                setBudgetSheetOpen(false);
+              }}
+            >
+              <View style={styles.modalListItemRow}>
+                <View style={styles.modalListItemLeft}>
+                  <View
+                    style={[
+                      styles.selectorIconBg,
+                      { backgroundColor: budColor },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name="wallet-outline"
+                      size={18}
+                      color="#fff"
+                    />
+                  </View>
+                  <View style={{ marginLeft: 12 }}>
+                    <Text
+                      variant="bodyMedium"
+                      style={{
+                        fontWeight: '600',
+                        color: theme.colors.onSurface,
+                      }}
+                    >
+                      {translateName(bud.name || cat?.name || t('budgets'))}
+                    </Text>
+                    <Text
+                      variant="labelSmall"
+                      style={{ color: theme.colors.onSurfaceVariant }}
+                    >
+                      {formatCurrency(usage.spent)} of{' '}
+                      {formatCurrency(bud.amount)} spent
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={[
+                    styles.radioOuter,
+                    {
+                      borderColor: isSelected
+                        ? theme.colors.primary
+                        : theme.colors.outlineVariant,
+                    },
+                  ]}
+                >
+                  {isSelected && (
+                    <View
+                      style={[
+                        styles.radioInner,
+                        { backgroundColor: theme.colors.primary },
+                      ]}
+                    />
+                  )}
+                </View>
+              </View>
+
+              <View
+                style={[
+                  styles.budgetProgressContainer,
+                  { marginTop: 8, paddingHorizontal: 4 },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.budgetProgressBarBg,
+                    { backgroundColor: theme.colors.outlineVariant },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.budgetProgressBarFill,
+                      {
+                        backgroundColor: budColor,
+                        width: `${usage.progress * 100}%`,
+                      },
+                    ]}
+                  />
+                </View>
+                <Text
+                  variant="labelSmall"
+                  style={[
+                    styles.budgetPercentText,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {Math.round(usage.progress * 100)}%
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </BottomSheet>
+
+      {/* Sticky Bottom CTA Container */}
       <View
         style={[
-          styles.bottomBar,
+          styles.bottomBarContainer,
           {
-            bottom: isKeyboardOpen ? 12 : Math.max(insets.bottom, 16),
+            backgroundColor: theme.dark
+              ? 'rgba(10, 17, 15, 0.95)'
+              : 'rgba(248, 250, 252, 0.95)',
+            borderColor: theme.colors.outlineVariant,
+            paddingBottom: isKeyboardOpen ? 12 : Math.max(insets.bottom, 16),
           },
         ]}
       >
-        {isEditing && !isKeyboardOpen ? (
-          <View style={styles.editActionsBar}>
-            <TouchableOpacity
-              style={[
-                styles.secondaryActionBtn,
-                {
-                  borderColor: theme.colors.outlineVariant,
-                  marginRight: 8,
-                  backgroundColor: theme.colors.surface,
-                },
-              ]}
-              onPress={handleDuplicate}
-              activeOpacity={0.8}
-            >
-              <MaterialCommunityIcons
-                name="content-copy"
-                size={20}
-                color={theme.colors.primary}
-              />
-              <Text
-                variant="labelMedium"
-                style={[
-                  styles.secondaryActionBtnText,
-                  { color: theme.colors.primary },
-                ]}
-              >
-                {t('duplicate')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.secondaryActionBtn,
-                {
-                  borderColor: theme.colors.outlineVariant,
-                  marginRight: 8,
-                  backgroundColor: theme.colors.surface,
-                },
-              ]}
-              onPress={handleDelete}
-              activeOpacity={0.8}
-            >
-              <MaterialCommunityIcons
-                name="trash-can-outline"
-                size={20}
-                color={theme.colors.error}
-              />
-              <Text
-                variant="labelMedium"
-                style={[
-                  styles.secondaryActionBtnText,
-                  { color: theme.colors.error },
-                ]}
-              >
-                {t('delete')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.primaryActionBtn,
-                { backgroundColor: theme.colors.primary, flex: 2 },
-              ]}
-              onPress={handleSave}
-              activeOpacity={0.8}
-            >
-              <Text variant="labelLarge" style={styles.primaryActionBtnText}>
-                {t('update')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
+        <View style={styles.actionButtonsCol}>
+          {/* Primary Action Button */}
           <TouchableOpacity
             style={[
               styles.primaryActionBtn,
               { backgroundColor: theme.colors.primary },
             ]}
             onPress={handleSave}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
           >
             <Text variant="labelLarge" style={styles.primaryActionBtnText}>
               {isEditing ? t('update') : t('saveTransaction')}
             </Text>
           </TouchableOpacity>
-        )}
+
+          {/* Secondary Action Row in Edit Mode (Hidden when keyboard is open) */}
+          {isEditing && !isKeyboardOpen && (
+            <View style={styles.secondaryActionsRow}>
+              <TouchableOpacity
+                style={[
+                  styles.secondaryActionBtn,
+                  {
+                    borderColor: theme.colors.outlineVariant,
+                    backgroundColor: theme.colors.surface,
+                  },
+                ]}
+                onPress={handleDuplicate}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons
+                  name="content-copy"
+                  size={16}
+                  color={theme.colors.primary}
+                />
+                <Text
+                  variant="labelMedium"
+                  style={[
+                    styles.secondaryActionBtnText,
+                    { color: theme.colors.primary },
+                  ]}
+                >
+                  {t('duplicate')}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.secondaryActionBtn,
+                  {
+                    borderColor: theme.colors.outlineVariant,
+                    backgroundColor: theme.colors.surface,
+                  },
+                ]}
+                onPress={handleDelete}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons
+                  name="trash-can-outline"
+                  size={16}
+                  color={theme.colors.error}
+                />
+                <Text
+                  variant="labelMedium"
+                  style={[
+                    styles.secondaryActionBtnText,
+                    { color: theme.colors.error },
+                  ]}
+                >
+                  {t('delete')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -947,11 +1584,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  scrollContent: {
     padding: 16,
   },
 
-  // Type Segments
+  // 1. Transaction Type Segmented Control
   tabContainer: {
     flexDirection: 'row',
     height: 48,
@@ -959,7 +1596,7 @@ const styles = StyleSheet.create({
     padding: 4,
     alignItems: 'center',
     position: 'relative',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   tabIndicator: {
     position: 'absolute',
@@ -980,146 +1617,257 @@ const styles = StyleSheet.create({
     color: '#8A9A9D',
   },
 
-  // Amount Input
-  amountCard: {
-    borderRadius: 12,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    marginBottom: 12,
+  // 2. Amount Hero Section
+  amountHeroCard: {
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginBottom: 16,
     elevation: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-  },
-  amountHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
   },
   amountLabel: {
     fontWeight: '700',
     letterSpacing: 1.2,
-    color: '#8A9A9D',
-    fontSize: 9,
+    fontSize: 10,
+    marginBottom: 8,
   },
-  amountInputRow: {
+  amountInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     position: 'relative',
-    paddingVertical: 0,
+    width: '100%',
+    paddingHorizontal: 12,
   },
-  currencySymbol: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginRight: 6,
+  currencyBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    marginRight: 8,
   },
-  amountTextInput: {
-    fontSize: 26,
+  currencyText: {
+    fontSize: 14,
     fontWeight: '800',
+  },
+  amountInputWrapper: {
     flex: 1,
+    justifyContent: 'center',
+  },
+  amountTextInputCentered: {
+    fontSize: 36,
+    fontWeight: '900',
     padding: 0,
+    letterSpacing: -0.5,
   },
-  clearBtn: {
-    padding: 2,
+  amountClearBtn: {
+    padding: 4,
+    position: 'absolute',
+    right: 0,
   },
-
-  // Accounts Carousel
-  accountScroll: {
+  quickChipsScroll: {
     flexDirection: 'row',
-    gap: 12,
-    paddingVertical: 4,
+    gap: 8,
+    paddingTop: 16,
     paddingHorizontal: 4,
   },
-  accountCard: {
-    width: 145,
-    height: 90,
+  quickChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 16,
-    padding: 12,
-    justifyContent: 'space-between',
     borderWidth: 1,
+  },
+  quickChipText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  // Interactive Selector Cards
+  selectorCard: {
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOpacity: 0.02,
+    shadowRadius: 3,
   },
-  accountCardHeader: {
+  selectorCardLeft: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    flex: 1,
   },
-  accountIconBg: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+  selectorIconBg: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  checkmarkBadge: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+  selectorCardTextCol: {
+    marginLeft: 12,
+    flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  accountCardFooter: {
-    justifyContent: 'flex-end',
+  selectorCardLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
   },
-  accountCardName: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  accountCardBalance: {
-    fontSize: 13,
+  selectorCardValue: {
+    fontSize: 15,
     fontWeight: '700',
     marginTop: 2,
   },
-
-  // Sections
-  section: {
-    marginBottom: 20,
+  selectorCardRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: 16,
+  selectorCardBalance: {
+    fontSize: 14,
     fontWeight: '800',
-    marginBottom: 12,
-    marginLeft: 4,
+    marginRight: 8,
   },
-  sectionHeaderRow: {
+
+  // Transfer mode accounts stacking
+  transferAccountsGroup: {
+    marginTop: 8,
+  },
+
+  // Budget details
+  budgetCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  budgetUsageText: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginRight: 6,
+  },
+  budgetProgressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    width: '100%',
+  },
+  budgetProgressBarBg: {
+    flex: 1,
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  budgetProgressBarFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  budgetPercentText: {
+    fontSize: 11,
+    fontWeight: '700',
+    marginLeft: 10,
+    width: 32,
+    textAlign: 'right',
+  },
+
+  // Compact Row card (Date)
+  compactRowCard: {
+    borderRadius: 16,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 3,
+  },
+
+  // Notes
+  notesCard: {
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 3,
+  },
+  notesInput: {
+    flex: 1,
+    fontSize: 14,
+    padding: 0,
+    fontWeight: '500',
+  },
+
+  // Modal bottom sheets
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  },
+  modalContent: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    elevation: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+  },
+  modalHandleContainer: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+  },
+  modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
   },
-
-
-  // Categories Picker Grid
-  categoryGridRow: {
+  modalCloseBtn: {
+    padding: 4,
+  },
+  modalScrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+  modalGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    paddingHorizontal: 4,
-  },
-  categoryItem: {
-    width: '23%',
-    alignItems: 'center',
+    gap: 12,
     paddingVertical: 8,
-    borderRadius: 12,
   },
-  categoryItemActive: {
-    transform: [{ scale: 1.05 }],
-  },
-  categoryIconOuter: {
-    borderRadius: 28,
-    justifyContent: 'center',
+  modalGridItem: {
+    width: '30%',
+    aspectRatio: 1,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
-    padding: 3,
+    justifyContent: 'center',
+    borderRadius: 16,
+    padding: 8,
   },
-  categoryIconInner: {
+  modalGridIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -1128,128 +1876,111 @@ const styles = StyleSheet.create({
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1.5,
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
   },
-  categoryLabel: {
-    marginTop: 6,
-    fontSize: 10,
-    textAlign: 'center',
-  },
-
-  // Details Card
-  detailsCard: {
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 20,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-  },
-  detailsTitle: {
-    fontWeight: '700',
-    marginBottom: 14,
-    fontSize: 15,
-  },
-  notesContainer: {
+  modalListItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    height: 44,
-    borderRadius: 14,
-    marginBottom: 12,
-  },
-  notesInput: {
-    flex: 1,
-    fontSize: 14,
-    padding: 0,
-  },
-  rowDetails: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 8,
-    marginBottom: 16,
-  },
-  detailPill: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 38,
-    borderRadius: 12,
+    paddingVertical: 14,
     paddingHorizontal: 12,
-  },
-
-
-  // Budgets
-  chipsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    paddingHorizontal: 4,
-  },
-  budgetChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
+    marginBottom: 10,
   },
-  budgetDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
+  modalListItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
-  budgetLabel: {
-    fontSize: 11,
+  modalListItemRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  radioOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  modalListItemCol: {
+    flexDirection: 'column',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  modalListItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
   },
 
-  // Bottom Sticky Panel
-  bottomBar: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    backgroundColor: 'transparent',
+  // Sticky bottom action buttons
+  bottomBarContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    elevation: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+  },
+  actionButtonsCol: {
+    flexDirection: 'column',
+    gap: 8,
   },
   primaryActionBtn: {
-    height: 50,
+    height: 52,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 4,
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    width: '100%',
   },
   primaryActionBtnText: {
     color: '#fff',
-    fontWeight: '700',
-    fontSize: 15,
+    fontWeight: '800',
+    fontSize: 16,
   },
-  editActionsBar: {
+  secondaryActionsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    gap: 12,
+    marginTop: 4,
+    marginBottom: 4,
   },
   secondaryActionBtn: {
     flex: 1,
-    height: 50,
+    height: 48,
     borderRadius: 16,
     borderWidth: 1,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 3,
+    gap: 6,
+    elevation: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 2,
   },
   secondaryActionBtnText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '700',
-    marginTop: 2,
   },
 });
