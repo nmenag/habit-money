@@ -655,7 +655,7 @@ export const DashboardScreen = React.memo(() => {
                             : isAdjustment
                               ? 'scale-balance'
                               : getValidCategoryIcon(cat?.icon) ||
-                              (tr.type === 'income' ? 'plus' : 'minus')
+                                (tr.type === 'income' ? 'plus' : 'minus')
                         }
                         style={{
                           backgroundColor:
@@ -664,9 +664,9 @@ export const DashboardScreen = React.memo(() => {
                               : isAdjustment
                                 ? theme.colors.surfaceVariant
                                 : cat?.color ||
-                                (tr.type === 'income'
-                                  ? theme.colors.income
-                                  : theme.colors.error),
+                                  (tr.type === 'income'
+                                    ? theme.colors.income
+                                    : theme.colors.error),
                         }}
                         color={
                           tr.type === 'transfer'
@@ -679,12 +679,12 @@ export const DashboardScreen = React.memo(() => {
                       <View style={{ marginLeft: 12, flex: 1 }}>
                         <Text variant="bodyLarge" numberOfLines={1}>
                           {tr.note &&
-                            translateName(tr.note) === t('balanceAdjustment')
+                          translateName(tr.note) === t('balanceAdjustment')
                             ? t('balanceAdjustment')
                             : tr.note ||
-                            (tr.type === 'transfer'
-                              ? t('transfer')
-                              : translateName(cat?.name || 'Other'))}
+                              (tr.type === 'transfer'
+                                ? t('transfer')
+                                : translateName(cat?.name || 'Other'))}
                         </Text>
                         <Text
                           variant="labelSmall"
@@ -750,7 +750,7 @@ export const DashboardScreen = React.memo(() => {
         style={[
           styles.fab,
           {
-            bottom: (insets.bottom || 0) + 120,
+            bottom: (insets.bottom || 0) + 16,
             backgroundColor: theme.colors.primary,
           },
         ]}

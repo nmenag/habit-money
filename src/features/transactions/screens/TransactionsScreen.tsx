@@ -361,7 +361,7 @@ export const TransactionsScreen = () => {
         style={[
           styles.fab,
           {
-            bottom: (insets.bottom || 0) + 120,
+            bottom: (insets.bottom || 0) + 16,
             backgroundColor: theme.colors.primary,
           },
         ]}
