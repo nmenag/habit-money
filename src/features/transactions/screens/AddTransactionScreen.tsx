@@ -11,9 +11,7 @@ import {
   LayoutAnimation,
   useWindowDimensions,
   TextInput as RNTextInput,
-  UIManager,
   Keyboard,
-  Modal,
 } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,27 +20,19 @@ import { format, isToday, isYesterday } from 'date-fns';
 import { enUS, es } from 'date-fns/locale';
 import { DatePickerModal } from 'react-native-paper-dates';
 
-if (Platform.OS === 'android') {
-  if (
-    UIManager.setLayoutAnimationEnabledExperimental &&
-    !(global as any).RN$NewArchitecture
-  ) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
-}
-
 import {
   TransactionType,
   useStore,
   useTranslation,
-  Category,
   Budget,
-  Account,
 } from '../../../store/useStore';
 import { getLocalISOString } from '../../../utils/dateUtils';
 import { formatNumber } from '../../../utils/formatters';
 import { getValidCategoryIcon } from '../../../constants';
 import { BottomSheet } from '../../../shared/components';
+import { ExpenseFormFields } from '../components/ExpenseFormFields';
+import { IncomeFormFields } from '../components/IncomeFormFields';
+import { TransferFormFields } from '../components/TransferFormFields';
 
 export const AddTransactionScreen = () => {
   const { width } = useWindowDimensions();
@@ -109,8 +99,8 @@ export const AddTransactionScreen = () => {
   );
   const [selectedToAccount, setSelectedToAccount] = useState(
     editingTransaction?.toAccountId ||
-    accounts.find((a) => a.id !== selectedAccount)?.id ||
-    '',
+      accounts.find((a) => a.id !== selectedAccount)?.id ||
+      '',
   );
 
   const [selectedDate, setSelectedDate] = useState<Date>(
@@ -119,7 +109,6 @@ export const AddTransactionScreen = () => {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
-  // Bottom sheets open state
   const [categorySheetOpen, setCategorySheetOpen] = useState(false);
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
   const [targetAccountType, setTargetAccountType] = useState<'from' | 'to'>(
@@ -361,7 +350,6 @@ export const AddTransactionScreen = () => {
     return { spent: 0, progress: 0, remaining: 0 };
   }, [selectedBudgetObj, getBudgetUsage]);
 
-  // Segmented Type Selector Component
   const CustomSegmentedControl = () => {
     const containerWidth = Math.min(width, 600);
     const tabWidth = (containerWidth - 32 - 8) / 3;
@@ -487,8 +475,6 @@ export const AddTransactionScreen = () => {
     );
   };
 
-
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -598,401 +584,53 @@ export const AddTransactionScreen = () => {
           </View>
         </View>
 
-        {type !== 'transfer' ? (
-          <TouchableOpacity
-            style={[
-              styles.selectorCard,
-              {
-                backgroundColor: theme.colors.surface,
-                borderColor: theme.colors.outlineVariant,
-                borderWidth: 1,
-              },
-            ]}
-            onPress={() => openAccountSheet('from')}
-            activeOpacity={0.7}
-          >
-            <View style={styles.selectorCardLeft}>
-              <View
-                style={[
-                  styles.selectorIconBg,
-                  {
-                    backgroundColor:
-                      selectedAccountObj?.color || theme.colors.primary,
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name={getAccountIcon(selectedAccountObj?.type)}
-                  size={20}
-                  color="#fff"
-                />
-              </View>
-              <View style={styles.selectorCardTextCol}>
-                <Text
-                  variant="labelSmall"
-                  style={[
-                    styles.selectorCardLabel,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  {type === 'expense' ? t('withdrawFrom') : t('depositTo')}
-                </Text>
-                <Text
-                  variant="bodyMedium"
-                  style={[
-                    styles.selectorCardValue,
-                    { color: theme.colors.onSurface },
-                  ]}
-                >
-                  {selectedAccountObj
-                    ? translateName(selectedAccountObj.name)
-                    : t('selectAccount')}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.selectorCardRight}>
-              <Text
-                variant="titleSmall"
-                style={[
-                  styles.selectorCardBalance,
-                  { color: theme.colors.onSurface },
-                ]}
-              >
-                {selectedAccountObj
-                  ? formatCurrency(selectedAccountObj.currentBalance)
-                  : ''}
-              </Text>
-              <Ionicons
-                name="chevron-forward"
-                size={18}
-                color={theme.colors.onSurfaceVariant}
-              />
-            </View>
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.transferAccountsGroup}>
-            <TouchableOpacity
-              style={[
-                styles.selectorCard,
-                {
-                  backgroundColor: theme.colors.surface,
-                  borderColor: theme.colors.outlineVariant,
-                  borderWidth: 1,
-                  marginBottom: 12,
-                },
-              ]}
-              onPress={() => openAccountSheet('from')}
-              activeOpacity={0.7}
-            >
-              <View style={styles.selectorCardLeft}>
-                <View
-                  style={[
-                    styles.selectorIconBg,
-                    {
-                      backgroundColor:
-                        selectedAccountObj?.color || theme.colors.primary,
-                    },
-                  ]}
-                >
-                  <MaterialCommunityIcons
-                    name={getAccountIcon(selectedAccountObj?.type)}
-                    size={20}
-                    color="#fff"
-                  />
-                </View>
-                <View style={styles.selectorCardTextCol}>
-                  <Text
-                    variant="labelSmall"
-                    style={[
-                      styles.selectorCardLabel,
-                      { color: theme.colors.onSurfaceVariant },
-                    ]}
-                  >
-                    {t('withdrawFrom') || 'From Account'}
-                  </Text>
-                  <Text
-                    variant="bodyMedium"
-                    style={[
-                      styles.selectorCardValue,
-                      { color: theme.colors.onSurface },
-                    ]}
-                  >
-                    {selectedAccountObj
-                      ? translateName(selectedAccountObj.name)
-                      : t('selectAccount')}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.selectorCardRight}>
-                <Text
-                  variant="titleSmall"
-                  style={[
-                    styles.selectorCardBalance,
-                    { color: theme.colors.onSurface },
-                  ]}
-                >
-                  {selectedAccountObj
-                    ? formatCurrency(selectedAccountObj.currentBalance)
-                    : ''}
-                </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={18}
-                  color={theme.colors.onSurfaceVariant}
-                />
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.selectorCard,
-                {
-                  backgroundColor: theme.colors.surface,
-                  borderColor: theme.colors.outlineVariant,
-                  borderWidth: 1,
-                },
-              ]}
-              onPress={() => openAccountSheet('to')}
-              activeOpacity={0.7}
-            >
-              <View style={styles.selectorCardLeft}>
-                <View
-                  style={[
-                    styles.selectorIconBg,
-                    {
-                      backgroundColor:
-                        selectedToAccountObj?.color || theme.colors.primary,
-                    },
-                  ]}
-                >
-                  <MaterialCommunityIcons
-                    name={getAccountIcon(selectedToAccountObj?.type)}
-                    size={20}
-                    color="#fff"
-                  />
-                </View>
-                <View style={styles.selectorCardTextCol}>
-                  <Text
-                    variant="labelSmall"
-                    style={[
-                      styles.selectorCardLabel,
-                      { color: theme.colors.onSurfaceVariant },
-                    ]}
-                  >
-                    {t('depositTo') || 'To Account'}
-                  </Text>
-                  <Text
-                    variant="bodyMedium"
-                    style={[
-                      styles.selectorCardValue,
-                      { color: theme.colors.onSurface },
-                    ]}
-                  >
-                    {selectedToAccountObj
-                      ? translateName(selectedToAccountObj.name)
-                      : t('selectAccount')}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.selectorCardRight}>
-                <Text
-                  variant="titleSmall"
-                  style={[
-                    styles.selectorCardBalance,
-                    { color: theme.colors.onSurface },
-                  ]}
-                >
-                  {selectedToAccountObj
-                    ? formatCurrency(selectedToAccountObj.currentBalance)
-                    : ''}
-                </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={18}
-                  color={theme.colors.onSurfaceVariant}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
+        {type === 'expense' && (
+          <ExpenseFormFields
+            theme={theme}
+            styles={styles}
+            t={t}
+            translateName={translateName}
+            formatCurrency={formatCurrency}
+            getAccountIcon={getAccountIcon}
+            selectedAccountObj={selectedAccountObj}
+            openAccountSheet={openAccountSheet}
+            selectedCategoryObj={selectedCategoryObj}
+            setCategorySheetOpen={setCategorySheetOpen}
+            selectedBudgetObj={selectedBudgetObj}
+            setBudgetSheetOpen={setBudgetSheetOpen}
+            budgets={budgets}
+            categories={categories}
+            currentBudgetUsage={currentBudgetUsage}
+          />
         )}
 
-        {type !== 'transfer' && (
-          <TouchableOpacity
-            style={[
-              styles.selectorCard,
-              {
-                backgroundColor: theme.colors.surface,
-                borderColor: theme.colors.outlineVariant,
-                borderWidth: 1,
-                marginTop: 16,
-              },
-            ]}
-            onPress={() => setCategorySheetOpen(true)}
-            activeOpacity={0.7}
-          >
-            <View style={styles.selectorCardLeft}>
-              <View
-                style={[
-                  styles.selectorIconBg,
-                  {
-                    backgroundColor:
-                      selectedCategoryObj?.color || theme.colors.primary,
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name={getValidCategoryIcon(selectedCategoryObj?.icon) as any}
-                  size={20}
-                  color="#fff"
-                />
-              </View>
-              <View style={styles.selectorCardTextCol}>
-                <Text
-                  variant="labelSmall"
-                  style={[
-                    styles.selectorCardLabel,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  {t('categories') || 'Category'}
-                </Text>
-                <Text
-                  variant="bodyMedium"
-                  style={[
-                    styles.selectorCardValue,
-                    { color: theme.colors.onSurface },
-                  ]}
-                >
-                  {selectedCategoryObj
-                    ? translateName(selectedCategoryObj.name)
-                    : t('selectCategory') || 'Select Category'}
-                </Text>
-              </View>
-            </View>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={theme.colors.onSurfaceVariant}
-            />
-          </TouchableOpacity>
+        {type === 'income' && (
+          <IncomeFormFields
+            theme={theme}
+            styles={styles}
+            t={t}
+            translateName={translateName}
+            formatCurrency={formatCurrency}
+            getAccountIcon={getAccountIcon}
+            selectedAccountObj={selectedAccountObj}
+            openAccountSheet={openAccountSheet}
+            selectedCategoryObj={selectedCategoryObj}
+            setCategorySheetOpen={setCategorySheetOpen}
+          />
         )}
 
-        {type === 'expense' && budgets.length > 0 && (
-          <TouchableOpacity
-            style={[
-              styles.selectorCard,
-              {
-                backgroundColor: theme.colors.surface,
-                borderColor: theme.colors.outlineVariant,
-                borderWidth: 1,
-                marginTop: 16,
-              },
-            ]}
-            onPress={() => setBudgetSheetOpen(true)}
-            activeOpacity={0.7}
-          >
-            <View style={{ flex: 1 }}>
-              <View style={styles.budgetCardTop}>
-                <View style={styles.selectorCardLeft}>
-                  <View
-                    style={[
-                      styles.selectorIconBg,
-                      {
-                        backgroundColor:
-                          selectedBudgetObj?.color || theme.colors.outline,
-                      },
-                    ]}
-                  >
-                    <MaterialCommunityIcons
-                      name={
-                        selectedBudgetObj ? 'wallet-outline' : 'slash-forward'
-                      }
-                      size={20}
-                      color="#fff"
-                    />
-                  </View>
-                  <View style={styles.selectorCardTextCol}>
-                    <Text
-                      variant="labelSmall"
-                      style={[
-                        styles.selectorCardLabel,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
-                    >
-                      {t('budgets') || 'Budget'}
-                    </Text>
-                    <Text
-                      variant="bodyMedium"
-                      style={[
-                        styles.selectorCardValue,
-                        { color: theme.colors.onSurface },
-                      ]}
-                    >
-                      {selectedBudgetObj
-                        ? translateName(
-                          selectedBudgetObj.name ||
-                          categories.find(
-                            (c) => c.id === selectedBudgetObj.categoryId,
-                          )?.name ||
-                          t('budgets'),
-                        )
-                        : t('noBudget')}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.selectorCardRight}>
-                  {selectedBudgetObj && (
-                    <Text
-                      variant="labelSmall"
-                      style={[
-                        styles.budgetUsageText,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
-                    >
-                      {formatCurrency(currentBudgetUsage.spent)} of{' '}
-                      {formatCurrency(selectedBudgetObj.amount)}
-                    </Text>
-                  )}
-                  <Ionicons
-                    name="chevron-forward"
-                    size={18}
-                    color={theme.colors.onSurfaceVariant}
-                  />
-                </View>
-              </View>
-
-              {selectedBudgetObj && (
-                <View style={styles.budgetProgressContainer}>
-                  <View
-                    style={[
-                      styles.budgetProgressBarBg,
-                      { backgroundColor: theme.colors.outlineVariant },
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.budgetProgressBarFill,
-                        {
-                          backgroundColor:
-                            selectedBudgetObj.color || theme.colors.primary,
-                          width: `${currentBudgetUsage.progress * 100}%`,
-                        },
-                      ]}
-                    />
-                  </View>
-                  <Text
-                    variant="labelSmall"
-                    style={[
-                      styles.budgetPercentText,
-                      { color: theme.colors.onSurfaceVariant },
-                    ]}
-                  >
-                    {Math.round(currentBudgetUsage.progress * 100)}%
-                  </Text>
-                </View>
-              )}
-            </View>
-          </TouchableOpacity>
+        {type === 'transfer' && (
+          <TransferFormFields
+            theme={theme}
+            styles={styles}
+            t={t}
+            translateName={translateName}
+            formatCurrency={formatCurrency}
+            getAccountIcon={getAccountIcon}
+            selectedAccountObj={selectedAccountObj}
+            selectedToAccountObj={selectedToAccountObj}
+            openAccountSheet={openAccountSheet}
+          />
         )}
 
         <TouchableOpacity
@@ -1150,7 +788,6 @@ export const AddTransactionScreen = () => {
       >
         {accounts
           .filter((acc) => {
-            // In transfer mode, exclude selected accounts reciprocally
             if (type === 'transfer') {
               if (targetAccountType === 'from') {
                 return acc.id !== selectedToAccount;
@@ -1252,13 +889,11 @@ export const AddTransactionScreen = () => {
           })}
       </BottomSheet>
 
-      {/* Budget Bottom Sheet */}
       <BottomSheet
         visible={budgetSheetOpen}
         onClose={() => setBudgetSheetOpen(false)}
         title={t('budgets') || 'Select Budget'}
       >
-        {/* No Budget Option */}
         <TouchableOpacity
           style={[
             styles.modalListItem,
@@ -1432,7 +1067,6 @@ export const AddTransactionScreen = () => {
         })}
       </BottomSheet>
 
-      {/* Transaction Actions Menu Bottom Sheet */}
       <BottomSheet
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
@@ -1490,7 +1124,6 @@ export const AddTransactionScreen = () => {
         </View>
       </BottomSheet>
 
-      {/* Sticky Bottom CTA Container */}
       <View
         style={[
           styles.bottomBarContainer,
@@ -1507,7 +1140,6 @@ export const AddTransactionScreen = () => {
         ]}
       >
         <View style={styles.actionButtonsCol}>
-          {/* Primary Action Button */}
           <TouchableOpacity
             style={[
               styles.primaryActionBtn,
@@ -1534,7 +1166,6 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 
-  // 1. Transaction Type Segmented Control
   tabContainer: {
     flexDirection: 'row',
     height: 48,
@@ -1563,7 +1194,6 @@ const styles = StyleSheet.create({
     color: '#8A9A9D',
   },
 
-  // 2. Amount Hero Section
   amountHeroCard: {
     borderRadius: 20,
     paddingVertical: 16,
@@ -1632,7 +1262,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // Interactive Selector Cards
   selectorCard: {
     borderRadius: 16,
     padding: 16,
@@ -1682,12 +1311,10 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
 
-  // Transfer mode accounts stacking
   transferAccountsGroup: {
     marginTop: 8,
   },
 
-  // Budget details
   budgetCardTop: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1723,7 +1350,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 
-  // Compact Row card (Date)
   compactRowCard: {
     borderRadius: 16,
     padding: 12,
@@ -1737,7 +1363,6 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
 
-  // Notes
   notesCard: {
     borderRadius: 16,
     paddingHorizontal: 16,
@@ -1757,7 +1382,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // Modal bottom sheets
   modalGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
