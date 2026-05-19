@@ -21,11 +21,42 @@ export const formatCurrency = (
     CAD: '$',
     AUD: '$',
     NZD: '$',
+    ARS: '$',
+    BOB: 'Bs.',
+    CRC: '₡',
+    CUP: '$',
+    DOP: 'RD$',
+    GTQ: 'Q',
+    HNL: 'L',
+    NIO: 'C$',
+    PYG: '₲',
+    UYU: '$U',
+    VES: 'Bs.S',
+    XAF: 'FCFA',
+    INR: '₹',
+    ZAR: 'R',
+    SGD: 'S$',
+    PHP: '₱',
+    NGN: '₦',
+    PKR: '₨',
+    JMD: 'J$',
+    BSD: 'B$',
+    TTD: 'TT$',
+    BZD: 'BZ$',
+    BBD: 'Bds$',
+    KES: 'KSh',
+    GHS: '₵',
   };
   const symbol = symbols[currencyCode] || '$';
 
-  if (currencyCode === 'COP') {
-    return `${symbol} ${formatNumber(amount, 'es')}`;
+  const isNoDecimal =
+    currencyCode === 'COP' ||
+    currencyCode === 'CLP' ||
+    currencyCode === 'PYG' ||
+    currencyCode === 'XAF';
+
+  if (isNoDecimal) {
+    return `${symbol} ${formatNumber(amount, language)}`;
   }
 
   const formatted = amount.toLocaleString(

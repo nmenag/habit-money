@@ -268,7 +268,11 @@ export const AddTransactionScreen = () => {
   const [displayAmount, setDisplayAmount] = useState(() => {
     if (!editingTransaction) return '';
     const absVal = Math.abs(editingTransaction.amount);
-    const isDecimal = currency !== 'COP' && currency !== 'CLP';
+    const isDecimal =
+      currency !== 'COP' &&
+      currency !== 'CLP' &&
+      currency !== 'PYG' &&
+      currency !== 'XAF';
     if (!isDecimal) {
       return formatNumber(absVal, language);
     } else {
@@ -555,7 +559,11 @@ export const AddTransactionScreen = () => {
   );
 
   const handleAmountChange = (text: string) => {
-    const isDecimal = currency !== 'COP' && currency !== 'CLP';
+    const isDecimal =
+      currency !== 'COP' &&
+      currency !== 'CLP' &&
+      currency !== 'PYG' &&
+      currency !== 'XAF';
     const formatted = formatAmountInput(text, isDecimal);
 
     if (formatted === '') {
