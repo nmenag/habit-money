@@ -50,7 +50,10 @@ const addAlpha = (color: string, opacity: number): string => {
   }
   let hex = color.replace('#', '');
   if (hex.length === 3) {
-    hex = hex.split('').map((char) => char + char).join('');
+    hex = hex
+      .split('')
+      .map((char) => char + char)
+      .join('');
   }
   if (hex.length === 6) {
     const r = parseInt(hex.substring(0, 2), 16);
@@ -68,151 +71,156 @@ interface CustomSegmentedControlProps {
   setSelectedCategory: (id: string) => void;
 }
 
-const CustomSegmentedControl: React.FC<CustomSegmentedControlProps> = React.memo(({
-  type,
-  setType,
-  categories,
-  setSelectedCategory,
-}) => {
-  const { width } = useWindowDimensions();
-  const theme = useTheme();
-  const { t } = useTranslation();
+const CustomSegmentedControl: React.FC<CustomSegmentedControlProps> =
+  React.memo(({ type, setType, categories, setSelectedCategory }) => {
+    const { width } = useWindowDimensions();
+    const theme = useTheme();
+    const { t } = useTranslation();
 
-  const containerWidth = Math.min(width, 600);
-  const tabWidth = (containerWidth - 32 - 8) / 3;
+    const containerWidth = Math.min(width, 600);
+    const tabWidth = (containerWidth - 32 - 8) / 3;
 
-  const getColors = () => {
-    switch (type) {
-      case 'expense':
-        return {
-          bg: theme.dark ? '#3A1E1E' : '#FEE2E2',
-          text: theme.colors.error,
-        };
-      case 'income':
-        return {
-          bg: theme.dark ? '#1A3324' : '#DCFCE7',
-          text: (theme.colors as any).income || '#15803D',
-        };
-      case 'transfer':
-        return {
-          bg: theme.dark ? '#1E293B' : '#E0F2FE',
-          text: theme.colors.primary,
-        };
-    }
-  };
+    const getColors = () => {
+      switch (type) {
+        case 'expense':
+          return {
+            bg: theme.dark ? '#3A1E1E' : '#FEE2E2',
+            text: theme.colors.error,
+          };
+        case 'income':
+          return {
+            bg: theme.dark ? '#1A3324' : '#DCFCE7',
+            text: (theme.colors as any).income || '#15803D',
+          };
+        case 'transfer':
+          return {
+            bg: theme.dark ? '#1E293B' : '#E0F2FE',
+            text: theme.colors.primary,
+          };
+      }
+    };
 
-  const activeColors = getColors();
+    const activeColors = getColors();
 
-  const handleSelectType = (newType: TransactionType) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setType(newType);
+    const handleSelectType = (newType: TransactionType) => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setType(newType);
 
-    const newAvailable = categories.filter((c) => c.type === newType);
-    if (newAvailable.length > 0) {
-      setSelectedCategory(newAvailable[0].id);
-    } else {
-      setSelectedCategory('');
-    }
-  };
+      const newAvailable = categories.filter((c) => c.type === newType);
+      if (newAvailable.length > 0) {
+        setSelectedCategory(newAvailable[0].id);
+      } else {
+        setSelectedCategory('');
+      }
+    };
 
-  return (
-    <View
-      style={[
-        styles.tabContainer,
-        { backgroundColor: theme.colors.surfaceVariant },
-      ]}
-    >
+    return (
       <View
         style={[
-          styles.tabIndicator,
-          {
-            width: tabWidth,
-            backgroundColor: activeColors.bg,
-            transform: [
-              {
-                translateX:
-                  type === 'expense'
-                    ? 4
-                    : type === 'income'
-                      ? tabWidth + 4
-                      : tabWidth * 2 + 4,
-              },
-            ],
-          },
+          styles.tabContainer,
+          { backgroundColor: theme.colors.surfaceVariant },
         ]}
-      />
-
-      <TouchableOpacity
-        style={styles.tabButton}
-        onPress={() => handleSelectType('expense')}
-        activeOpacity={0.8}
-        accessibilityRole="tab"
-        accessibilityState={{ selected: type === 'expense' }}
-        accessibilityLabel={t('expense') || 'Expense'}
-        accessibilityHint={t('switchToExpenseHint' as any) || 'Switches transaction type to expense'}
       >
-        <Text
+        <View
           style={[
-            styles.tabText,
-            { color: theme.colors.onSurfaceVariant },
-            type === 'expense' && {
-              color: activeColors.text,
-              fontWeight: '800',
+            styles.tabIndicator,
+            {
+              width: tabWidth,
+              backgroundColor: activeColors.bg,
+              transform: [
+                {
+                  translateX:
+                    type === 'expense'
+                      ? 4
+                      : type === 'income'
+                        ? tabWidth + 4
+                        : tabWidth * 2 + 4,
+                },
+              ],
             },
           ]}
-        >
-          {t('expense')}
-        </Text>
-      </TouchableOpacity>
+        />
 
-      <TouchableOpacity
-        style={styles.tabButton}
-        onPress={() => handleSelectType('income')}
-        activeOpacity={0.8}
-        accessibilityRole="tab"
-        accessibilityState={{ selected: type === 'income' }}
-        accessibilityLabel={t('income') || 'Income'}
-        accessibilityHint={t('switchToIncomeHint' as any) || 'Switches transaction type to income'}
-      >
-        <Text
-          style={[
-            styles.tabText,
-            { color: theme.colors.onSurfaceVariant },
-            type === 'income' && {
-              color: activeColors.text,
-              fontWeight: '800',
-            },
-          ]}
+        <TouchableOpacity
+          style={styles.tabButton}
+          onPress={() => handleSelectType('expense')}
+          activeOpacity={0.8}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: type === 'expense' }}
+          accessibilityLabel={t('expense') || 'Expense'}
+          accessibilityHint={
+            t('switchToExpenseHint' as any) ||
+            'Switches transaction type to expense'
+          }
         >
-          {t('income')}
-        </Text>
-      </TouchableOpacity>
+          <Text
+            style={[
+              styles.tabText,
+              { color: theme.colors.onSurfaceVariant },
+              type === 'expense' && {
+                color: activeColors.text,
+                fontWeight: '800',
+              },
+            ]}
+          >
+            {t('expense')}
+          </Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.tabButton}
-        onPress={() => handleSelectType('transfer')}
-        activeOpacity={0.8}
-        accessibilityRole="tab"
-        accessibilityState={{ selected: type === 'transfer' }}
-        accessibilityLabel={t('transfer') || 'Transfer'}
-        accessibilityHint={t('switchToTransferHint' as any) || 'Switches transaction type to transfer'}
-      >
-        <Text
-          style={[
-            styles.tabText,
-            { color: theme.colors.onSurfaceVariant },
-            type === 'transfer' && {
-              color: activeColors.text,
-              fontWeight: '800',
-            },
-          ]}
+        <TouchableOpacity
+          style={styles.tabButton}
+          onPress={() => handleSelectType('income')}
+          activeOpacity={0.8}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: type === 'income' }}
+          accessibilityLabel={t('income') || 'Income'}
+          accessibilityHint={
+            t('switchToIncomeHint' as any) ||
+            'Switches transaction type to income'
+          }
         >
-          {t('transfer')}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-});
+          <Text
+            style={[
+              styles.tabText,
+              { color: theme.colors.onSurfaceVariant },
+              type === 'income' && {
+                color: activeColors.text,
+                fontWeight: '800',
+              },
+            ]}
+          >
+            {t('income')}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tabButton}
+          onPress={() => handleSelectType('transfer')}
+          activeOpacity={0.8}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: type === 'transfer' }}
+          accessibilityLabel={t('transfer') || 'Transfer'}
+          accessibilityHint={
+            t('switchToTransferHint' as any) ||
+            'Switches transaction type to transfer'
+          }
+        >
+          <Text
+            style={[
+              styles.tabText,
+              { color: theme.colors.onSurfaceVariant },
+              type === 'transfer' && {
+                color: activeColors.text,
+                fontWeight: '800',
+              },
+            ]}
+          >
+            {t('transfer')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  });
 CustomSegmentedControl.displayName = 'CustomSegmentedControl';
 
 export const AddTransactionScreen = () => {
@@ -665,8 +673,12 @@ export const AddTransactionScreen = () => {
                 style={{ padding: 8, marginRight: -8 }}
                 activeOpacity={0.7}
                 accessibilityRole="button"
-                accessibilityLabel={t('transactionOptions') || 'Transaction options'}
-                accessibilityHint={t('openMenuHint' as any) || 'Opens options menu'}
+                accessibilityLabel={
+                  t('transactionOptions') || 'Transaction options'
+                }
+                accessibilityHint={
+                  t('openMenuHint' as any) || 'Opens options menu'
+                }
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Ionicons
@@ -751,7 +763,9 @@ export const AddTransactionScreen = () => {
                 placeholder={isAmountFocused ? '' : '0'}
                 placeholderTextColor={theme.colors.outlineVariant}
                 accessibilityLabel={t('amount') || 'Amount'}
-                accessibilityHint={t('amountInputHint' as any) || 'Enter the transaction value'}
+                accessibilityHint={
+                  t('amountInputHint' as any) || 'Enter the transaction value'
+                }
                 style={[
                   styles.amountTextInputCentered,
                   {
@@ -777,7 +791,10 @@ export const AddTransactionScreen = () => {
                 style={styles.amountClearBtn}
                 accessibilityRole="button"
                 accessibilityLabel={t('clearAmount' as any) || 'Clear amount'}
-                accessibilityHint={t('clearAmountHint' as any) || 'Resets the transaction amount to zero'}
+                accessibilityHint={
+                  t('clearAmountHint' as any) ||
+                  'Resets the transaction amount to zero'
+                }
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               >
                 <Ionicons
@@ -853,7 +870,9 @@ export const AddTransactionScreen = () => {
           activeOpacity={0.7}
           accessibilityRole="button"
           accessibilityLabel={`${t('date') || 'Date'}: ${formattedDateText}`}
-          accessibilityHint={t('changeDateHint' as any) || 'Double tap to open calendar selector'}
+          accessibilityHint={
+            t('changeDateHint' as any) || 'Double tap to open calendar selector'
+          }
         >
           <View style={styles.selectorCardLeft}>
             <View
@@ -919,7 +938,10 @@ export const AddTransactionScreen = () => {
             placeholder={t('notePlaceholder') || 'Add a note...'}
             placeholderTextColor={addAlpha(theme.colors.onSurfaceVariant, 0.44)}
             accessibilityLabel={t('notePlaceholder') || 'Notes'}
-            accessibilityHint={t('notesInputHint' as any) || 'Optional text description of this transaction'}
+            accessibilityHint={
+              t('notesInputHint' as any) ||
+              'Optional text description of this transaction'
+            }
             style={[
               styles.notesInput,
               { color: theme.colors.onSurface, maxHeight: 100 },
@@ -970,7 +992,10 @@ export const AddTransactionScreen = () => {
                 accessibilityRole="button"
                 accessibilityState={{ selected: isSelected }}
                 accessibilityLabel={translateName(cat.name)}
-                accessibilityHint={t('selectCategoryHint' as any) || 'Sets the transaction category to ' + translateName(cat.name)}
+                accessibilityHint={
+                  t('selectCategoryHint' as any) ||
+                  'Sets the transaction category to ' + translateName(cat.name)
+                }
               >
                 <View
                   style={[styles.modalGridIcon, { backgroundColor: catColor }]}
@@ -1002,9 +1027,11 @@ export const AddTransactionScreen = () => {
         visible={accountSheetOpen}
         onClose={() => setAccountSheetOpen(false)}
         title={
-          targetAccountType === 'from'
-            ? t('withdrawFrom') || 'Select Account'
-            : t('depositTo') || 'Deposit To Account'
+          type === 'income'
+            ? t('depositTo')
+            : targetAccountType === 'from'
+              ? t('withdrawFrom')
+              : t('depositTo')
         }
       >
         {accounts
@@ -1047,7 +1074,9 @@ export const AddTransactionScreen = () => {
                 accessibilityRole="button"
                 accessibilityState={{ selected: isSelected }}
                 accessibilityLabel={`${translateName(acc.name)}, ${acc.type.toUpperCase()}, ${t('balance' as any) || 'balance'}: ${formatCurrency(acc.currentBalance)}`}
-                accessibilityHint={t('selectAccountHint' as any) || 'Selects this account'}
+                accessibilityHint={
+                  t('selectAccountHint' as any) || 'Selects this account'
+                }
               >
                 <View style={styles.modalListItemLeft}>
                   <View
@@ -1138,7 +1167,9 @@ export const AddTransactionScreen = () => {
           accessibilityRole="button"
           accessibilityState={{ selected: selectedBudget === '' }}
           accessibilityLabel={t('noBudget') || 'No budget'}
-          accessibilityHint={t('clearBudgetHint' as any) || 'Clears the budget association'}
+          accessibilityHint={
+            t('clearBudgetHint' as any) || 'Clears the budget association'
+          }
         >
           <View style={styles.modalListItemLeft}>
             <View
@@ -1211,7 +1242,9 @@ export const AddTransactionScreen = () => {
               accessibilityRole="button"
               accessibilityState={{ selected: isSelected }}
               accessibilityLabel={`${translateName(bud.name || cat?.name || t('budgets'))}, ${formatCurrency(usage.spent)} of ${formatCurrency(bud.amount)} spent`}
-              accessibilityHint={t('selectBudgetHint' as any) || 'Selects this budget'}
+              accessibilityHint={
+                t('selectBudgetHint' as any) || 'Selects this budget'
+              }
             >
               <View style={styles.modalListItemRow}>
                 <View style={styles.modalListItemLeft}>
@@ -1318,7 +1351,10 @@ export const AddTransactionScreen = () => {
             }}
             accessibilityRole="button"
             accessibilityLabel={t('duplicate') || 'Duplicate transaction'}
-            accessibilityHint={t('duplicateHint' as any) || 'Creates an identical copy of this transaction'}
+            accessibilityHint={
+              t('duplicateHint' as any) ||
+              'Creates an identical copy of this transaction'
+            }
           >
             <Ionicons
               name="duplicate-outline"
@@ -1349,7 +1385,9 @@ export const AddTransactionScreen = () => {
             }}
             accessibilityRole="button"
             accessibilityLabel={t('delete') || 'Delete transaction'}
-            accessibilityHint={t('deleteHint' as any) || 'Deletes this transaction permanently'}
+            accessibilityHint={
+              t('deleteHint' as any) || 'Deletes this transaction permanently'
+            }
           >
             <Ionicons
               name="trash-outline"
@@ -1394,7 +1432,10 @@ export const AddTransactionScreen = () => {
             activeOpacity={0.85}
             accessibilityRole="button"
             accessibilityLabel={isEditing ? t('update') : t('saveTransaction')}
-            accessibilityHint={t('saveTransactionHint' as any) || 'Saves changes and records transaction'}
+            accessibilityHint={
+              t('saveTransactionHint' as any) ||
+              'Saves changes and records transaction'
+            }
           >
             <Text variant="labelLarge" style={styles.primaryActionBtnText}>
               {isEditing ? t('update') : t('saveTransaction')}

@@ -18,158 +18,163 @@ interface IncomeFormFieldsProps {
   setCategorySheetOpen: (open: boolean) => void;
 }
 
-export const IncomeFormFields = React.memo(({
-  theme,
-  styles,
-  t,
-  translateName,
-  formatCurrency,
-  getAccountIcon,
-  selectedAccountObj,
-  openAccountSheet,
-  selectedCategoryObj,
-  setCategorySheetOpen,
-}: IncomeFormFieldsProps) => {
-  return (
-    <>
-      <TouchableOpacity
-        style={[
-          styles.selectorCard,
-          {
-            backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.outlineVariant,
-            borderWidth: 1,
-          },
-        ]}
-        onPress={() => openAccountSheet('from')}
-        activeOpacity={0.7}
-        accessibilityRole="button"
-        accessibilityLabel={`${t('depositTo') || 'Deposit to'}: ${selectedAccountObj ? translateName(selectedAccountObj.name) : t('selectAccount')}, ${t('balance') || 'balance'}: ${selectedAccountObj ? formatCurrency(selectedAccountObj.currentBalance) : ''}`}
-        accessibilityHint={t('changeAccountHint') || 'Double tap to select a different account'}
-      >
-        <View style={styles.selectorCardLeft}>
-          <View
-            style={[
-              styles.selectorIconBg,
-              {
-                backgroundColor:
-                  selectedAccountObj?.color || theme.colors.primary,
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name={getAccountIcon(selectedAccountObj?.type) as any}
-              size={20}
-              color="#fff"
-            />
-          </View>
-          <View style={styles.selectorCardTextCol}>
-            <Text
-              variant="labelSmall"
+export const IncomeFormFields = React.memo(
+  ({
+    theme,
+    styles,
+    t,
+    translateName,
+    formatCurrency,
+    getAccountIcon,
+    selectedAccountObj,
+    openAccountSheet,
+    selectedCategoryObj,
+    setCategorySheetOpen,
+  }: IncomeFormFieldsProps) => {
+    return (
+      <>
+        <TouchableOpacity
+          style={[
+            styles.selectorCard,
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.outlineVariant,
+              borderWidth: 1,
+            },
+          ]}
+          onPress={() => openAccountSheet('from')}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={`${t('depositTo') || 'Deposit to'}: ${selectedAccountObj ? translateName(selectedAccountObj.name) : t('selectAccount')}, ${t('balance') || 'balance'}: ${selectedAccountObj ? formatCurrency(selectedAccountObj.currentBalance) : ''}`}
+          accessibilityHint={
+            t('changeAccountHint') || 'Double tap to select a different account'
+          }
+        >
+          <View style={styles.selectorCardLeft}>
+            <View
               style={[
-                styles.selectorCardLabel,
-                { color: theme.colors.onSurfaceVariant },
+                styles.selectorIconBg,
+                {
+                  backgroundColor:
+                    selectedAccountObj?.color || theme.colors.primary,
+                },
               ]}
             >
-              {t('depositTo')}
-            </Text>
+              <MaterialCommunityIcons
+                name={getAccountIcon(selectedAccountObj?.type) as any}
+                size={20}
+                color="#fff"
+              />
+            </View>
+            <View style={styles.selectorCardTextCol}>
+              <Text
+                variant="labelSmall"
+                style={[
+                  styles.selectorCardLabel,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {t('depositTo')}
+              </Text>
+              <Text
+                variant="bodyMedium"
+                style={[
+                  styles.selectorCardValue,
+                  { color: theme.colors.onSurface },
+                ]}
+              >
+                {selectedAccountObj
+                  ? translateName(selectedAccountObj.name)
+                  : t('selectAccount')}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.selectorCardRight}>
             <Text
-              variant="bodyMedium"
+              variant="titleSmall"
               style={[
-                styles.selectorCardValue,
+                styles.selectorCardBalance,
                 { color: theme.colors.onSurface },
               ]}
             >
               {selectedAccountObj
-                ? translateName(selectedAccountObj.name)
-                : t('selectAccount')}
+                ? formatCurrency(selectedAccountObj.currentBalance)
+                : ''}
             </Text>
+            <Ionicons
+              name="chevron-forward"
+              size={18}
+              color={theme.colors.onSurfaceVariant}
+            />
           </View>
-        </View>
-        <View style={styles.selectorCardRight}>
-          <Text
-            variant="titleSmall"
-            style={[
-              styles.selectorCardBalance,
-              { color: theme.colors.onSurface },
-            ]}
-          >
-            {selectedAccountObj
-              ? formatCurrency(selectedAccountObj.currentBalance)
-              : ''}
-          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.selectorCard,
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.outlineVariant,
+              borderWidth: 1,
+              marginTop: 16,
+            },
+          ]}
+          onPress={() => setCategorySheetOpen(true)}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={`${t('categories') || 'Category'}: ${selectedCategoryObj ? translateName(selectedCategoryObj.name) : t('selectCategory') || 'Select Category'}`}
+          accessibilityHint={
+            t('changeCategoryHint') || 'Double tap to select a category'
+          }
+        >
+          <View style={styles.selectorCardLeft}>
+            <View
+              style={[
+                styles.selectorIconBg,
+                {
+                  backgroundColor:
+                    selectedCategoryObj?.color || theme.colors.primary,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name={getValidCategoryIcon(selectedCategoryObj?.icon) as any}
+                size={20}
+                color="#fff"
+              />
+            </View>
+            <View style={styles.selectorCardTextCol}>
+              <Text
+                variant="labelSmall"
+                style={[
+                  styles.selectorCardLabel,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {t('categories') || 'Category'}
+              </Text>
+              <Text
+                variant="bodyMedium"
+                style={[
+                  styles.selectorCardValue,
+                  { color: theme.colors.onSurface },
+                ]}
+              >
+                {selectedCategoryObj
+                  ? translateName(selectedCategoryObj.name)
+                  : t('selectCategory') || 'Select Category'}
+              </Text>
+            </View>
+          </View>
           <Ionicons
             name="chevron-forward"
             size={18}
             color={theme.colors.onSurfaceVariant}
           />
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[
-          styles.selectorCard,
-          {
-            backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.outlineVariant,
-            borderWidth: 1,
-            marginTop: 16,
-          },
-        ]}
-        onPress={() => setCategorySheetOpen(true)}
-        activeOpacity={0.7}
-        accessibilityRole="button"
-        accessibilityLabel={`${t('categories') || 'Category'}: ${selectedCategoryObj ? translateName(selectedCategoryObj.name) : t('selectCategory') || 'Select Category'}`}
-        accessibilityHint={t('changeCategoryHint') || 'Double tap to select a category'}
-      >
-        <View style={styles.selectorCardLeft}>
-          <View
-            style={[
-              styles.selectorIconBg,
-              {
-                backgroundColor:
-                  selectedCategoryObj?.color || theme.colors.primary,
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name={getValidCategoryIcon(selectedCategoryObj?.icon) as any}
-              size={20}
-              color="#fff"
-            />
-          </View>
-          <View style={styles.selectorCardTextCol}>
-            <Text
-              variant="labelSmall"
-              style={[
-                styles.selectorCardLabel,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
-            >
-              {t('categories') || 'Category'}
-            </Text>
-            <Text
-              variant="bodyMedium"
-              style={[
-                styles.selectorCardValue,
-                { color: theme.colors.onSurface },
-              ]}
-            >
-              {selectedCategoryObj
-                ? translateName(selectedCategoryObj.name)
-                : t('selectCategory') || 'Select Category'}
-            </Text>
-          </View>
-        </View>
-        <Ionicons
-          name="chevron-forward"
-          size={18}
-          color={theme.colors.onSurfaceVariant}
-        />
-      </TouchableOpacity>
-    </>
-  );
-});
+        </TouchableOpacity>
+      </>
+    );
+  },
+);
 
 IncomeFormFields.displayName = 'IncomeFormFields';
-
