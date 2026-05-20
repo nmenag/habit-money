@@ -5,7 +5,6 @@ import React, { useState } from 'react';
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { FAB, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
 import { CalendarView } from '../components/CalendarView';
 import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../../../store/useStore';
@@ -138,17 +137,15 @@ export const CalendarScreen = () => {
             </Text>
           </View>
         }
-        contentContainerStyle={{ paddingBottom: insets.bottom + 140 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 88 }}
       />
-
-      <BannerAdComponent />
 
       <FAB
         icon="plus"
         style={[
           styles.fab,
           {
-            bottom: (insets.bottom || 0) + 120,
+            bottom: (insets.bottom || 0) + 16,
             backgroundColor: theme.colors.primary,
           },
         ]}
