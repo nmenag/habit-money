@@ -307,7 +307,7 @@ export const es = {
     'Si tienes alguna pregunta sobre esta política de privacidad, puedes contactarnos en:',
   contactEmailAddress: 'nmena.garzon@gmail.com',
   lastUpdated: 'Última actualización',
-  lastUpdatedDate: '22 de marzo de 2024',
+  lastUpdatedDate: '21 de mayo de 2026',
   app: 'App',
   website: 'Sitio Web',
   adMobPrivacyUrl: 'https://policies.google.com/privacy',
