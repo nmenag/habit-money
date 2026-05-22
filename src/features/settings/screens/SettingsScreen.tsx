@@ -27,6 +27,8 @@ import { NotificationService } from '../../../services/NotificationService';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { backupToJSON, restoreFromJSON } from '../../../utils/dataBackup';
 import { CURRENCIES } from '../../../constants';
+import { AppTheme, spacing } from '../../../theme/theme';
+import { fontScale } from '../../../utils/responsive';
 
 export const SettingsScreen = () => {
   const {
@@ -44,7 +46,7 @@ export const SettingsScreen = () => {
   } = useStore();
 
   const { t, language } = useTranslation();
-  const theme = useTheme();
+  const theme = useTheme<AppTheme>();
   const insets = useSafeAreaInsets();
 
   const notificationHeight = useSharedValue(notificationsEnabled ? 80 : 0);
@@ -203,42 +205,37 @@ export const SettingsScreen = () => {
     [notificationsEnabled, t, setNotificationTime],
   );
 
-  // Modern finance cards metadata
+  // Core Financial Links - Matching categories/accounts translucent design system
   const SETTINGS_LINKS = [
     {
       name: t('manageAccounts'),
       icon: 'wallet-outline',
       screen: '/accounts',
-      color: '#10B981',
-      bgColor: theme.dark ? '#052E16' : '#DCFCE7',
+      color: '#10B981', // Emerald
     },
     {
       name: t('manageCategories'),
       icon: 'pricetags-outline',
       screen: '/categories',
-      color: '#8B5CF6',
-      bgColor: theme.dark ? '#2E1065' : '#F3E8FF',
+      color: '#8B5CF6', // Purple
     },
     {
       name: t('manageBudgets'),
       icon: 'pie-chart-outline',
       screen: '/budgets',
-      color: '#3B82F6',
-      bgColor: theme.dark ? '#172554' : '#DBEAFE',
+      color: '#3B82F6', // Blue
     },
     {
       name: t('manageGoals'),
       icon: 'flag-outline',
       screen: '/goals',
-      color: '#F59E0B',
-      bgColor: theme.dark ? '#451A03' : '#FEF3C7',
+      color: '#F59E0B', // Amber
     },
     {
       name: t('calendar'),
       icon: 'calendar-outline',
       screen: '/calendar',
-      color: '#EC4899',
-      bgColor: theme.dark ? '#4C0519' : '#FCE7F3',
+      color: '#EC4899', // Pink
     },
   ];
 
@@ -263,9 +260,7 @@ export const SettingsScreen = () => {
       >
         {/* Brand Header */}
         <View style={styles.header}>
-          <Text
-            style={[styles.headerTitle, { color: theme.colors.onBackground }]}
-          >
+          <Text style={[styles.headerTitle, { color: theme.colors.onSurface }]}>
             {t('preferences') || 'Settings'}
           </Text>
         </View>
@@ -280,58 +275,58 @@ export const SettingsScreen = () => {
           >
             {t('financeEssentials')}
           </Text>
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor: theme.dark ? '#0A110F' : '#FFFFFF',
-                borderColor: theme.dark ? '#11221D' : '#E2E8F0',
-              },
-            ]}
-          >
-            {SETTINGS_LINKS.map((item, index) => (
-              <View key={item.screen}>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  style={styles.rowItem}
-                  onPress={() => {
-                    router.push(item.screen as any);
-                  }}
-                >
-                  <View
-                    style={[styles.iconBox, { backgroundColor: item.bgColor }]}
+          <View style={styles.card}>
+            {SETTINGS_LINKS.map((item, index) => {
+              const itemColor = item.color;
+              return (
+                <View key={item.screen}>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    style={styles.rowItem}
+                    onPress={() => {
+                      router.push(item.screen as any);
+                    }}
                   >
-                    <Ionicons
-                      name={item.icon as any}
-                      size={20}
-                      color={item.color}
-                    />
-                  </View>
-                  <View style={styles.rowText}>
-                    <Text
+                    <View
                       style={[
-                        styles.rowTitle,
-                        { color: theme.colors.onSurface },
+                        styles.iconBox,
+                        {
+                          backgroundColor: `${itemColor}12`,
+                          borderColor: `${itemColor}2B`,
+                        },
                       ]}
                     >
-                      {item.name}
-                    </Text>
-                  </View>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={18}
-                    color={theme.colors.onSurfaceVariant}
-                  />
-                </TouchableOpacity>
-                {index < SETTINGS_LINKS.length - 1 && (
-                  <Divider style={styles.divider} />
-                )}
-              </View>
-            ))}
+                      <Ionicons
+                        name={item.icon as any}
+                        size={20}
+                        color={itemColor}
+                      />
+                    </View>
+                    <View style={styles.rowText}>
+                      <Text
+                        style={[
+                          styles.rowTitle,
+                          { color: theme.colors.onSurface },
+                        ]}
+                      >
+                        {item.name}
+                      </Text>
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color={theme.colors.onSurfaceVariant}
+                    />
+                  </TouchableOpacity>
+                  {index < SETTINGS_LINKS.length - 1 && (
+                    <Divider style={styles.divider} />
+                  )}
+                </View>
+              );
+            })}
           </View>
         </View>
 
-        {/* Section 2: App Customization */}
         <View style={styles.section}>
           <Text
             style={[
@@ -341,16 +336,7 @@ export const SettingsScreen = () => {
           >
             {t('appCustomization')}
           </Text>
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor: theme.dark ? '#0A110F' : '#FFFFFF',
-                borderColor: theme.dark ? '#11221D' : '#E2E8F0',
-              },
-            ]}
-          >
-            {/* Inline Language Menu Selector */}
+          <View style={styles.card}>
             <Menu
               visible={languageMenuVisible}
               onDismiss={() => setLanguageMenuVisible(false)}
@@ -365,7 +351,10 @@ export const SettingsScreen = () => {
                   <View
                     style={[
                       styles.iconBox,
-                      { backgroundColor: theme.dark ? '#172554' : '#DBEAFE' },
+                      {
+                        backgroundColor: '#3B82F612',
+                        borderColor: '#3B82F62B',
+                      },
                     ]}
                   >
                     <Ionicons name="earth-outline" size={20} color="#3B82F6" />
@@ -392,13 +381,13 @@ export const SettingsScreen = () => {
                     <View
                       style={[
                         styles.badge,
-                        { backgroundColor: theme.colors.primaryContainer },
+                        { backgroundColor: theme.colors.outlineVariant },
                       ]}
                     >
                       <Text
                         style={[
                           styles.badgeText,
-                          { color: theme.colors.primary },
+                          { color: theme.colors.onSurfaceVariant },
                         ]}
                       >
                         {LANGUAGES.find((l) => l.code === language)?.label}
@@ -406,7 +395,7 @@ export const SettingsScreen = () => {
                     </View>
                     <Ionicons
                       name="chevron-down"
-                      size={18}
+                      size={16}
                       color={theme.colors.onSurfaceVariant}
                     />
                   </View>
@@ -429,7 +418,8 @@ export const SettingsScreen = () => {
                       color: isSelected
                         ? theme.colors.primary
                         : theme.colors.onSurface,
-                      fontWeight: isSelected ? 'bold' : 'normal',
+                      fontFamily: isSelected ? 'Inter-Medium' : 'Inter-Regular',
+                      fontWeight: isSelected ? '500' : '400',
                     }}
                   />
                 );
@@ -438,7 +428,6 @@ export const SettingsScreen = () => {
 
             <Divider style={styles.divider} />
 
-            {/* Inline Currency Menu Selector */}
             <Menu
               visible={currencyMenuVisible}
               onDismiss={() => setCurrencyMenuVisible(false)}
@@ -453,7 +442,10 @@ export const SettingsScreen = () => {
                   <View
                     style={[
                       styles.iconBox,
-                      { backgroundColor: theme.dark ? '#052E16' : '#DCFCE7' },
+                      {
+                        backgroundColor: '#10B98112',
+                        borderColor: '#10B9812B',
+                      },
                     ]}
                   >
                     <Ionicons name="cash-outline" size={20} color="#10B981" />
@@ -480,13 +472,13 @@ export const SettingsScreen = () => {
                     <View
                       style={[
                         styles.badge,
-                        { backgroundColor: theme.colors.primaryContainer },
+                        { backgroundColor: theme.colors.outlineVariant },
                       ]}
                     >
                       <Text
                         style={[
                           styles.badgeText,
-                          { color: theme.colors.primary },
+                          { color: theme.colors.onSurfaceVariant },
                         ]}
                       >
                         {CURRENCIES.find((c) => c.code === currency)?.symbol ||
@@ -496,7 +488,7 @@ export const SettingsScreen = () => {
                     </View>
                     <Ionicons
                       name="chevron-down"
-                      size={18}
+                      size={16}
                       color={theme.colors.onSurfaceVariant}
                     />
                   </View>
@@ -523,7 +515,10 @@ export const SettingsScreen = () => {
                           color: isSelected
                             ? theme.colors.primary
                             : theme.colors.onSurface,
-                          fontWeight: isSelected ? 'bold' : 'normal',
+                          fontFamily: isSelected
+                            ? 'Inter-Medium'
+                            : 'Inter-Regular',
+                          fontWeight: isSelected ? '500' : '400',
                         }}
                       />
                     );
@@ -534,12 +529,14 @@ export const SettingsScreen = () => {
 
             <Divider style={styles.divider} />
 
-            {/* Dark Mode Toggle Switch Row */}
             <View style={styles.rowItem}>
               <View
                 style={[
                   styles.iconBox,
-                  { backgroundColor: theme.dark ? '#11221D' : '#E6F4EA' },
+                  {
+                    backgroundColor: `${theme.colors.primary}12`,
+                    borderColor: `${theme.colors.primary}2B`,
+                  },
                 ]}
               >
                 <Ionicons
@@ -574,12 +571,14 @@ export const SettingsScreen = () => {
 
             <Divider style={styles.divider} />
 
-            {/* Notification Switch Row */}
             <View style={styles.rowItem}>
               <View
                 style={[
                   styles.iconBox,
-                  { backgroundColor: theme.dark ? '#451A03' : '#FEF3C7' },
+                  {
+                    backgroundColor: '#F59E0B12',
+                    borderColor: '#F59E0B2B',
+                  },
                 ]}
               >
                 <Ionicons
@@ -611,7 +610,6 @@ export const SettingsScreen = () => {
               />
             </View>
 
-            {/* Animated Slide-down Reminder Time Selection */}
             <Animated.View style={animatedReminderStyle}>
               <Divider style={styles.divider} />
               <TouchableOpacity
@@ -624,7 +622,10 @@ export const SettingsScreen = () => {
                 <View
                   style={[
                     styles.iconBox,
-                    { backgroundColor: theme.dark ? '#0F172A' : '#F1F5F9' },
+                    {
+                      backgroundColor: `${theme.colors.primary}12`,
+                      borderColor: `${theme.colors.primary}2B`,
+                    },
                   ]}
                 >
                   <Ionicons
@@ -650,7 +651,7 @@ export const SettingsScreen = () => {
                 </View>
                 <Ionicons
                   name="chevron-forward"
-                  size={18}
+                  size={16}
                   color={theme.colors.onSurfaceVariant}
                 />
               </TouchableOpacity>
@@ -658,7 +659,6 @@ export const SettingsScreen = () => {
           </View>
         </View>
 
-        {/* Section 4: Data & Safety */}
         <View style={styles.section}>
           <Text
             style={[
@@ -668,15 +668,7 @@ export const SettingsScreen = () => {
           >
             {t('dataManagement')}
           </Text>
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor: theme.dark ? '#0A110F' : '#FFFFFF',
-                borderColor: theme.dark ? '#11221D' : '#E2E8F0',
-              },
-            ]}
-          >
+          <View style={styles.card}>
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.rowItem}
@@ -687,7 +679,10 @@ export const SettingsScreen = () => {
               <View
                 style={[
                   styles.iconBox,
-                  { backgroundColor: theme.dark ? '#1E1B4B' : '#E0E7FF' },
+                  {
+                    backgroundColor: '#6366F112',
+                    borderColor: '#6366F12B',
+                  },
                 ]}
               >
                 <Ionicons
@@ -713,7 +708,7 @@ export const SettingsScreen = () => {
               </View>
               <Ionicons
                 name="chevron-forward"
-                size={18}
+                size={16}
                 color={theme.colors.onSurfaceVariant}
               />
             </TouchableOpacity>
@@ -728,7 +723,10 @@ export const SettingsScreen = () => {
               <View
                 style={[
                   styles.iconBox,
-                  { backgroundColor: theme.dark ? '#312E81' : '#EEF2FF' },
+                  {
+                    backgroundColor: '#4F46E512',
+                    borderColor: '#4F46E52B',
+                  },
                 ]}
               >
                 <Ionicons name="save-outline" size={20} color="#4F46E5" />
@@ -750,7 +748,7 @@ export const SettingsScreen = () => {
               </View>
               <Ionicons
                 name="chevron-forward"
-                size={18}
+                size={16}
                 color={theme.colors.onSurfaceVariant}
               />
             </TouchableOpacity>
@@ -765,7 +763,10 @@ export const SettingsScreen = () => {
               <View
                 style={[
                   styles.iconBox,
-                  { backgroundColor: theme.dark ? '#581C87' : '#F3E8FF' },
+                  {
+                    backgroundColor: '#A855F712',
+                    borderColor: '#A855F72B',
+                  },
                 ]}
               >
                 <Ionicons
@@ -791,14 +792,13 @@ export const SettingsScreen = () => {
               </View>
               <Ionicons
                 name="chevron-forward"
-                size={18}
+                size={16}
                 color={theme.colors.onSurfaceVariant}
               />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Section 5: Support & Coffee */}
         <View style={styles.section}>
           <Text
             style={[
@@ -808,15 +808,7 @@ export const SettingsScreen = () => {
           >
             {t('feedback')}
           </Text>
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor: theme.dark ? '#0A110F' : '#FFFFFF',
-                borderColor: theme.dark ? '#11221D' : '#E2E8F0',
-              },
-            ]}
-          >
+          <View style={styles.card}>
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.rowItem}
@@ -825,7 +817,10 @@ export const SettingsScreen = () => {
               <View
                 style={[
                   styles.iconBox,
-                  { backgroundColor: theme.dark ? '#1E293B' : '#F1F5F9' },
+                  {
+                    backgroundColor: '#64748B12',
+                    borderColor: '#64748B2B',
+                  },
                 ]}
               >
                 <Ionicons name="mail-outline" size={20} color="#64748B" />
@@ -847,7 +842,7 @@ export const SettingsScreen = () => {
               </View>
               <Ionicons
                 name="chevron-forward"
-                size={18}
+                size={16}
                 color={theme.colors.onSurfaceVariant}
               />
             </TouchableOpacity>
@@ -862,7 +857,10 @@ export const SettingsScreen = () => {
               <View
                 style={[
                   styles.iconBox,
-                  { backgroundColor: theme.dark ? '#451A03' : '#FEF3C7' },
+                  {
+                    backgroundColor: '#F59E0B12',
+                    borderColor: '#F59E0B2B',
+                  },
                 ]}
               >
                 <Ionicons name="heart-outline" size={20} color="#F59E0B" />
@@ -884,14 +882,13 @@ export const SettingsScreen = () => {
               </View>
               <Ionicons
                 name="open-outline"
-                size={18}
+                size={16}
                 color={theme.colors.onSurfaceVariant}
               />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Section 6: About & Legal */}
         <View style={styles.section}>
           <Text
             style={[
@@ -901,15 +898,7 @@ export const SettingsScreen = () => {
           >
             {t('aboutApp')}
           </Text>
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor: theme.dark ? '#0A110F' : '#FFFFFF',
-                borderColor: theme.dark ? '#11221D' : '#E2E8F0',
-              },
-            ]}
-          >
+          <View style={styles.card}>
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.rowItem}
@@ -920,7 +909,10 @@ export const SettingsScreen = () => {
               <View
                 style={[
                   styles.iconBox,
-                  { backgroundColor: theme.dark ? '#0F172A' : '#F8FAFC' },
+                  {
+                    backgroundColor: `${theme.colors.primary}12`,
+                    borderColor: `${theme.colors.primary}2B`,
+                  },
                 ]}
               >
                 <Ionicons
@@ -938,7 +930,7 @@ export const SettingsScreen = () => {
               </View>
               <Ionicons
                 name="chevron-forward"
-                size={18}
+                size={16}
                 color={theme.colors.onSurfaceVariant}
               />
             </TouchableOpacity>
@@ -955,7 +947,10 @@ export const SettingsScreen = () => {
               <View
                 style={[
                   styles.iconBox,
-                  { backgroundColor: theme.dark ? '#0F172A' : '#F8FAFC' },
+                  {
+                    backgroundColor: `${theme.colors.primary}12`,
+                    borderColor: `${theme.colors.primary}2B`,
+                  },
                 ]}
               >
                 <Ionicons
@@ -973,7 +968,7 @@ export const SettingsScreen = () => {
               </View>
               <Ionicons
                 name="chevron-forward"
-                size={18}
+                size={16}
                 color={theme.colors.onSurfaceVariant}
               />
             </TouchableOpacity>
@@ -981,12 +976,10 @@ export const SettingsScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Static Footer Ad banner */}
       <View style={styles.adContainer}>
         <BannerAdComponent />
       </View>
 
-      {/* Date-picker Modal for daily notifications */}
       <TimePickerModal
         visible={timePickerVisible}
         onDismiss={onDismissTimePicker}
@@ -999,67 +992,69 @@ export const SettingsScreen = () => {
   );
 };
 
-const defaultStyles = (theme: any) =>
+const defaultStyles = (theme: AppTheme) =>
   StyleSheet.create({
     container: {
       flex: 1,
     },
     header: {
-      marginBottom: 24,
+      marginBottom: 20,
       paddingHorizontal: 8,
     },
     headerTitle: {
-      fontSize: 28,
-      fontWeight: '900',
+      fontSize: fontScale(24),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       letterSpacing: -0.5,
-      marginBottom: 6,
     },
     section: {
-      marginBottom: 24,
+      marginBottom: 20,
     },
     sectionTitle: {
-      fontSize: 12,
-      fontWeight: '800',
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       textTransform: 'uppercase',
       marginBottom: 10,
       marginLeft: 8,
-      letterSpacing: 1.2,
+      letterSpacing: 1,
     },
     card: {
-      borderRadius: 20,
+      borderRadius: theme.roundness || 12,
       borderWidth: 1,
+      borderColor: theme.colors.outline,
+      backgroundColor: theme.colors.surface,
       overflow: 'hidden',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: theme.dark ? 0.3 : 0.04,
-      shadowRadius: 10,
-      elevation: 2,
+      elevation: 0,
     },
     rowItem: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 14,
+      paddingVertical: 12,
       paddingHorizontal: 16,
     },
     iconBox: {
-      width: 38,
-      height: 38,
-      borderRadius: 12,
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      borderWidth: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: 16,
+      marginRight: 14,
     },
     rowText: {
       flex: 1,
       justifyContent: 'center',
     },
     rowTitle: {
-      fontSize: 15,
-      fontWeight: '700',
+      fontSize: fontScale(14),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     rowSub: {
-      fontSize: 12,
-      fontWeight: '500',
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
       marginTop: 2,
     },
     rowRight: {
@@ -1073,12 +1068,13 @@ const defaultStyles = (theme: any) =>
       marginRight: 8,
     },
     badgeText: {
-      fontSize: 12,
-      fontWeight: '800',
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     divider: {
-      backgroundColor: theme.dark ? '#11221D' : '#F1F5F9',
-      marginLeft: 70,
+      backgroundColor: theme.colors.outline,
+      marginLeft: 74,
     },
     themeSelectorContainer: {
       flexDirection: 'row',

@@ -17,7 +17,6 @@ import { getLocalDateString } from '../../../utils/dateUtils';
 export const AccountsScreen = () => {
   const accounts = useStore((s) => s.accounts);
   const transactions = useStore((s) => s.transactions);
-  const deleteAccount = useStore((s) => s.deleteAccount);
   const updateAccountsOrder = useStore((s) => s.updateAccountsOrder);
   const { formatCurrency } = useStore();
 
@@ -37,7 +36,6 @@ export const AccountsScreen = () => {
     });
   }, []);
 
-  // --- Premium Visual Account Analytics calculations ---
   const { totalBalance, monthlyIncome, monthlyExpenses, spendingVelocity } =
     useMemo(() => {
       let balanceSum = 0;
@@ -45,9 +43,8 @@ export const AccountsScreen = () => {
         balanceSum += a.currentBalance;
       });
 
-      // Filter transactions for the current month
-      const currentISO = getLocalDateString(); // e.g. "2026-05-22"
-      const currentMonthPrefix = currentISO.substring(0, 7); // e.g. "2026-05"
+      const currentISO = getLocalDateString();
+      const currentMonthPrefix = currentISO.substring(0, 7);
 
       let incomeSum = 0;
       let expenseSum = 0;
@@ -64,7 +61,6 @@ export const AccountsScreen = () => {
         }
       });
 
-      // Calculate spending velocity: average amount spent per day in this month
       const elapsedDays = Math.max(
         1,
         parseInt(currentISO.substring(8, 10), 10),
@@ -79,7 +75,6 @@ export const AccountsScreen = () => {
       };
     }, [accounts, transactions]);
 
-  // AI-powered dynamic financial insights based on active balances and cash velocity
   const aiInsight = useMemo(() => {
     const defaultCurrencyCode = accounts[0]?.currency || 'USD';
     const formattedVelocity = formatCurrency(
@@ -143,7 +138,6 @@ export const AccountsScreen = () => {
   const HeaderComponent = useMemo(() => {
     const defaultCurrencyCode = accounts[0]?.currency || 'USD';
 
-    // Calculate dynamic visual ratios for progress bars
     const cashFlowRatio =
       monthlyIncome > 0
         ? Math.min(1, monthlyExpenses / monthlyIncome)
@@ -151,11 +145,10 @@ export const AccountsScreen = () => {
           ? 1
           : 0;
 
-    const velocityRatio = Math.min(1, spendingVelocity / 150); // Normalized relative to custom daily threshold $150
+    const velocityRatio = Math.min(1, spendingVelocity / 150);
 
     return (
       <View style={styles.headerContainer}>
-        {/* Total Assets Overview */}
         <View style={styles.overviewSection}>
           <Text
             style={[
@@ -180,9 +173,7 @@ export const AccountsScreen = () => {
           </Text>
         </View>
 
-        {/* Visual Analytics Widgets Row */}
         <View style={styles.analyticsRow}>
-          {/* Widget 1: Net Cash Flow */}
           <Card style={styles.analyticsCard} mode="contained">
             <Card.Content style={styles.analyticsCardContent}>
               <View style={styles.widgetHeader}>
@@ -238,7 +229,6 @@ export const AccountsScreen = () => {
             </Card.Content>
           </Card>
 
-          {/* Widget 2: Spending Velocity */}
           <Card style={styles.analyticsCard} mode="contained">
             <Card.Content style={styles.analyticsCardContent}>
               <View style={styles.widgetHeader}>
@@ -287,7 +277,6 @@ export const AccountsScreen = () => {
           </Card>
         </View>
 
-        {/* AI Finance Insights Card */}
         <Card
           style={[
             styles.insightCard,
@@ -315,7 +304,7 @@ export const AccountsScreen = () => {
               <Text
                 style={[styles.insightTitle, { color: theme.colors.onSurface }]}
               >
-                AI Smart Insight
+                Insight
               </Text>
               <Text
                 style={[
@@ -329,7 +318,6 @@ export const AccountsScreen = () => {
           </Card.Content>
         </Card>
 
-        {/* Dynamic Drag Reorder Helper Badge */}
         {accounts.length > 1 && (
           <View style={styles.dragHelpRow}>
             <Ionicons

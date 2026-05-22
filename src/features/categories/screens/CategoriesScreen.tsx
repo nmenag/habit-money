@@ -1,7 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
@@ -9,7 +9,6 @@ import DraggableFlatList, {
 import {
   Card,
   FAB,
-  IconButton,
   SegmentedButtons,
   Text,
   useTheme,
@@ -26,20 +25,14 @@ import { getValidCategoryIcon } from '../../../constants';
 import { AppTheme } from '../../../theme/theme';
 
 export const CategoriesScreen = () => {
-  const {
-    categories,
-    deleteCategory,
-    transactions,
-    updateCategoriesOrder,
-    formatCurrency,
-  } = useStore();
+  const { categories, transactions, updateCategoriesOrder, formatCurrency } =
+    useStore();
   const { t, translateName } = useTranslation();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const [activeTab, setActiveTab] = useState<TransactionType>('expense');
   const insets = useSafeAreaInsets();
 
-  // 1. Calculate category-wise totals and stats for insights
   const analytics = useMemo(() => {
     const totals: Record<string, number> = {};
     const counts: Record<string, number> = {};
@@ -71,18 +64,26 @@ export const CategoriesScreen = () => {
     const ratio = analytics.maxVal > 0 ? totalAmount / analytics.maxVal : 0;
     const itemColor = item.color || theme.colors.primary;
 
+    const isDark = theme.dark;
+    const cardBg = isActive
+      ? theme.colors.elevation.level3
+      : isDark
+        ? `${itemColor}08`
+        : `${itemColor}04`;
+    const cardBorder = isActive
+      ? theme.colors.primary
+      : isDark
+        ? `${itemColor}25`
+        : `${itemColor}1C`;
+
     return (
       <ScaleDecorator>
         <Card
           style={[
             styles.card,
             {
-              backgroundColor: isActive
-                ? theme.colors.elevation.level3
-                : theme.colors.surface,
-              borderColor: isActive
-                ? theme.colors.primary
-                : theme.colors.outline,
+              backgroundColor: cardBg,
+              borderColor: cardBorder,
             },
           ]}
           onPress={() =>
@@ -95,24 +96,27 @@ export const CategoriesScreen = () => {
           mode="outlined"
         >
           <View style={styles.cardInner}>
-            {/* Drag Handle Indicator */}
             <TouchableOpacity
               onPressIn={drag}
               activeOpacity={0.8}
               style={styles.dragHandle}
             >
               <Ionicons
-                name="grid-outline"
-                size={16}
+                name="reorder-two-outline"
+                size={18}
                 color={theme.colors.outline}
+                style={{ opacity: 0.35 }}
               />
             </TouchableOpacity>
 
-            {/* Tinted Category Icon Badge */}
             <View
               style={[
                 styles.iconCircle,
-                { backgroundColor: `${itemColor}15` }, // 10% opacity soft desaturated tint
+                {
+                  backgroundColor: `${itemColor}12`,
+                  borderColor: `${itemColor}2B`,
+                  borderWidth: 1,
+                },
               ]}
             >
               <MaterialCommunityIcons
@@ -122,7 +126,6 @@ export const CategoriesScreen = () => {
               />
             </View>
 
-            {/* Center Content: Title, metadata, and visual mini progress bar */}
             <View style={styles.metaCol}>
               <View style={styles.titleRow}>
                 <Text
@@ -137,7 +140,7 @@ export const CategoriesScreen = () => {
                   <Text
                     style={[
                       styles.amountText,
-                      { color: theme.colors.onSurfaceVariant },
+                      { color: theme.colors.onSurface },
                     ]}
                   >
                     {formatCurrency(totalAmount)}
@@ -153,7 +156,6 @@ export const CategoriesScreen = () => {
                   : `${txCount} ${t('transactions')}`}
               </Text>
 
-              {/* Muted spending pill indicator */}
               {totalAmount > 0 && (
                 <View style={styles.ratioBarBg}>
                   <View
@@ -178,7 +180,6 @@ export const CategoriesScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      {/* Top Segmented Navigation Tabs */}
       <View
         style={[styles.headerSection, { paddingTop: Math.max(12, insets.top) }]}
       >

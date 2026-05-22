@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
-import { Card, IconButton, Text, useTheme } from 'react-native-paper';
+import { StyleSheet, View } from 'react-native';
+import { Card, Text, useTheme } from 'react-native-paper';
 import { Account, useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme } from '../../../theme/theme';
 
@@ -40,10 +40,10 @@ export const AccountCard: React.FC<Props> = ({
   const isDarkColor = theme.dark;
 
   const cardBackground = isDarkColor
-    ? `${accountColor}12`
-    : `${accountColor}0C`;
+    ? `${accountColor}08`
+    : `${accountColor}04`;
 
-  const cardBorder = isDarkColor ? `${accountColor}2B` : `${accountColor}20`;
+  const cardBorder = isDarkColor ? `${accountColor}25` : `${accountColor}1B`;
 
   return (
     <Card
@@ -70,21 +70,22 @@ export const AccountCard: React.FC<Props> = ({
           {onLongPress && (
             <View style={styles.dragHandle} pointerEvents="none">
               <Ionicons
-                name="menu-outline"
+                name="reorder-two-outline"
                 size={20}
-                color={theme.colors.onSurfaceVariant}
-                style={{ opacity: 0.4 }}
+                color={theme.colors.outline}
+                style={{ opacity: 0.35 }}
               />
             </View>
           )}
 
-          {/* Account Icon Badge with premium glowing ring */}
+          {/* Account Icon Badge with premium desaturated border */}
           <View
             style={[
               styles.iconContainer,
               {
-                backgroundColor: `${accountColor}1B`,
-                borderColor: `${accountColor}40`,
+                backgroundColor: `${accountColor}12`,
+                borderColor: `${accountColor}2B`,
+                borderWidth: 1,
               },
             ]}
           >
@@ -175,8 +176,8 @@ const defaultStyles = (theme: AppTheme) =>
       justifyContent: 'center',
     },
     name: {
-      fontSize: 16,
-      fontWeight: '800',
+      fontSize: 15,
+      fontWeight: '600',
       letterSpacing: -0.2,
     },
     badgeRow: {
@@ -185,7 +186,7 @@ const defaultStyles = (theme: AppTheme) =>
     },
     typeText: {
       fontSize: 9,
-      fontWeight: '900',
+      fontWeight: '600',
       letterSpacing: 1,
       paddingHorizontal: 6,
       paddingVertical: 2,
@@ -199,9 +200,9 @@ const defaultStyles = (theme: AppTheme) =>
       marginRight: 4,
     },
     balanceText: {
-      fontSize: 17,
-      fontWeight: '900',
-      letterSpacing: -0.5,
+      fontSize: 16,
+      fontWeight: '600',
+      letterSpacing: -0.4,
     },
     deleteButton: {
       margin: 0,
