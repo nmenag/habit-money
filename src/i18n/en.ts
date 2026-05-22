@@ -24,6 +24,8 @@ export const en = {
   noRecentTransactions: 'No recent transactions',
 
   preferences: 'Preferences',
+  financeEssentials: 'Finance Essentials',
+  appCustomization: 'App Preferences',
   manageAccounts: 'Manage Accounts',
   manageCategories: 'Manage Categories',
   manageBudgets: 'Manage Budgets',
@@ -40,6 +42,8 @@ export const en = {
   light: 'Light',
   dark: 'Dark',
   system: 'System Default',
+  darkMode: 'Dark Mode',
+  darkModeDesc: 'Toggle a sleek dark appearance',
   backupData: 'Backup Data (JSON)',
   backupDataDesc: 'Export all app data to a JSON file for backup.',
   restoreData: 'Restore Data (JSON)',
