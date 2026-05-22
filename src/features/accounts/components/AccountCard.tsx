@@ -51,6 +51,15 @@ export const AccountCard: React.FC<Props> = ({
     }
   };
 
+  const accountColor = account.color || theme.colors.primary;
+  const isDarkColor = theme.dark;
+
+  const cardBackground = isDarkColor
+    ? `${accountColor}12`
+    : `${accountColor}0C`;
+
+  const cardBorder = isDarkColor ? `${accountColor}2B` : `${accountColor}20`;
+
   return (
     <Card
       style={[
@@ -58,44 +67,72 @@ export const AccountCard: React.FC<Props> = ({
         {
           backgroundColor: isActive
             ? theme.colors.elevation.level3
-            : theme.colors.surface,
+            : cardBackground,
+          borderColor: isActive ? theme.colors.primary : cardBorder,
         },
       ]}
-      mode="elevated"
+      mode="outlined"
       onPress={onPress}
       onLongPress={onLongPress}
+      delayLongPress={180}
       disabled={isActive}
       accessibilityLabel={`${translateName(account.name)}, ${t(account.type)}, ${formatCurrency(account.currentBalance, account.currency)}`}
       accessibilityRole="button"
     >
       <Card.Content style={styles.cardContent}>
         <View style={styles.cardHeader}>
+          {/* Reorder drag handle indicator */}
+          {onLongPress && (
+            <View style={styles.dragHandle} pointerEvents="none">
+              <Ionicons
+                name="menu-outline"
+                size={20}
+                color={theme.colors.onSurfaceVariant}
+                style={{ opacity: 0.4 }}
+              />
+            </View>
+          )}
+
+          {/* Account Icon Badge with premium glowing ring */}
           <View
             style={[
               styles.iconContainer,
-              { backgroundColor: account.color || theme.colors.primary },
+              {
+                backgroundColor: `${accountColor}1B`,
+                borderColor: `${accountColor}40`,
+              },
             ]}
           >
             <Ionicons
               name={getAccountIcon(account.type) as any}
-              size={24}
-              color={theme.colors.onPrimary}
+              size={22}
+              color={accountColor}
             />
           </View>
+
+          {/* Details & Hierarchy */}
           <View style={styles.textContainer}>
-            <Text variant="titleMedium" style={styles.name}>
+            <Text style={[styles.name, { color: theme.colors.onSurface }]}>
               {translateName(account.name)}
             </Text>
-            <Text
-              variant="labelMedium"
-              style={[styles.typeText, { color: theme.colors.outline }]}
-            >
-              {t(account.type).toUpperCase()}
-            </Text>
+            <View style={styles.badgeRow}>
+              <Text
+                style={[
+                  styles.typeText,
+                  {
+                    color: accountColor,
+                    backgroundColor: `${accountColor}12`,
+                  },
+                ]}
+              >
+                {t(account.type).toUpperCase()}
+              </Text>
+            </View>
           </View>
+
+          {/* Large, beautiful balance display */}
           <View style={styles.balanceContainer}>
             <Text
-              variant="titleMedium"
               style={[
                 styles.balanceText,
                 {
@@ -111,11 +148,13 @@ export const AccountCard: React.FC<Props> = ({
               {formatCurrency(account.currentBalance, account.currency)}
             </Text>
           </View>
+
+          {/* Elegant direct edit/delete option */}
           {onDelete && (
             <IconButton
               icon="trash-can-outline"
-              iconColor={theme.colors.error}
-              size={20}
+              iconColor={theme.colors.onSurfaceVariant}
+              size={18}
               onPress={(e) => {
                 e.stopPropagation();
                 handleDelete();
@@ -132,50 +171,69 @@ export const AccountCard: React.FC<Props> = ({
 const defaultStyles = (theme: AppTheme) =>
   StyleSheet.create({
     card: {
-      marginBottom: 16,
-      borderRadius: 16,
+      marginBottom: 12,
+      borderRadius: 20,
+      borderWidth: 1.5,
       overflow: 'hidden',
+      elevation: 0,
     },
     cardContent: {
-      padding: 16,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
     },
     cardHeader: {
       flexDirection: 'row',
       alignItems: 'center',
     },
-    iconContainer: {
-      width: 48,
-      height: 48,
-      borderRadius: 12,
+    dragHandle: {
+      marginRight: 10,
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: 16,
-      elevation: 2,
-      shadowColor: theme.colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
+    },
+    iconContainer: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      borderWidth: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 14,
     },
     textContainer: {
-      flex: 1,
+      flex: 1.2,
+      justifyContent: 'center',
     },
     name: {
+      fontSize: 16,
       fontWeight: '800',
-      letterSpacing: 0.2,
+      letterSpacing: -0.2,
+    },
+    badgeRow: {
+      flexDirection: 'row',
+      marginTop: 4,
     },
     typeText: {
-      marginTop: 2,
-      fontWeight: '500',
+      fontSize: 9,
+      fontWeight: '900',
+      letterSpacing: 1,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 6,
+      overflow: 'hidden',
     },
     balanceContainer: {
       alignItems: 'flex-end',
-      marginRight: 8,
-      flexShrink: 1,
+      justifyContent: 'center',
+      flex: 1,
+      marginRight: 4,
     },
     balanceText: {
-      fontWeight: '800',
+      fontSize: 17,
+      fontWeight: '900',
+      letterSpacing: -0.5,
     },
     deleteButton: {
       margin: 0,
+      opacity: 0.7,
     },
   });

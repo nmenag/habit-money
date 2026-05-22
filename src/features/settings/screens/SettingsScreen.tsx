@@ -47,7 +47,6 @@ export const SettingsScreen = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  // Animation values for notifications settings expansion
   const notificationHeight = useSharedValue(notificationsEnabled ? 80 : 0);
   const notificationOpacity = useSharedValue(notificationsEnabled ? 1 : 0);
 
