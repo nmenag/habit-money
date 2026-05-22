@@ -511,13 +511,12 @@ export const AddTransactionScreen = () => {
         const cleanText = text.replace(/[^0-9.,]/g, '');
         if (cleanText === '') return '';
 
-        let firstSepIdx = cleanText.indexOf('.');
-        if (firstSepIdx === -1) {
-          firstSepIdx = cleanText.indexOf(',');
-        }
+        const firstSepIdx = cleanText.indexOf(decimalSep);
 
         if (firstSepIdx === -1) {
-          return cleanText.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSep);
+          return cleanText
+            .replace(/\D/g, '')
+            .replace(/\B(?=(\d{3})+(?!\d))/g, thousandSep);
         } else {
           const integerPart = cleanText
             .substring(0, firstSepIdx)
@@ -564,7 +563,17 @@ export const AddTransactionScreen = () => {
       currency !== 'CLP' &&
       currency !== 'PYG' &&
       currency !== 'XAF';
-    const formatted = formatAmountInput(text, isDecimal);
+
+    let processedText = text;
+    if (language === 'es' && isDecimal) {
+      if (/\.\d{1,2}$/.test(processedText)) {
+        processedText = processedText.replace(/\.(\d{1,2})$/, ',$1');
+      } else if (processedText.endsWith('.')) {
+        processedText = processedText.slice(0, -1) + ',';
+      }
+    }
+
+    const formatted = formatAmountInput(processedText, isDecimal);
 
     if (formatted === '') {
       setDisplayAmount('');
