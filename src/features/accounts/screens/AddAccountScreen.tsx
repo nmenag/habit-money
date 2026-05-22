@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, Stack } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
   Alert,
@@ -11,6 +11,7 @@ import {
 import { Button, Text, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
+import { BottomSheet } from '../../../shared/components/BottomSheet';
 import { COLORS } from '../../../constants';
 import {
   Account,
@@ -38,12 +39,20 @@ export const AddAccountScreen = () => {
 
   const isEditing = !!editingAccount;
 
-  const { addAccount, editAccount, addTransaction, currency } = useStore();
+  const {
+    addAccount,
+    editAccount,
+    deleteAccount,
+    addTransaction,
+    currency,
+    accounts,
+  } = useStore();
   const { t, language, translateName } = useTranslation();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
 
+  const [menuOpen, setMenuOpen] = useState(false);
   const [name, setName] = useState(
     editingAccount ? translateName(editingAccount.name) : '',
   );
@@ -117,33 +126,62 @@ export const AddAccountScreen = () => {
     setDisplayBalance(onlyDigits.replace(/\B(?=(\d{3})+(?!\d))/g, separator));
   };
 
+  const handleDelete = () => {
+    if (!editingAccount) return;
+    if (accounts.length <= 1) {
+      Alert.alert(
+        t('error'),
+        t('cannotDeleteLastAccount' as any) ||
+          'You must keep at least one account.',
+      );
+      return;
+    }
+
+    Alert.alert(
+      t('deleteAccount'),
+      t('deleteAccountConfirm', { name: translateName(editingAccount.name) }),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('delete'),
+          style: 'destructive',
+          onPress: () => {
+            deleteAccount(editingAccount.id);
+            router.replace('/accounts');
+          },
+        },
+      ],
+    );
+  };
+
   return (
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      {/* Top Header Navigation bar */}
-      <View
-        style={[styles.headerBar, { paddingTop: Math.max(12, insets.top) }]}
-      >
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons
-            name="arrow-back-outline"
-            size={24}
-            color={theme.colors.onSurface}
-          />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.colors.onSurface }]}>
-          {isEditing
-            ? t('editAccount' as any) || 'Edit Account'
-            : t('saveAccount') || 'New Account'}
-        </Text>
-        <View style={{ width: 40 }} />
-      </View>
-
+      <Stack.Screen
+        options={{
+          title: isEditing ? t('editAccount') : t('addAccount'),
+          headerRight: () =>
+            isEditing ? (
+              <TouchableOpacity
+                onPress={() => setMenuOpen(true)}
+                style={{ padding: 8, marginRight: -8 }}
+                activeOpacity={0.7}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons
+                  name="ellipsis-horizontal"
+                  size={22}
+                  color={theme.colors.onSurface}
+                />
+              </TouchableOpacity>
+            ) : null,
+        }}
+      />
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: Math.max(insets.bottom, 20) + 40 },
+          { paddingBottom: Math.max(insets.bottom, 20) + 120 },
         ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -385,6 +423,34 @@ export const AddAccountScreen = () => {
       </ScrollView>
 
       <BannerAdComponent />
+
+      <BottomSheet
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        title={t('accountOptions' as any) || 'Account Options'}
+      >
+        <View style={styles.menuContainer}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              setMenuOpen(false);
+              handleDelete();
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={t('delete') || 'Delete account'}
+          >
+            <Ionicons
+              name="trash-outline"
+              size={22}
+              color={theme.colors.error}
+              style={{ marginRight: 16 }}
+            />
+            <Text style={[styles.menuItemText, { color: theme.colors.error }]}>
+              {t('delete')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </BottomSheet>
     </View>
   );
 };
@@ -481,5 +547,22 @@ const defaultStyles = (theme: AppTheme) =>
       fontSize: 15,
       fontWeight: '800',
       color: '#fff',
+    },
+    menuContainer: {
+      paddingHorizontal: 16,
+      paddingTop: 8,
+      paddingBottom: 24,
+    },
+    menuItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 18,
+      paddingHorizontal: 16,
+      borderRadius: 16,
+      marginVertical: 2,
+    },
+    menuItemText: {
+      fontSize: 16,
+      fontWeight: '600',
     },
   });

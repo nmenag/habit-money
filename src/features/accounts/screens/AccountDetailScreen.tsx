@@ -153,7 +153,7 @@ export const AccountDetailScreen = () => {
       <ScrollView
         contentContainerStyle={{
           paddingTop: Math.max(16, insets.top),
-          paddingBottom: insets.bottom + 120,
+          paddingBottom: insets.bottom + 200,
         }}
         showsVerticalScrollIndicator={false}
       >

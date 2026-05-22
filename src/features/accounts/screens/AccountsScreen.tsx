@@ -37,13 +37,6 @@ export const AccountsScreen = () => {
     });
   }, []);
 
-  const handleDeleteAccount = useCallback(
-    (id: string) => {
-      deleteAccount(id);
-    },
-    [deleteAccount],
-  );
-
   // --- Premium Visual Account Analytics calculations ---
   const { totalBalance, monthlyIncome, monthlyExpenses, spendingVelocity } =
     useMemo(() => {
@@ -138,16 +131,13 @@ export const AccountsScreen = () => {
       <ScaleDecorator>
         <AccountCard
           account={item}
-          onDelete={
-            accounts.length > 1 ? () => handleDeleteAccount(item.id) : undefined
-          }
           onPress={() => handleAccountPress(item.id)}
           onLongPress={drag}
           isActive={isActive}
         />
       </ScaleDecorator>
     ),
-    [accounts.length, handleDeleteAccount, handleAccountPress],
+    [handleAccountPress],
   );
 
   const HeaderComponent = useMemo(() => {
@@ -380,7 +370,7 @@ export const AccountsScreen = () => {
         onDragEnd={({ data }) => updateAccountsOrder(data)}
         contentContainerStyle={[
           styles.listContent,
-          { paddingBottom: insets.bottom + 140 },
+          { paddingBottom: insets.bottom + 200 },
         ]}
         ListHeaderComponent={HeaderComponent}
         renderItem={renderItem}

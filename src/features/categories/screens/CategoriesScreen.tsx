@@ -1,7 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
@@ -10,7 +10,6 @@ import {
   Card,
   FAB,
   IconButton,
-  List,
   SegmentedButtons,
   Text,
   useTheme,
@@ -24,96 +23,165 @@ import {
   useTranslation,
 } from '../../../store/useStore';
 import { getValidCategoryIcon } from '../../../constants';
+import { AppTheme } from '../../../theme/theme';
 
 export const CategoriesScreen = () => {
-  const { categories, deleteCategory, transactions, updateCategoriesOrder } =
-    useStore();
+  const {
+    categories,
+    deleteCategory,
+    transactions,
+    updateCategoriesOrder,
+    formatCurrency,
+  } = useStore();
   const { t, translateName } = useTranslation();
-  const theme = useTheme();
+  const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const [activeTab, setActiveTab] = useState<TransactionType>('expense');
+  const insets = useSafeAreaInsets();
 
-  const handleDelete = (category: Category) => {
-    const isUsed = transactions.some((t) => t.categoryId === category.id);
-    if (isUsed) {
-      Alert.alert(t('cannotDelete'), t('categoryUsedError'));
-      return;
-    }
+  // 1. Calculate category-wise totals and stats for insights
+  const analytics = useMemo(() => {
+    const totals: Record<string, number> = {};
+    const counts: Record<string, number> = {};
+    let grandTotal = 0;
+    let maxVal = 0;
 
-    Alert.alert(
-      t('deleteCategory'),
-      `${t('confirmDelete')} ${translateName(category.name)}?`,
-      [
-        { text: t('cancel'), style: 'cancel' },
-        {
-          text: t('delete'),
-          style: 'destructive',
-          onPress: () => deleteCategory(category.id),
-        },
-      ],
-    );
-  };
-
-  const renderItem = ({ item, drag, isActive }: RenderItemParams<Category>) => (
-    <ScaleDecorator>
-      <Card
-        style={[
-          styles.card,
-          {
-            backgroundColor: isActive
-              ? theme.colors.elevation.level3
-              : theme.colors.surface,
-          },
-        ]}
-        onPress={() =>
-          router.push({
-            pathname: '/add-category',
-            params: { category: JSON.stringify(item) },
-          })
+    transactions
+      .filter((tx) => tx.type === activeTab)
+      .forEach((tx) => {
+        const catId = tx.categoryId || 'uncategorized';
+        totals[catId] = (totals[catId] || 0) + tx.amount;
+        counts[catId] = (counts[catId] || 0) + 1;
+        grandTotal += tx.amount;
+        if (totals[catId] > maxVal) {
+          maxVal = totals[catId];
         }
-        onLongPress={drag}
-        disabled={isActive}
-        mode="elevated"
-      >
-        <List.Item
-          title={translateName(item.name)}
-          titleStyle={styles.categoryName}
-          left={() => (
+      });
+
+    return { totals, counts, grandTotal, maxVal };
+  }, [transactions, activeTab]);
+
+  const filteredCategories = useMemo(() => {
+    return categories.filter((c) => c.type === activeTab);
+  }, [categories, activeTab]);
+
+  const renderItem = ({ item, drag, isActive }: RenderItemParams<Category>) => {
+    const totalAmount = analytics.totals[item.id] || 0;
+    const txCount = analytics.counts[item.id] || 0;
+    const ratio = analytics.maxVal > 0 ? totalAmount / analytics.maxVal : 0;
+    const itemColor = item.color || theme.colors.primary;
+
+    return (
+      <ScaleDecorator>
+        <Card
+          style={[
+            styles.card,
+            {
+              backgroundColor: isActive
+                ? theme.colors.elevation.level3
+                : theme.colors.surface,
+              borderColor: isActive
+                ? theme.colors.primary
+                : theme.colors.outline,
+            },
+          ]}
+          onPress={() =>
+            router.push({
+              pathname: '/add-category',
+              params: { category: JSON.stringify(item) },
+            })
+          }
+          disabled={isActive}
+          mode="outlined"
+        >
+          <View style={styles.cardInner}>
+            {/* Drag Handle Indicator */}
+            <TouchableOpacity
+              onPressIn={drag}
+              activeOpacity={0.8}
+              style={styles.dragHandle}
+            >
+              <Ionicons
+                name="grid-outline"
+                size={16}
+                color={theme.colors.outline}
+              />
+            </TouchableOpacity>
+
+            {/* Tinted Category Icon Badge */}
             <View
               style={[
                 styles.iconCircle,
-                { backgroundColor: item.color || theme.colors.surfaceVariant },
+                { backgroundColor: `${itemColor}15` }, // 10% opacity soft desaturated tint
               ]}
             >
               <MaterialCommunityIcons
                 name={getValidCategoryIcon(item.icon) as any}
-                size={22}
-                color="#fff"
+                size={20}
+                color={itemColor}
               />
             </View>
-          )}
-          right={(props) => (
-            <IconButton
-              {...props}
-              icon="trash-can-outline"
-              iconColor={theme.colors.error}
-              onPress={() => handleDelete(item)}
-            />
-          )}
-        />
-      </Card>
-    </ScaleDecorator>
-  );
 
-  const insets = useSafeAreaInsets();
+            {/* Center Content: Title, metadata, and visual mini progress bar */}
+            <View style={styles.metaCol}>
+              <View style={styles.titleRow}>
+                <Text
+                  style={[
+                    styles.categoryName,
+                    { color: theme.colors.onSurface },
+                  ]}
+                >
+                  {translateName(item.name)}
+                </Text>
+                {totalAmount > 0 && (
+                  <Text
+                    style={[
+                      styles.amountText,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {formatCurrency(totalAmount)}
+                  </Text>
+                )}
+              </View>
 
-  const filteredCategories = categories.filter((c) => c.type === activeTab);
+              <Text
+                style={[styles.categoryDesc, { color: theme.colors.outline }]}
+              >
+                {txCount === 1
+                  ? `1 ${t('transaction' as any) || 'transaction'}`
+                  : `${txCount} ${t('transactions')}`}
+              </Text>
+
+              {/* Muted spending pill indicator */}
+              {totalAmount > 0 && (
+                <View style={styles.ratioBarBg}>
+                  <View
+                    style={[
+                      styles.ratioBarFill,
+                      {
+                        width: `${ratio * 100}%`,
+                        backgroundColor: itemColor,
+                      },
+                    ]}
+                  />
+                </View>
+              )}
+            </View>
+          </View>
+        </Card>
+      </ScaleDecorator>
+    );
+  };
 
   return (
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <View style={styles.topBar}>
+      {/* Top Segmented Navigation Tabs */}
+      <View
+        style={[styles.headerSection, { paddingTop: Math.max(12, insets.top) }]}
+      >
         <SegmentedButtons
           value={activeTab}
           onValueChange={(v) => setActiveTab(v as TransactionType)}
@@ -138,7 +206,6 @@ export const CategoriesScreen = () => {
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         onDragEnd={({ data }) => {
-          // Merge reordered filtered list back into the main categories list
           const otherCategories = categories.filter(
             (c) => c.type !== activeTab,
           );
@@ -146,19 +213,55 @@ export const CategoriesScreen = () => {
         }}
         contentContainerStyle={[
           styles.listContent,
-          { paddingBottom: insets.bottom + 140 },
+          { paddingBottom: insets.bottom + 200 },
         ]}
+        ListHeaderComponent={
+          filteredCategories.length > 0 ? (
+            <Card style={styles.insightsCard} mode="contained">
+              <Card.Content style={styles.insightsCardContent}>
+                <Ionicons
+                  name="analytics-outline"
+                  size={20}
+                  color={theme.colors.primary}
+                />
+                <View style={styles.insightsTextContainer}>
+                  <Text
+                    style={[
+                      styles.insightsTitle,
+                      { color: theme.colors.onSurface },
+                    ]}
+                  >
+                    {activeTab === 'expense'
+                      ? t('topSpendingCategory')
+                      : t('income')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.insightsBody,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('totalBalance')}:{' '}
+                    <Text
+                      style={{ fontWeight: '600', color: theme.colors.primary }}
+                    >
+                      {formatCurrency(analytics.grandTotal)}
+                    </Text>{' '}
+                    across {filteredCategories.length} categories.
+                  </Text>
+                </View>
+              </Card.Content>
+            </Card>
+          ) : null
+        }
         ListEmptyComponent={
           <View style={styles.empty}>
             <Ionicons
               name={activeTab === 'expense' ? 'cart-outline' : 'cash-outline'}
-              size={64}
+              size={54}
               color={theme.colors.outlineVariant}
             />
-            <Text
-              variant="bodyLarge"
-              style={[styles.emptyText, { color: theme.colors.outline }]}
-            >
+            <Text style={[styles.emptyText, { color: theme.colors.outline }]}>
               {t('noCategories')}
             </Text>
           </View>
@@ -183,55 +286,133 @@ export const CategoriesScreen = () => {
   );
 };
 
-const defaultStyles = (theme: any) =>
+const defaultStyles = (theme: AppTheme) =>
   StyleSheet.create({
     container: {
       flex: 1,
     },
-    topBar: {
+    headerSection: {
       paddingHorizontal: 16,
-      paddingVertical: 12,
-      backgroundColor: theme.colors.background,
+      paddingBottom: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.outlineVariant,
     },
     segmentedButtons: {
-      borderRadius: 12,
+      borderRadius: 14,
+    },
+    insightsCard: {
+      marginHorizontal: 16,
+      marginTop: 16,
+      marginBottom: 8,
+      borderRadius: 18,
+      backgroundColor: theme.colors.elevation.level1,
+      borderColor: theme.colors.outline,
+      borderWidth: 1,
+      elevation: 0,
+    },
+    insightsCardContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      padding: 14,
+    },
+    insightsTextContainer: {
+      flex: 1,
+    },
+    insightsTitle: {
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    insightsBody: {
+      fontSize: 11,
+      marginTop: 2,
     },
     listContent: {
-      paddingTop: 4,
+      paddingTop: 8,
     },
     card: {
       marginBottom: 8,
       marginHorizontal: 16,
-      borderRadius: 16,
-      backgroundColor: theme.colors.surface,
+      borderRadius: 20,
+      borderWidth: 1.5,
+      elevation: 0,
+      overflow: 'hidden',
+    },
+    cardInner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 14,
+      paddingHorizontal: 12,
+    },
+    dragHandle: {
+      width: 24,
+      height: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 6,
     },
     iconCircle: {
       width: 44,
       height: 44,
-      borderRadius: 22,
+      borderRadius: 14,
       justifyContent: 'center',
       alignItems: 'center',
-      marginLeft: 8,
-      alignSelf: 'center',
+      marginRight: 12,
+    },
+    metaCol: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    titleRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingRight: 6,
     },
     categoryName: {
-      fontWeight: '700',
-      fontSize: 16,
+      fontWeight: '600',
+      fontSize: 15,
+      letterSpacing: -0.1,
+    },
+    amountText: {
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    categoryDesc: {
+      fontSize: 11,
+      marginTop: 2,
+      fontWeight: '400',
+    },
+    ratioBarBg: {
+      height: 4,
+      borderRadius: 100,
+      backgroundColor: theme.dark ? '#27272A' : '#F4F4F5',
+      marginTop: 8,
+      overflow: 'hidden',
+    },
+    ratioBarFill: {
+      height: '100%',
+      borderRadius: 100,
+    },
+    deleteBtn: {
+      margin: 0,
+      opacity: 0.7,
     },
     empty: {
       padding: 40,
       alignItems: 'center',
-      marginTop: 80,
+      marginTop: 60,
     },
     emptyText: {
       textAlign: 'center',
-      paddingHorizontal: 20,
+      fontSize: 14,
+      fontWeight: '500',
       marginTop: 12,
     },
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 16,
+      borderRadius: 18,
       elevation: 6,
     },
   });

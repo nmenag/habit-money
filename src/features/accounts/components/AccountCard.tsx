@@ -7,7 +7,6 @@ import { AppTheme } from '../../../theme/theme';
 
 interface Props {
   account: Account;
-  onDelete?: () => void;
   onPress?: () => void;
   onLongPress?: () => void;
   isActive?: boolean;
@@ -15,7 +14,6 @@ interface Props {
 
 export const AccountCard: React.FC<Props> = ({
   account,
-  onDelete,
   onPress,
   onLongPress,
   isActive,
@@ -24,19 +22,6 @@ export const AccountCard: React.FC<Props> = ({
   const { t, translateName } = useTranslation();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
-
-  const handleDelete = () => {
-    if (onDelete) {
-      Alert.alert(
-        t('deleteAccount'),
-        t('deleteAccountConfirm', { name: translateName(account.name) }),
-        [
-          { text: t('cancel'), style: 'cancel' },
-          { text: t('delete'), style: 'destructive', onPress: onDelete },
-        ],
-      );
-    }
-  };
 
   const getAccountIcon = (type: string) => {
     switch (type) {
@@ -148,20 +133,6 @@ export const AccountCard: React.FC<Props> = ({
               {formatCurrency(account.currentBalance, account.currency)}
             </Text>
           </View>
-
-          {/* Elegant direct edit/delete option */}
-          {onDelete && (
-            <IconButton
-              icon="trash-can-outline"
-              iconColor={theme.colors.onSurfaceVariant}
-              size={18}
-              onPress={(e) => {
-                e.stopPropagation();
-                handleDelete();
-              }}
-              style={styles.deleteButton}
-            />
-          )}
         </View>
       </Card.Content>
     </Card>
