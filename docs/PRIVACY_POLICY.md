@@ -1,6 +1,6 @@
 # Privacy Policy for Habit Money
 
-**Effective Date: April 6, 2026**
+**Effective Date: May 21, 2026**
 
 Habit Money ("we", "us", or "our") built the Habit Money app as a Freemium app. This SERVICE is provided by Habit Money at no cost and is intended for use as is.
 
