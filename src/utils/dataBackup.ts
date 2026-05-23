@@ -208,6 +208,16 @@ export const restoreFromJSON = async (
 
     db.execSync('PRAGMA foreign_keys = ON;');
 
+    try {
+      const today = getLocalDateString();
+      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+        'last_backup_reminder_date',
+        today,
+      ]);
+    } catch (e) {
+      console.error('Failed to set restore day backup reminder settings', e);
+    }
+
     onSuccess();
     Alert.alert(t('success'), t('restoreSuccess'));
   } catch (error) {
