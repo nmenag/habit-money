@@ -311,7 +311,7 @@ export const AccountsScreen = () => {
             <Text
               style={[styles.dragHelpText, { color: theme.colors.outline }]}
             >
-              Hold & drag cards to adjust their priority order
+              {t('holdAndDragToReorder')}
             </Text>
           </View>
         )}

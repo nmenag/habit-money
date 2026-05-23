@@ -212,47 +212,68 @@ export const CategoriesScreen = () => {
         ]}
         ListHeaderComponent={
           filteredCategories.length > 0 ? (
-            <Card style={styles.insightsCard} mode="contained">
-              <Card.Content style={styles.insightsCardContent}>
-                <Ionicons
-                  name="analytics-outline"
-                  size={18}
-                  color={theme.colors.primary}
-                />
-                <View style={styles.insightsTextContainer}>
-                  <Text
-                    style={[
-                      styles.insightsTitle,
-                      { color: theme.colors.onSurface },
-                    ]}
-                  >
-                    {activeTab === 'expense'
-                      ? t('topSpendingCategory')
-                      : t('income')}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.insightsBody,
-                      { color: theme.colors.onSurfaceVariant },
-                    ]}
-                  >
-                    {t('totalBalance')}:{' '}
+            <View>
+              <Card style={styles.insightsCard} mode="contained">
+                <Card.Content style={styles.insightsCardContent}>
+                  <Ionicons
+                    name="analytics-outline"
+                    size={18}
+                    color={theme.colors.primary}
+                  />
+                  <View style={styles.insightsTextContainer}>
                     <Text
-                      style={{
-                        fontFamily: 'Inter-SemiBold',
-                        fontWeight: '600',
-                        color: theme.colors.primary,
-                      }}
+                      style={[
+                        styles.insightsTitle,
+                        { color: theme.colors.onSurface },
+                      ]}
                     >
-                      {formatCurrency(analytics.grandTotal)}
-                    </Text>{' '}
-                    {t('acrossCategoriesCount', {
-                      count: filteredCategories.length,
-                    })}
+                      {activeTab === 'expense'
+                        ? t('topSpendingCategory')
+                        : t('income')}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.insightsBody,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {t('totalBalance')}:{' '}
+                      <Text
+                        style={{
+                          fontFamily: 'Inter-SemiBold',
+                          fontWeight: '600',
+                          color: theme.colors.primary,
+                        }}
+                      >
+                        {formatCurrency(analytics.grandTotal)}
+                      </Text>{' '}
+                      {t('acrossCategoriesCount', {
+                        count: filteredCategories.length,
+                      })}
+                    </Text>
+                  </View>
+                </Card.Content>
+              </Card>
+
+              {filteredCategories.length > 1 && (
+                <View style={styles.dragHelpRow}>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={13}
+                    color={theme.colors.outline}
+                    style={{ marginRight: 4 }}
+                  />
+                  <Text
+                    style={[
+                      styles.dragHelpText,
+                      { color: theme.colors.outline },
+                    ]}
+                  >
+                    {t('holdAndDragToReorder')}
                   </Text>
                 </View>
-              </Card.Content>
-            </Card>
+              )}
+            </View>
           ) : null
         }
         ListEmptyComponent={
@@ -415,6 +436,19 @@ const defaultStyles = (theme: AppTheme) =>
     ratioBarFill: {
       height: '100%',
       borderRadius: 100,
+    },
+    dragHelpRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 16,
+      marginBottom: 8,
+      opacity: 0.8,
+    },
+    dragHelpText: {
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
     },
     empty: {
       padding: 40,

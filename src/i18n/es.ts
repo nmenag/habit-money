@@ -43,7 +43,7 @@ export const es = {
   dark: 'Oscuro',
   system: 'Por defecto',
   darkMode: 'Modo Oscuro',
-  darkModeDesc: 'Alternar una apariencia oscura y elegante',
+  darkModeDesc: 'Alternar una apariencia oscura',
   backupData: 'Copia de Seguridad (JSON)',
   backupDataDesc:
     'Exporta todos los datos de la app a un archivo JSON para respaldo.',
@@ -448,4 +448,6 @@ export const es = {
     '💡 Consejo Financiero: Asignar un 10% adicional de flujo de caja positivo mensual te permitirá alcanzar tus metas 2.4 meses antes.',
   smartAdviceAchievedAll:
     '🎉 ¡Felicitaciones! Has alcanzado por completo todos tus objetivos financieros establecidos. Considera definir un nuevo hito de inversión a largo plazo.',
+  holdAndDragToReorder:
+    'Mantén presionado y arrastra las tarjetas para ajustar su orden de prioridad',
 };

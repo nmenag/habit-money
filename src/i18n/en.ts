@@ -441,4 +441,5 @@ export const en = {
     '💡 Financial Tip: Allocating an extra 10% of monthly positive cash flow will hit your active milestones 2.4 months earlier.',
   smartAdviceAchievedAll:
     '🎉 Congratulations! You have fully achieved all of your set financial targets. Consider defining a new long-term investment milestone.',
+  holdAndDragToReorder: 'Hold & drag cards to adjust their priority order',
 };
