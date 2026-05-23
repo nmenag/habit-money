@@ -187,7 +187,6 @@ export const AccountsScreen = () => {
           </Text>
         </Animated.View>
 
-        {/* Analytics Widgets Row */}
         <Animated.View
           entering={FadeInUp.delay(100).duration(300)}
           style={styles.analyticsRow}

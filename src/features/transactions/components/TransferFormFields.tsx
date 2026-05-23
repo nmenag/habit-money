@@ -38,6 +38,7 @@ export const TransferFormFields = React.memo(
               borderColor: theme.colors.outlineVariant,
               borderWidth: 1,
               marginBottom: 12,
+              paddingLeft: 20,
             },
           ]}
           onPress={() => openAccountSheet('from')}
@@ -49,6 +50,15 @@ export const TransferFormFields = React.memo(
             'Double tap to select a different source account'
           }
         >
+          <View
+            style={[
+              styles.selectorAccentBar,
+              {
+                backgroundColor:
+                  selectedAccountObj?.color || theme.colors.primary,
+              },
+            ]}
+          />
           <View style={styles.selectorCardLeft}>
             <View
               style={[
@@ -108,11 +118,21 @@ export const TransferFormFields = React.memo(
                 ? formatCurrency(selectedAccountObj.currentBalance)
                 : ''}
             </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={theme.colors.onSurfaceVariant}
-            />
+            <View
+              style={[
+                styles.chevronCircle,
+                {
+                  backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <Ionicons
+                name="chevron-forward"
+                size={14}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </View>
           </View>
         </TouchableOpacity>
 
@@ -123,6 +143,7 @@ export const TransferFormFields = React.memo(
               backgroundColor: theme.colors.surface,
               borderColor: theme.colors.outlineVariant,
               borderWidth: 1,
+              paddingLeft: 20,
             },
           ]}
           onPress={() => openAccountSheet('to')}
@@ -134,6 +155,15 @@ export const TransferFormFields = React.memo(
             'Double tap to select a different destination account'
           }
         >
+          <View
+            style={[
+              styles.selectorAccentBar,
+              {
+                backgroundColor:
+                  selectedToAccountObj?.color || theme.colors.primary,
+              },
+            ]}
+          />
           <View style={styles.selectorCardLeft}>
             <View
               style={[
@@ -193,11 +223,21 @@ export const TransferFormFields = React.memo(
                 ? formatCurrency(selectedToAccountObj.currentBalance)
                 : ''}
             </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={theme.colors.onSurfaceVariant}
-            />
+            <View
+              style={[
+                styles.chevronCircle,
+                {
+                  backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <Ionicons
+                name="chevron-forward"
+                size={14}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </View>
           </View>
         </TouchableOpacity>
       </View>

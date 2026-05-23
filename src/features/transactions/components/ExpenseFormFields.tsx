@@ -50,6 +50,7 @@ export const ExpenseFormFields = React.memo(
               backgroundColor: theme.colors.surface,
               borderColor: theme.colors.outlineVariant,
               borderWidth: 1,
+              paddingLeft: 20,
             },
           ]}
           onPress={() => openAccountSheet('from')}
@@ -60,6 +61,15 @@ export const ExpenseFormFields = React.memo(
             t('changeAccountHint') || 'Double tap to select a different account'
           }
         >
+          <View
+            style={[
+              styles.selectorAccentBar,
+              {
+                backgroundColor:
+                  selectedAccountObj?.color || theme.colors.primary,
+              },
+            ]}
+          />
           <View style={styles.selectorCardLeft}>
             <View
               style={[
@@ -119,11 +129,21 @@ export const ExpenseFormFields = React.memo(
                 ? formatCurrency(selectedAccountObj.currentBalance)
                 : ''}
             </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={theme.colors.onSurfaceVariant}
-            />
+            <View
+              style={[
+                styles.chevronCircle,
+                {
+                  backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <Ionicons
+                name="chevron-forward"
+                size={14}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </View>
           </View>
         </TouchableOpacity>
 
@@ -135,6 +155,7 @@ export const ExpenseFormFields = React.memo(
               borderColor: theme.colors.outlineVariant,
               borderWidth: 1,
               marginTop: 16,
+              paddingLeft: 20,
             },
           ]}
           onPress={() => setCategorySheetOpen(true)}
@@ -145,6 +166,15 @@ export const ExpenseFormFields = React.memo(
             t('changeCategoryHint') || 'Double tap to select a category'
           }
         >
+          <View
+            style={[
+              styles.selectorAccentBar,
+              {
+                backgroundColor:
+                  selectedCategoryObj?.color || theme.colors.primary,
+              },
+            ]}
+          />
           <View style={styles.selectorCardLeft}>
             <View
               style={[
@@ -190,11 +220,21 @@ export const ExpenseFormFields = React.memo(
               </Text>
             </View>
           </View>
-          <Ionicons
-            name="chevron-forward"
-            size={18}
-            color={theme.colors.onSurfaceVariant}
-          />
+          <View
+            style={[
+              styles.chevronCircle,
+              {
+                backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={14}
+              color={theme.colors.onSurfaceVariant}
+            />
+          </View>
         </TouchableOpacity>
 
         {budgets.length > 0 && (
@@ -206,6 +246,7 @@ export const ExpenseFormFields = React.memo(
                 borderColor: theme.colors.outlineVariant,
                 borderWidth: 1,
                 marginTop: 16,
+                paddingLeft: 20,
               },
             ]}
             onPress={() => setBudgetSheetOpen(true)}
@@ -216,6 +257,15 @@ export const ExpenseFormFields = React.memo(
               t('changeBudgetHint') || 'Double tap to select a budget'
             }
           >
+            <View
+              style={[
+                styles.selectorAccentBar,
+                {
+                  backgroundColor:
+                    selectedBudgetObj?.color || theme.colors.outline,
+                },
+              ]}
+            />
             <View style={{ flex: 1 }}>
               <View style={styles.budgetCardTop}>
                 <View style={styles.selectorCardLeft}>
@@ -286,11 +336,21 @@ export const ExpenseFormFields = React.memo(
                       {formatCurrency(selectedBudgetObj.amount)}
                     </Text>
                   )}
-                  <Ionicons
-                    name="chevron-forward"
-                    size={18}
-                    color={theme.colors.onSurfaceVariant}
-                  />
+                  <View
+                    style={[
+                      styles.chevronCircle,
+                      {
+                        backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                        borderColor: theme.colors.outlineVariant,
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name="chevron-forward"
+                      size={14}
+                      color={theme.colors.onSurfaceVariant}
+                    />
+                  </View>
                 </View>
               </View>
 
@@ -298,40 +358,23 @@ export const ExpenseFormFields = React.memo(
                 <View style={styles.budgetProgressContainer}>
                   <View
                     style={[
-                      styles.budgetProgressBarBg,
+                      styles.budgetProgressBar,
                       {
                         backgroundColor: theme.colors.outlineVariant,
-                        height: 4,
-                        borderRadius: 2,
                       },
                     ]}
                   >
                     <View
                       style={[
-                        styles.budgetProgressBarFill,
+                        styles.budgetProgressFill,
                         {
+                          width: `${Math.min(currentBudgetUsage.progress * 100, 100)}%`,
                           backgroundColor:
                             selectedBudgetObj.color || theme.colors.primary,
-                          width: `${currentBudgetUsage.progress * 100}%`,
-                          height: 4,
-                          borderRadius: 2,
                         },
                       ]}
                     />
                   </View>
-                  <Text
-                    style={{
-                      fontFamily: 'Inter-Regular',
-                      fontWeight: '400',
-                      fontSize: 11,
-                      color: theme.colors.onSurfaceVariant,
-                      marginLeft: 10,
-                      width: 32,
-                      textAlign: 'right',
-                    }}
-                  >
-                    {Math.round(currentBudgetUsage.progress * 100)}%
-                  </Text>
                 </View>
               )}
             </View>

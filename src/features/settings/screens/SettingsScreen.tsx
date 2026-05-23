@@ -3,15 +3,15 @@ import { router } from 'expo-router';
 import React from 'react';
 import {
   Alert,
-  FlatList,
   Linking,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Divider, Menu, Switch, Text, useTheme } from 'react-native-paper';
+import { Divider, Switch, Text, useTheme } from 'react-native-paper';
 import { TimePickerModal } from 'react-native-paper-dates';
+import { BottomSheet } from '../../../shared/components/BottomSheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -29,6 +29,17 @@ import { backupToJSON, restoreFromJSON } from '../../../utils/dataBackup';
 import { CURRENCIES } from '../../../constants';
 import { AppTheme } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
+
+const addAlpha = (color: string, opacity: number) => {
+  if (color && color.startsWith('#')) {
+    const hex = color.replace('#', '');
+    const alpha = Math.round(opacity * 255)
+      .toString(16)
+      .padStart(2, '0');
+    return `#${hex}${alpha}`;
+  }
+  return color;
+};
 
 export const SettingsScreen = () => {
   const {
@@ -205,7 +216,6 @@ export const SettingsScreen = () => {
     [notificationsEnabled, t, setNotificationTime],
   );
 
-  // Core Financial Links - Matching categories/accounts translucent design system
   const SETTINGS_LINKS = [
     {
       name: t('manageAccounts'),
@@ -337,195 +347,122 @@ export const SettingsScreen = () => {
             {t('appCustomization')}
           </Text>
           <View style={styles.card}>
-            <Menu
-              visible={languageMenuVisible}
-              onDismiss={() => setLanguageMenuVisible(false)}
-              anchor={
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => {
-                    setLanguageMenuVisible(true);
-                  }}
-                  style={styles.rowItem}
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {
+                setLanguageMenuVisible(true);
+              }}
+              style={styles.rowItem}
+            >
+              <View
+                style={[
+                  styles.iconBox,
+                  {
+                    backgroundColor: '#3B82F612',
+                    borderColor: '#3B82F62B',
+                  },
+                ]}
+              >
+                <Ionicons name="earth-outline" size={20} color="#3B82F6" />
+              </View>
+              <View style={styles.rowText}>
+                <Text
+                  style={[styles.rowTitle, { color: theme.colors.onSurface }]}
                 >
-                  <View
+                  {t('language')}
+                </Text>
+                <Text
+                  style={[
+                    styles.rowSub,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {t('changeLanguageDesc') || 'Switch the app language'}
+                </Text>
+              </View>
+              <View style={styles.rowRight}>
+                <View
+                  style={[
+                    styles.badge,
+                    { backgroundColor: theme.colors.outlineVariant },
+                  ]}
+                >
+                  <Text
                     style={[
-                      styles.iconBox,
-                      {
-                        backgroundColor: '#3B82F612',
-                        borderColor: '#3B82F62B',
-                      },
+                      styles.badgeText,
+                      { color: theme.colors.onSurfaceVariant },
                     ]}
                   >
-                    <Ionicons name="earth-outline" size={20} color="#3B82F6" />
-                  </View>
-                  <View style={styles.rowText}>
-                    <Text
-                      style={[
-                        styles.rowTitle,
-                        { color: theme.colors.onSurface },
-                      ]}
-                    >
-                      {t('language')}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.rowSub,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
-                    >
-                      {t('changeLanguageDesc') || 'Switch the app language'}
-                    </Text>
-                  </View>
-                  <View style={styles.rowRight}>
-                    <View
-                      style={[
-                        styles.badge,
-                        { backgroundColor: theme.colors.outlineVariant },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.badgeText,
-                          { color: theme.colors.onSurfaceVariant },
-                        ]}
-                      >
-                        {LANGUAGES.find((l) => l.code === language)?.label}
-                      </Text>
-                    </View>
-                    <Ionicons
-                      name="chevron-down"
-                      size={16}
-                      color={theme.colors.onSurfaceVariant}
-                    />
-                  </View>
-                </TouchableOpacity>
-              }
-              contentStyle={{ backgroundColor: theme.colors.elevation.level3 }}
-            >
-              {LANGUAGES.map((item) => {
-                const isSelected = language === item.code;
-                return (
-                  <Menu.Item
-                    key={item.code}
-                    onPress={() => {
-                      setLanguage(item.code as any);
-                      setLanguageMenuVisible(false);
-                    }}
-                    title={item.name}
-                    leadingIcon={isSelected ? 'check' : 'translate'}
-                    titleStyle={{
-                      color: isSelected
-                        ? theme.colors.primary
-                        : theme.colors.onSurface,
-                      fontFamily: isSelected ? 'Inter-Medium' : 'Inter-Regular',
-                      fontWeight: isSelected ? '500' : '400',
-                    }}
-                  />
-                );
-              })}
-            </Menu>
+                    {LANGUAGES.find((l) => l.code === language)?.label}
+                  </Text>
+                </View>
+                <Ionicons
+                  name="chevron-down"
+                  size={16}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </View>
+            </TouchableOpacity>
 
             <Divider style={styles.divider} />
 
-            <Menu
-              visible={currencyMenuVisible}
-              onDismiss={() => setCurrencyMenuVisible(false)}
-              anchor={
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => {
-                    setCurrencyMenuVisible(true);
-                  }}
-                  style={styles.rowItem}
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {
+                setCurrencyMenuVisible(true);
+              }}
+              style={styles.rowItem}
+            >
+              <View
+                style={[
+                  styles.iconBox,
+                  {
+                    backgroundColor: '#10B98112',
+                    borderColor: '#10B9812B',
+                  },
+                ]}
+              >
+                <Ionicons name="cash-outline" size={20} color="#10B981" />
+              </View>
+              <View style={styles.rowText}>
+                <Text
+                  style={[styles.rowTitle, { color: theme.colors.onSurface }]}
                 >
-                  <View
+                  {t('currency') || 'Currency'}
+                </Text>
+                <Text
+                  style={[
+                    styles.rowSub,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {t('detectedCurrency')}
+                </Text>
+              </View>
+              <View style={styles.rowRight}>
+                <View
+                  style={[
+                    styles.badge,
+                    { backgroundColor: theme.colors.outlineVariant },
+                  ]}
+                >
+                  <Text
                     style={[
-                      styles.iconBox,
-                      {
-                        backgroundColor: '#10B98112',
-                        borderColor: '#10B9812B',
-                      },
+                      styles.badgeText,
+                      { color: theme.colors.onSurfaceVariant },
                     ]}
                   >
-                    <Ionicons name="cash-outline" size={20} color="#10B981" />
-                  </View>
-                  <View style={styles.rowText}>
-                    <Text
-                      style={[
-                        styles.rowTitle,
-                        { color: theme.colors.onSurface },
-                      ]}
-                    >
-                      {t('currency') || 'Currency'}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.rowSub,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
-                    >
-                      {t('detectedCurrency')}
-                    </Text>
-                  </View>
-                  <View style={styles.rowRight}>
-                    <View
-                      style={[
-                        styles.badge,
-                        { backgroundColor: theme.colors.outlineVariant },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.badgeText,
-                          { color: theme.colors.onSurfaceVariant },
-                        ]}
-                      >
-                        {CURRENCIES.find((c) => c.code === currency)?.symbol ||
-                          '$'}{' '}
-                        {currency}
-                      </Text>
-                    </View>
-                    <Ionicons
-                      name="chevron-down"
-                      size={16}
-                      color={theme.colors.onSurfaceVariant}
-                    />
-                  </View>
-                </TouchableOpacity>
-              }
-              contentStyle={{ backgroundColor: theme.colors.elevation.level3 }}
-            >
-              <View style={{ maxHeight: 300, minWidth: 200 }}>
-                <FlatList
-                  data={CURRENCIES}
-                  keyExtractor={(item) => item.code}
-                  initialNumToRender={10}
-                  renderItem={({ item }) => {
-                    const isSelected = currency === item.code;
-                    return (
-                      <Menu.Item
-                        onPress={() => {
-                          setCurrency(item.code);
-                          setCurrencyMenuVisible(false);
-                        }}
-                        title={`${t(item.tKey as any)} (${item.code})`}
-                        leadingIcon={isSelected ? 'check' : 'cash-multiple'}
-                        titleStyle={{
-                          color: isSelected
-                            ? theme.colors.primary
-                            : theme.colors.onSurface,
-                          fontFamily: isSelected
-                            ? 'Inter-Medium'
-                            : 'Inter-Regular',
-                          fontWeight: isSelected ? '500' : '400',
-                        }}
-                      />
-                    );
-                  }}
+                    {CURRENCIES.find((c) => c.code === currency)?.symbol || '$'}{' '}
+                    {currency}
+                  </Text>
+                </View>
+                <Ionicons
+                  name="chevron-down"
+                  size={16}
+                  color={theme.colors.onSurfaceVariant}
                 />
               </View>
-            </Menu>
+            </TouchableOpacity>
 
             <Divider style={styles.divider} />
 
@@ -988,6 +925,129 @@ export const SettingsScreen = () => {
         minutes={parseInt(notificationTime.split(':')[1], 10)}
         use24HourClock={is24Hour}
       />
+
+      <BottomSheet
+        visible={languageMenuVisible}
+        onClose={() => setLanguageMenuVisible(false)}
+        title={t('language') || 'Language'}
+      >
+        {LANGUAGES.map((item) => {
+          const isSelected = language === item.code;
+          return (
+            <TouchableOpacity
+              key={item.code}
+              style={[
+                styles.modalListItem,
+                { borderColor: theme.colors.outlineVariant },
+                isSelected && {
+                  backgroundColor: theme.dark
+                    ? addAlpha(theme.colors.primary, 0.16)
+                    : addAlpha(theme.colors.primary, 0.08),
+                },
+              ]}
+              onPress={() => {
+                setLanguage(item.code as any);
+                setLanguageMenuVisible(false);
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+            >
+              <Text
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  color: theme.colors.onSurface,
+                }}
+              >
+                {item.name}
+              </Text>
+              <View
+                style={[
+                  styles.radioOuter,
+                  {
+                    borderColor: isSelected
+                      ? theme.colors.primary
+                      : theme.colors.outlineVariant,
+                  },
+                ]}
+              >
+                {isSelected && (
+                  <View
+                    style={[
+                      styles.radioInner,
+                      { backgroundColor: theme.colors.primary },
+                    ]}
+                  />
+                )}
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </BottomSheet>
+
+      <BottomSheet
+        visible={currencyMenuVisible}
+        onClose={() => setCurrencyMenuVisible(false)}
+        title={t('currency') || 'Currency'}
+      >
+        <ScrollView
+          style={{ maxHeight: 400 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {CURRENCIES.map((curr) => {
+            const isSelected = currency === curr.code;
+            return (
+              <TouchableOpacity
+                key={curr.code}
+                style={[
+                  styles.modalListItem,
+                  { borderColor: theme.colors.outlineVariant },
+                  isSelected && {
+                    backgroundColor: theme.dark
+                      ? addAlpha(theme.colors.primary, 0.16)
+                      : addAlpha(theme.colors.primary, 0.08),
+                  },
+                ]}
+                onPress={() => {
+                  setCurrency(curr.code);
+                  setCurrencyMenuVisible(false);
+                }}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+              >
+                <Text
+                  style={{
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    color: theme.colors.onSurface,
+                  }}
+                >
+                  {t(curr.tKey as any)} ({curr.code})
+                </Text>
+                <View
+                  style={[
+                    styles.radioOuter,
+                    {
+                      borderColor: isSelected
+                        ? theme.colors.primary
+                        : theme.colors.outlineVariant,
+                    },
+                  ]}
+                >
+                  {isSelected && (
+                    <View
+                      style={[
+                        styles.radioInner,
+                        { backgroundColor: theme.colors.primary },
+                      ]}
+                    />
+                  )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </BottomSheet>
     </View>
   );
 };
@@ -1099,6 +1159,29 @@ const defaultStyles = (theme: AppTheme) =>
     themeButtonText: {
       fontSize: 13,
       textTransform: 'capitalize',
+    },
+    modalListItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      borderRadius: 16,
+      borderWidth: 1,
+      marginBottom: 10,
+    },
+    radioOuter: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    radioInner: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
     },
     adContainer: {
       position: 'absolute',

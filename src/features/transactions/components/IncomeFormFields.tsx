@@ -40,6 +40,7 @@ export const IncomeFormFields = React.memo(
               backgroundColor: theme.colors.surface,
               borderColor: theme.colors.outlineVariant,
               borderWidth: 1,
+              paddingLeft: 20,
             },
           ]}
           onPress={() => openAccountSheet('from')}
@@ -50,6 +51,15 @@ export const IncomeFormFields = React.memo(
             t('changeAccountHint') || 'Double tap to select a different account'
           }
         >
+          <View
+            style={[
+              styles.selectorAccentBar,
+              {
+                backgroundColor:
+                  selectedAccountObj?.color || theme.colors.primary,
+              },
+            ]}
+          />
           <View style={styles.selectorCardLeft}>
             <View
               style={[
@@ -109,11 +119,21 @@ export const IncomeFormFields = React.memo(
                 ? formatCurrency(selectedAccountObj.currentBalance)
                 : ''}
             </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={theme.colors.onSurfaceVariant}
-            />
+            <View
+              style={[
+                styles.chevronCircle,
+                {
+                  backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <Ionicons
+                name="chevron-forward"
+                size={14}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </View>
           </View>
         </TouchableOpacity>
 
@@ -125,6 +145,7 @@ export const IncomeFormFields = React.memo(
               borderColor: theme.colors.outlineVariant,
               borderWidth: 1,
               marginTop: 16,
+              paddingLeft: 20,
             },
           ]}
           onPress={() => setCategorySheetOpen(true)}
@@ -135,6 +156,15 @@ export const IncomeFormFields = React.memo(
             t('changeCategoryHint') || 'Double tap to select a category'
           }
         >
+          <View
+            style={[
+              styles.selectorAccentBar,
+              {
+                backgroundColor:
+                  selectedCategoryObj?.color || theme.colors.primary,
+              },
+            ]}
+          />
           <View style={styles.selectorCardLeft}>
             <View
               style={[
@@ -180,11 +210,21 @@ export const IncomeFormFields = React.memo(
               </Text>
             </View>
           </View>
-          <Ionicons
-            name="chevron-forward"
-            size={18}
-            color={theme.colors.onSurfaceVariant}
-          />
+          <View
+            style={[
+              styles.chevronCircle,
+              {
+                backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={14}
+              color={theme.colors.onSurfaceVariant}
+            />
+          </View>
         </TouchableOpacity>
       </>
     );

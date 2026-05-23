@@ -1029,7 +1029,8 @@ export const AddTransactionScreen = () => {
                 <Text
                   variant="labelSmall"
                   style={{
-                    fontWeight: isSelected ? '700' : '400',
+                    fontFamily: isSelected ? 'Inter-Medium' : 'Inter-Regular',
+                    fontWeight: isSelected ? '500' : '400',
                     color: theme.colors.onSurface,
                     marginTop: 6,
                     textAlign: 'center',
@@ -1115,7 +1116,8 @@ export const AddTransactionScreen = () => {
                     <Text
                       variant="bodyMedium"
                       style={{
-                        fontWeight: '600',
+                        fontFamily: 'Inter-Medium',
+                        fontWeight: '500',
                         color: theme.colors.onSurface,
                       }}
                     >
@@ -1133,7 +1135,8 @@ export const AddTransactionScreen = () => {
                   <Text
                     variant="bodyMedium"
                     style={{
-                      fontWeight: '700',
+                      fontFamily: 'Inter-Medium',
+                      fontWeight: '500',
                       color: theme.colors.onSurface,
                       marginRight: 12,
                     }}
@@ -1207,7 +1210,8 @@ export const AddTransactionScreen = () => {
             <Text
               variant="bodyMedium"
               style={{
-                fontWeight: '600',
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
                 color: theme.colors.onSurface,
                 marginLeft: 12,
               }}
@@ -1284,7 +1288,8 @@ export const AddTransactionScreen = () => {
                     <Text
                       variant="bodyMedium"
                       style={{
-                        fontWeight: '600',
+                        fontFamily: 'Inter-Medium',
+                        fontWeight: '500',
                         color: theme.colors.onSurface,
                       }}
                     >
@@ -1795,5 +1800,23 @@ const styles = StyleSheet.create({
     height: 1,
     marginVertical: 12,
     opacity: 0.6,
+  },
+  selectorAccentBar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 6,
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+  },
+  chevronCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
   },
 });
