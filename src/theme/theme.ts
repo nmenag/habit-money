@@ -49,7 +49,6 @@ const palette = {
   },
 };
 
-// Global Spacing scale (4px base)
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -72,7 +71,6 @@ export const chartColors = [
   '#6366F1', // indigo
 ];
 
-// Clean global typography scale using Inter only (weights: 400, 500, 600)
 const fontConfig = {
   displayLarge: {
     fontFamily: 'Inter-SemiBold',

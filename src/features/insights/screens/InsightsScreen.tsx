@@ -19,7 +19,6 @@ import {
   moderateScale,
 } from '../../../utils/responsive';
 
-// Hex/RGB transparency utility for desaturated accent overlays with bulletproof fallbacks
 const addAlpha = (
   color: string | undefined,
   opacity: number,

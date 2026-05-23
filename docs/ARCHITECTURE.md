@@ -83,7 +83,7 @@ habit-money/
 The UI is built with **React Native Paper** (Material Design 3), ensuring a premium, consistent look. Navigation is handled by **Expo Router**, which provides a robust, file-based routing system similar to Next.js.
 
 - **Theme Casting Pattern**: To achieve absolute type safety, we cast standard `useTheme()` to `AppTheme` (e.g. `useTheme<AppTheme>()`). This gives the presentation layer fully typed access to custom branded colors (like `income`, `incomeContainer`, `warningContainer`, and `errorContainer`) without resorting to fragile `(theme.colors as any)` cast overrides.
-- **Dynamic Dark Mode Contrast**: Legend containers and boundaries avoid hardcoded borders, binding dynamically to theme-level tokens (like `theme.colors.outlineVariant`) so grid layouts retain crisp visibility in high-contrast and dark mode environments.
+- **Dynamic Dark Mode Contrast**: Legend containers, settings rows, and card boundaries avoid hardcoded colors. They bind dynamically to theme-level tokens (like `theme.colors.outlineVariant`) across all modules (Accounts, Categories, Budgets, Goals, Transactions), ensuring beautiful, premium visual boundaries under both light and dark mode.
 - **Universal Accessibility (WCAG)**: Graphical canvases (Pie and Bar SVG charts), summary metric panels, and dynamic progress bars are fitted with native `accessible={true}` configurations and descriptive `accessibilityLabel` parameters to ensure that VoiceOver and TalkBack screen-reader users receive clear, spoken reports of their financial health.
 
 Each feature module exports its screens and components through a barrel `index.ts`, keeping imports clean and enforcing feature boundaries.
@@ -108,6 +108,7 @@ We use **Zustand v5** with a **sliced store pattern** for lightweight, performan
 - All financial data is stored **locally** on the device — no cloud sync, no external API calls.
 - **`src/db/schema.ts`** handles table creation, indexing, and forward-only migrations.
 - **WAL mode** is enabled for improved concurrency and write performance.
+- **Async Validation Pipeline**: Critical configuration and initialization transactions utilize fully asynchronous prepared statements to guarantee database thread safety and prevent any main thread locks during dynamic onboarding setup.
 - Key indexes on `transactions(date)`, `transactions(accountId)`, and `transactions(categoryId)` ensure fast filtering even with thousands of records.
 
 See [DATABASE_DESIGN.md](DATABASE_DESIGN.md) for the full schema and ERD.
