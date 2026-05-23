@@ -60,8 +60,8 @@ Habit Money is a modern, high-performance personal finance tracker built with **
 1. **Clone & Install**
 
    ```bash
-   git clone git@github.com:nmenag/fin-habit.git
-   cd fin-habit
+   git clone git@github.com:nmenag/habit-money.git
+   cd habit-money
    npm install
    ```
 
@@ -174,7 +174,7 @@ This project is configured for **EAS (Expo Application Services)** to handle bui
 
 The application configuration is dynamic and handles three variants: `development`, `preview`, and `production`.
 
-- **Slug**: `fin-habit` (Matches the associated EAS Project ID).
+- **Slug**: `habit-money` (Matches the associated EAS Project ID).
 - **Name**: `Habit Money`.
 - **Scheme**: `habitmoney`.
 

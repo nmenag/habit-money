@@ -30,7 +30,7 @@ graph TD
 The codebase follows a **feature-based architecture**. Each domain (dashboard, transactions, accounts, etc.) owns its screens, components, and feature-specific services, colocated under `src/features/<feature-name>/`. Shared, cross-cutting concerns live in dedicated top-level directories.
 
 ```
-fin-habit/
+habit-money/
 ├── app/                        # Expo Router entry: file-based navigation (tabs & stacks)
 │   ├── (tabs)/                 # Bottom-tab routes
 │   └── *.tsx                   # Stack routes (add-account, add-transaction, goals, etc.)

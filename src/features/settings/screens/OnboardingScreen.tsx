@@ -289,7 +289,9 @@ export const OnboardingScreen = () => {
           <Text
             style={[styles.termsLink, { color: theme.colors.primary }]}
             onPress={() =>
-              Linking.openURL('https://nmenag.github.io/fin-habit/privacy.html')
+              Linking.openURL(
+                'https://nmenag.github.io/habit-money/privacy.html',
+              )
             }
           >
             {t('privacyPolicy')}
@@ -298,7 +300,7 @@ export const OnboardingScreen = () => {
           <Text
             style={[styles.termsLink, { color: theme.colors.primary }]}
             onPress={() =>
-              Linking.openURL('https://nmenag.github.io/fin-habit/terms.html')
+              Linking.openURL('https://nmenag.github.io/habit-money/terms.html')
             }
           >
             {t('termsOfUse')}
