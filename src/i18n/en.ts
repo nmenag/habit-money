@@ -115,6 +115,7 @@ export const en = {
   accountNamePlaceholder: 'E.g. Checking Wallet',
   categoryNamePlaceholder: 'E.g. Groceries',
   goalNamePlaceholder: 'E.g. New Car',
+  nameMinLengthError: 'Please enter a name with at least 2 characters.',
   updateTransaction: 'Update Transaction',
   saveTransaction: 'Save Transaction',
   deleteTransaction: 'Delete Transaction',

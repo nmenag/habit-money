@@ -118,6 +118,7 @@ export const es = {
   accountNamePlaceholder: 'Ej. Mi Billetera',
   categoryNamePlaceholder: 'Ej. Compras',
   goalNamePlaceholder: 'Ej. Carro nuevo',
+  nameMinLengthError: 'Por favor ingresa un nombre con al menos 2 caracteres.',
   updateTransaction: 'Actualizar Transacción',
   saveTransaction: 'Guardar Transacción',
   deleteTransaction: 'Eliminar Transacción',

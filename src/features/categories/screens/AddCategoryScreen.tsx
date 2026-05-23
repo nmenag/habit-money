@@ -160,7 +160,7 @@ export const AddCategoryScreen = () => {
             {t('categoryName' as any) || 'CATEGORY NAME'}
           </Text>
           <TextInput
-            placeholder="Name (e.g. Shopping, Rent)"
+            placeholder={t('categoryNamePlaceholder')}
             value={name}
             onChangeText={setName}
             mode="outlined"
@@ -179,7 +179,8 @@ export const AddCategoryScreen = () => {
                 fontWeight: '500',
               }}
             >
-              Please enter a name with at least 2 characters.
+              {t('nameMinLengthError' as any) ||
+                'Please enter a name with at least 2 characters.'}
             </Text>
           )}
         </View>

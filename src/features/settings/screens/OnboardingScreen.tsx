@@ -75,15 +75,15 @@ export const OnboardingScreen = () => {
 
       const db = await getDb();
       await db.runAsync(
-        'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)',
-        ['has_onboarded', 'true'],
+        'INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)',
+        ['isFirstLaunch', 'false'],
       );
       await db.runAsync(
-        'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)',
+        'INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)',
         ['language', detectedLang],
       );
       await db.runAsync(
-        'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)',
+        'INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)',
         ['currency', detectedCurrency],
       );
 
@@ -274,7 +274,9 @@ export const OnboardingScreen = () => {
             <Text
               style={[styles.termsLink, { color: theme.colors.primary }]}
               onPress={() =>
-                Linking.openURL('https://habitmoney.app/privacy-policy')
+                Linking.openURL(
+                  'https://nmenag.github.io/habit-money/privacy.html',
+                )
               }
             >
               {t('privacyPolicy')}

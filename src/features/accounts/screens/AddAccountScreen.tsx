@@ -196,7 +196,7 @@ export const AddAccountScreen = () => {
               onChangeText={setName}
               mode="outlined"
               style={styles.inputField}
-              placeholder="Name (e.g. Chase Bank, Cash)"
+              placeholder={t('accountNamePlaceholder')}
               outlineColor={theme.dark ? '#11221D' : '#E2E8F0'}
               activeOutlineColor={theme.colors.primary}
               textColor={theme.colors.onSurface}
@@ -211,7 +211,8 @@ export const AddAccountScreen = () => {
                   fontWeight: '600',
                 }}
               >
-                Please enter a name with at least 2 characters.
+                {t('nameMinLengthError' as any) ||
+                  'Please enter a name with at least 2 characters.'}
               </Text>
             )}
           </View>

@@ -184,7 +184,7 @@ export const AddGoalScreen = () => {
               {t('goalName') || 'GOAL NAME'}
             </Text>
             <TextInput
-              placeholder="e.g. Vacation, New Laptop"
+              placeholder={t('goalNamePlaceholder')}
               value={name}
               onChangeText={setName}
               mode="outlined"
@@ -204,7 +204,8 @@ export const AddGoalScreen = () => {
                   paddingLeft: 4,
                 }}
               >
-                Please enter a name with at least 2 characters.
+                {t('nameMinLengthError' as any) ||
+                  'Please enter a name with at least 2 characters.'}
               </Text>
             )}
           </View>
