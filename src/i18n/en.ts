@@ -346,6 +346,7 @@ export const en = {
   agreeToTermsPrefix: 'By continuing, you agree to our ',
   agreeToTermsAnd: ' and ',
   termsOfUse: 'Terms of Use',
+  startOnboarding: "Let's Start",
   currUSD: 'US Dollar',
   currEUR: 'Euro',
   currGBP: 'British Pound',

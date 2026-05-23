@@ -45,11 +45,9 @@ export const OnboardingScreen = () => {
     const locales = Localization.getLocales();
     if (locales && locales.length > 0) {
       const languageCode = locales[0].languageCode;
-      if (languageCode === 'es') {
-        setDetectedLang('es');
-      } else {
-        setDetectedLang('en');
-      }
+      const detected = languageCode === 'es' ? 'es' : 'en';
+      setDetectedLang(detected);
+      setLanguage(detected);
 
       const currencyCode = locales[0].currencyCode;
       if (currencyCode) {
@@ -59,10 +57,11 @@ export const OnboardingScreen = () => {
         }
       }
     }
-  }, []);
+  }, [setLanguage]);
 
   const selectLanguage = (lang: Language) => {
     setDetectedLang(lang);
+    setLanguage(lang);
   };
 
   const selectCurrency = (curr: string) => {
@@ -108,178 +107,190 @@ export const OnboardingScreen = () => {
     >
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        <View style={styles.header}>
-          <Image
-            source={require('../../../../assets/images/icon.png')}
-            style={styles.logo}
-            priority="high"
-          />
-          <Text
-            style={[styles.title, { color: theme.colors.onBackground }]}
-            variant="headlineLarge"
-          >
-            Habit Money
-          </Text>
-          <Text
-            style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}
-            variant="bodyLarge"
-          >
-            {t('welcomeMessage' as any)}
-          </Text>
-        </View>
-
-        <View style={styles.content}>
-          <Text
-            style={[
-              styles.sectionTitle,
-              { color: theme.colors.onSurfaceVariant },
-            ]}
-          >
-            {t('appCustomization')}
-          </Text>
-          <View
-            style={[
-              styles.settingsCard,
-              {
-                backgroundColor: theme.colors.surface,
-                borderColor: theme.colors.outlineVariant,
-              },
-            ]}
-          >
-            <TouchableOpacity
-              style={styles.settingRow}
-              activeOpacity={0.7}
-              onPress={() => setLangMenuVisible(true)}
-            >
-              <View
-                style={[
-                  styles.iconBox,
-                  {
-                    backgroundColor: addAlpha(theme.colors.primary, 0.08),
-                    borderColor: addAlpha(theme.colors.primary, 0.17),
-                    borderWidth: 1,
-                  },
-                ]}
-              >
-                <Ionicons name="earth" size={20} color={theme.colors.primary} />
-              </View>
-              <View style={styles.settingTextContainer}>
-                <Text
-                  style={[
-                    styles.settingLabel,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  {t('detectedLanguage')}
-                </Text>
-                <Text
-                  style={[
-                    styles.settingValue,
-                    { color: theme.colors.onSurface },
-                  ]}
-                >
-                  {detectedLang === 'es' ? t('spanish') : t('english')}
-                </Text>
-              </View>
-              <Ionicons
-                name="chevron-down"
-                size={20}
-                color={theme.colors.onSurfaceVariant}
-              />
-            </TouchableOpacity>
-            <View
-              style={[
-                styles.divider,
-                { backgroundColor: theme.colors.outlineVariant },
-              ]}
-            />
-            <TouchableOpacity
-              style={styles.settingRow}
-              activeOpacity={0.7}
-              onPress={() => setCurrencyMenuVisible(true)}
-            >
-              <View
-                style={[
-                  styles.iconBox,
-                  {
-                    backgroundColor: addAlpha(theme.colors.primary, 0.08),
-                    borderColor: addAlpha(theme.colors.primary, 0.17),
-                    borderWidth: 1,
-                  },
-                ]}
-              >
-                <Ionicons
-                  name="cash-outline"
-                  size={20}
-                  color={theme.colors.primary}
-                />
-              </View>
-              <View style={styles.settingTextContainer}>
-                <Text
-                  style={[
-                    styles.settingLabel,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  {t('detectedCurrency')}
-                </Text>
-                <Text
-                  style={[
-                    styles.settingValue,
-                    { color: theme.colors.onSurface },
-                  ]}
-                >
-                  {t(
-                    CURRENCIES.find((c) => c.code === detectedCurrency)
-                      ?.tKey as any,
-                  )}
-                </Text>
-              </View>
-              <Ionicons
-                name="chevron-down"
-                size={20}
-                color={theme.colors.onSurfaceVariant}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-
-      <View
-        style={[
-          styles.footer,
-          {
-            backgroundColor: theme.colors.background,
-            borderTopWidth: 1,
-            borderTopColor: theme.colors.outlineVariant,
-          },
+        contentContainerStyle={[
+          styles.scrollContent,
+          { flexGrow: 1, justifyContent: 'space-between' },
         ]}
       >
-        <Text
-          style={[styles.termsText, { color: theme.colors.onSurfaceVariant }]}
+        <View style={styles.mainContent}>
+          <View style={styles.header}>
+            <Image
+              source={require('../../../../assets/images/icon.png')}
+              style={styles.logo}
+              priority="high"
+            />
+            <Text
+              style={[styles.title, { color: theme.colors.onBackground }]}
+              variant="headlineLarge"
+            >
+              Habit Money
+            </Text>
+            <Text
+              style={[
+                styles.subtitle,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+              variant="bodyLarge"
+            >
+              {t('onboardingDesc')}
+            </Text>
+          </View>
+
+          <View style={styles.content}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              {t('appCustomization')}
+            </Text>
+            <View
+              style={[
+                styles.settingsCard,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <TouchableOpacity
+                style={styles.settingRow}
+                activeOpacity={0.7}
+                onPress={() => setLangMenuVisible(true)}
+              >
+                <View
+                  style={[
+                    styles.iconBox,
+                    {
+                      backgroundColor: addAlpha(theme.colors.primary, 0.08),
+                      borderColor: addAlpha(theme.colors.primary, 0.17),
+                      borderWidth: 1,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="earth"
+                    size={20}
+                    color={theme.colors.primary}
+                  />
+                </View>
+                <View style={styles.settingTextContainer}>
+                  <Text
+                    style={[
+                      styles.settingLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('detectedLanguage')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.settingValue,
+                      { color: theme.colors.onSurface },
+                    ]}
+                  >
+                    {detectedLang === 'es' ? t('spanish') : t('english')}
+                  </Text>
+                </View>
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </TouchableOpacity>
+              <View
+                style={[
+                  styles.divider,
+                  { backgroundColor: theme.colors.outlineVariant },
+                ]}
+              />
+              <TouchableOpacity
+                style={styles.settingRow}
+                activeOpacity={0.7}
+                onPress={() => setCurrencyMenuVisible(true)}
+              >
+                <View
+                  style={[
+                    styles.iconBox,
+                    {
+                      backgroundColor: addAlpha(theme.colors.primary, 0.08),
+                      borderColor: addAlpha(theme.colors.primary, 0.17),
+                      borderWidth: 1,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="cash-outline"
+                    size={20}
+                    color={theme.colors.primary}
+                  />
+                </View>
+                <View style={styles.settingTextContainer}>
+                  <Text
+                    style={[
+                      styles.settingLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('detectedCurrency')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.settingValue,
+                      { color: theme.colors.onSurface },
+                    ]}
+                  >
+                    {t(
+                      CURRENCIES.find((c) => c.code === detectedCurrency)
+                        ?.tKey as any,
+                    )}
+                  </Text>
+                </View>
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        <View
+          style={[
+            styles.footer,
+            {
+              borderTopWidth: 1,
+              borderTopColor: theme.colors.outlineVariant,
+              paddingBottom: Math.max(insets.bottom, 24),
+            },
+          ]}
         >
-          {t('termsPrefix' as any)}{' '}
           <Text
-            style={[styles.termsLink, { color: theme.colors.primary }]}
-            onPress={() =>
-              Linking.openURL('https://habitmoney.app/privacy-policy')
-            }
+            style={[styles.termsText, { color: theme.colors.onSurfaceVariant }]}
           >
-            {t('privacyPolicy')}
+            {t('agreeToTermsPrefix')}{' '}
+            <Text
+              style={[styles.termsLink, { color: theme.colors.primary }]}
+              onPress={() =>
+                Linking.openURL('https://habitmoney.app/privacy-policy')
+              }
+            >
+              {t('privacyPolicy')}
+            </Text>
           </Text>
-        </Text>
-        <Button
-          mode="contained"
-          onPress={handleStart}
-          style={styles.button}
-          contentStyle={styles.buttonContent}
-          labelStyle={styles.buttonLabel}
-        >
-          {t('startOnboarding' as any) || "Let's Start"}
-        </Button>
-      </View>
+          <Button
+            mode="contained"
+            onPress={handleStart}
+            style={styles.button}
+            contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
+          >
+            {t('startOnboarding')}
+          </Button>
+        </View>
+      </ScrollView>
 
       <BottomSheet
         visible={langMenuVisible}
@@ -455,11 +466,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 24,
-    paddingBottom: 40,
     width: '100%',
     maxWidth: 600,
     alignSelf: 'center',
+  },
+  mainContent: {
+    padding: 24,
+    paddingBottom: 16,
+    width: '100%',
   },
   header: {
     alignItems: 'center',

@@ -353,6 +353,7 @@ export const es = {
   agreeToTermsPrefix: 'Al continuar, aceptas nuestra ',
   agreeToTermsAnd: ' y ',
   termsOfUse: 'Términos de Uso',
+  startOnboarding: 'Comenzar',
   currUSD: 'Dólar estadounidense',
   currEUR: 'Euro',
   currGBP: 'Libra esterlina',
