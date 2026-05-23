@@ -129,11 +129,7 @@ export const AddAccountScreen = () => {
   const handleDelete = () => {
     if (!editingAccount) return;
     if (accounts.length <= 1) {
-      Alert.alert(
-        t('error'),
-        t('cannotDeleteLastAccount' as any) ||
-          'You must keep at least one account.',
-      );
+      Alert.alert(t('error'), t('cannotDeleteLastAccount'));
       return;
     }
 
@@ -189,7 +185,7 @@ export const AddAccountScreen = () => {
         <View style={styles.formSection}>
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
-              {t('accountName' as any) || 'ACCOUNT NAME'}
+              {t('accountName')}
             </Text>
             <TextInput
               value={name}
@@ -211,8 +207,7 @@ export const AddAccountScreen = () => {
                   fontWeight: '600',
                 }}
               >
-                {t('nameMinLengthError' as any) ||
-                  'Please enter a name with at least 2 characters.'}
+                {t('nameMinLengthError')}
               </Text>
             )}
           </View>
@@ -364,7 +359,7 @@ export const AddAccountScreen = () => {
 
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
-              {t('color' as any) || 'ACCOUNT BRAND COLOR'}
+              {t('color')}
             </Text>
             <View style={styles.colorPaletteRow}>
               {COLORS.map((c) => {
@@ -419,7 +414,7 @@ export const AddAccountScreen = () => {
       <BottomSheet
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
-        title={t('accountOptions' as any) || 'Account Options'}
+        title={t('accountOptions')}
       >
         <View style={styles.menuContainer}>
           <TouchableOpacity

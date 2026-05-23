@@ -456,7 +456,7 @@ export const AddTransactionScreen = () => {
   };
 
   const handleDelete = () => {
-    Alert.alert(t('confirmDelete'), t('confirmDeleteTx'), [
+    Alert.alert(t('deleteTransaction'), t('confirmDeleteTx'), [
       { text: t('cancel'), style: 'cancel' },
       {
         text: t('delete'),

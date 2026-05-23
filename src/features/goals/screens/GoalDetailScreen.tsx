@@ -109,21 +109,17 @@ export const GoalDetailScreen = () => {
   } = calculations;
 
   const handleDelete = () => {
-    Alert.alert(
-      t('confirmDelete') || 'Confirm Delete',
-      t('confirmDeleteGoal') || 'Are you sure you want to delete this goal?',
-      [
-        { text: t('cancel'), style: 'cancel' },
-        {
-          text: t('delete'),
-          style: 'destructive',
-          onPress: () => {
-            deleteGoal(goal.id);
-            router.back();
-          },
+    Alert.alert(t('deleteGoal'), t('confirmDeleteGoal'), [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('delete'),
+        style: 'destructive',
+        onPress: () => {
+          deleteGoal(goal.id);
+          router.back();
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const handleAddFunds = () => {

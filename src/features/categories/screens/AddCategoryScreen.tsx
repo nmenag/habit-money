@@ -157,7 +157,7 @@ export const AddCategoryScreen = () => {
       >
         <View style={styles.fieldContainer}>
           <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
-            {t('categoryName' as any) || 'CATEGORY NAME'}
+            {t('categoryName')}
           </Text>
           <TextInput
             placeholder={t('categoryNamePlaceholder')}
@@ -179,8 +179,7 @@ export const AddCategoryScreen = () => {
                 fontWeight: '500',
               }}
             >
-              {t('nameMinLengthError' as any) ||
-                'Please enter a name with at least 2 characters.'}
+              {t('nameMinLengthError')}
             </Text>
           )}
         </View>
@@ -311,7 +310,7 @@ export const AddCategoryScreen = () => {
       <BottomSheet
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
-        title={t('categoryOptions' as any) || 'Category Options'}
+        title={t('categoryOptions')}
       >
         <View style={styles.menuContainer}>
           <TouchableOpacity

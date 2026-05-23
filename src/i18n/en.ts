@@ -51,6 +51,14 @@ export const en = {
   dataManagement: 'Data Management',
   restoreConfirm:
     'Are you sure you want to restore data? This will overwrite your current data and cannot be undone.',
+  restoreBackupPrompt:
+    'Would you like to back up your current local data first? Restoring will completely overwrite your current data and cannot be undone.',
+  backupAndRestore: 'Back Up & Restore',
+  backupAndRestoreDesc:
+    'Create a backup file first to keep your data safe, then select a file to restore.',
+  restoreDirectly: 'Restore Directly',
+  restoreDirectlyDesc:
+    'Directly select a file to restore. Your current local data will be overwritten.',
   restoreSuccess: 'Data restored successfully!',
   restoreError: 'Error restoring data. Please check the file format.',
   backupReminder: 'Backup Reminder',
@@ -218,6 +226,10 @@ export const en = {
   transfer: 'Transfer',
   confirmDeleteTx: 'Are you sure you want to delete this transaction?',
   transactionOptions: 'Transaction Options',
+  accountOptions: 'Account Options',
+  categoryOptions: 'Category Options',
+  budgetOptions: 'Budget Options',
+  goalOptions: 'Goal Options',
   whatToDo: 'What would you like to do?',
   financialAnalysis: 'Financial Analysis',
   savingsRateTitle: 'Savings Rate',
