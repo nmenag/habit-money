@@ -389,7 +389,6 @@ export const InsightsScreen = () => {
           </Text>
         </View>
 
-        {/* Summary Cards */}
         <View style={styles.summaryContainer}>
           <Card
             style={[
@@ -567,7 +566,6 @@ export const InsightsScreen = () => {
           </View>
         )}
 
-        {/* Savings Row - Contained Card with Progress Visualizer */}
         <Card
           style={[
             styles.savingsCard,
@@ -667,7 +665,6 @@ export const InsightsScreen = () => {
           </Card.Content>
         </Card>
 
-        {/* Category Spending Chart */}
         {pieData.length > 0 && (
           <Card
             style={[
@@ -700,7 +697,6 @@ export const InsightsScreen = () => {
           </Card>
         )}
 
-        {/* Month-over-month Bar Chart */}
         {barData && (
           <Card
             style={[
@@ -774,7 +770,6 @@ export const InsightsScreen = () => {
           </Card>
         )}
 
-        {/* Insights */}
         {analyticsReport && analyticsReport.insights.length > 0 && (
           <View style={{ marginTop: 8 }}>
             <Text
@@ -898,7 +893,6 @@ export const InsightsScreen = () => {
           </View>
         )}
 
-        {/* Empty state */}
         {filtered.txCount === 0 && (
           <View style={styles.emptyContainer}>
             <Ionicons

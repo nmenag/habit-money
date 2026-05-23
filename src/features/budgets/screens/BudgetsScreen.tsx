@@ -262,7 +262,6 @@ export const BudgetsScreen = () => {
               entering={FadeIn.duration(400)}
               style={styles.dashboardHeader}
             >
-              {/* Aggregated budget statistics */}
               <View style={styles.statCard}>
                 <View style={styles.overviewTextRow}>
                   <View>
@@ -302,7 +301,6 @@ export const BudgetsScreen = () => {
                 </View>
               </View>
 
-              {/* Dynamic recommendation box */}
               {smartRecommendation && (
                 <View
                   style={[
@@ -330,7 +328,6 @@ export const BudgetsScreen = () => {
                 </View>
               )}
 
-              {/* Instructions row */}
               <Text style={styles.sectionTitle}>{t('budgetAllocations')}</Text>
             </Animated.View>
           ) : null

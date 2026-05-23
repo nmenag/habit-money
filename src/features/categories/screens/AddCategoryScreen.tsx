@@ -155,7 +155,6 @@ export const AddCategoryScreen = () => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Category Name Input */}
         <View style={styles.fieldContainer}>
           <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
             {t('categoryName' as any) || 'CATEGORY NAME'}
@@ -185,7 +184,6 @@ export const AddCategoryScreen = () => {
           )}
         </View>
 
-        {/* Category Type Tab Triggers */}
         <View style={styles.section}>
           <Text
             style={[
@@ -206,7 +204,6 @@ export const AddCategoryScreen = () => {
           />
         </View>
 
-        {/* Dynamic Category Color Selection Bubble Grid */}
         <View style={styles.section}>
           <Text
             style={[
@@ -248,7 +245,6 @@ export const AddCategoryScreen = () => {
           </View>
         </View>
 
-        {/* Interactive Themed Icon Badge library Grid */}
         <View style={styles.section}>
           <Text
             style={[
@@ -288,7 +284,6 @@ export const AddCategoryScreen = () => {
           </View>
         </View>
 
-        {/* Save button */}
         <Button
           mode="contained"
           onPress={handleSave}

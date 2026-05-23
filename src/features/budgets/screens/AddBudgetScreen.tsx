@@ -166,9 +166,7 @@ export const AddBudgetScreen = () => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Form Container */}
         <View style={styles.formSection}>
-          {/* Budget Limit Field */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('monthlyLimit') || 'MONTHLY BUDGET LIMIT'}
@@ -188,7 +186,6 @@ export const AddBudgetScreen = () => {
             />
           </View>
 
-          {/* Associated Category Field */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('associatedCategory') || 'ASSOCIATED CATEGORY'}
@@ -221,7 +218,6 @@ export const AddBudgetScreen = () => {
             </View>
           </View>
 
-          {/* Brand Color Field */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('color') || 'BUDGET THEME COLOR'}
@@ -255,7 +251,6 @@ export const AddBudgetScreen = () => {
           </View>
         </View>
 
-        {/* Action button */}
         <Button
           mode="contained"
           onPress={handleSave}

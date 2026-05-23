@@ -198,7 +198,6 @@ export const GoalDetailScreen = () => {
           </Card>
         </Animated.View>
 
-        {/* Milestone Celebration Banner */}
         {isCompleted && (
           <Animated.View entering={FadeInUp.delay(100).duration(300)}>
             <View style={styles.celebrationCard}>
@@ -321,7 +320,6 @@ export const GoalDetailScreen = () => {
           </Card>
         </Animated.View>
 
-        {/* Dynamic Saving Acceleration tip */}
         {!isCompleted && remaining > 0 && monthsSavedWithExtra > 0 && (
           <Animated.View entering={FadeInUp.delay(200).duration(300)}>
             <View style={styles.savingTipsBox}>
@@ -342,7 +340,6 @@ export const GoalDetailScreen = () => {
           </Animated.View>
         )}
 
-        {/* Action Controls */}
         <Animated.View
           entering={FadeInUp.delay(250).duration(300)}
           style={styles.actions}

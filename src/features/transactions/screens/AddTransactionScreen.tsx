@@ -1241,7 +1241,6 @@ export const AddTransactionScreen = () => {
           </View>
         </TouchableOpacity>
 
-        {/* Budgets list */}
         {budgets.map((bud) => {
           const isSelected = selectedBudget === bud.id;
           const budColor = bud.color || theme.colors.primary;

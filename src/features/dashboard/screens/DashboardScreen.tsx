@@ -265,9 +265,7 @@ export const DashboardScreen = React.memo(() => {
           </Card.Content>
         </Card>
 
-        {/* Separated Flow row: Incomes & Expenses side-by-side */}
         <View style={styles.flowRow}>
-          {/* Income Container */}
           <Card
             style={[
               styles.flowCard,
@@ -328,7 +326,6 @@ export const DashboardScreen = React.memo(() => {
             </Card.Content>
           </Card>
 
-          {/* Expenses Container */}
           <Card
             style={[
               styles.flowCard,
@@ -390,7 +387,6 @@ export const DashboardScreen = React.memo(() => {
           </Card>
         </View>
 
-        {/* AA. Accounts Summary */}
         <Card style={styles.card} mode="contained">
           <Card.Content>
             <View style={styles.cardHeader}>
@@ -522,7 +518,6 @@ export const DashboardScreen = React.memo(() => {
           </Card.Content>
         </Card>
 
-        {/* B. Monthly Spending Progress */}
         <Card style={styles.card} mode="contained">
           <Card.Content>
             <View style={styles.cardHeader}>
@@ -600,7 +595,6 @@ export const DashboardScreen = React.memo(() => {
           </Card.Content>
         </Card>
 
-        {/* C. Top Category */}
         <Card style={styles.card} mode="contained">
           <Card.Content>
             <Text
@@ -687,7 +681,6 @@ export const DashboardScreen = React.memo(() => {
           </Card.Content>
         </Card>
 
-        {/* D. Main Insight */}
         <Card
           style={[
             styles.card,
@@ -722,7 +715,6 @@ export const DashboardScreen = React.memo(() => {
           </Card.Content>
         </Card>
 
-        {/* E. Goals Preview */}
         {goals.length > 0 && (
           <Card style={styles.card} mode="contained">
             <Card.Content>
@@ -825,7 +817,6 @@ export const DashboardScreen = React.memo(() => {
           </Card>
         )}
 
-        {/* F. Recent Transactions */}
         <Card style={styles.card} mode="contained">
           <Card.Content>
             <View style={[styles.cardHeader, { marginBottom: 12 }]}>

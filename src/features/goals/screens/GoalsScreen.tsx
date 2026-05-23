@@ -257,7 +257,6 @@ export const GoalsScreen = () => {
               entering={FadeIn.duration(400)}
               style={styles.dashboardHeader}
             >
-              {/* Savings Health Center */}
               <View style={styles.statCard}>
                 <View style={styles.overviewTextRow}>
                   <View>
@@ -297,7 +296,6 @@ export const GoalsScreen = () => {
                 </View>
               </View>
 
-              {/* Dynamic recommendation box */}
               {smartAdvice && (
                 <View
                   style={[
@@ -325,7 +323,6 @@ export const GoalsScreen = () => {
                 </View>
               )}
 
-              {/* Header section title */}
               <Text style={styles.sectionTitle}>{t('savingsMilestones')}</Text>
             </Animated.View>
           ) : null

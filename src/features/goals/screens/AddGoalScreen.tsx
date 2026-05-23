@@ -178,9 +178,7 @@ export const AddGoalScreen = () => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Form Container */}
         <View style={styles.formSection}>
-          {/* Goal Name Field */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('goalName') || 'GOAL NAME'}
@@ -211,7 +209,6 @@ export const AddGoalScreen = () => {
             )}
           </View>
 
-          {/* Goal Target Amount Field */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('targetAmount') || 'TARGET AMOUNT'}
@@ -231,7 +228,6 @@ export const AddGoalScreen = () => {
             />
           </View>
 
-          {/* Goal Target Deadline Field */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('deadline') || 'TARGET DEADLINE'}
@@ -268,7 +264,6 @@ export const AddGoalScreen = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Goal Icon Grid */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('selectIcon') || 'GOAL ICON'}
@@ -307,7 +302,6 @@ export const AddGoalScreen = () => {
             </View>
           </View>
 
-          {/* Goal Theme Color Field */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('selectColor') || 'THEME COLOR'}
@@ -341,7 +335,6 @@ export const AddGoalScreen = () => {
           </View>
         </View>
 
-        {/* Action button */}
         <Button
           mode="contained"
           onPress={handleSave}

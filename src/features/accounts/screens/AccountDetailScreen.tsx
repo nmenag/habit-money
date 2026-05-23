@@ -256,7 +256,6 @@ export const AccountDetailScreen = () => {
           </Card>
         </Animated.View>
 
-        {/* Capsule summary flow grid */}
         <Animated.View
           entering={FadeInUp.delay(100).duration(300)}
           style={styles.cashFlowSummaryRow}

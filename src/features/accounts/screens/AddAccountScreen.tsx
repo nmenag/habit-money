@@ -186,9 +186,7 @@ export const AddAccountScreen = () => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Form Container */}
         <View style={styles.formSection}>
-          {/* Account Name */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('accountName' as any) || 'ACCOUNT NAME'}
@@ -218,13 +216,11 @@ export const AddAccountScreen = () => {
             )}
           </View>
 
-          {/* Account Type - Horizontal Selector Grid */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('type') || 'ACCOUNT TYPE'}
             </Text>
             <View style={styles.typeSelectorRow}>
-              {/* Type: Cash */}
               <TouchableOpacity
                 activeOpacity={0.8}
                 style={[
@@ -264,7 +260,6 @@ export const AddAccountScreen = () => {
                 </Text>
               </TouchableOpacity>
 
-              {/* Type: Bank */}
               <TouchableOpacity
                 activeOpacity={0.8}
                 style={[
@@ -304,7 +299,6 @@ export const AddAccountScreen = () => {
                 </Text>
               </TouchableOpacity>
 
-              {/* Type: Credit */}
               <TouchableOpacity
                 activeOpacity={0.8}
                 style={[
@@ -346,7 +340,6 @@ export const AddAccountScreen = () => {
             </View>
           </View>
 
-          {/* Account Balance */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {isEditing
@@ -368,7 +361,6 @@ export const AddAccountScreen = () => {
             />
           </View>
 
-          {/* Theme Color */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('color' as any) || 'ACCOUNT BRAND COLOR'}
@@ -402,7 +394,6 @@ export const AddAccountScreen = () => {
           </View>
         </View>
 
-        {/* Action button */}
         <Button
           mode="contained"
           onPress={handleSave}

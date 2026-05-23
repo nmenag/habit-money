@@ -65,7 +65,6 @@ export const AccountCard: React.FC<Props> = ({
     >
       <Card.Content style={styles.cardContent}>
         <View style={styles.cardHeader}>
-          {/* Reorder drag handle indicator */}
           {onLongPress && (
             <View style={styles.dragHandle} pointerEvents="none">
               <Ionicons
@@ -77,7 +76,6 @@ export const AccountCard: React.FC<Props> = ({
             </View>
           )}
 
-          {/* Account Icon Badge with premium desaturated border */}
           <View
             style={[
               styles.iconContainer,
@@ -94,7 +92,6 @@ export const AccountCard: React.FC<Props> = ({
             />
           </View>
 
-          {/* Details & Hierarchy */}
           <View style={styles.textContainer}>
             <Text style={[styles.name, { color: theme.colors.onSurface }]}>
               {translateName(account.name)}
@@ -114,7 +111,6 @@ export const AccountCard: React.FC<Props> = ({
             </View>
           </View>
 
-          {/* Large, beautiful balance display */}
           <View style={styles.balanceContainer}>
             <Text
               style={[

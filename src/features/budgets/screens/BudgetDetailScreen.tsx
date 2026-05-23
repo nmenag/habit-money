@@ -137,7 +137,6 @@ export const BudgetDetailScreen = () => {
                 </View>
               </View>
 
-              {/* Action Buttons */}
               <View style={styles.headerActions}>
                 <TouchableOpacity
                   activeOpacity={0.7}
@@ -187,7 +186,6 @@ export const BudgetDetailScreen = () => {
           </Card>
         </Animated.View>
 
-        {/* Actionable recommendation card */}
         <Animated.View entering={FadeInUp.delay(100).duration(300)}>
           <View style={styles.insightBox}>
             <Ionicons
@@ -200,7 +198,6 @@ export const BudgetDetailScreen = () => {
           </View>
         </Animated.View>
 
-        {/* Transactions Panel */}
         <Animated.View
           entering={FadeInUp.delay(200).duration(300)}
           style={styles.sectionTransactions}

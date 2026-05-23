@@ -268,14 +268,12 @@ export const SettingsScreen = () => {
           paddingHorizontal: 16,
         }}
       >
-        {/* Brand Header */}
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { color: theme.colors.onSurface }]}>
             {t('preferences') || 'Settings'}
           </Text>
         </View>
 
-        {/* Section 1: Finance Essentials */}
         <View style={styles.section}>
           <Text
             style={[

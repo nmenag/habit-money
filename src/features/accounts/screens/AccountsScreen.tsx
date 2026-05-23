@@ -159,7 +159,6 @@ export const AccountsScreen = () => {
 
     return (
       <View style={styles.headerContainer}>
-        {/* Total balance aggregate overview header */}
         <Animated.View
           entering={FadeIn.duration(400)}
           style={styles.overviewSection}
@@ -271,7 +270,6 @@ export const AccountsScreen = () => {
           </Card>
         </Animated.View>
 
-        {/* Dynamic recommendation center */}
         <Animated.View entering={FadeInUp.delay(150).duration(300)}>
           <View
             style={[
