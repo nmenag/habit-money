@@ -58,7 +58,6 @@ export const AccountCard: React.FC<Props> = ({
       mode="contained"
       onPress={onPress}
       onLongPress={onLongPress}
-      delayLongPress={180}
       disabled={isActive}
       accessibilityLabel={`${translateName(account.name)}, ${t(account.type)}, ${formatCurrency(account.currentBalance, account.currency)}`}
       accessibilityRole="button"

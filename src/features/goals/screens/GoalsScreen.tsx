@@ -134,7 +134,7 @@ export const GoalsScreen = () => {
                 {
                   borderColor: isActive
                     ? theme.colors.primary
-                    : theme.colors.outline,
+                    : theme.colors.outlineVariant,
                   backgroundColor: theme.colors.surface,
                 },
               ]}
@@ -390,7 +390,7 @@ const defaultStyles = (theme: AppTheme) =>
     },
     statCard: {
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       borderRadius: theme.roundness || 12,
       backgroundColor: theme.colors.surface,
       padding: 16,

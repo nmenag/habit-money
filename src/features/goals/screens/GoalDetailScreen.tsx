@@ -175,7 +175,7 @@ export const GoalDetailScreen = () => {
                       : theme.colors.outlineVariant,
                     borderColor: isCompleted
                       ? `${theme.colors.income}2B`
-                      : theme.colors.outline,
+                      : theme.colors.outlineVariant,
                   },
                 ]}
               >
@@ -368,7 +368,7 @@ export const GoalDetailScreen = () => {
               activeOpacity={0.7}
               style={[
                 styles.secondaryButton,
-                { borderColor: theme.colors.outline },
+                { borderColor: theme.colors.outlineVariant },
               ]}
               onPress={() =>
                 router.push({
@@ -390,7 +390,7 @@ export const GoalDetailScreen = () => {
               activeOpacity={0.7}
               style={[
                 styles.secondaryButton,
-                { borderColor: theme.colors.outline },
+                { borderColor: theme.colors.outlineVariant },
               ]}
               onPress={handleDelete}
             >
@@ -441,7 +441,7 @@ export const GoalDetailScreen = () => {
               autoFocus
               outlineStyle={{
                 borderRadius: 10,
-                borderColor: theme.colors.outline,
+                borderColor: theme.colors.outlineVariant,
               }}
               style={{ backgroundColor: 'transparent' }}
               left={<TextInput.Affix text={currency + ' '} />}
@@ -483,7 +483,7 @@ const defaultStyles = (theme: AppTheme) =>
       paddingVertical: 24,
       borderRadius: theme.roundness || 12,
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       backgroundColor: theme.colors.surface,
     },
     headerContent: {
@@ -548,7 +548,7 @@ const defaultStyles = (theme: AppTheme) =>
       marginHorizontal: 16,
       borderRadius: theme.roundness || 12,
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       backgroundColor: theme.colors.surface,
     },
     progressRow: {
@@ -595,7 +595,7 @@ const defaultStyles = (theme: AppTheme) =>
       color: theme.colors.onSurface,
     },
     divider: {
-      backgroundColor: theme.colors.outline,
+      backgroundColor: theme.colors.outlineVariant,
       marginVertical: 14,
     },
     formulaSection: {
@@ -611,7 +611,7 @@ const defaultStyles = (theme: AppTheme) =>
       marginTop: 6,
       paddingTop: 14,
       borderTopWidth: 1,
-      borderTopColor: theme.colors.outline,
+      borderTopColor: theme.colors.outlineVariant,
     },
     formulaInfo: {
       flex: 1,
@@ -654,7 +654,7 @@ const defaultStyles = (theme: AppTheme) =>
       marginHorizontal: 16,
       marginTop: 16,
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       borderRadius: theme.roundness || 12,
       backgroundColor: theme.colors.surface,
       padding: 12,

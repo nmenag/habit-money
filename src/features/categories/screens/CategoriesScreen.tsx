@@ -1,7 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
@@ -86,22 +86,19 @@ export const CategoriesScreen = () => {
               params: { category: JSON.stringify(item) },
             })
           }
+          onLongPress={drag}
           disabled={isActive}
           mode="contained"
         >
           <View style={styles.cardInner}>
-            <TouchableOpacity
-              onPressIn={drag}
-              activeOpacity={0.8}
-              style={styles.dragHandle}
-            >
+            <View style={styles.dragHandle} pointerEvents="none">
               <Ionicons
                 name="reorder-two-outline"
                 size={18}
                 color={theme.colors.outline}
                 style={{ opacity: 0.35 }}
               />
-            </TouchableOpacity>
+            </View>
 
             <View
               style={[
@@ -344,7 +341,7 @@ const defaultStyles = (theme: AppTheme) =>
       marginBottom: 8,
       borderRadius: theme.roundness || 12,
       backgroundColor: theme.colors.surface,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       borderWidth: 1,
       elevation: 0,
     },

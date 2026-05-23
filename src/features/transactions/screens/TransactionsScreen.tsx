@@ -387,7 +387,7 @@ const defaultStyles = (theme: any) =>
       height: 44,
       borderRadius: 12,
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       backgroundColor: theme.colors.surface,
       justifyContent: 'center',
       elevation: 0,

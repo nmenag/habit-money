@@ -430,7 +430,7 @@ const defaultStyles = (theme: AppTheme) =>
       borderRadius: theme.roundness || 12,
       backgroundColor: theme.colors.surface,
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       elevation: 0,
     },
     analyticsCardContent: {

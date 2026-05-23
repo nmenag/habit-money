@@ -166,7 +166,7 @@ export const AccountDetailScreen = () => {
               styles.creditCard,
               {
                 backgroundColor: cardBgColor,
-                borderColor: theme.colors.outline,
+                borderColor: theme.colors.outlineVariant,
               },
             ]}
             mode="contained"
@@ -368,7 +368,7 @@ export const AccountDetailScreen = () => {
                 styles.chartCard,
                 {
                   backgroundColor: theme.colors.surface,
-                  borderColor: theme.colors.outline,
+                  borderColor: theme.colors.outlineVariant,
                 },
               ]}
               mode="contained"

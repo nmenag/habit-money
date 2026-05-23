@@ -268,7 +268,9 @@ export const AddCategoryScreen = () => {
                       backgroundColor: isActiveIcon
                         ? `${color}1A`
                         : theme.colors.elevation.level1,
-                      borderColor: isActiveIcon ? color : theme.colors.outline,
+                      borderColor: isActiveIcon
+                        ? color
+                        : theme.colors.outlineVariant,
                       borderWidth: isActiveIcon ? 2 : 1,
                     },
                   ]}

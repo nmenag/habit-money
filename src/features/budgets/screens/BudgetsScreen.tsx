@@ -131,7 +131,6 @@ export const BudgetsScreen = () => {
               })
             }
             onLongPress={drag}
-            delayLongPress={180}
             disabled={isActive}
             mode="contained"
           >
