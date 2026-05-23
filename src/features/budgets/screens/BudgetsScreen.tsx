@@ -193,7 +193,7 @@ export const BudgetsScreen = () => {
               <View style={styles.footerRow}>
                 <Text style={styles.remainingText}>
                   {isOverLimit
-                    ? t('overLimit' as any) || 'Over limit'
+                    ? t('overLimit')
                     : `${t('remainingAmount')}: ${formatCurrency(remaining)}`}
                 </Text>
                 <Text

@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
     maxWidth: 600,
     width: '100%',
     alignSelf: 'center',
+    maxHeight: '80%',
   },
   modalHandleContainer: {
     width: '100%',

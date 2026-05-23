@@ -192,7 +192,6 @@ export const AddBudgetScreen = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.formSection}>
-          {/* Amount Hero Card */}
           <View
             style={[
               styles.amountHeroCard,
@@ -278,7 +277,6 @@ export const AddBudgetScreen = () => {
             </View>
           </View>
 
-          {/* Category Picker Card */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('associatedCategory') || 'ASSOCIATED CATEGORY'}
@@ -381,7 +379,6 @@ export const AddBudgetScreen = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Color Selector */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('color') || 'BUDGET THEME COLOR'}
@@ -436,14 +433,12 @@ export const AddBudgetScreen = () => {
 
       <BannerAdComponent />
 
-      {/* Category Bottom Sheet */}
       <BottomSheet
         visible={categorySheetOpen}
         onClose={() => setCategorySheetOpen(false)}
         title={t('categories') || 'Select Category'}
       >
         <View style={styles.modalGrid}>
-          {/* None Option */}
           <TouchableOpacity
             style={[
               styles.modalGridItem,

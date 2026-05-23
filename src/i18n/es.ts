@@ -468,4 +468,5 @@ export const es = {
     '💡 Presupuesto excedido: Reducir el gasto semanal aquí en {{weeklySaving}} ayudará a volver a alinear tu flujo de caja y asegurar la liquidez.',
   smartSavingsTip:
     '💡 Consejo inteligente: Reducir los gastos en esta categoría por solo {{dailySaving}} al día liberará {{monthlySaving}} al mes para acelerar tus metas de ahorro activas.',
+  overLimit: 'Límite excedido',
 };

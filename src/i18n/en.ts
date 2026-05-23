@@ -460,4 +460,5 @@ export const en = {
     '💡 Budget Exceeded: Reducing weekly spending here by {{weeklySaving}} will help re-align your cash flow and secure liquidity.',
   smartSavingsTip:
     '💡 Smart tip: Scaling down spending in this category by just {{dailySaving}} per day will unlock {{monthlySaving}} per month to accelerate your active Savings Goals.',
+  overLimit: 'Over limit',
 };
