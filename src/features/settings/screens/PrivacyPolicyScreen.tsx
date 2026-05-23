@@ -108,25 +108,28 @@ const createStyles = (theme: any) =>
       marginBottom: 32,
     },
     title: {
-      fontWeight: '900',
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
       color: theme.colors.onBackground,
       letterSpacing: 0.5,
     },
     lastUpdated: {
       marginTop: 8,
       color: theme.colors.onSurfaceVariant,
-      fontWeight: '500',
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
     },
     divider: {
       marginBottom: 32,
-      opacity: 0.5,
+      backgroundColor: theme.colors.outlineVariant,
     },
     section: {
       marginBottom: 36,
     },
     sectionTitle: {
       marginBottom: 12,
-      fontWeight: '800',
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       color: theme.colors.onSurface,
       letterSpacing: 0.3,
     },
@@ -134,11 +137,14 @@ const createStyles = (theme: any) =>
       lineHeight: 24,
       color: theme.colors.onSurfaceVariant,
       fontSize: 16,
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
     },
     link: {
       marginTop: 12,
       color: theme.colors.primary,
-      fontWeight: '600',
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     footer: {
       marginTop: 24,
@@ -147,6 +153,8 @@ const createStyles = (theme: any) =>
     footerText: {
       color: theme.colors.onSurfaceVariant,
       opacity: 0.7,
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
       fontStyle: 'italic',
     },
   });

@@ -7,6 +7,7 @@ import {
   MD3DarkTheme,
   MD3LightTheme,
   useTheme,
+  configureFonts,
 } from 'react-native-paper';
 
 const palette = {
@@ -48,7 +49,7 @@ const palette = {
   },
 };
 
-// 2. Spacing scale (4px base)
+// Global Spacing scale (4px base)
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -71,6 +72,117 @@ export const chartColors = [
   '#6366F1', // indigo
 ];
 
+// Clean global typography scale using Inter only (weights: 400, 500, 600)
+const fontConfig = {
+  displayLarge: {
+    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600' as const,
+    fontSize: 40,
+    lineHeight: 48,
+    letterSpacing: -1,
+  },
+  displayMedium: {
+    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600' as const,
+    fontSize: 34,
+    lineHeight: 40,
+    letterSpacing: -0.5,
+  },
+  displaySmall: {
+    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600' as const,
+    fontSize: 30,
+    lineHeight: 36,
+    letterSpacing: 0,
+  },
+  headlineLarge: {
+    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600' as const,
+    fontSize: 28,
+    lineHeight: 34,
+    letterSpacing: 0,
+  },
+  headlineMedium: {
+    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600' as const,
+    fontSize: 24,
+    lineHeight: 30,
+    letterSpacing: 0,
+  },
+  headlineSmall: {
+    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600' as const,
+    fontSize: 20,
+    lineHeight: 26,
+    letterSpacing: 0,
+  },
+  titleLarge: {
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500' as const,
+    fontSize: 18,
+    lineHeight: 24,
+    letterSpacing: 0.15,
+  },
+  titleMedium: {
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500' as const,
+    fontSize: 16,
+    lineHeight: 22,
+    letterSpacing: 0.15,
+  },
+  titleSmall: {
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500' as const,
+    fontSize: 15,
+    lineHeight: 20,
+    letterSpacing: 0.1,
+  },
+  bodyLarge: {
+    fontFamily: 'Inter-Regular',
+    fontWeight: '400' as const,
+    fontSize: 15,
+    lineHeight: 22,
+    letterSpacing: 0.15,
+  },
+  bodyMedium: {
+    fontFamily: 'Inter-Regular',
+    fontWeight: '400' as const,
+    fontSize: 14,
+    lineHeight: 20,
+    letterSpacing: 0.25,
+  },
+  bodySmall: {
+    fontFamily: 'Inter-Regular',
+    fontWeight: '400' as const,
+    fontSize: 13,
+    lineHeight: 18,
+    letterSpacing: 0.4,
+  },
+  labelLarge: {
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500' as const,
+    fontSize: 14,
+    lineHeight: 20,
+    letterSpacing: 0.1,
+  },
+  labelMedium: {
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500' as const,
+    fontSize: 12,
+    lineHeight: 16,
+    letterSpacing: 0.5,
+  },
+  labelSmall: {
+    fontFamily: 'Inter-Regular',
+    fontWeight: '400' as const,
+    fontSize: 12,
+    lineHeight: 16,
+    letterSpacing: 0.5,
+  },
+};
+
+const customFonts = configureFonts({ config: fontConfig });
+
 declare module 'react-native-paper' {
   export interface MD3Colors {
     income: string;
@@ -86,6 +198,7 @@ export const useAppTheme = () => useTheme<AppTheme>();
 export const lightTheme = {
   ...MD3LightTheme,
   roundness: 12,
+  fonts: customFonts,
   colors: {
     ...MD3LightTheme.colors,
     primary: palette.green[500],
@@ -111,6 +224,7 @@ export const lightTheme = {
 export const darkTheme = {
   ...MD3DarkTheme,
   roundness: 12,
+  fonts: customFonts,
   colors: {
     ...MD3DarkTheme.colors,
     primary: palette.green[500],

@@ -385,7 +385,67 @@ export const es = {
   currBSD: 'Dólar bahameño',
   currTTD: 'Dólar de Trinidad y Tobago',
   currBZD: 'Dólar beliceño',
-  currBBD: 'Dólar barbadense',
   currKES: 'Chelín keniano',
   currGHS: 'Cedi ghanés',
+  cashFlow: 'Flujo de Caja',
+  ofIncomeSpent: 'de ingresos gastados',
+  velocity: 'Velocidad',
+  perDay: '/día',
+  avgSpendingOutflow: 'Promedio de egresos',
+  insightNegativeBalance:
+    'Algunas cuentas de crédito/pasivos tienen saldos negativos. Prioriza resolver saldos de deuda para evitar intereses altos y fortalecer el flujo de caja.',
+  insightOutpacingIncome:
+    'Tu tasa de gasto supera los ingresos registrados este mes. Mantén los gastos bajo control; la velocidad diaria actual es {{velocity}}.',
+  insightSuperbLiquidity:
+    '¡Excelente liquidez! Considera destinar el 15% de tu flujo de caja positivo a tus Metas de Ahorro activas para construir riqueza a largo plazo.',
+  insightDailyOutflowHabit:
+    'Tu flujo promedio diario es {{velocity}} este mes. Registrar cada pequeña transacción diariamente construye hábitos financieros sólidos.',
+  inflowMonth: 'Ingresos (Mes)',
+  outflowMonth: 'Egresos (Mes)',
+  sevenDayOutflowVelocity: 'Velocidad de Egreso (7 Días)',
+  addTransactionLabel: 'Añadir Transacción',
+  cannotDeleteLastAccount: 'Debes mantener al menos una cuenta.',
+  savingsCapital: 'Capital Ahorrado',
+  reachedGoalCount: '🏆 {{count}} Alcanzadas',
+  overallCompletionProgress: 'Progreso de Ahorro Global',
+  savingsMilestones: 'Hitos de Ahorro',
+  reachedLabel: '🎉 Alcanzada',
+  closingInLabel: '🚀 Cerca',
+  halfwayLabel: '⚡ Mitad',
+  rootedLabel: '🌱 Iniciada',
+  initiatedLabel: '✨ Comenzada',
+  goalNotFound: 'Meta no encontrada',
+  targetReachedBannerTitle: '¡Meta Alcanzada!',
+  targetReachedBannerDesc:
+    '¡Has asegurado con éxito la asignación completa de {{amount}}! Tus hábitos financieros están construyendo una seguridad duradera.',
+  targetMinusSavedCapital: 'Objetivo - Capital Ahorrado',
+  toReachDeadlineBy: 'Para alcanzar el límite el {{date}}',
+  saveFasterTip:
+    '🚀 Ahorra más rápido: ¡Contribuir un extra de {{extra}}/mes para esta meta te ayudará a alcanzar {{goalName}} {{months}} meses antes!',
+  aggregateSpending: 'Gasto Agregado',
+  streakActive: '🏆 Racha Activa',
+  overallBudgetDepletion: 'Depreciación de Presupuesto Global',
+  budgetAllocations: 'Asignaciones de Presupuesto',
+  noBudgetsCreated: 'Sin Presupuestos Creados',
+  noBudgetsSubtitle:
+    'Establece límites semanales o mensuales para categorías de gastos para dominar tu ritmo de ahorro.',
+  noGoalsDefined: 'Sin Metas Definidas',
+  noGoalsSubtitleText:
+    'Configura objetivos de ahorro para vacaciones, fondos de emergencia o inversiones para comenzar a acumular riqueza.',
+  noCategoriesDefined: 'Sin Categorías Definidas',
+  noCategoriesSubtitleText:
+    'Configura categorías de transacciones para organizar automáticamente tus presupuestos mensuales.',
+  acrossCategoriesCount: 'a través de {{count}} categorías.',
+  excellentPaceTip:
+    '🟢 ¡Excelente ritmo! Has gastado menos del 40% de tu límite. Tu velocidad tranquila es ideal para invertir.',
+  moderatePaceTip:
+    '🟡 Ritmo moderado. Has consumido el {{percent}}% de tus límites agregados. Mantener las categorías secundarias pausadas asegurará liquidez.',
+  highDepletionTip:
+    '🔴 Advertencia de alto consumo. Los límites agregados superan el 80% de depreciación. Considera recortar suscripciones diarias no esenciales.',
+  smartAdviceClosingIn:
+    '🚀 ¡Increíblemente cerca! Has alcanzado el {{percent}}% de tus metas de ahorro agregadas. Un último esfuerzo este mes te permitirá alcanzar hitos importantes.',
+  smartAdviceFinancialTip:
+    '💡 Consejo Financiero: Asignar un 10% adicional de flujo de caja positivo mensual te permitirá alcanzar tus metas 2.4 meses antes.',
+  smartAdviceAchievedAll:
+    '🎉 ¡Felicitaciones! Has alcanzado por completo todos tus objetivos financieros establecidos. Considera definir un nuevo hito de inversión a largo plazo.',
 };

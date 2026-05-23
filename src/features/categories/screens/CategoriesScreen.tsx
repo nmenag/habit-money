@@ -14,6 +14,8 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeIn } from 'react-native-reanimated';
+
 import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
 import {
   Category,
@@ -23,6 +25,7 @@ import {
 } from '../../../store/useStore';
 import { getValidCategoryIcon } from '../../../constants';
 import { AppTheme } from '../../../theme/theme';
+import { fontScale } from '../../../utils/responsive';
 
 export const CategoriesScreen = () => {
   const { categories, transactions, updateCategoriesOrder, formatCurrency } =
@@ -64,17 +67,8 @@ export const CategoriesScreen = () => {
     const ratio = analytics.maxVal > 0 ? totalAmount / analytics.maxVal : 0;
     const itemColor = item.color || theme.colors.primary;
 
-    const isDark = theme.dark;
-    const cardBg = isActive
-      ? theme.colors.elevation.level3
-      : isDark
-        ? `${itemColor}08`
-        : `${itemColor}04`;
-    const cardBorder = isActive
-      ? theme.colors.primary
-      : isDark
-        ? `${itemColor}25`
-        : `${itemColor}1C`;
+    const cardBg = isActive ? theme.colors.elevation.level3 : `${itemColor}12`;
+    const cardBorder = isActive ? theme.colors.primary : `${itemColor}2B`;
 
     return (
       <ScaleDecorator>
@@ -93,7 +87,7 @@ export const CategoriesScreen = () => {
             })
           }
           disabled={isActive}
-          mode="outlined"
+          mode="contained"
         >
           <View style={styles.cardInner}>
             <TouchableOpacity
@@ -222,7 +216,7 @@ export const CategoriesScreen = () => {
               <Card.Content style={styles.insightsCardContent}>
                 <Ionicons
                   name="analytics-outline"
-                  size={20}
+                  size={18}
                   color={theme.colors.primary}
                 />
                 <View style={styles.insightsTextContainer}>
@@ -244,11 +238,17 @@ export const CategoriesScreen = () => {
                   >
                     {t('totalBalance')}:{' '}
                     <Text
-                      style={{ fontWeight: '600', color: theme.colors.primary }}
+                      style={{
+                        fontFamily: 'Inter-SemiBold',
+                        fontWeight: '600',
+                        color: theme.colors.primary,
+                      }}
                     >
                       {formatCurrency(analytics.grandTotal)}
                     </Text>{' '}
-                    across {filteredCategories.length} categories.
+                    {t('acrossCategoriesCount', {
+                      count: filteredCategories.length,
+                    })}
                   </Text>
                 </View>
               </Card.Content>
@@ -256,16 +256,32 @@ export const CategoriesScreen = () => {
           ) : null
         }
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <Ionicons
-              name={activeTab === 'expense' ? 'cart-outline' : 'cash-outline'}
-              size={54}
-              color={theme.colors.outlineVariant}
-            />
-            <Text style={[styles.emptyText, { color: theme.colors.outline }]}>
-              {t('noCategories')}
+          <Animated.View entering={FadeIn.duration(400)} style={styles.empty}>
+            <View
+              style={[
+                styles.emptyIconCircle,
+                {
+                  backgroundColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <Ionicons
+                name={activeTab === 'expense' ? 'cart-outline' : 'cash-outline'}
+                size={32}
+                color={theme.colors.outline}
+              />
+            </View>
+            <Text
+              style={[styles.emptyTitle, { color: theme.colors.onSurface }]}
+            >
+              {t('noCategoriesDefined')}
             </Text>
-          </View>
+            <Text
+              style={[styles.emptySubtitle, { color: theme.colors.outline }]}
+            >
+              {t('noCategoriesSubtitleText')}
+            </Text>
+          </Animated.View>
         }
       />
 
@@ -305,8 +321,8 @@ const defaultStyles = (theme: AppTheme) =>
       marginHorizontal: 16,
       marginTop: 16,
       marginBottom: 8,
-      borderRadius: 18,
-      backgroundColor: theme.colors.elevation.level1,
+      borderRadius: theme.roundness || 12,
+      backgroundColor: theme.colors.surface,
       borderColor: theme.colors.outline,
       borderWidth: 1,
       elevation: 0,
@@ -321,11 +337,14 @@ const defaultStyles = (theme: AppTheme) =>
       flex: 1,
     },
     insightsTitle: {
-      fontSize: 13,
-      fontWeight: '600',
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     insightsBody: {
-      fontSize: 11,
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
       marginTop: 2,
     },
     listContent: {
@@ -334,15 +353,14 @@ const defaultStyles = (theme: AppTheme) =>
     card: {
       marginBottom: 8,
       marginHorizontal: 16,
-      borderRadius: 20,
-      borderWidth: 1.5,
-      elevation: 0,
+      borderRadius: theme.roundness || 12,
+      borderWidth: 1,
       overflow: 'hidden',
     },
     cardInner: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 14,
+      paddingVertical: 12,
       paddingHorizontal: 12,
     },
     dragHandle: {
@@ -371,18 +389,21 @@ const defaultStyles = (theme: AppTheme) =>
       paddingRight: 6,
     },
     categoryName: {
-      fontWeight: '600',
-      fontSize: 15,
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      fontSize: fontScale(14),
       letterSpacing: -0.1,
     },
     amountText: {
-      fontSize: 13,
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-SemiBold',
       fontWeight: '600',
     },
     categoryDesc: {
-      fontSize: 11,
-      marginTop: 2,
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Regular',
       fontWeight: '400',
+      marginTop: 2,
     },
     ratioBarBg: {
       height: 4,
@@ -395,20 +416,32 @@ const defaultStyles = (theme: AppTheme) =>
       height: '100%',
       borderRadius: 100,
     },
-    deleteBtn: {
-      margin: 0,
-      opacity: 0.7,
-    },
     empty: {
       padding: 40,
       alignItems: 'center',
       marginTop: 60,
     },
-    emptyText: {
-      textAlign: 'center',
-      fontSize: 14,
+    emptyIconCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    emptyTitle: {
+      fontSize: fontScale(16),
+      fontFamily: 'Inter-Medium',
       fontWeight: '500',
-      marginTop: 12,
+      marginBottom: 6,
+    },
+    emptySubtitle: {
+      textAlign: 'center',
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
+      paddingHorizontal: 20,
+      lineHeight: 18,
     },
     fab: {
       position: 'absolute',

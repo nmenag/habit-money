@@ -378,7 +378,67 @@ export const en = {
   currBSD: 'Bahamian Dollar',
   currTTD: 'Trinidad and Tobago Dollar',
   currBZD: 'Belize Dollar',
-  currBBD: 'Barbadian Dollar',
   currKES: 'Kenyan Shilling',
   currGHS: 'Ghanaian Cedi',
+  cashFlow: 'Cash Flow',
+  ofIncomeSpent: 'of income spent',
+  velocity: 'Velocity',
+  perDay: '/day',
+  avgSpendingOutflow: 'Avg. spending outflow',
+  insightNegativeBalance:
+    'Some credit/liability accounts have negative balances. Prioritize resolving debt balances to avoid high interest and strengthen cash flow.',
+  insightOutpacingIncome:
+    'Your spending rate is outpacing recorded income this month. Keep expenses under check; current daily velocity is {{velocity}}.',
+  insightSuperbLiquidity:
+    'Superb liquidity! Consider allocating 15% of your positive cash flow toward your active Savings Goals to build long-term wealth.',
+  insightDailyOutflowHabit:
+    'Your daily average outflow is {{velocity}} this month. Logging every minor transaction daily builds robust financial habits.',
+  inflowMonth: 'Inflow (Month)',
+  outflowMonth: 'Outflow (Month)',
+  sevenDayOutflowVelocity: '7-Day Outflow Velocity',
+  addTransactionLabel: 'Add Transaction',
+  cannotDeleteLastAccount: 'You must keep at least one account.',
+  savingsCapital: 'Savings Capital',
+  reachedGoalCount: '🏆 {{count}} Reached',
+  overallCompletionProgress: 'Overall Completion Progress',
+  savingsMilestones: 'Savings Milestones',
+  reachedLabel: '🎉 Reached',
+  closingInLabel: '🚀 Closing In',
+  halfwayLabel: '⚡ Halfway',
+  rootedLabel: '🌱 Rooted',
+  initiatedLabel: '✨ Initiated',
+  goalNotFound: 'Goal not found',
+  targetReachedBannerTitle: 'Target Reached!',
+  targetReachedBannerDesc:
+    'You have successfully secured the complete fund allocation of {{amount}}! Your financial habits are building lasting security.',
+  targetMinusSavedCapital: 'Target - Saved Capital',
+  toReachDeadlineBy: 'To reach deadline by {{date}}',
+  saveFasterTip:
+    '🚀 Save Faster: Contributing an extra {{extra}}/mo towards this milestone will help you achieve {{goalName}} {{months}} months earlier!',
+  aggregateSpending: 'Aggregate Spending',
+  streakActive: '🏆 Streak Active',
+  overallBudgetDepletion: 'Overall Budget Depletion',
+  budgetAllocations: 'Budget Allocations',
+  noBudgetsCreated: 'No Budgets Created',
+  noBudgetsSubtitle:
+    'Set up weekly or monthly targets for expense categories to master your savings rhythm.',
+  noGoalsDefined: 'No Goals Defined',
+  noGoalsSubtitleText:
+    'Configure savings targets for vacation, emergency funds, or investments to start compounding wealth.',
+  noCategoriesDefined: 'No Categories Defined',
+  noCategoriesSubtitleText:
+    'Configure transaction categories to automatically organize your monthly budget categories.',
+  acrossCategoriesCount: 'across {{count}} categories.',
+  excellentPaceTip:
+    '🟢 Excellent pace! You have spent less than 40% of your limit. Your calm velocity is ideal for investing.',
+  moderatePaceTip:
+    '🟡 Moderate pace. You have consumed {{percent}}% of aggregate limits. Keeping minor categories paused will secure liquidity.',
+  highDepletionTip:
+    '🔴 High depletion warning. Aggregate limits exceed 80% depletion. Consider trimming non-essential daily subscriptions.',
+  smartAdviceClosingIn:
+    '🚀 Incredibly close! You have achieved {{percent}}% of your aggregate savings goals. A final push this month will reach major milestones.',
+  smartAdviceFinancialTip:
+    '💡 Financial Tip: Allocating an extra 10% of monthly positive cash flow will hit your active milestones 2.4 months earlier.',
+  smartAdviceAchievedAll:
+    '🎉 Congratulations! You have fully achieved all of your set financial targets. Consider defining a new long-term investment milestone.',
 };

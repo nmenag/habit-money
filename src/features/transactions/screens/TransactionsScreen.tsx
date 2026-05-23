@@ -386,9 +386,14 @@ const defaultStyles = (theme: any) =>
     searchbar: {
       height: 44,
       borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.outline,
+      backgroundColor: theme.colors.surface,
       justifyContent: 'center',
+      elevation: 0,
     },
     searchInput: {
+      fontFamily: 'Inter-Regular',
       fontSize: 14,
       alignSelf: 'center',
       paddingVertical: 0,
@@ -422,9 +427,11 @@ const defaultStyles = (theme: any) =>
       paddingBottom: 4,
     },
     sectionHeaderText: {
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      fontSize: 10,
+      letterSpacing: 1.5,
       textTransform: 'uppercase',
-      letterSpacing: 0.8,
-      fontWeight: '800',
     },
     empty: {
       padding: 60,
@@ -433,8 +440,9 @@ const defaultStyles = (theme: any) =>
       gap: 12,
     },
     emptyText: {
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       color: theme.colors.onSurfaceVariant,
-      fontWeight: '600',
     },
     clearLink: {
       paddingVertical: 4,
@@ -443,6 +451,5 @@ const defaultStyles = (theme: any) =>
       position: 'absolute',
       right: 16,
       borderRadius: 16,
-      elevation: 6,
     },
   });

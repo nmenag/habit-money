@@ -159,7 +159,8 @@ const CustomSegmentedControl: React.FC<CustomSegmentedControlProps> =
               { color: theme.colors.onSurfaceVariant },
               type === 'expense' && {
                 color: activeColors.text,
-                fontWeight: '800',
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
               },
             ]}
           >
@@ -185,7 +186,8 @@ const CustomSegmentedControl: React.FC<CustomSegmentedControlProps> =
               { color: theme.colors.onSurfaceVariant },
               type === 'income' && {
                 color: activeColors.text,
-                fontWeight: '800',
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
               },
             ]}
           >
@@ -211,7 +213,8 @@ const CustomSegmentedControl: React.FC<CustomSegmentedControlProps> =
               { color: theme.colors.onSurfaceVariant },
               type === 'transfer' && {
                 color: activeColors.text,
-                fontWeight: '800',
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
               },
             ]}
           >
@@ -1495,8 +1498,9 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   tabText: {
+    fontFamily: 'Inter-Medium',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
   },
 
   amountHeroCard: {
@@ -1505,15 +1509,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
     marginBottom: 16,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
+    elevation: 0,
   },
   amountLabel: {
-    fontWeight: '700',
-    letterSpacing: 1.2,
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
+    letterSpacing: 1.5,
     fontSize: 10,
     marginBottom: 8,
   },
@@ -1533,8 +1534,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   currencyText: {
+    fontFamily: 'Inter-Medium',
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '500',
   },
   amountInputWrapper: {
     flex: 1,
@@ -1544,8 +1546,9 @@ const styles = StyleSheet.create({
     width: 56,
   },
   amountTextInputCentered: {
+    fontFamily: 'Inter-SemiBold',
     fontSize: 36,
-    fontWeight: '900',
+    fontWeight: '600',
     padding: 0,
     letterSpacing: -0.5,
   },
@@ -1561,11 +1564,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.02,
-    shadowRadius: 3,
+    elevation: 0,
   },
   selectorCardLeft: {
     flexDirection: 'row',
@@ -1585,13 +1584,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   selectorCardLabel: {
+    fontFamily: 'Inter-Medium',
     fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.8,
+    fontWeight: '500',
+    letterSpacing: 1.5,
   },
   selectorCardValue: {
+    fontFamily: 'Inter-Medium',
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '500',
     marginTop: 2,
   },
   selectorCardRight: {
@@ -1599,8 +1600,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selectorCardBalance: {
+    fontFamily: 'Inter-Medium',
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '500',
     marginRight: 8,
   },
 
@@ -1615,8 +1617,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   budgetUsageText: {
+    fontFamily: 'Inter-Regular',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '400',
     marginRight: 6,
   },
   budgetProgressContainer: {
@@ -1627,17 +1630,18 @@ const styles = StyleSheet.create({
   },
   budgetProgressBarBg: {
     flex: 1,
-    height: 6,
-    borderRadius: 3,
+    height: 4,
+    borderRadius: 2,
     overflow: 'hidden',
   },
   budgetProgressBarFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 2,
   },
   budgetPercentText: {
+    fontFamily: 'Inter-Regular',
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '400',
     marginLeft: 10,
     width: 32,
     textAlign: 'right',
@@ -1649,11 +1653,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.02,
-    shadowRadius: 3,
+    elevation: 0,
   },
 
   notesCard: {
@@ -1662,17 +1662,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.02,
-    shadowRadius: 3,
+    elevation: 0,
   },
   notesInput: {
     flex: 1,
+    fontFamily: 'Inter-Regular',
     fontSize: 14,
     padding: 0,
-    fontWeight: '500',
+    fontWeight: '400',
   },
 
   modalGrid: {
@@ -1695,11 +1692,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
+    elevation: 0,
   },
   modalListItem: {
     flexDirection: 'row',
@@ -1752,11 +1745,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
     borderTopWidth: 1,
-    elevation: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
+    elevation: 0,
   },
   actionButtonsCol: {
     flexDirection: 'column',
@@ -1767,16 +1756,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    elevation: 0,
     width: '100%',
   },
   primaryActionBtnText: {
     color: '#fff',
-    fontWeight: '800',
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
     fontSize: 16,
   },
   menuContainer: {
@@ -1801,7 +1787,8 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   menuItemText: {
-    fontWeight: '600',
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
     fontSize: 16,
   },
   menuDivider: {

@@ -18,6 +18,36 @@ import {
   moderateScale,
 } from '../../../utils/responsive';
 
+// Hex/RGB transparency utility for desaturated accent overlays with bulletproof fallbacks
+const addAlpha = (
+  color: string | undefined,
+  opacity: number,
+  fallbackHex: string,
+) => {
+  let resolvedColor = color || fallbackHex;
+
+  if (typeof resolvedColor !== 'string') {
+    resolvedColor = fallbackHex;
+  }
+
+  if (resolvedColor.startsWith('rgb')) {
+    const match = resolvedColor.match(/\d+/g);
+    if (match && match.length >= 3) {
+      return `rgba(${match[0]}, ${match[1]}, ${match[2]}, ${opacity})`;
+    }
+  }
+
+  if (!resolvedColor.startsWith('#')) {
+    resolvedColor = fallbackHex;
+  }
+
+  const hex = resolvedColor.replace('#', '');
+  const alpha = Math.round(opacity * 255)
+    .toString(16)
+    .padStart(2, '0');
+  return `#${hex}${alpha}`;
+};
+
 export const InsightsScreen = () => {
   const transactions = useStore((s) => s.transactions);
   const categories = useStore((s) => s.categories);
@@ -210,39 +240,42 @@ export const InsightsScreen = () => {
             <View
               style={[
                 styles.legendIconContainer,
-                { backgroundColor: item.color },
+                {
+                  backgroundColor: addAlpha(item.color, 0.08, '#64748B'),
+                  borderColor: addAlpha(item.color, 0.17, '#64748B'),
+                  borderWidth: 1,
+                },
               ]}
             >
               <MaterialCommunityIcons
                 name={getValidCategoryIcon(item.icon) as any}
                 size={14}
-                color="#fff"
+                color={item.color}
               />
             </View>
-            <Text
-              variant="bodySmall"
-              style={styles.legendName}
-              numberOfLines={1}
-            >
+            <Text style={styles.legendName} numberOfLines={1}>
               {item.name}
             </Text>
             <Text
-              variant="bodySmall"
               style={{
+                fontFamily: 'Inter-Medium',
                 color: theme.colors.onSurfaceVariant,
-                fontWeight: '600',
+                fontWeight: '500',
+                fontSize: 12,
               }}
             >
               {item.percentage}%
             </Text>
             <Text
-              variant="bodySmall"
               style={[
                 styles.legendAmount,
                 {
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
                   color: theme.colors.onSurface,
                   flexShrink: 1,
                   textAlign: 'right',
+                  fontSize: 13,
                 },
               ]}
               numberOfLines={1}
@@ -295,7 +328,11 @@ export const InsightsScreen = () => {
         <View
           style={[
             styles.rangeBadge,
-            { backgroundColor: theme.colors.primaryContainer },
+            {
+              backgroundColor: addAlpha(theme.colors.primary, 0.08, '#22C55E'),
+              borderColor: addAlpha(theme.colors.primary, 0.17, '#22C55E'),
+              borderWidth: 1,
+            },
           ]}
         >
           {selectedRange.type !== 'allTime' && (
@@ -303,23 +340,26 @@ export const InsightsScreen = () => {
               <Ionicons
                 name="calendar"
                 size={14}
-                color={theme.colors.onPrimaryContainer}
+                color={theme.colors.primary}
               />
               <Text
-                variant="labelSmall"
                 style={{
-                  color: theme.colors.onPrimaryContainer,
+                  fontFamily: 'Inter-Medium',
+                  color: theme.colors.primary,
                   marginLeft: 6,
-                  fontWeight: '700',
+                  fontWeight: '500',
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  textTransform: 'uppercase',
                 }}
               >
                 {rangeLabel}
               </Text>
               <Text
-                variant="labelSmall"
                 style={{
-                  color: theme.colors.onPrimaryContainer,
+                  color: theme.colors.primary,
                   marginLeft: 4,
+                  fontSize: 10,
                 }}
               >
                 ·{' '}
@@ -327,8 +367,14 @@ export const InsightsScreen = () => {
             </>
           )}
           <Text
-            variant="labelSmall"
-            style={{ color: theme.colors.onPrimaryContainer }}
+            style={{
+              fontFamily: 'Inter-Medium',
+              color: theme.colors.primary,
+              fontWeight: '500',
+              fontSize: 10,
+              letterSpacing: 1.2,
+              textTransform: 'uppercase',
+            }}
           >
             {filtered.txCount}{' '}
             {filtered.txCount === 1 ? 'transaction' : 'transactions'}
@@ -340,7 +386,11 @@ export const InsightsScreen = () => {
           <Card
             style={[
               styles.miniCard,
-              { backgroundColor: theme.colors.incomeContainer },
+              {
+                backgroundColor: addAlpha(theme.colors.income, 0.08, '#16A34A'),
+                borderColor: addAlpha(theme.colors.income, 0.17, '#16A34A'),
+                borderWidth: 1,
+              },
             ]}
             mode="contained"
             accessible={true}
@@ -353,18 +403,25 @@ export const InsightsScreen = () => {
                 color={theme.colors.income}
               />
               <Text
-                variant="labelSmall"
-                style={[styles.miniLabel, { color: theme.colors.income }]}
+                style={[
+                  styles.miniLabel,
+                  {
+                    color: theme.colors.income,
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                  },
+                ]}
                 numberOfLines={1}
               >
                 {t('realIncome')}
               </Text>
               <Text
-                variant="titleSmall"
                 style={[
                   styles.miniValue,
                   {
                     color: theme.colors.income,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
                     fontSize: fontScale(14),
                   },
                 ]}
@@ -380,7 +437,19 @@ export const InsightsScreen = () => {
             <Card
               style={[
                 styles.miniCard,
-                { backgroundColor: theme.colors.surfaceVariant },
+                {
+                  backgroundColor: addAlpha(
+                    theme.colors.onSurfaceVariant,
+                    0.08,
+                    '#64748B',
+                  ),
+                  borderColor: addAlpha(
+                    theme.colors.onSurfaceVariant,
+                    0.17,
+                    '#64748B',
+                  ),
+                  borderWidth: 1,
+                },
               ]}
               mode="contained"
               accessible={true}
@@ -393,21 +462,25 @@ export const InsightsScreen = () => {
                   color={theme.colors.onSurfaceVariant}
                 />
                 <Text
-                  variant="labelSmall"
                   style={[
                     styles.miniLabel,
-                    { color: theme.colors.onSurfaceVariant },
+                    {
+                      color: theme.colors.onSurfaceVariant,
+                      fontFamily: 'Inter-Medium',
+                      fontWeight: '500',
+                    },
                   ]}
                   numberOfLines={1}
                 >
                   {t('adjustments')}
                 </Text>
                 <Text
-                  variant="titleSmall"
                   style={[
                     styles.miniValue,
                     {
                       color: theme.colors.onSurfaceVariant,
+                      fontFamily: 'Inter-SemiBold',
+                      fontWeight: '600',
                       fontSize: fontScale(14),
                     },
                   ]}
@@ -423,7 +496,11 @@ export const InsightsScreen = () => {
           <Card
             style={[
               styles.miniCard,
-              { backgroundColor: theme.colors.errorContainer },
+              {
+                backgroundColor: addAlpha(theme.colors.error, 0.08, '#EF4444'),
+                borderColor: addAlpha(theme.colors.error, 0.17, '#EF4444'),
+                borderWidth: 1,
+              },
             ]}
             mode="contained"
             accessible={true}
@@ -436,17 +513,27 @@ export const InsightsScreen = () => {
                 color={theme.colors.error}
               />
               <Text
-                variant="labelSmall"
-                style={[styles.miniLabel, { color: theme.colors.error }]}
+                style={[
+                  styles.miniLabel,
+                  {
+                    color: theme.colors.error,
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                  },
+                ]}
                 numberOfLines={1}
               >
                 {t('expenses')}
               </Text>
               <Text
-                variant="titleSmall"
                 style={[
                   styles.miniValue,
-                  { color: theme.colors.error, fontSize: fontScale(14) },
+                  {
+                    color: theme.colors.error,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                    fontSize: fontScale(14),
+                  },
                 ]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
@@ -459,7 +546,14 @@ export const InsightsScreen = () => {
 
         {filtered.hasAdjustments && filtered.totalAdjustments !== 0 && (
           <View style={{ marginBottom: 12, alignItems: 'center' }}>
-            <Text variant="labelSmall" style={{ color: theme.colors.outline }}>
+            <Text
+              style={{
+                fontFamily: 'Inter-Regular',
+                fontWeight: '400',
+                fontSize: 11,
+                color: theme.colors.outline,
+              }}
+            >
               {t('combinedTotal')}: {formatCurrency(filtered.combinedIncome)}
             </Text>
           </View>
@@ -469,27 +563,35 @@ export const InsightsScreen = () => {
         <Card
           style={[
             styles.savingsCard,
-            { backgroundColor: theme.colors.surface },
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.outlineVariant,
+              borderWidth: 1,
+            },
           ]}
-          mode="elevated"
+          mode="contained"
           accessible={true}
           accessibilityLabel={`${t('savingsRateTitle')}: ${filtered.savingsRate.toFixed(1)}%. ${t('spendingFrequencyTitle')}: ${filtered.spendingDays} ${t('daysLabel')}, ${filtered.txCount} ${filtered.txCount === 1 ? 'transaction' : 'transactions'}`}
         >
           <Card.Content style={styles.savingsRow}>
             <View style={styles.savingsItem}>
               <Text
-                variant="labelSmall"
                 style={{
                   color: theme.colors.onSurfaceVariant,
-                  fontWeight: '700',
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 10,
+                  letterSpacing: 1.5,
+                  textTransform: 'uppercase',
                 }}
               >
                 {t('savingsRateTitle')}
               </Text>
               <Text
-                variant="titleLarge"
                 style={{
-                  fontWeight: '900',
+                  fontFamily: 'Inter-SemiBold',
+                  fontWeight: '600',
+                  fontSize: 22,
                   color:
                     filtered.savingsRate >= 0
                       ? theme.colors.income
@@ -519,18 +621,22 @@ export const InsightsScreen = () => {
             />
             <View style={styles.savingsItem}>
               <Text
-                variant="labelSmall"
                 style={{
                   color: theme.colors.onSurfaceVariant,
-                  fontWeight: '700',
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 10,
+                  letterSpacing: 1.5,
+                  textTransform: 'uppercase',
                 }}
               >
                 {t('spendingFrequencyTitle')}
               </Text>
               <Text
-                variant="titleLarge"
                 style={{
-                  fontWeight: '900',
+                  fontFamily: 'Inter-SemiBold',
+                  fontWeight: '600',
+                  fontSize: 22,
                   color: theme.colors.onSurface,
                   marginTop: 4,
                 }}
@@ -539,10 +645,11 @@ export const InsightsScreen = () => {
               >
                 {filtered.spendingDays}{' '}
                 <Text
-                  variant="bodySmall"
                   style={{
                     color: theme.colors.onSurfaceVariant,
-                    fontWeight: '600',
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    fontSize: 12,
                   }}
                 >
                   {t('daysLabel')}
@@ -552,16 +659,31 @@ export const InsightsScreen = () => {
           </Card.Content>
         </Card>
 
-        {/* Category Pie Chart */}
+        {/* Category Spending Chart */}
         {pieData.length > 0 && (
           <Card
-            style={styles.card}
-            mode="elevated"
+            style={[
+              styles.card,
+              {
+                borderColor: theme.colors.outlineVariant,
+                borderWidth: 1,
+              },
+            ]}
+            mode="contained"
             accessible={true}
             accessibilityLabel={`${t('chartTitle')}. ${t('categoryPieChartDescription' as any) || 'Pie chart showing category spending breakdown'}`}
           >
             <Card.Content>
-              <Text variant="titleMedium" style={styles.chartTitle}>
+              <Text
+                style={[
+                  styles.chartTitle,
+                  {
+                    color: theme.colors.onSurface,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                  },
+                ]}
+              >
                 {t('chartTitle')}
               </Text>
               {memoizedPieChart}
@@ -570,22 +692,39 @@ export const InsightsScreen = () => {
           </Card>
         )}
 
-        {/* Month-over-month Bar Chart (always shows global data) */}
+        {/* Month-over-month Bar Chart */}
         {barData && (
           <Card
-            style={styles.card}
-            mode="elevated"
+            style={[
+              styles.card,
+              {
+                borderColor: theme.colors.outlineVariant,
+                borderWidth: 1,
+              },
+            ]}
+            mode="contained"
             accessible={true}
             accessibilityLabel={`${t('expenseGrowthTitle')}. ${t('monthlyBarChartDescription' as any) || 'Bar chart showing monthly expense comparisons'}`}
           >
             <Card.Content>
-              <Text variant="titleMedium" style={styles.chartTitle}>
+              <Text
+                style={[
+                  styles.chartTitle,
+                  {
+                    color: theme.colors.onSurface,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                  },
+                ]}
+              >
                 {t('expenseGrowthTitle')}
               </Text>
               <Text
-                variant="labelSmall"
                 style={{
                   color: theme.colors.onSurfaceVariant,
+                  fontFamily: 'Inter-Regular',
+                  fontWeight: '400',
+                  fontSize: 12,
                   marginBottom: 8,
                 }}
               >
@@ -594,7 +733,6 @@ export const InsightsScreen = () => {
               {memoizedBarChart}
               <View style={styles.growthContainer}>
                 <Text
-                  variant="headlineMedium"
                   style={[
                     styles.growthValue,
                     {
@@ -602,13 +740,25 @@ export const InsightsScreen = () => {
                         expenseGrowth > 0
                           ? theme.colors.error
                           : theme.colors.income,
+                      fontFamily: 'Inter-SemiBold',
+                      fontWeight: '600',
+                      fontSize: 22,
                     },
                   ]}
                 >
                   {expenseGrowth > 0 ? '+' : ''}
                   {expenseGrowth.toFixed(1)}%
                 </Text>
-                <Text variant="labelSmall" style={styles.subtext}>
+                <Text
+                  style={[
+                    styles.subtext,
+                    {
+                      fontFamily: 'Inter-Regular',
+                      fontWeight: '400',
+                      fontSize: 12,
+                    },
+                  ]}
+                >
                   {t('comparedToLastMonth')}
                 </Text>
               </View>
@@ -619,13 +769,27 @@ export const InsightsScreen = () => {
         {/* Insights */}
         {analyticsReport && analyticsReport.insights.length > 0 && (
           <View style={{ marginTop: 8 }}>
-            <Text variant="titleLarge" style={styles.sectionTitle}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                {
+                  color: theme.colors.onSurface,
+                  fontFamily: 'Inter-SemiBold',
+                  fontWeight: '600',
+                },
+              ]}
+            >
               {t('insights')}
             </Text>
             {analyticsReport.insights.map((insight) => {
               let iconName: any = 'information-circle-outline';
               let iconColor = theme.colors.primary;
-              let backgroundColor = theme.colors.primaryContainer;
+              let backgroundColor = addAlpha(
+                theme.colors.primary,
+                0.08,
+                '#22C55E',
+              );
+              let borderColor = addAlpha(theme.colors.primary, 0.17, '#22C55E');
 
               if (insight.level === 'critical' || insight.level === 'warning') {
                 iconName = 'alert-circle-outline';
@@ -633,45 +797,85 @@ export const InsightsScreen = () => {
                   insight.level === 'critical'
                     ? theme.colors.error
                     : theme.colors.warning;
-                backgroundColor =
-                  insight.level === 'critical'
-                    ? theme.colors.errorContainer
-                    : theme.colors.warningContainer;
+                backgroundColor = addAlpha(
+                  iconColor,
+                  0.08,
+                  insight.level === 'critical' ? '#EF4444' : '#F59E0B',
+                );
+                borderColor = addAlpha(
+                  iconColor,
+                  0.17,
+                  insight.level === 'critical' ? '#EF4444' : '#F59E0B',
+                );
               } else if (insight.level === 'positive') {
                 iconName = 'checkmark-circle-outline';
                 iconColor = theme.colors.income;
-                backgroundColor = theme.colors.incomeContainer;
+                backgroundColor = addAlpha(
+                  theme.colors.income,
+                  0.08,
+                  '#16A34A',
+                );
+                borderColor = addAlpha(theme.colors.income, 0.17, '#16A34A');
               }
 
               return (
                 <Card
                   key={insight.id}
-                  style={styles.insightCard}
-                  mode="elevated"
+                  style={[
+                    styles.insightCard,
+                    {
+                      borderColor: theme.colors.outlineVariant,
+                      borderWidth: 1,
+                    },
+                  ]}
+                  mode="contained"
                 >
                   <Card.Content style={styles.insightContent}>
                     <View
                       style={[
                         styles.insightIconContainer,
-                        { backgroundColor: backgroundColor },
+                        {
+                          backgroundColor: backgroundColor,
+                          borderColor: borderColor,
+                          borderWidth: 1,
+                        },
                       ]}
                     >
                       <Ionicons name={iconName} size={24} color={iconColor} />
                     </View>
                     <View style={styles.insightTextContainer}>
-                      <Text variant="titleSmall" style={styles.insightTitle}>
+                      <Text
+                        style={[
+                          styles.insightTitle,
+                          {
+                            color: theme.colors.onSurface,
+                            fontFamily: 'Inter-Medium',
+                            fontWeight: '500',
+                          },
+                        ]}
+                      >
                         {insight.title}
                       </Text>
-                      <Text variant="bodyMedium" style={styles.insightText}>
+                      <Text
+                        style={[
+                          styles.insightText,
+                          {
+                            color: theme.colors.onSurfaceVariant,
+                            fontFamily: 'Inter-Regular',
+                            fontWeight: '400',
+                          },
+                        ]}
+                      >
                         {insight.message}
                       </Text>
                       {insight.recommendation && (
                         <View style={styles.recommendationContainer}>
                           <Text
-                            variant="labelSmall"
                             style={{
                               color: theme.colors.primary,
-                              fontWeight: '700',
+                              fontFamily: 'Inter-Medium',
+                              fontWeight: '500',
+                              fontSize: 12,
                             }}
                           >
                             {insight.recommendation}
@@ -695,10 +899,14 @@ export const InsightsScreen = () => {
               color={theme.colors.outlineVariant}
             />
             <Text
-              variant="bodyLarge"
               style={[
                 styles.emptyText,
-                { color: theme.colors.onSurfaceVariant },
+                {
+                  color: theme.colors.onSurfaceVariant,
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 14,
+                },
               ]}
             >
               {t('noDataForPeriod')}
@@ -746,14 +954,12 @@ const defaultStyles = (theme: any) =>
       gap: 4,
     },
     miniLabel: {
-      fontWeight: '700',
       textTransform: 'uppercase',
       fontSize: 10,
+      letterSpacing: 1.2,
       marginTop: 4,
     },
-    miniValue: {
-      fontWeight: '900',
-    },
+    miniValue: {},
     savingsCard: {
       borderRadius: 16,
       marginBottom: 16,
@@ -784,7 +990,7 @@ const defaultStyles = (theme: any) =>
       marginVertical: 12,
     },
     sectionTitle: {
-      fontWeight: '800',
+      fontSize: 18,
       marginBottom: 16,
       marginLeft: 4,
     },
@@ -794,8 +1000,8 @@ const defaultStyles = (theme: any) =>
       backgroundColor: theme.colors.surface,
     },
     chartTitle: {
-      fontWeight: '800',
-      marginBottom: 8,
+      fontSize: 16,
+      marginBottom: 4,
     },
     chart: {
       marginVertical: 8,
@@ -821,19 +1027,19 @@ const defaultStyles = (theme: any) =>
     },
     legendName: {
       flex: 1,
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       color: theme.colors.onSurface,
+      fontSize: 13,
     },
     legendAmount: {
-      fontWeight: '700',
       marginLeft: 8,
     },
     growthContainer: {
       alignItems: 'center',
       marginTop: 8,
     },
-    growthValue: {
-      fontWeight: '900',
-    },
+    growthValue: {},
     subtext: {
       color: theme.colors.onSurfaceVariant,
     },
@@ -841,7 +1047,7 @@ const defaultStyles = (theme: any) =>
       marginBottom: 12,
       borderRadius: 20,
       backgroundColor: theme.colors.surface,
-      elevation: 2,
+      elevation: 0,
     },
     insightContent: {
       flexDirection: 'row',
@@ -861,11 +1067,11 @@ const defaultStyles = (theme: any) =>
       gap: 2,
     },
     insightTitle: {
-      fontWeight: '700',
+      fontSize: 14,
     },
     insightText: {
-      color: theme.colors.onSurfaceVariant,
       lineHeight: 18,
+      fontSize: 13,
     },
     recommendationContainer: {
       marginTop: 8,
@@ -878,7 +1084,5 @@ const defaultStyles = (theme: any) =>
       paddingVertical: 40,
       gap: 12,
     },
-    emptyText: {
-      fontWeight: '500',
-    },
+    emptyText: {},
   });

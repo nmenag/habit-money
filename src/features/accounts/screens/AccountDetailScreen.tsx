@@ -6,11 +6,14 @@ import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Card, IconButton, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+
 import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
 import { TransactionItem } from '../../transactions/components/TransactionItem';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme } from '../../../theme/theme';
 import { getLocalDateString } from '../../../utils/dateUtils';
+import { fontScale } from '../../../utils/responsive';
 
 export const AccountDetailScreen = () => {
   const params = useLocalSearchParams<{ accountId: string }>();
@@ -139,12 +142,12 @@ export const AccountDetailScreen = () => {
   const accountColor = account.color || theme.colors.primary;
   const isDarkColor = theme.dark;
 
-  const cardBgColor = isDarkColor ? '#0A110F' : '#FFFFFF';
+  const cardBgColor = theme.colors.surface;
 
-  const inflowBg = isDarkColor ? '#0D2A1C' : '#E6F4EA';
-  const inflowBorder = isDarkColor ? '#1B4D36' : '#C2E7D9';
-  const outflowBg = isDarkColor ? '#2A0E10' : '#FCE8E6';
-  const outflowBorder = isDarkColor ? '#4D1B1E' : '#F5C2C1';
+  const inflowBg = isDarkColor ? '#052E16' : '#DCFCE7';
+  const inflowBorder = isDarkColor ? '#065F462B' : '#A7F3D0';
+  const outflowBg = isDarkColor ? '#450A0A' : '#FEE2E2';
+  const outflowBorder = isDarkColor ? '#991B1B2B' : '#FCA5A5';
 
   return (
     <View
@@ -157,100 +160,107 @@ export const AccountDetailScreen = () => {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Card
-          style={[
-            styles.creditCard,
-            {
-              backgroundColor: cardBgColor,
-              borderColor: accountColor,
-              shadowColor: accountColor,
-            },
-          ]}
-          mode="outlined"
-        >
-          <Card.Content style={styles.creditCardContent}>
-            <View style={styles.cardMidRow}>
-              <Text
-                style={[
-                  styles.cardBalanceLabel,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
-              >
-                {t('currentBalanceLabel').toUpperCase()}
-              </Text>
-              <Text
-                style={[
-                  styles.cardBalance,
-                  {
-                    color:
-                      account.currentBalance < 0
-                        ? theme.colors.error
-                        : theme.colors.onSurface,
-                  },
-                ]}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                {formatCurrency(account.currentBalance, account.currency)}
-              </Text>
-            </View>
-
-            <View style={styles.cardBottomRow}>
-              <View style={styles.cardInfoCol}>
+        <Animated.View entering={FadeIn.duration(300)}>
+          <Card
+            style={[
+              styles.creditCard,
+              {
+                backgroundColor: cardBgColor,
+                borderColor: theme.colors.outline,
+              },
+            ]}
+            mode="contained"
+          >
+            <Card.Content style={styles.creditCardContent}>
+              <View style={styles.cardMidRow}>
                 <Text
                   style={[
-                    styles.cardHolderLabel,
-                    { color: theme.colors.outline },
+                    styles.cardBalanceLabel,
+                    { color: theme.colors.onSurfaceVariant },
                   ]}
                 >
-                  {t(account.type).toUpperCase()}
+                  {t('currentBalanceLabel').toUpperCase()}
                 </Text>
                 <Text
                   style={[
-                    styles.cardHolderName,
-                    { color: theme.colors.onSurface },
+                    styles.cardBalance,
+                    {
+                      color:
+                        account.currentBalance < 0
+                          ? theme.colors.error
+                          : theme.colors.onSurface,
+                    },
                   ]}
                   numberOfLines={1}
                   adjustsFontSizeToFit
                 >
-                  {translateName(account.name)}
+                  {formatCurrency(account.currentBalance, account.currency)}
                 </Text>
               </View>
-              <View style={styles.headerActions}>
-                <IconButton
-                  icon="pencil-outline"
-                  mode="contained"
-                  containerColor={theme.dark ? '#11221D' : '#F1F5F9'}
-                  iconColor={theme.colors.onSurface}
-                  size={18}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/add-account',
-                      params: { account: JSON.stringify(account) },
-                    })
-                  }
-                  style={styles.actionIconBtn}
-                />
-                <IconButton
-                  icon="plus"
-                  mode="contained"
-                  containerColor={theme.colors.primary}
-                  iconColor="#fff"
-                  size={18}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/add-transaction',
-                      params: { accountId: account.id },
-                    })
-                  }
-                  style={styles.actionIconBtn}
-                />
-              </View>
-            </View>
-          </Card.Content>
-        </Card>
 
-        <View style={styles.cashFlowSummaryRow}>
+              <View style={styles.cardBottomRow}>
+                <View style={styles.cardInfoCol}>
+                  <Text
+                    style={[
+                      styles.cardHolderLabel,
+                      { color: theme.colors.outline },
+                    ]}
+                  >
+                    {t(account.type).toUpperCase()}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.cardHolderName,
+                      { color: theme.colors.onSurface },
+                    ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                  >
+                    {translateName(account.name)}
+                  </Text>
+                </View>
+                <View style={styles.headerActions}>
+                  <IconButton
+                    icon="pencil-outline"
+                    mode="contained"
+                    containerColor={theme.colors.elevation.level1}
+                    iconColor={theme.colors.onSurface}
+                    size={16}
+                    accessibilityLabel={t('edit')}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/add-account',
+                        params: { account: JSON.stringify(account) },
+                      })
+                    }
+                    style={styles.actionIconBtn}
+                  />
+                  <IconButton
+                    icon="plus"
+                    mode="contained"
+                    containerColor={theme.colors.primary}
+                    iconColor="#fff"
+                    size={16}
+                    accessibilityLabel="Add Transaction"
+                    onPress={() =>
+                      router.push({
+                        pathname: '/add-transaction',
+                        params: { accountId: account.id },
+                      })
+                    }
+                    style={styles.actionIconBtn}
+                  />
+                </View>
+              </View>
+            </Card.Content>
+          </Card>
+        </Animated.View>
+
+        {/* Capsule summary flow grid */}
+        <Animated.View
+          entering={FadeInUp.delay(100).duration(300)}
+          style={styles.cashFlowSummaryRow}
+        >
           <View
             style={[
               styles.cashFlowCapsule,
@@ -260,17 +270,22 @@ export const AccountDetailScreen = () => {
             <View
               style={[
                 styles.flowIconBox,
-                { backgroundColor: isDarkColor ? '#1B4D36' : '#D1E7DD' },
+                { backgroundColor: isDarkColor ? '#065F46' : '#A7F3D0' },
               ]}
             >
-              <Ionicons name="arrow-down" size={16} color="#22C55E" />
+              <Ionicons name="arrow-down" size={14} color="#10B981" />
             </View>
             <View style={styles.flowTextCol}>
-              <Text style={[styles.flowLabel, { color: theme.colors.outline }]}>
-                Inflow (Month)
+              <Text
+                style={[
+                  styles.flowLabel,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {t('inflowMonth')}
               </Text>
               <Text
-                style={[styles.flowAmount, { color: '#22C55E' }]}
+                style={[styles.flowAmount, { color: '#10B981' }]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
@@ -288,14 +303,19 @@ export const AccountDetailScreen = () => {
             <View
               style={[
                 styles.flowIconBox,
-                { backgroundColor: isDarkColor ? '#4D1B1E' : '#F8D7DA' },
+                { backgroundColor: isDarkColor ? '#7F1D1D' : '#FCA5A5' },
               ]}
             >
-              <Ionicons name="arrow-up" size={16} color="#EF4444" />
+              <Ionicons name="arrow-up" size={14} color="#EF4444" />
             </View>
             <View style={styles.flowTextCol}>
-              <Text style={[styles.flowLabel, { color: theme.colors.outline }]}>
-                Outflow (Month)
+              <Text
+                style={[
+                  styles.flowLabel,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {t('outflowMonth')}
               </Text>
               <Text
                 style={[styles.flowAmount, { color: '#EF4444' }]}
@@ -306,21 +326,24 @@ export const AccountDetailScreen = () => {
               </Text>
             </View>
           </View>
-        </View>
+        </Animated.View>
 
         {accountTransactions.some((t) => t.type === 'expense') && (
-          <View style={styles.chartSection}>
+          <Animated.View
+            entering={FadeInUp.delay(150).duration(300)}
+            style={styles.chartSection}
+          >
             <View style={styles.chartHeader}>
               <View style={styles.chartTitleBox}>
                 <Ionicons
                   name="speedometer-outline"
-                  size={18}
+                  size={16}
                   color={theme.colors.primary}
                 />
                 <Text
                   style={[styles.chartTitle, { color: theme.colors.onSurface }]}
                 >
-                  7-Day Outflow Velocity
+                  {t('sevenDayOutflowVelocity')}
                 </Text>
               </View>
               {maxSpendingAmount > 0 && (
@@ -345,11 +368,11 @@ export const AccountDetailScreen = () => {
               style={[
                 styles.chartCard,
                 {
-                  backgroundColor: theme.dark ? '#0A110F' : '#FFFFFF',
-                  borderColor: theme.dark ? '#11221D' : '#E2E8F0',
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.outline,
                 },
               ]}
-              mode="outlined"
+              mode="contained"
             >
               <Card.Content style={styles.chartCardContent}>
                 <View style={styles.chartGridLines}>
@@ -357,7 +380,7 @@ export const AccountDetailScreen = () => {
                     style={[
                       styles.gridLine,
                       {
-                        borderColor: theme.dark ? '#1E293B' : '#E2E8F0',
+                        borderColor: theme.colors.outlineVariant,
                         borderStyle: 'dashed',
                       },
                     ]}
@@ -366,7 +389,7 @@ export const AccountDetailScreen = () => {
                     style={[
                       styles.gridLine,
                       {
-                        borderColor: theme.dark ? '#1E293B' : '#E2E8F0',
+                        borderColor: theme.colors.outlineVariant,
                         borderStyle: 'dashed',
                       },
                     ]}
@@ -403,10 +426,13 @@ export const AccountDetailScreen = () => {
                 </View>
               </Card.Content>
             </Card>
-          </View>
+          </Animated.View>
         )}
 
-        <View style={styles.transactionsSection}>
+        <Animated.View
+          entering={FadeInUp.delay(200).duration(300)}
+          style={styles.transactionsSection}
+        >
           <Text
             style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
           >
@@ -423,7 +449,6 @@ export const AccountDetailScreen = () => {
                   ]}
                 >
                   <Text
-                    variant="labelSmall"
                     style={[
                       styles.sectionHeaderText,
                       { color: theme.colors.onSurfaceVariant },
@@ -472,7 +497,7 @@ export const AccountDetailScreen = () => {
               </Text>
             </View>
           )}
-        </View>
+        </Animated.View>
       </ScrollView>
       <BannerAdComponent />
     </View>
@@ -487,58 +512,37 @@ const defaultStyles = (theme: AppTheme) =>
     errorText: {
       textAlign: 'center',
       marginTop: 80,
-      fontSize: 16,
-      fontWeight: '700',
+      fontSize: fontScale(16),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     creditCard: {
       margin: 16,
       marginTop: 20,
-      borderRadius: 24,
-      borderWidth: 1.5,
+      borderRadius: theme.roundness || 12,
+      borderWidth: 1,
       elevation: 0,
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: theme.dark ? 0.25 : 0.12,
-      shadowRadius: 16,
     },
     creditCardContent: {
-      paddingVertical: 20,
-      paddingHorizontal: 20,
-    },
-    cardTopRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 20,
-    },
-    chipMock: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      opacity: 0.9,
-    },
-    brandBadge: {
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 8,
-      backgroundColor: theme.dark ? '#11221D' : '#F1F5F9',
-    },
-    brandBadgeText: {
-      fontSize: 8,
-      fontWeight: '900',
-      letterSpacing: 1.2,
+      paddingVertical: 16,
+      paddingHorizontal: 16,
     },
     cardMidRow: {
-      marginBottom: 24,
+      marginBottom: 20,
     },
     cardBalanceLabel: {
-      fontSize: 10,
-      fontWeight: '900',
-      letterSpacing: 2,
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      textTransform: 'uppercase',
+      letterSpacing: 1.5,
       marginBottom: 4,
     },
     cardBalance: {
-      fontSize: 32,
-      fontWeight: '900',
-      letterSpacing: -1,
+      fontSize: fontScale(24),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      letterSpacing: -0.2,
     },
     cardBottomRow: {
       flexDirection: 'row',
@@ -551,14 +555,17 @@ const defaultStyles = (theme: AppTheme) =>
       marginRight: 8,
     },
     cardHolderLabel: {
-      fontSize: 9,
-      fontWeight: '800',
+      fontSize: fontScale(9),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      textTransform: 'uppercase',
       letterSpacing: 1,
       marginBottom: 2,
     },
     cardHolderName: {
-      fontSize: 15,
-      fontWeight: '800',
+      fontSize: fontScale(14),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       letterSpacing: -0.1,
     },
     headerActions: {
@@ -568,9 +575,9 @@ const defaultStyles = (theme: AppTheme) =>
     },
     actionIconBtn: {
       margin: 0,
-      borderRadius: 12,
-      width: 38,
-      height: 38,
+      borderRadius: 10,
+      width: 36,
+      height: 36,
     },
     cashFlowSummaryRow: {
       flexDirection: 'row',
@@ -585,13 +592,13 @@ const defaultStyles = (theme: AppTheme) =>
       flexDirection: 'row',
       alignItems: 'center',
       padding: 12,
-      borderRadius: 18,
-      borderWidth: 1.5,
+      borderRadius: theme.roundness || 12,
+      borderWidth: 1,
       gap: 10,
     },
     flowIconBox: {
-      width: 32,
-      height: 32,
+      width: 30,
+      height: 30,
       borderRadius: 10,
       justifyContent: 'center',
       alignItems: 'center',
@@ -600,14 +607,15 @@ const defaultStyles = (theme: AppTheme) =>
       flex: 1,
     },
     flowLabel: {
-      fontSize: 9,
-      fontWeight: '700',
-      letterSpacing: 0.2,
+      fontSize: fontScale(9),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
       marginBottom: 2,
     },
     flowAmount: {
-      fontSize: 13,
-      fontWeight: '900',
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
       letterSpacing: -0.2,
     },
     chartSection: {
@@ -627,8 +635,9 @@ const defaultStyles = (theme: AppTheme) =>
       gap: 8,
     },
     chartTitle: {
-      fontSize: 14,
-      fontWeight: '800',
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       letterSpacing: -0.2,
     },
     chartBadge: {
@@ -638,22 +647,23 @@ const defaultStyles = (theme: AppTheme) =>
       borderWidth: 1,
     },
     chartBadgeText: {
-      fontSize: 9,
-      fontWeight: '800',
+      fontSize: fontScale(9),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     chartCard: {
-      borderRadius: 20,
-      borderWidth: 1.5,
+      borderRadius: theme.roundness || 12,
+      borderWidth: 1,
       elevation: 0,
       position: 'relative',
     },
     chartCardContent: {
-      paddingVertical: 18,
+      paddingVertical: 16,
       paddingHorizontal: 10,
     },
     chartGridLines: {
       position: 'absolute',
-      top: 18,
+      top: 16,
       left: 10,
       right: 10,
       height: 56,
@@ -679,9 +689,9 @@ const defaultStyles = (theme: AppTheme) =>
     },
     chartBarTrack: {
       height: 56,
-      width: 7,
+      width: 6,
       borderRadius: 100,
-      backgroundColor: theme.dark ? '#11221D' : '#F1F5F9',
+      backgroundColor: theme.dark ? '#1E293B' : '#F1F5F9',
       justifyContent: 'flex-end',
       overflow: 'hidden',
       marginBottom: 8,
@@ -691,17 +701,20 @@ const defaultStyles = (theme: AppTheme) =>
       borderRadius: 100,
     },
     chartDayLabel: {
-      fontSize: 9,
-      fontWeight: '800',
+      fontSize: fontScale(9),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       letterSpacing: 0.5,
     },
     transactionsSection: {
       paddingHorizontal: 16,
     },
     sectionTitle: {
-      fontSize: 18,
-      fontWeight: '900',
-      letterSpacing: -0.5,
+      fontSize: fontScale(14),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
       marginBottom: 16,
       paddingLeft: 4,
     },
@@ -714,9 +727,11 @@ const defaultStyles = (theme: AppTheme) =>
       paddingBottom: 4,
     },
     sectionHeaderText: {
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       textTransform: 'uppercase',
       letterSpacing: 0.8,
-      fontWeight: '800',
     },
     transactionsList: {
       paddingHorizontal: 16,
@@ -727,8 +742,9 @@ const defaultStyles = (theme: AppTheme) =>
       marginTop: 20,
     },
     emptyTextText: {
-      fontSize: 14,
-      fontWeight: '700',
+      fontSize: fontScale(14),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       marginTop: 10,
     },
   });

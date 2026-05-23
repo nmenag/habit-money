@@ -2,8 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Card, Text, useTheme } from 'react-native-paper';
+
 import { Account, useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme } from '../../../theme/theme';
+import { fontScale } from '../../../utils/responsive';
 
 interface Props {
   account: Account;
@@ -37,26 +39,23 @@ export const AccountCard: React.FC<Props> = ({
   };
 
   const accountColor = account.color || theme.colors.primary;
-  const isDarkColor = theme.dark;
 
-  const cardBackground = isDarkColor
-    ? `${accountColor}08`
-    : `${accountColor}04`;
+  const cardBackground = isActive
+    ? theme.colors.elevation.level3
+    : `${accountColor}12`;
 
-  const cardBorder = isDarkColor ? `${accountColor}25` : `${accountColor}1B`;
+  const cardBorder = isActive ? theme.colors.primary : `${accountColor}2B`;
 
   return (
     <Card
       style={[
         styles.card,
         {
-          backgroundColor: isActive
-            ? theme.colors.elevation.level3
-            : cardBackground,
-          borderColor: isActive ? theme.colors.primary : cardBorder,
+          backgroundColor: cardBackground,
+          borderColor: cardBorder,
         },
       ]}
-      mode="outlined"
+      mode="contained"
       onPress={onPress}
       onLongPress={onLongPress}
       delayLongPress={180}
@@ -71,7 +70,7 @@ export const AccountCard: React.FC<Props> = ({
             <View style={styles.dragHandle} pointerEvents="none">
               <Ionicons
                 name="reorder-two-outline"
-                size={20}
+                size={18}
                 color={theme.colors.outline}
                 style={{ opacity: 0.35 }}
               />
@@ -85,13 +84,12 @@ export const AccountCard: React.FC<Props> = ({
               {
                 backgroundColor: `${accountColor}12`,
                 borderColor: `${accountColor}2B`,
-                borderWidth: 1,
               },
             ]}
           >
             <Ionicons
               name={getAccountIcon(account.type) as any}
-              size={22}
+              size={20}
               color={accountColor}
             />
           </View>
@@ -144,21 +142,20 @@ const defaultStyles = (theme: AppTheme) =>
   StyleSheet.create({
     card: {
       marginBottom: 12,
-      borderRadius: 20,
-      borderWidth: 1.5,
+      borderRadius: theme.roundness || 12,
+      borderWidth: 1,
       overflow: 'hidden',
-      elevation: 0,
     },
     cardContent: {
-      paddingVertical: 14,
-      paddingHorizontal: 16,
+      paddingVertical: 12,
+      paddingHorizontal: 12,
     },
     cardHeader: {
       flexDirection: 'row',
       alignItems: 'center',
     },
     dragHandle: {
-      marginRight: 10,
+      marginRight: 6,
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -169,24 +166,26 @@ const defaultStyles = (theme: AppTheme) =>
       borderWidth: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: 14,
+      marginRight: 12,
     },
     textContainer: {
       flex: 1.2,
       justifyContent: 'center',
     },
     name: {
-      fontSize: 15,
-      fontWeight: '600',
-      letterSpacing: -0.2,
+      fontSize: fontScale(14),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      letterSpacing: -0.1,
     },
     badgeRow: {
       flexDirection: 'row',
       marginTop: 4,
     },
     typeText: {
-      fontSize: 9,
-      fontWeight: '600',
+      fontSize: fontScale(8),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       letterSpacing: 1,
       paddingHorizontal: 6,
       paddingVertical: 2,
@@ -200,12 +199,9 @@ const defaultStyles = (theme: AppTheme) =>
       marginRight: 4,
     },
     balanceText: {
-      fontSize: 16,
+      fontSize: fontScale(15),
+      fontFamily: 'Inter-SemiBold',
       fontWeight: '600',
-      letterSpacing: -0.4,
-    },
-    deleteButton: {
-      margin: 0,
-      opacity: 0.7,
+      letterSpacing: -0.2,
     },
   });

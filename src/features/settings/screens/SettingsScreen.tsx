@@ -27,7 +27,7 @@ import { NotificationService } from '../../../services/NotificationService';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { backupToJSON, restoreFromJSON } from '../../../utils/dataBackup';
 import { CURRENCIES } from '../../../constants';
-import { AppTheme, spacing } from '../../../theme/theme';
+import { AppTheme } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
 
 export const SettingsScreen = () => {
@@ -1022,7 +1022,7 @@ const defaultStyles = (theme: AppTheme) =>
     card: {
       borderRadius: theme.roundness || 12,
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       backgroundColor: theme.colors.surface,
       overflow: 'hidden',
       elevation: 0,
@@ -1073,7 +1073,7 @@ const defaultStyles = (theme: AppTheme) =>
       fontWeight: '500',
     },
     divider: {
-      backgroundColor: theme.colors.outline,
+      backgroundColor: theme.colors.outlineVariant,
       marginLeft: 74,
     },
     themeSelectorContainer: {

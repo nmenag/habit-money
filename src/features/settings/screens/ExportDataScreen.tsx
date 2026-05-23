@@ -17,6 +17,17 @@ import { useStore, useTranslation } from '../../../store/useStore';
 import { exportTransactionsToCSV } from '../../../utils/csvExport';
 import { isInRange } from '../../../utils/dateFilters';
 
+const addAlpha = (color: string, opacity: number) => {
+  if (color && color.startsWith('#')) {
+    const hex = color.replace('#', '');
+    const alpha = Math.round(opacity * 255)
+      .toString(16)
+      .padStart(2, '0');
+    return `#${hex}${alpha}`;
+  }
+  return color;
+};
+
 export const ExportDataScreen = () => {
   const { transactions, accounts, categories, checkAndShowAd } = useStore();
   const { t, translateName } = useTranslation();
@@ -82,40 +93,63 @@ export const ExportDataScreen = () => {
         contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
       >
         <View style={styles.header}>
-          <Text variant="headlineSmall" style={styles.title}>
+          <Text
+            style={[
+              styles.title,
+              { color: theme.colors.onSurface, fontSize: 24 },
+            ]}
+          >
             {t('exportData')}
           </Text>
           <Text
-            variant="bodyMedium"
-            style={{ color: theme.colors.onSurfaceVariant }}
+            style={{
+              color: theme.colors.onSurfaceVariant,
+              fontFamily: 'Inter-Regular',
+              fontWeight: '400',
+              fontSize: 14,
+              marginTop: 4,
+            }}
           >
             {t('exportDataDesc')}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text variant="labelLarge" style={styles.sectionTitle}>
+          <Text style={styles.sectionTitle}>
             {t('filterCustomRange' as any)}
           </Text>
           <FilterBar />
         </View>
 
         <View style={styles.section}>
-          <Text variant="labelLarge" style={styles.sectionTitle}>
-            {t('filters')}
-          </Text>
-          <Card style={styles.card} mode="contained">
+          <Text style={styles.sectionTitle}>{t('filters')}</Text>
+          <Card
+            style={[
+              styles.card,
+              {
+                borderColor: theme.colors.outlineVariant,
+                borderWidth: 1,
+                backgroundColor: theme.colors.surface,
+              },
+            ]}
+            mode="contained"
+          >
             <Menu
               visible={accountMenuOpen}
               onDismiss={() => setAccountMenuOpen(false)}
               anchor={
                 <List.Item
                   title={t('filterByAccount' as any)}
+                  titleStyle={{ fontFamily: 'Inter-Medium', fontWeight: '500' }}
                   description={
                     activeAccount
                       ? translateName(activeAccount.name)
                       : t('allAccounts' as any)
                   }
+                  descriptionStyle={{
+                    fontFamily: 'Inter-Regular',
+                    fontWeight: '400',
+                  }}
                   left={(props) => <List.Icon {...props} icon="bank-outline" />}
                   right={(props) => (
                     <List.Icon {...props} icon="chevron-down" />
@@ -126,6 +160,7 @@ export const ExportDataScreen = () => {
             >
               <Menu.Item
                 title={t('allAccounts' as any)}
+                titleStyle={{ fontFamily: 'Inter-Regular', fontWeight: '400' }}
                 onPress={() => {
                   setSelectedAccountId(null);
                   setAccountMenuOpen(false);
@@ -135,6 +170,10 @@ export const ExportDataScreen = () => {
                 <Menu.Item
                   key={acc.id}
                   title={translateName(acc.name)}
+                  titleStyle={{
+                    fontFamily: 'Inter-Regular',
+                    fontWeight: '400',
+                  }}
                   onPress={() => {
                     setSelectedAccountId(acc.id);
                     setAccountMenuOpen(false);
@@ -142,18 +181,23 @@ export const ExportDataScreen = () => {
                 />
               ))}
             </Menu>
-            <Divider />
+            <Divider style={{ backgroundColor: theme.colors.outlineVariant }} />
             <Menu
               visible={categoryMenuOpen}
               onDismiss={() => setCategoryMenuOpen(false)}
               anchor={
                 <List.Item
                   title={t('filterByCategory' as any)}
+                  titleStyle={{ fontFamily: 'Inter-Medium', fontWeight: '500' }}
                   description={
                     activeCategory
                       ? translateName(activeCategory.name)
                       : t('allCategories' as any)
                   }
+                  descriptionStyle={{
+                    fontFamily: 'Inter-Regular',
+                    fontWeight: '400',
+                  }}
                   left={(props) => <List.Icon {...props} icon="tag-outline" />}
                   right={(props) => (
                     <List.Icon {...props} icon="chevron-down" />
@@ -164,6 +208,7 @@ export const ExportDataScreen = () => {
             >
               <Menu.Item
                 title={t('allCategories' as any)}
+                titleStyle={{ fontFamily: 'Inter-Regular', fontWeight: '400' }}
                 onPress={() => {
                   setSelectedCategoryId(null);
                   setCategoryMenuOpen(false);
@@ -173,6 +218,10 @@ export const ExportDataScreen = () => {
                 <Menu.Item
                   key={cat.id}
                   title={translateName(cat.name)}
+                  titleStyle={{
+                    fontFamily: 'Inter-Regular',
+                    fontWeight: '400',
+                  }}
                   onPress={() => {
                     setSelectedCategoryId(cat.id);
                     setCategoryMenuOpen(false);
@@ -180,18 +229,23 @@ export const ExportDataScreen = () => {
                 />
               ))}
             </Menu>
-            <Divider />
+            <Divider style={{ backgroundColor: theme.colors.outlineVariant }} />
             <Menu
               visible={typeMenuOpen}
               onDismiss={() => setTypeMenuOpen(false)}
               anchor={
                 <List.Item
                   title={t('type')}
+                  titleStyle={{ fontFamily: 'Inter-Medium', fontWeight: '500' }}
                   description={
                     selectedType === 'all'
                       ? t('allTypes' as any)
                       : t(selectedType as any)
                   }
+                  descriptionStyle={{
+                    fontFamily: 'Inter-Regular',
+                    fontWeight: '400',
+                  }}
                   left={(props) => (
                     <List.Icon {...props} icon="swap-vertical" />
                   )}
@@ -204,6 +258,7 @@ export const ExportDataScreen = () => {
             >
               <Menu.Item
                 title={t('allTypes' as any)}
+                titleStyle={{ fontFamily: 'Inter-Regular', fontWeight: '400' }}
                 onPress={() => {
                   setSelectedType('all');
                   setTypeMenuOpen(false);
@@ -211,6 +266,7 @@ export const ExportDataScreen = () => {
               />
               <Menu.Item
                 title={t('income')}
+                titleStyle={{ fontFamily: 'Inter-Regular', fontWeight: '400' }}
                 onPress={() => {
                   setSelectedType('income');
                   setTypeMenuOpen(false);
@@ -218,6 +274,7 @@ export const ExportDataScreen = () => {
               />
               <Menu.Item
                 title={t('expense')}
+                titleStyle={{ fontFamily: 'Inter-Regular', fontWeight: '400' }}
                 onPress={() => {
                   setSelectedType('expense');
                   setTypeMenuOpen(false);
@@ -225,6 +282,7 @@ export const ExportDataScreen = () => {
               />
               <Menu.Item
                 title={t('transfer')}
+                titleStyle={{ fontFamily: 'Inter-Regular', fontWeight: '400' }}
                 onPress={() => {
                   setSelectedType('transfer');
                   setTypeMenuOpen(false);
@@ -238,24 +296,35 @@ export const ExportDataScreen = () => {
           <Card
             style={[
               styles.summaryCard,
-              { backgroundColor: theme.colors.primaryContainer },
+              {
+                backgroundColor: addAlpha(theme.colors.primary, 0.08),
+                borderColor: addAlpha(theme.colors.primary, 0.17),
+                borderWidth: 1,
+              },
             ]}
             mode="contained"
           >
             <View style={styles.summaryContent}>
               <View>
                 <Text
-                  variant="titleMedium"
                   style={{
-                    color: theme.colors.onPrimaryContainer,
-                    fontWeight: 'bold',
+                    color: theme.colors.primary,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                    fontSize: 20,
                   }}
                 >
                   {filteredTransactions.length}
                 </Text>
                 <Text
-                  variant="labelSmall"
-                  style={{ color: theme.colors.onPrimaryContainer }}
+                  style={{
+                    color: theme.colors.primary,
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    fontSize: 11,
+                    letterSpacing: 1,
+                    textTransform: 'uppercase',
+                  }}
                 >
                   {t('transactions')}
                 </Text>
@@ -265,6 +334,7 @@ export const ExportDataScreen = () => {
                 icon="file-export"
                 onPress={handleExport}
                 disabled={filteredTransactions.length === 0}
+                labelStyle={{ fontFamily: 'Inter-Medium', fontWeight: '500' }}
               >
                 {t('exportData')}
               </Button>
@@ -287,7 +357,8 @@ const defaultStyles = (theme: any) =>
       paddingTop: 16,
     },
     title: {
-      fontWeight: 'bold',
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
       marginBottom: 8,
     },
     section: {
@@ -296,12 +367,14 @@ const defaultStyles = (theme: any) =>
       marginBottom: 16,
     },
     sectionTitle: {
-      fontWeight: '900',
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      fontSize: 10,
       color: theme.colors.onSurfaceVariant,
       textTransform: 'uppercase',
       marginBottom: 8,
       marginLeft: 8,
-      letterSpacing: 1.5,
+      letterSpacing: 1.2,
     },
     card: {
       borderRadius: 16,

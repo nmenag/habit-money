@@ -6,13 +6,16 @@ import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
 } from 'react-native-draggable-flatlist';
-import { FAB, Text, useTheme, Card } from 'react-native-paper';
+import { FAB, Text, useTheme, Card, ProgressBar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+
 import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
 import { AccountCard } from '../components/AccountCard';
 import { Account, useStore, useTranslation } from '../../../store/useStore';
-import { AppTheme } from '../../../theme/theme';
+import { AppTheme, spacing } from '../../../theme/theme';
 import { getLocalDateString } from '../../../utils/dateUtils';
+import { fontScale } from '../../../utils/responsive';
 
 export const AccountsScreen = () => {
   const accounts = useStore((s) => s.accounts);
@@ -86,7 +89,8 @@ export const AccountsScreen = () => {
       return {
         icon: 'warning-outline',
         color: '#F59E0B',
-        text: 'Some credit/liability accounts have negative balances. Prioritize resolving debt balances to avoid high interest and strengthen cash flow.',
+        bgColor: theme.dark ? '#332511' : '#FFF7E6',
+        text: t('insightNegativeBalance'),
       };
     }
 
@@ -94,22 +98,25 @@ export const AccountsScreen = () => {
       return {
         icon: 'trending-down-outline',
         color: '#EF4444',
-        text: `Your spending rate is outpacing recorded income this month. Keep expenses under check; current daily velocity is ${formattedVelocity}.`,
+        bgColor: theme.dark ? '#3A1616' : '#FEF2F2',
+        text: t('insightOutpacingIncome', { velocity: formattedVelocity }),
       };
     }
 
     if (totalBalance > 10000) {
       return {
         icon: 'sparkles-outline',
-        color: '#22C55E',
-        text: 'Superb liquidity! Consider allocating 15% of your positive cash flow toward your active Savings Goals to build long-term wealth.',
+        color: '#10B981',
+        bgColor: theme.colors.incomeContainer,
+        text: t('insightSuperbLiquidity'),
       };
     }
 
     return {
       icon: 'bulb-outline',
       color: theme.colors.primary,
-      text: `Your daily average outflow is ${formattedVelocity} this month. Logging every minor transaction daily builds robust financial habits.`,
+      bgColor: theme.colors.incomeContainer,
+      text: t('insightDailyOutflowHabit', { velocity: formattedVelocity }),
     };
   }, [
     accounts,
@@ -119,17 +126,20 @@ export const AccountsScreen = () => {
     spendingVelocity,
     formatCurrency,
     theme,
+    t,
   ]);
 
   const renderItem = useCallback(
     ({ item, drag, isActive }: RenderItemParams<Account>) => (
       <ScaleDecorator>
-        <AccountCard
-          account={item}
-          onPress={() => handleAccountPress(item.id)}
-          onLongPress={drag}
-          isActive={isActive}
-        />
+        <Animated.View entering={FadeInUp.duration(300)}>
+          <AccountCard
+            account={item}
+            onPress={() => handleAccountPress(item.id)}
+            onLongPress={drag}
+            isActive={isActive}
+          />
+        </Animated.View>
       </ScaleDecorator>
     ),
     [handleAccountPress],
@@ -149,14 +159,18 @@ export const AccountsScreen = () => {
 
     return (
       <View style={styles.headerContainer}>
-        <View style={styles.overviewSection}>
+        {/* Total balance aggregate overview header */}
+        <Animated.View
+          entering={FadeIn.duration(400)}
+          style={styles.overviewSection}
+        >
           <Text
             style={[
               styles.overviewLabel,
               { color: theme.colors.onSurfaceVariant },
             ]}
           >
-            {t('totalBalance').toUpperCase()}
+            {t('totalBalance')}
           </Text>
           <Text
             style={[
@@ -171,15 +185,19 @@ export const AccountsScreen = () => {
           >
             {formatCurrency(totalBalance, defaultCurrencyCode)}
           </Text>
-        </View>
+        </Animated.View>
 
-        <View style={styles.analyticsRow}>
+        {/* Analytics Widgets Row */}
+        <Animated.View
+          entering={FadeInUp.delay(100).duration(300)}
+          style={styles.analyticsRow}
+        >
           <Card style={styles.analyticsCard} mode="contained">
             <Card.Content style={styles.analyticsCardContent}>
               <View style={styles.widgetHeader}>
                 <Ionicons
                   name="swap-vertical-outline"
-                  size={16}
+                  size={14}
                   color="#3B82F6"
                 />
                 <Text
@@ -188,7 +206,7 @@ export const AccountsScreen = () => {
                     { color: theme.colors.onSurfaceVariant },
                   ]}
                 >
-                  Cash Flow
+                  {t('cashFlow')}
                 </Text>
               </View>
               <Text
@@ -199,32 +217,20 @@ export const AccountsScreen = () => {
                   defaultCurrencyCode,
                 )}
               </Text>
-              <View
-                style={[
-                  styles.progressBarBg,
-                  { backgroundColor: theme.dark ? '#1E293B' : '#E2E8F0' },
-                ]}
-              >
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    {
-                      width: `${cashFlowRatio * 100}%`,
-                      backgroundColor:
-                        monthlyIncome - monthlyExpenses >= 0
-                          ? '#22C55E'
-                          : '#EF4444',
-                    },
-                  ]}
-                />
-              </View>
+              <ProgressBar
+                progress={cashFlowRatio}
+                color={
+                  monthlyIncome - monthlyExpenses >= 0 ? '#10B981' : '#EF4444'
+                }
+                style={styles.widgetBar}
+              />
               <Text
                 style={[styles.widgetDesc, { color: theme.colors.outline }]}
               >
                 {cashFlowRatio >= 1
                   ? '100%'
                   : `${Math.round(cashFlowRatio * 100)}%`}{' '}
-                of income spent
+                {t('ofIncomeSpent')}
               </Text>
             </Card.Content>
           </Card>
@@ -234,7 +240,7 @@ export const AccountsScreen = () => {
               <View style={styles.widgetHeader}>
                 <Ionicons
                   name="speedometer-outline"
-                  size={16}
+                  size={14}
                   color="#EC4899"
                 />
                 <Text
@@ -243,86 +249,62 @@ export const AccountsScreen = () => {
                     { color: theme.colors.onSurfaceVariant },
                   ]}
                 >
-                  Velocity
+                  {t('velocity')}
                 </Text>
               </View>
               <Text
                 style={[styles.widgetVal, { color: theme.colors.onSurface }]}
               >
                 {formatCurrency(spendingVelocity, defaultCurrencyCode)}
-                <Text style={styles.velocityUnit}>/day</Text>
+                <Text style={styles.velocityUnit}>{t('perDay')}</Text>
               </Text>
-              <View
-                style={[
-                  styles.progressBarBg,
-                  { backgroundColor: theme.dark ? '#1E293B' : '#E2E8F0' },
-                ]}
-              >
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    {
-                      width: `${velocityRatio * 100}%`,
-                      backgroundColor: '#EC4899',
-                    },
-                  ]}
-                />
-              </View>
+              <ProgressBar
+                progress={velocityRatio}
+                color="#EC4899"
+                style={styles.widgetBar}
+              />
               <Text
                 style={[styles.widgetDesc, { color: theme.colors.outline }]}
               >
-                Avg. spending outflow
+                {t('avgSpendingOutflow')}
               </Text>
             </Card.Content>
           </Card>
-        </View>
+        </Animated.View>
 
-        <Card
-          style={[
-            styles.insightCard,
-            {
-              backgroundColor: theme.dark ? '#0A110F' : '#FFFFFF',
-              borderColor: theme.dark ? '#11221D' : '#E2E8F0',
-            },
-          ]}
-          mode="outlined"
-        >
-          <Card.Content style={styles.insightContent}>
-            <View
+        {/* Dynamic recommendation center */}
+        <Animated.View entering={FadeInUp.delay(150).duration(300)}>
+          <View
+            style={[
+              styles.recommendationBox,
+              {
+                backgroundColor: aiInsight.bgColor,
+                borderColor: `${aiInsight.color}2B`,
+              },
+            ]}
+          >
+            <Ionicons
+              name={aiInsight.icon as any}
+              size={16}
+              color={aiInsight.color}
+              style={{ marginRight: 10 }}
+            />
+            <Text
               style={[
-                styles.insightIconContainer,
-                { backgroundColor: `${aiInsight.color}18` },
+                styles.recommendationText,
+                { color: theme.colors.onSurface },
               ]}
             >
-              <Ionicons
-                name={aiInsight.icon as any}
-                size={18}
-                color={aiInsight.color}
-              />
-            </View>
-            <View style={styles.insightTextContainer}>
-              <Text
-                style={[styles.insightTitle, { color: theme.colors.onSurface }]}
-              >
-                Insight
-              </Text>
-              <Text
-                style={[
-                  styles.insightBody,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
-              >
-                {aiInsight.text}
-              </Text>
-            </View>
-          </Card.Content>
-        </Card>
+              {aiInsight.text}
+            </Text>
+          </View>
+        </Animated.View>
 
         {accounts.length > 1 && (
           <View style={styles.dragHelpRow}>
             <Ionicons
               name="information-circle-outline"
-              size={14}
+              size={13}
               color={theme.colors.outline}
               style={{ marginRight: 4 }}
             />
@@ -363,19 +345,33 @@ export const AccountsScreen = () => {
         ListHeaderComponent={HeaderComponent}
         renderItem={renderItem}
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <Ionicons
-              name="wallet-outline"
-              size={64}
-              color={theme.colors.outlineVariant}
-            />
-            <Text
-              variant="bodyLarge"
-              style={[styles.emptyText, { color: theme.colors.outline }]}
+          <Animated.View entering={FadeIn.duration(400)} style={styles.empty}>
+            <View
+              style={[
+                styles.emptyIconCircle,
+                {
+                  backgroundColor: theme.colors.outlineVariant,
+                },
+              ]}
             >
-              {t('noAccounts')}
+              <Ionicons
+                name="wallet-outline"
+                size={32}
+                color={theme.colors.outline}
+              />
+            </View>
+            <Text
+              style={[styles.emptyTitle, { color: theme.colors.onSurface }]}
+            >
+              No Accounts Defined
             </Text>
-          </View>
+            <Text
+              style={[styles.emptySubtitle, { color: theme.colors.outline }]}
+            >
+              Establish accounts such as bank deposits or emergency funds to
+              track assets at a glance.
+            </Text>
+          </Animated.View>
         }
       />
 
@@ -404,24 +400,28 @@ const defaultStyles = (theme: AppTheme) =>
     },
     listContent: {
       padding: 16,
+      paddingTop: spacing.xs,
     },
     headerContainer: {
-      marginBottom: 16,
+      marginBottom: 8,
     },
     overviewSection: {
       alignItems: 'center',
       marginVertical: 20,
     },
     overviewLabel: {
-      fontSize: 11,
-      fontWeight: '900',
-      letterSpacing: 2,
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      textTransform: 'uppercase',
+      letterSpacing: 1.5,
       marginBottom: 6,
     },
     overviewValue: {
-      fontSize: 34,
-      fontWeight: '900',
-      letterSpacing: -1,
+      fontSize: fontScale(26),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      letterSpacing: -0.2,
     },
     analyticsRow: {
       flexDirection: 'row',
@@ -430,10 +430,10 @@ const defaultStyles = (theme: AppTheme) =>
     },
     analyticsCard: {
       flex: 1,
-      borderRadius: 20,
-      backgroundColor: theme.dark ? '#0A110F' : '#FFFFFF',
+      borderRadius: theme.roundness || 12,
+      backgroundColor: theme.colors.surface,
       borderWidth: 1,
-      borderColor: theme.dark ? '#11221D' : '#E2E8F0',
+      borderColor: theme.colors.outline,
       elevation: 0,
     },
     analyticsCardContent: {
@@ -446,66 +446,47 @@ const defaultStyles = (theme: AppTheme) =>
       marginBottom: 6,
     },
     widgetTitle: {
-      fontSize: 12,
-      fontWeight: '700',
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       letterSpacing: -0.1,
     },
     widgetVal: {
-      fontSize: 18,
-      fontWeight: '900',
-      letterSpacing: -0.5,
+      fontSize: fontScale(16),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      letterSpacing: -0.2,
       marginBottom: 8,
     },
     velocityUnit: {
-      fontSize: 12,
-      fontWeight: '500',
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
     },
-    progressBarBg: {
-      height: 5,
-      borderRadius: 100,
-      overflow: 'hidden',
-      marginBottom: 6,
-    },
-    progressBarFill: {
-      height: '100%',
-      borderRadius: 100,
+    widgetBar: {
+      height: 4,
+      borderRadius: 2,
+      marginBottom: 8,
     },
     widgetDesc: {
-      fontSize: 10,
-      fontWeight: '500',
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
     },
-    insightCard: {
-      borderRadius: 20,
-      borderWidth: 1.5,
-      marginBottom: 16,
-      elevation: 0,
-    },
-    insightContent: {
+    recommendationBox: {
+      borderWidth: 1,
+      borderRadius: theme.roundness || 12,
+      padding: 12,
       flexDirection: 'row',
-      padding: 14,
-      alignItems: 'flex-start',
-      gap: 12,
-    },
-    insightIconContainer: {
-      width: 34,
-      height: 34,
-      borderRadius: 10,
-      justifyContent: 'center',
       alignItems: 'center',
+      marginBottom: 20,
     },
-    insightTextContainer: {
+    recommendationText: {
       flex: 1,
-    },
-    insightTitle: {
-      fontSize: 13,
-      fontWeight: '800',
-      letterSpacing: -0.1,
-      marginBottom: 2,
-    },
-    insightBody: {
-      fontSize: 12,
+      fontSize: fontScale(12),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
       lineHeight: 16,
-      fontWeight: '500',
     },
     dragHelpRow: {
       flexDirection: 'row',
@@ -515,18 +496,36 @@ const defaultStyles = (theme: AppTheme) =>
       opacity: 0.8,
     },
     dragHelpText: {
-      fontSize: 11,
-      fontWeight: '600',
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
     },
     empty: {
       padding: 40,
       alignItems: 'center',
       marginTop: 40,
     },
-    emptyText: {
+    emptyIconCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    emptyTitle: {
+      fontSize: fontScale(16),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      marginBottom: 6,
+    },
+    emptySubtitle: {
       textAlign: 'center',
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
       paddingHorizontal: 20,
-      fontWeight: '700',
+      lineHeight: 18,
     },
     fab: {
       position: 'absolute',

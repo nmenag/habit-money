@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
@@ -14,9 +14,13 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
+
 import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
 import { Budget, useStore, useTranslation } from '../../../store/useStore';
-import { fontScale, moderateScale } from '../../../utils/responsive';
+import { AppTheme, spacing } from '../../../theme/theme';
+import { fontScale } from '../../../utils/responsive';
 
 export const BudgetsScreen = () => {
   const {
@@ -28,8 +32,76 @@ export const BudgetsScreen = () => {
     updateBudgetsOrder,
   } = useStore();
   const { t, translateName } = useTranslation();
-  const theme = useTheme();
+  const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
+  const insets = useSafeAreaInsets();
+
+  // Aggregate values
+  const { totalBudgeted, totalSpent, averageProgress, allWithinLimit } =
+    useMemo(() => {
+      let budgetedSum = 0;
+      let spentSum = 0;
+      let count = budgets.length;
+
+      budgets.forEach((budget) => {
+        budgetedSum += budget.amount;
+        const spentForBudget = transactions
+          .filter((tx) => {
+            const matchesBudget = tx.budgetId === budget.id;
+            const matchesCategory =
+              budget.categoryId && tx.categoryId === budget.categoryId;
+            return (matchesBudget || matchesCategory) && tx.type === 'expense';
+          })
+          .reduce((sum, tx) => sum + tx.amount, 0);
+        spentSum += spentForBudget;
+      });
+
+      const avgProg = budgetedSum > 0 ? spentSum / budgetedSum : 0;
+      const withinLimit = budgets.every((budget) => {
+        const spentForBudget = transactions
+          .filter((tx) => {
+            const matchesBudget = tx.budgetId === budget.id;
+            const matchesCategory =
+              budget.categoryId && tx.categoryId === budget.categoryId;
+            return (matchesBudget || matchesCategory) && tx.type === 'expense';
+          })
+          .reduce((sum, tx) => sum + tx.amount, 0);
+        return spentForBudget <= budget.amount;
+      });
+
+      return {
+        totalBudgeted: budgetedSum,
+        totalSpent: spentSum,
+        averageProgress: Math.min(avgProg, 1),
+        allWithinLimit: withinLimit && count > 0,
+      };
+    }, [budgets, transactions]);
+
+  // Contextual financial recommendation
+  const smartRecommendation = useMemo(() => {
+    if (budgets.length === 0) return null;
+    const percent = Math.round(averageProgress * 100);
+
+    if (percent <= 40) {
+      return {
+        text: t('excellentPaceTip'),
+        color: theme.colors.primary,
+        bgColor: theme.colors.incomeContainer,
+      };
+    } else if (percent <= 80) {
+      return {
+        text: t('moderatePaceTip', { percent }),
+        color: '#D97706',
+        bgColor: theme.dark ? '#332511' : '#FFF7E6',
+      };
+    } else {
+      return {
+        text: t('highDepletionTip'),
+        color: theme.colors.error,
+        bgColor: theme.dark ? '#341F1C' : '#FBECE9',
+      };
+    }
+  }, [averageProgress, budgets.length, theme, t]);
 
   const handleDelete = (budget: Budget) => {
     const isUsed = transactions.some((t) => t.budgetId === budget.id);
@@ -69,77 +141,107 @@ export const BudgetsScreen = () => {
     const progress = Math.min(spent / item.amount, 1);
     const remaining = Math.max(item.amount - spent, 0);
     const category = categories.find((c) => c.id === item.categoryId);
+    const isOverLimit = spent > item.amount;
+    const categoryColor = item.color || theme.colors.primary;
 
     return (
       <ScaleDecorator>
-        <Card
-          style={[
-            styles.card,
-            {
-              backgroundColor: isActive
-                ? theme.colors.elevation.level3
-                : theme.colors.surface,
-            },
-          ]}
-          onPress={() =>
-            router.push({
-              pathname: '/budget-detail',
-              params: { budgetId: item.id },
-            })
-          }
-          onLongPress={drag}
-          disabled={isActive}
-          mode="elevated"
-        >
-          <Card.Content>
-            <View style={styles.cardHeader}>
-              <View style={styles.textContainer}>
-                <Text variant="titleLarge" style={styles.name}>
-                  {category?.name ? translateName(category.name) : t('budgets')}
+        <Animated.View entering={FadeInUp.duration(300)}>
+          <Card
+            style={[
+              styles.card,
+              {
+                borderColor: isActive
+                  ? theme.colors.primary
+                  : theme.colors.outline,
+                backgroundColor: theme.colors.surface,
+              },
+            ]}
+            onPress={() =>
+              router.push({
+                pathname: '/budget-detail',
+                params: { budgetId: item.id },
+              })
+            }
+            onLongPress={drag}
+            disabled={isActive}
+            mode="contained"
+          >
+            <Card.Content style={styles.cardContent}>
+              <View style={styles.cardHeader}>
+                <View style={styles.textContainer}>
+                  <View style={styles.titleRow}>
+                    <View
+                      style={[
+                        styles.iconCircle,
+                        {
+                          backgroundColor: `${categoryColor}12`,
+                          borderColor: `${categoryColor}2B`,
+                        },
+                      ]}
+                    >
+                      <Ionicons
+                        name={(category?.icon || 'tag-outline') as any}
+                        size={18}
+                        color={categoryColor}
+                      />
+                    </View>
+                    <Text style={styles.name}>
+                      {category?.name
+                        ? translateName(category.name)
+                        : t('budgets')}
+                    </Text>
+                  </View>
+                  <Text style={styles.limitText}>
+                    {formatCurrency(spent)}{' '}
+                    <Text style={styles.limitTarget}>
+                      / {formatCurrency(item.amount)}
+                    </Text>
+                  </Text>
+                </View>
+                <IconButton
+                  icon="trash-can-outline"
+                  iconColor={theme.colors.onSurfaceVariant}
+                  size={20}
+                  accessibilityLabel={t('delete')}
+                  style={styles.deleteBtn}
+                  onPress={() => handleDelete(item)}
+                />
+              </View>
+
+              <View style={styles.progressContainer}>
+                <ProgressBar
+                  progress={progress}
+                  color={isOverLimit ? theme.colors.error : categoryColor}
+                  style={styles.progressBar}
+                />
+              </View>
+
+              <View style={styles.footerRow}>
+                <Text style={styles.remainingText}>
+                  {isOverLimit
+                    ? t('overLimit' as any) || 'Over limit'
+                    : `${t('remainingAmount')}: ${formatCurrency(remaining)}`}
                 </Text>
                 <Text
-                  variant="bodyMedium"
-                  style={styles.limitText}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
+                  style={[
+                    styles.percentageText,
+                    {
+                      color: isOverLimit
+                        ? theme.colors.error
+                        : theme.colors.onSurfaceVariant,
+                    },
+                  ]}
                 >
-                  {formatCurrency(spent)} / {formatCurrency(item.amount)}
+                  {Math.round(progress * 100)}%
                 </Text>
               </View>
-              <IconButton
-                icon="trash-can-outline"
-                iconColor={theme.colors.error}
-                size={24}
-                onPress={() => handleDelete(item)}
-              />
-            </View>
-
-            <ProgressBar
-              progress={progress}
-              color={item.color || theme.colors.primary}
-              style={styles.progressBar}
-            />
-
-            <View style={styles.footerRow}>
-              <Text
-                variant="labelSmall"
-                style={[styles.remainingText, { flex: 1 }]}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                {t('remainingAmount')}: {formatCurrency(remaining)}
-              </Text>
-              <Text variant="labelSmall" style={styles.percentageText}>
-                {Math.round(progress * 100)}%
-              </Text>
-            </View>
-          </Card.Content>
-        </Card>
+            </Card.Content>
+          </Card>
+        </Animated.View>
       </ScaleDecorator>
     );
   };
-
-  const insets = useSafeAreaInsets();
 
   return (
     <View
@@ -154,15 +256,110 @@ export const BudgetsScreen = () => {
           styles.listContent,
           { paddingBottom: insets.bottom + 140 },
         ]}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text
-              variant="bodyLarge"
-              style={[styles.emptyText, { color: theme.colors.outline }]}
+        ListHeaderComponent={
+          budgets.length > 0 ? (
+            <Animated.View
+              entering={FadeIn.duration(400)}
+              style={styles.dashboardHeader}
             >
-              {t('noBudgets')}
+              {/* Aggregated budget statistics */}
+              <View style={styles.statCard}>
+                <View style={styles.overviewTextRow}>
+                  <View>
+                    <Text style={styles.overviewLabel}>
+                      {t('aggregateSpending')}
+                    </Text>
+                    <Text style={styles.overviewValue}>
+                      {formatCurrency(totalSpent)}
+                      <Text style={styles.overviewBudgetGoal}>
+                        {' '}
+                        / {formatCurrency(totalBudgeted)}
+                      </Text>
+                    </Text>
+                  </View>
+                  {allWithinLimit && (
+                    <View style={styles.streakBadge}>
+                      <Text style={styles.streakBadgeText}>
+                        {t('streakActive')}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                <ProgressBar
+                  progress={averageProgress}
+                  color={theme.colors.primary}
+                  style={styles.summaryBar}
+                />
+
+                <View style={styles.summaryFooterRow}>
+                  <Text style={styles.summaryFooterText}>
+                    {t('overallBudgetDepletion')}
+                  </Text>
+                  <Text style={styles.summaryFooterPercent}>
+                    {Math.round(averageProgress * 100)}%
+                  </Text>
+                </View>
+              </View>
+
+              {/* Dynamic recommendation box */}
+              {smartRecommendation && (
+                <View
+                  style={[
+                    styles.recommendationBox,
+                    {
+                      backgroundColor: smartRecommendation.bgColor,
+                      borderColor: `${smartRecommendation.color}2B`,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="sparkles-outline"
+                    size={16}
+                    color={smartRecommendation.color}
+                    style={{ marginRight: 10 }}
+                  />
+                  <Text
+                    style={[
+                      styles.recommendationText,
+                      { color: theme.colors.onSurface },
+                    ]}
+                  >
+                    {smartRecommendation.text}
+                  </Text>
+                </View>
+              )}
+
+              {/* Instructions row */}
+              <Text style={styles.sectionTitle}>{t('budgetAllocations')}</Text>
+            </Animated.View>
+          ) : null
+        }
+        ListEmptyComponent={
+          <Animated.View entering={FadeIn.duration(400)} style={styles.empty}>
+            <View
+              style={[
+                styles.emptyIconCircle,
+                {
+                  backgroundColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <Ionicons
+                name="pie-chart-outline"
+                size={32}
+                color={theme.colors.outline}
+              />
+            </View>
+            <Text
+              style={[styles.emptyTitle, { color: theme.colors.onSurface }]}
+            >
+              {t('noBudgetsCreated')}
             </Text>
-          </View>
+            <Text style={[styles.emptyText, { color: theme.colors.outline }]}>
+              {t('noBudgetsSubtitle')}
+            </Text>
+          </Animated.View>
         }
       />
 
@@ -177,77 +374,234 @@ export const BudgetsScreen = () => {
             backgroundColor: theme.colors.primary,
           },
         ]}
-        color={theme.colors.onPrimary}
+        color="#fff"
         onPress={() => router.push('/add-budget')}
       />
     </View>
   );
 };
 
-const defaultStyles = (theme: any) =>
+const defaultStyles = (theme: AppTheme) =>
   StyleSheet.create({
     container: {
       flex: 1,
     },
     listContent: {
-      paddingTop: moderateScale(8),
+      paddingTop: spacing.xs,
+    },
+    dashboardHeader: {
+      paddingHorizontal: 16,
+      marginTop: 16,
+      marginBottom: 8,
+    },
+    statCard: {
+      borderWidth: 1,
+      borderColor: theme.colors.outline,
+      borderRadius: theme.roundness || 12,
+      backgroundColor: theme.colors.surface,
+      padding: 16,
+      marginBottom: 12,
+    },
+    overviewTextRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: 12,
+    },
+    overviewLabel: {
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      color: theme.colors.onSurfaceVariant,
+      marginBottom: 4,
+    },
+    overviewValue: {
+      fontSize: fontScale(20),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      color: theme.colors.onSurface,
+    },
+    overviewBudgetGoal: {
+      fontSize: fontScale(14),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
+      color: theme.colors.onSurfaceVariant,
+    },
+    streakBadge: {
+      backgroundColor: theme.colors.incomeContainer,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 100,
+      borderWidth: 0.5,
+      borderColor: `${theme.colors.income}2B`,
+    },
+    streakBadgeText: {
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      color: theme.colors.income,
+    },
+    summaryBar: {
+      height: 6,
+      borderRadius: 3,
+      marginBottom: 8,
+    },
+    summaryFooterRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    summaryFooterText: {
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
+      color: theme.colors.onSurfaceVariant,
+    },
+    summaryFooterPercent: {
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      color: theme.colors.onSurface,
+    },
+    recommendationBox: {
+      borderWidth: 1,
+      borderRadius: theme.roundness || 12,
+      padding: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    recommendationText: {
+      flex: 1,
+      fontSize: fontScale(12),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
+      lineHeight: 16,
+    },
+    sectionTitle: {
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      color: theme.colors.onSurfaceVariant,
+      marginLeft: 4,
+      marginBottom: 10,
     },
     card: {
-      marginVertical: 8,
+      marginBottom: 12,
       marginHorizontal: 16,
-      borderRadius: 16,
-      backgroundColor: theme.colors.surface,
+      borderRadius: theme.roundness || 12,
+      borderWidth: 1,
+      overflow: 'hidden',
+    },
+    cardContent: {
+      padding: 14,
     },
     cardHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 16,
+      alignItems: 'flex-start',
+      marginBottom: 12,
     },
     textContainer: {
       flex: 1,
     },
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 6,
+    },
+    iconCircle: {
+      width: 32,
+      height: 32,
+      borderRadius: 10,
+      borderWidth: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 10,
+    },
     name: {
-      fontWeight: '800',
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       color: theme.colors.onSurface,
-      fontSize: fontScale(18),
+      fontSize: fontScale(15),
+      letterSpacing: -0.1,
     },
     limitText: {
       color: theme.colors.onSurface,
-      marginTop: 4,
-      fontWeight: '700',
+      fontSize: fontScale(16),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+    },
+    limitTarget: {
+      fontSize: fontScale(12),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
+      color: theme.colors.onSurfaceVariant,
+    },
+    deleteBtn: {
+      margin: 0,
+      marginRight: -8,
+      marginTop: -4,
+    },
+    progressContainer: {
+      marginBottom: 8,
     },
     progressBar: {
-      height: 12,
-      borderRadius: 6,
+      height: 4,
+      borderRadius: 2,
     },
     footerRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginTop: 4,
     },
     remainingText: {
-      fontWeight: '700',
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
       color: theme.colors.onSurfaceVariant,
+      flex: 1,
     },
     percentageText: {
-      fontWeight: '700',
-      color: theme.colors.onSurfaceVariant,
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     empty: {
       padding: 40,
       alignItems: 'center',
       marginTop: 80,
     },
+    emptyIconCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    emptyTitle: {
+      fontSize: fontScale(16),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      marginBottom: 6,
+    },
     emptyText: {
       textAlign: 'center',
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
       paddingHorizontal: 20,
+      lineHeight: 18,
     },
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 16,
+      borderRadius: 18,
       elevation: 6,
     },
   });

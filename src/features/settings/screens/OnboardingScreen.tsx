@@ -18,6 +18,17 @@ import { getLocalDateString } from '../../../utils/dateUtils';
 import { CURRENCIES } from '../../../constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+const addAlpha = (color: string, opacity: number) => {
+  if (color && color.startsWith('#')) {
+    const hex = color.replace('#', '');
+    const alpha = Math.round(opacity * 255)
+      .toString(16)
+      .padStart(2, '0');
+    return `#${hex}${alpha}`;
+  }
+  return color;
+};
+
 export const OnboardingScreen = () => {
   const theme = useTheme();
   const router = useRouter();
@@ -79,7 +90,10 @@ export const OnboardingScreen = () => {
           <View style={styles.logoWrapper}>
             <Image
               source={require('../../../../assets/images/icon.png')}
-              style={styles.logoImage}
+              style={[
+                styles.logoImage,
+                { borderColor: theme.colors.outlineVariant, borderWidth: 1 },
+              ]}
               contentFit="contain"
               transition={300}
             />
@@ -136,7 +150,11 @@ export const OnboardingScreen = () => {
                   <View
                     style={[
                       styles.iconBox,
-                      { backgroundColor: theme.colors.primaryContainer },
+                      {
+                        backgroundColor: addAlpha(theme.colors.primary, 0.08),
+                        borderColor: addAlpha(theme.colors.primary, 0.17),
+                        borderWidth: 1,
+                      },
                     ]}
                   >
                     <Ionicons
@@ -198,7 +216,11 @@ export const OnboardingScreen = () => {
                   <View
                     style={[
                       styles.iconBox,
-                      { backgroundColor: theme.colors.primaryContainer },
+                      {
+                        backgroundColor: addAlpha(theme.colors.primary, 0.08),
+                        borderColor: addAlpha(theme.colors.primary, 0.17),
+                        borderWidth: 1,
+                      },
                     ]}
                   >
                     <Ionicons
@@ -334,19 +356,21 @@ const styles = StyleSheet.create({
     filter: 'blur(10px)',
   },
   title: {
-    fontSize: 36,
-    fontWeight: '900',
+    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600',
+    fontSize: 32,
     textAlign: 'center',
     marginBottom: 16,
     letterSpacing: -1,
-    lineHeight: 42,
+    lineHeight: 38,
   },
   description: {
-    fontSize: 16,
+    fontSize: 15,
     textAlign: 'center',
-    fontWeight: '500',
+    fontFamily: 'Inter-Regular',
+    fontWeight: '400',
     paddingHorizontal: 16,
-    lineHeight: 24,
+    lineHeight: 22,
   },
   preferencesSection: {
     width: '100%',
@@ -354,8 +378,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   sectionTitle: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
+    fontSize: 10,
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     marginBottom: 12,
@@ -385,15 +410,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   settingLabel: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
+    fontSize: 10,
     marginBottom: 4,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   settingValue: {
+    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600',
     fontSize: 16,
-    fontWeight: '700',
   },
   divider: {
     height: 1,
@@ -407,6 +434,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   termsText: {
+    fontFamily: 'Inter-Regular',
+    fontWeight: '400',
     fontSize: 12,
     textAlign: 'center',
     marginBottom: 20,
@@ -414,22 +443,20 @@ const styles = StyleSheet.create({
   },
   termsLink: {
     textDecorationLine: 'underline',
-    fontWeight: '700',
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
   },
   button: {
     borderRadius: 100,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    elevation: 0,
   },
   buttonContent: {
     height: 60,
   },
   buttonLabel: {
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
     letterSpacing: 0.5,
   },
 });

@@ -55,33 +55,39 @@ export const IncomeFormFields = React.memo(
               style={[
                 styles.selectorIconBg,
                 {
-                  backgroundColor:
-                    selectedAccountObj?.color || theme.colors.primary,
+                  backgroundColor: `${selectedAccountObj?.color || theme.colors.primary}12`,
+                  borderColor: `${selectedAccountObj?.color || theme.colors.primary}2B`,
+                  borderWidth: 1,
                 },
               ]}
             >
               <MaterialCommunityIcons
                 name={getAccountIcon(selectedAccountObj?.type) as any}
                 size={20}
-                color="#fff"
+                color={selectedAccountObj?.color || theme.colors.primary}
               />
             </View>
             <View style={styles.selectorCardTextCol}>
               <Text
-                variant="labelSmall"
-                style={[
-                  styles.selectorCardLabel,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 10,
+                  letterSpacing: 1.5,
+                  color: theme.colors.onSurfaceVariant,
+                  textTransform: 'uppercase',
+                }}
               >
                 {t('depositTo')}
               </Text>
               <Text
-                variant="bodyMedium"
-                style={[
-                  styles.selectorCardValue,
-                  { color: theme.colors.onSurface },
-                ]}
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 15,
+                  color: theme.colors.onSurface,
+                  marginTop: 2,
+                }}
               >
                 {selectedAccountObj
                   ? translateName(selectedAccountObj.name)
@@ -91,11 +97,13 @@ export const IncomeFormFields = React.memo(
           </View>
           <View style={styles.selectorCardRight}>
             <Text
-              variant="titleSmall"
-              style={[
-                styles.selectorCardBalance,
-                { color: theme.colors.onSurface },
-              ]}
+              style={{
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
+                fontSize: 14,
+                color: theme.colors.onSurface,
+                marginRight: 8,
+              }}
             >
               {selectedAccountObj
                 ? formatCurrency(selectedAccountObj.currentBalance)
@@ -132,33 +140,39 @@ export const IncomeFormFields = React.memo(
               style={[
                 styles.selectorIconBg,
                 {
-                  backgroundColor:
-                    selectedCategoryObj?.color || theme.colors.primary,
+                  backgroundColor: `${selectedCategoryObj?.color || theme.colors.primary}12`,
+                  borderColor: `${selectedCategoryObj?.color || theme.colors.primary}2B`,
+                  borderWidth: 1,
                 },
               ]}
             >
               <MaterialCommunityIcons
                 name={getValidCategoryIcon(selectedCategoryObj?.icon) as any}
                 size={20}
-                color="#fff"
+                color={selectedCategoryObj?.color || theme.colors.primary}
               />
             </View>
             <View style={styles.selectorCardTextCol}>
               <Text
-                variant="labelSmall"
-                style={[
-                  styles.selectorCardLabel,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 10,
+                  letterSpacing: 1.5,
+                  color: theme.colors.onSurfaceVariant,
+                  textTransform: 'uppercase',
+                }}
               >
                 {t('categories') || 'Category'}
               </Text>
               <Text
-                variant="bodyMedium"
-                style={[
-                  styles.selectorCardValue,
-                  { color: theme.colors.onSurface },
-                ]}
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 15,
+                  color: theme.colors.onSurface,
+                  marginTop: 2,
+                }}
               >
                 {selectedCategoryObj
                   ? translateName(selectedCategoryObj.name)
