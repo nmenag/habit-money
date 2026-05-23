@@ -679,9 +679,9 @@ export const AddTransactionScreen = () => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={[styles.container, { backgroundColor: theme.colors.background }]}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 80}
     >
       <Stack.Screen
         options={{
@@ -716,7 +716,7 @@ export const AddTransactionScreen = () => {
         contentContainerStyle={[
           styles.scrollContent,
           {
-            paddingBottom: 24,
+            paddingBottom: insets.bottom + 200,
             maxWidth: 600,
             width: '100%',
             alignSelf: 'center',
@@ -1478,6 +1478,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
+    flexGrow: 1,
   },
 
   tabContainer: {

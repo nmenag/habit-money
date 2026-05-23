@@ -11,6 +11,7 @@ import { useFilterStore } from '../../../store/useFilterStore';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme, chartColors } from '../../../theme/theme';
 import { isInRange } from '../../../utils/dateFilters';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   SCREEN_WIDTH,
@@ -61,6 +62,7 @@ export const InsightsScreen = () => {
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const selectedRange = useFilterStore((s) => s.selectedRange);
+  const insets = useSafeAreaInsets();
 
   React.useEffect(() => {
     loadFullData();
@@ -324,7 +326,13 @@ export const InsightsScreen = () => {
     >
       <FilterBar />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: insets.bottom + 200 },
+        ]}
+      >
         <View
           style={[
             styles.rangeBadge,
@@ -914,7 +922,9 @@ export const InsightsScreen = () => {
           </View>
         )}
       </ScrollView>
-      <BannerAdComponent />
+      <View style={styles.adContainer}>
+        <BannerAdComponent />
+      </View>
     </View>
   );
 };
@@ -1085,4 +1095,11 @@ const defaultStyles = (theme: any) =>
       gap: 12,
     },
     emptyText: {},
+    adContainer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: 'transparent',
+    },
   });

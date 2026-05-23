@@ -274,7 +274,7 @@ export const DashboardScreen = React.memo(() => {
               {
                 marginRight: spacing.xs,
                 borderWidth: 1,
-                borderColor: theme.colors.outline,
+                borderColor: theme.colors.outlineVariant,
                 backgroundColor: theme.colors.surface,
               },
             ]}
@@ -335,7 +335,7 @@ export const DashboardScreen = React.memo(() => {
               {
                 marginLeft: spacing.xs,
                 borderWidth: 1,
-                borderColor: theme.colors.outline,
+                borderColor: theme.colors.outlineVariant,
                 backgroundColor: theme.colors.surface,
               },
             ]}
@@ -1047,11 +1047,12 @@ const defaultStyles = (theme: AppTheme) =>
     },
     card: {
       marginBottom: spacing.md,
-      borderRadius: theme.roundness || 12,
+      borderRadius: 24,
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       backgroundColor: theme.colors.surface,
       elevation: 0,
+      overflow: 'hidden',
     },
     cardTitle: {
       marginBottom: spacing.md,
@@ -1088,11 +1089,12 @@ const defaultStyles = (theme: AppTheme) =>
     },
     flowCard: {
       flex: 1,
-      borderRadius: theme.roundness || 12,
+      borderRadius: 24,
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       backgroundColor: theme.colors.surface,
       elevation: 0,
+      overflow: 'hidden',
     },
     flowCardContent: {
       paddingVertical: spacing.md,
@@ -1142,21 +1144,23 @@ const defaultStyles = (theme: AppTheme) =>
     sectionCard: {
       marginHorizontal: spacing.md,
       marginBottom: spacing.md,
-      borderRadius: theme.roundness || 12,
+      borderRadius: 24,
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       backgroundColor: theme.colors.surface,
       elevation: 0,
+      overflow: 'hidden',
     },
     headerCard: {
       marginHorizontal: spacing.md,
       marginTop: spacing.sm,
       marginBottom: spacing.lg,
-      borderRadius: theme.roundness || 12,
+      borderRadius: 24,
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       backgroundColor: theme.colors.surface,
       elevation: 0,
+      overflow: 'hidden',
     },
     insightText: {
       marginLeft: spacing.md,
