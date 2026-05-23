@@ -149,9 +149,7 @@ export const AddGoalScreen = () => {
     >
       <Stack.Screen
         options={{
-          title: isEditing
-            ? t('editGoal' as any) || 'Edit Goal'
-            : t('saveGoal' as any) || 'Save Goal',
+          title: isEditing ? t('editGoal') : t('saveGoal'),
           headerRight: () =>
             isEditing ? (
               <TouchableOpacity
@@ -204,8 +202,7 @@ export const AddGoalScreen = () => {
                   paddingLeft: 4,
                 }}
               >
-                {t('nameMinLengthError' as any) ||
-                  'Please enter a name with at least 2 characters.'}
+                {t('nameMinLengthError')}
               </Text>
             )}
           </View>
@@ -371,7 +368,7 @@ export const AddGoalScreen = () => {
       <BottomSheet
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
-        title={t('goalOptions' as any) || 'Goal Options'}
+        title={t('goalOptions')}
       >
         <View style={styles.menuContainer}>
           <TouchableOpacity

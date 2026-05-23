@@ -164,9 +164,7 @@ export const AddBudgetScreen = () => {
     >
       <Stack.Screen
         options={{
-          title: isEditing
-            ? t('editBudget' as any) || 'Edit Budget'
-            : t('saveBudget' as any) || 'Save Budget',
+          title: isEditing ? t('editBudget') : t('saveBudget'),
           headerRight: () =>
             isEditing ? (
               <TouchableOpacity
@@ -543,7 +541,7 @@ export const AddBudgetScreen = () => {
       <BottomSheet
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
-        title={t('budgetOptions' as any) || 'Budget Options'}
+        title={t('budgetOptions')}
       >
         <View style={styles.menuContainer}>
           <TouchableOpacity

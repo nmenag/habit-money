@@ -52,6 +52,14 @@ export const es = {
   dataManagement: 'Gestión de Datos',
   restoreConfirm:
     '¿Estás seguro de que deseas restaurar los datos? Esto sobrescribirá tus datos actuales y no se puede deshacer.',
+  restoreBackupPrompt:
+    '¿Te gustaría hacer una copia de seguridad de tus datos locales actuales primero? La restauración sobrescribirá completamente tus datos actuales y no se puede deshacer.',
+  backupAndRestore: 'Respaldar y Restaurar',
+  backupAndRestoreDesc:
+    'Crea un archivo de copia de seguridad primero para mantener tus datos seguros, luego selecciona el archivo a restaurar.',
+  restoreDirectly: 'Restaurar Directamente',
+  restoreDirectlyDesc:
+    'Selecciona directamente un archivo para restaurar. Tus datos locales actuales serán sobrescritos.',
   restoreSuccess: '¡Datos restaurados con éxito!',
   restoreError:
     'Error al restaurar los datos. Por favor revisa el formato del archivo.',
@@ -224,6 +232,10 @@ export const es = {
   transfer: 'Transferencia',
   confirmDeleteTx: '¿Estás seguro de que deseas eliminar esta transacción?',
   transactionOptions: 'Opciones de Transacción',
+  accountOptions: 'Opciones de Cuenta',
+  categoryOptions: 'Opciones de Categoría',
+  budgetOptions: 'Opciones de Presupuesto',
+  goalOptions: 'Opciones de Meta',
   whatToDo: '¿Qué te gustaría hacer?',
   financialAnalysis: 'Análisis Financiero',
   savingsRateTitle: 'Tasa de Ahorro',

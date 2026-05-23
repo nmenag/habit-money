@@ -143,26 +143,8 @@ export const SettingsScreen = () => {
     }
   };
 
-  const handleRestoreJSON = async () => {
-    Alert.alert(t('restoreData'), t('restoreConfirm'), [
-      { text: t('cancel'), style: 'cancel' },
-      {
-        text: t('restoreData'),
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await restoreFromJSON(loadData, t);
-            await Haptics.notificationAsync(
-              Haptics.NotificationFeedbackType.Success,
-            ).catch(() => {});
-          } catch {
-            await Haptics.notificationAsync(
-              Haptics.NotificationFeedbackType.Error,
-            ).catch(() => {});
-          }
-        },
-      },
-    ]);
+  const handleRestoreJSON = () => {
+    setRestoreMenuVisible(true);
   };
 
   const is24Hour = React.useMemo(() => {
@@ -183,6 +165,7 @@ export const SettingsScreen = () => {
   const [timePickerVisible, setTimePickerVisible] = React.useState(false);
   const [languageMenuVisible, setLanguageMenuVisible] = React.useState(false);
   const [currencyMenuVisible, setCurrencyMenuVisible] = React.useState(false);
+  const [restoreMenuVisible, setRestoreMenuVisible] = React.useState(false);
 
   const onDismissTimePicker = React.useCallback(() => {
     setTimePickerVisible(false);
@@ -1045,6 +1028,132 @@ export const SettingsScreen = () => {
             );
           })}
         </ScrollView>
+      </BottomSheet>
+
+      <BottomSheet
+        visible={restoreMenuVisible}
+        onClose={() => setRestoreMenuVisible(false)}
+        title={t('restoreData')}
+      >
+        <Text
+          style={{
+            fontFamily: 'Inter-Regular',
+            fontSize: fontScale(13),
+            color: theme.colors.onSurfaceVariant,
+            marginBottom: 20,
+            lineHeight: 18,
+          }}
+        >
+          {t('restoreBackupPrompt')}
+        </Text>
+
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={[
+            styles.modalListItem,
+            { borderColor: theme.colors.outlineVariant, marginBottom: 12 },
+          ]}
+          onPress={async () => {
+            setRestoreMenuVisible(false);
+            try {
+              await backupToJSON();
+              await restoreFromJSON(loadData, t);
+              await Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              ).catch(() => {});
+            } catch {
+              await Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Error,
+              ).catch(() => {});
+            }
+          }}
+          accessibilityRole="button"
+        >
+          <View style={{ flex: 1, paddingRight: 8 }}>
+            <Text
+              style={{
+                fontFamily: 'Inter-SemiBold',
+                fontWeight: '600',
+                fontSize: fontScale(14),
+                color: '#10B981',
+                marginBottom: 2,
+              }}
+            >
+              {t('backupAndRestore')}
+            </Text>
+            <Text
+              style={{
+                fontFamily: 'Inter-Regular',
+                fontSize: fontScale(11),
+                color: theme.colors.onSurfaceVariant,
+                lineHeight: 14,
+              }}
+            >
+              {t('backupAndRestoreDesc')}
+            </Text>
+          </View>
+          <Ionicons name="shield-checkmark-outline" size={24} color="#10B981" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={[
+            styles.modalListItem,
+            { borderColor: theme.colors.outlineVariant, marginBottom: 20 },
+          ]}
+          onPress={async () => {
+            setRestoreMenuVisible(false);
+            Alert.alert(t('restoreData'), t('restoreConfirm'), [
+              { text: t('cancel'), style: 'cancel' },
+              {
+                text: t('restoreData'),
+                style: 'destructive',
+                onPress: async () => {
+                  try {
+                    await restoreFromJSON(loadData, t);
+                    await Haptics.notificationAsync(
+                      Haptics.NotificationFeedbackType.Success,
+                    ).catch(() => {});
+                  } catch {
+                    await Haptics.notificationAsync(
+                      Haptics.NotificationFeedbackType.Error,
+                    ).catch(() => {});
+                  }
+                },
+              },
+            ]);
+          }}
+          accessibilityRole="button"
+        >
+          <View style={{ flex: 1, paddingRight: 8 }}>
+            <Text
+              style={{
+                fontFamily: 'Inter-SemiBold',
+                fontWeight: '600',
+                fontSize: fontScale(14),
+                color: theme.colors.error,
+                marginBottom: 2,
+              }}
+            >
+              {t('restoreDirectly')}
+            </Text>
+            <Text
+              style={{
+                fontFamily: 'Inter-Regular',
+                fontSize: fontScale(11),
+                color: theme.colors.onSurfaceVariant,
+                lineHeight: 14,
+              }}
+            >
+              {t('restoreDirectlyDesc')}
+            </Text>
+          </View>
+          <Ionicons
+            name="warning-outline"
+            size={24}
+            color={theme.colors.error}
+          />
+        </TouchableOpacity>
       </BottomSheet>
     </View>
   );
