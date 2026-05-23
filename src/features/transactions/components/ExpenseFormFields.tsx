@@ -50,6 +50,7 @@ export const ExpenseFormFields = React.memo(
               backgroundColor: theme.colors.surface,
               borderColor: theme.colors.outlineVariant,
               borderWidth: 1,
+              paddingLeft: 20,
             },
           ]}
           onPress={() => openAccountSheet('from')}
@@ -60,38 +61,53 @@ export const ExpenseFormFields = React.memo(
             t('changeAccountHint') || 'Double tap to select a different account'
           }
         >
+          <View
+            style={[
+              styles.selectorAccentBar,
+              {
+                backgroundColor:
+                  selectedAccountObj?.color || theme.colors.primary,
+              },
+            ]}
+          />
           <View style={styles.selectorCardLeft}>
             <View
               style={[
                 styles.selectorIconBg,
                 {
-                  backgroundColor:
-                    selectedAccountObj?.color || theme.colors.primary,
+                  backgroundColor: `${selectedAccountObj?.color || theme.colors.primary}12`,
+                  borderColor: `${selectedAccountObj?.color || theme.colors.primary}2B`,
+                  borderWidth: 1,
                 },
               ]}
             >
               <MaterialCommunityIcons
                 name={getAccountIcon(selectedAccountObj?.type) as any}
                 size={20}
-                color="#fff"
+                color={selectedAccountObj?.color || theme.colors.primary}
               />
             </View>
             <View style={styles.selectorCardTextCol}>
               <Text
-                variant="labelSmall"
-                style={[
-                  styles.selectorCardLabel,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 10,
+                  letterSpacing: 1.5,
+                  color: theme.colors.onSurfaceVariant,
+                  textTransform: 'uppercase',
+                }}
               >
                 {t('withdrawFrom')}
               </Text>
               <Text
-                variant="bodyMedium"
-                style={[
-                  styles.selectorCardValue,
-                  { color: theme.colors.onSurface },
-                ]}
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 15,
+                  color: theme.colors.onSurface,
+                  marginTop: 2,
+                }}
               >
                 {selectedAccountObj
                   ? translateName(selectedAccountObj.name)
@@ -101,21 +117,33 @@ export const ExpenseFormFields = React.memo(
           </View>
           <View style={styles.selectorCardRight}>
             <Text
-              variant="titleSmall"
-              style={[
-                styles.selectorCardBalance,
-                { color: theme.colors.onSurface },
-              ]}
+              style={{
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
+                fontSize: 14,
+                color: theme.colors.onSurface,
+                marginRight: 8,
+              }}
             >
               {selectedAccountObj
                 ? formatCurrency(selectedAccountObj.currentBalance)
                 : ''}
             </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={theme.colors.onSurfaceVariant}
-            />
+            <View
+              style={[
+                styles.chevronCircle,
+                {
+                  backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <Ionicons
+                name="chevron-forward"
+                size={14}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </View>
           </View>
         </TouchableOpacity>
 
@@ -127,6 +155,7 @@ export const ExpenseFormFields = React.memo(
               borderColor: theme.colors.outlineVariant,
               borderWidth: 1,
               marginTop: 16,
+              paddingLeft: 20,
             },
           ]}
           onPress={() => setCategorySheetOpen(true)}
@@ -137,38 +166,53 @@ export const ExpenseFormFields = React.memo(
             t('changeCategoryHint') || 'Double tap to select a category'
           }
         >
+          <View
+            style={[
+              styles.selectorAccentBar,
+              {
+                backgroundColor:
+                  selectedCategoryObj?.color || theme.colors.primary,
+              },
+            ]}
+          />
           <View style={styles.selectorCardLeft}>
             <View
               style={[
                 styles.selectorIconBg,
                 {
-                  backgroundColor:
-                    selectedCategoryObj?.color || theme.colors.primary,
+                  backgroundColor: `${selectedCategoryObj?.color || theme.colors.primary}12`,
+                  borderColor: `${selectedCategoryObj?.color || theme.colors.primary}2B`,
+                  borderWidth: 1,
                 },
               ]}
             >
               <MaterialCommunityIcons
                 name={getValidCategoryIcon(selectedCategoryObj?.icon) as any}
                 size={20}
-                color="#fff"
+                color={selectedCategoryObj?.color || theme.colors.primary}
               />
             </View>
             <View style={styles.selectorCardTextCol}>
               <Text
-                variant="labelSmall"
-                style={[
-                  styles.selectorCardLabel,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 10,
+                  letterSpacing: 1.5,
+                  color: theme.colors.onSurfaceVariant,
+                  textTransform: 'uppercase',
+                }}
               >
                 {t('categories') || 'Category'}
               </Text>
               <Text
-                variant="bodyMedium"
-                style={[
-                  styles.selectorCardValue,
-                  { color: theme.colors.onSurface },
-                ]}
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 15,
+                  color: theme.colors.onSurface,
+                  marginTop: 2,
+                }}
               >
                 {selectedCategoryObj
                   ? translateName(selectedCategoryObj.name)
@@ -176,11 +220,21 @@ export const ExpenseFormFields = React.memo(
               </Text>
             </View>
           </View>
-          <Ionicons
-            name="chevron-forward"
-            size={18}
-            color={theme.colors.onSurfaceVariant}
-          />
+          <View
+            style={[
+              styles.chevronCircle,
+              {
+                backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={14}
+              color={theme.colors.onSurfaceVariant}
+            />
+          </View>
         </TouchableOpacity>
 
         {budgets.length > 0 && (
@@ -192,6 +246,7 @@ export const ExpenseFormFields = React.memo(
                 borderColor: theme.colors.outlineVariant,
                 borderWidth: 1,
                 marginTop: 16,
+                paddingLeft: 20,
               },
             ]}
             onPress={() => setBudgetSheetOpen(true)}
@@ -202,6 +257,15 @@ export const ExpenseFormFields = React.memo(
               t('changeBudgetHint') || 'Double tap to select a budget'
             }
           >
+            <View
+              style={[
+                styles.selectorAccentBar,
+                {
+                  backgroundColor:
+                    selectedBudgetObj?.color || theme.colors.outline,
+                },
+              ]}
+            />
             <View style={{ flex: 1 }}>
               <View style={styles.budgetCardTop}>
                 <View style={styles.selectorCardLeft}>
@@ -209,8 +273,9 @@ export const ExpenseFormFields = React.memo(
                     style={[
                       styles.selectorIconBg,
                       {
-                        backgroundColor:
-                          selectedBudgetObj?.color || theme.colors.outline,
+                        backgroundColor: `${selectedBudgetObj?.color || theme.colors.outline}12`,
+                        borderColor: `${selectedBudgetObj?.color || theme.colors.outline}2B`,
+                        borderWidth: 1,
                       },
                     ]}
                   >
@@ -219,25 +284,30 @@ export const ExpenseFormFields = React.memo(
                         selectedBudgetObj ? 'wallet-outline' : 'slash-forward'
                       }
                       size={20}
-                      color="#fff"
+                      color={selectedBudgetObj?.color || theme.colors.outline}
                     />
                   </View>
                   <View style={styles.selectorCardTextCol}>
                     <Text
-                      variant="labelSmall"
-                      style={[
-                        styles.selectorCardLabel,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
+                      style={{
+                        fontFamily: 'Inter-Medium',
+                        fontWeight: '500',
+                        fontSize: 10,
+                        letterSpacing: 1.5,
+                        color: theme.colors.onSurfaceVariant,
+                        textTransform: 'uppercase',
+                      }}
                     >
                       {t('budgets') || 'Budget'}
                     </Text>
                     <Text
-                      variant="bodyMedium"
-                      style={[
-                        styles.selectorCardValue,
-                        { color: theme.colors.onSurface },
-                      ]}
+                      style={{
+                        fontFamily: 'Inter-Medium',
+                        fontWeight: '500',
+                        fontSize: 15,
+                        color: theme.colors.onSurface,
+                        marginTop: 2,
+                      }}
                     >
                       {selectedBudgetObj
                         ? translateName(
@@ -254,21 +324,33 @@ export const ExpenseFormFields = React.memo(
                 <View style={styles.selectorCardRight}>
                   {selectedBudgetObj && (
                     <Text
-                      variant="labelSmall"
-                      style={[
-                        styles.budgetUsageText,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
+                      style={{
+                        fontFamily: 'Inter-Regular',
+                        fontWeight: '400',
+                        fontSize: 12,
+                        color: theme.colors.onSurfaceVariant,
+                        marginRight: 8,
+                      }}
                     >
                       {formatCurrency(currentBudgetUsage.spent)} of{' '}
                       {formatCurrency(selectedBudgetObj.amount)}
                     </Text>
                   )}
-                  <Ionicons
-                    name="chevron-forward"
-                    size={18}
-                    color={theme.colors.onSurfaceVariant}
-                  />
+                  <View
+                    style={[
+                      styles.chevronCircle,
+                      {
+                        backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                        borderColor: theme.colors.outlineVariant,
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name="chevron-forward"
+                      size={14}
+                      color={theme.colors.onSurfaceVariant}
+                    />
+                  </View>
                 </View>
               </View>
 
@@ -276,30 +358,23 @@ export const ExpenseFormFields = React.memo(
                 <View style={styles.budgetProgressContainer}>
                   <View
                     style={[
-                      styles.budgetProgressBarBg,
-                      { backgroundColor: theme.colors.outlineVariant },
+                      styles.budgetProgressBar,
+                      {
+                        backgroundColor: theme.colors.outlineVariant,
+                      },
                     ]}
                   >
                     <View
                       style={[
-                        styles.budgetProgressBarFill,
+                        styles.budgetProgressFill,
                         {
+                          width: `${Math.min(currentBudgetUsage.progress * 100, 100)}%`,
                           backgroundColor:
                             selectedBudgetObj.color || theme.colors.primary,
-                          width: `${currentBudgetUsage.progress * 100}%`,
                         },
                       ]}
                     />
                   </View>
-                  <Text
-                    variant="labelSmall"
-                    style={[
-                      styles.budgetPercentText,
-                      { color: theme.colors.onSurfaceVariant },
-                    ]}
-                  >
-                    {Math.round(currentBudgetUsage.progress * 100)}%
-                  </Text>
                 </View>
               )}
             </View>

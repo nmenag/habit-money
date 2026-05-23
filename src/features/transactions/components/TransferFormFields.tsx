@@ -38,6 +38,7 @@ export const TransferFormFields = React.memo(
               borderColor: theme.colors.outlineVariant,
               borderWidth: 1,
               marginBottom: 12,
+              paddingLeft: 20,
             },
           ]}
           onPress={() => openAccountSheet('from')}
@@ -49,38 +50,53 @@ export const TransferFormFields = React.memo(
             'Double tap to select a different source account'
           }
         >
+          <View
+            style={[
+              styles.selectorAccentBar,
+              {
+                backgroundColor:
+                  selectedAccountObj?.color || theme.colors.primary,
+              },
+            ]}
+          />
           <View style={styles.selectorCardLeft}>
             <View
               style={[
                 styles.selectorIconBg,
                 {
-                  backgroundColor:
-                    selectedAccountObj?.color || theme.colors.primary,
+                  backgroundColor: `${selectedAccountObj?.color || theme.colors.primary}12`,
+                  borderColor: `${selectedAccountObj?.color || theme.colors.primary}2B`,
+                  borderWidth: 1,
                 },
               ]}
             >
               <MaterialCommunityIcons
                 name={getAccountIcon(selectedAccountObj?.type) as any}
                 size={20}
-                color="#fff"
+                color={selectedAccountObj?.color || theme.colors.primary}
               />
             </View>
             <View style={styles.selectorCardTextCol}>
               <Text
-                variant="labelSmall"
-                style={[
-                  styles.selectorCardLabel,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 10,
+                  letterSpacing: 1.5,
+                  color: theme.colors.onSurfaceVariant,
+                  textTransform: 'uppercase',
+                }}
               >
                 {t('withdrawFrom') || 'From Account'}
               </Text>
               <Text
-                variant="bodyMedium"
-                style={[
-                  styles.selectorCardValue,
-                  { color: theme.colors.onSurface },
-                ]}
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 15,
+                  color: theme.colors.onSurface,
+                  marginTop: 2,
+                }}
               >
                 {selectedAccountObj
                   ? translateName(selectedAccountObj.name)
@@ -90,21 +106,33 @@ export const TransferFormFields = React.memo(
           </View>
           <View style={styles.selectorCardRight}>
             <Text
-              variant="titleSmall"
-              style={[
-                styles.selectorCardBalance,
-                { color: theme.colors.onSurface },
-              ]}
+              style={{
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
+                fontSize: 14,
+                color: theme.colors.onSurface,
+                marginRight: 8,
+              }}
             >
               {selectedAccountObj
                 ? formatCurrency(selectedAccountObj.currentBalance)
                 : ''}
             </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={theme.colors.onSurfaceVariant}
-            />
+            <View
+              style={[
+                styles.chevronCircle,
+                {
+                  backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <Ionicons
+                name="chevron-forward"
+                size={14}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </View>
           </View>
         </TouchableOpacity>
 
@@ -115,6 +143,7 @@ export const TransferFormFields = React.memo(
               backgroundColor: theme.colors.surface,
               borderColor: theme.colors.outlineVariant,
               borderWidth: 1,
+              paddingLeft: 20,
             },
           ]}
           onPress={() => openAccountSheet('to')}
@@ -126,38 +155,53 @@ export const TransferFormFields = React.memo(
             'Double tap to select a different destination account'
           }
         >
+          <View
+            style={[
+              styles.selectorAccentBar,
+              {
+                backgroundColor:
+                  selectedToAccountObj?.color || theme.colors.primary,
+              },
+            ]}
+          />
           <View style={styles.selectorCardLeft}>
             <View
               style={[
                 styles.selectorIconBg,
                 {
-                  backgroundColor:
-                    selectedToAccountObj?.color || theme.colors.primary,
+                  backgroundColor: `${selectedToAccountObj?.color || theme.colors.primary}12`,
+                  borderColor: `${selectedToAccountObj?.color || theme.colors.primary}2B`,
+                  borderWidth: 1,
                 },
               ]}
             >
               <MaterialCommunityIcons
                 name={getAccountIcon(selectedToAccountObj?.type) as any}
                 size={20}
-                color="#fff"
+                color={selectedToAccountObj?.color || theme.colors.primary}
               />
             </View>
             <View style={styles.selectorCardTextCol}>
               <Text
-                variant="labelSmall"
-                style={[
-                  styles.selectorCardLabel,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 10,
+                  letterSpacing: 1.5,
+                  color: theme.colors.onSurfaceVariant,
+                  textTransform: 'uppercase',
+                }}
               >
                 {t('depositTo') || 'To Account'}
               </Text>
               <Text
-                variant="bodyMedium"
-                style={[
-                  styles.selectorCardValue,
-                  { color: theme.colors.onSurface },
-                ]}
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 15,
+                  color: theme.colors.onSurface,
+                  marginTop: 2,
+                }}
               >
                 {selectedToAccountObj
                   ? translateName(selectedToAccountObj.name)
@@ -167,21 +211,33 @@ export const TransferFormFields = React.memo(
           </View>
           <View style={styles.selectorCardRight}>
             <Text
-              variant="titleSmall"
-              style={[
-                styles.selectorCardBalance,
-                { color: theme.colors.onSurface },
-              ]}
+              style={{
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
+                fontSize: 14,
+                color: theme.colors.onSurface,
+                marginRight: 8,
+              }}
             >
               {selectedToAccountObj
                 ? formatCurrency(selectedToAccountObj.currentBalance)
                 : ''}
             </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={theme.colors.onSurfaceVariant}
-            />
+            <View
+              style={[
+                styles.chevronCircle,
+                {
+                  backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <Ionicons
+                name="chevron-forward"
+                size={14}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </View>
           </View>
         </TouchableOpacity>
       </View>

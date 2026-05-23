@@ -9,14 +9,25 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native';
-import { Button, Menu, Text, useTheme } from 'react-native-paper';
+import { Button, Text, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { getDb } from '../../../db/schema';
 import { Language } from '../../../i18n/translations';
 import { useStore, useTranslation } from '../../../store/useStore';
-import { getLocalDateString } from '../../../utils/dateUtils';
 import { CURRENCIES } from '../../../constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BottomSheet } from '../../../shared/components/BottomSheet';
+
+const addAlpha = (color: string, opacity: number) => {
+  if (color && color.startsWith('#')) {
+    const hex = color.replace('#', '');
+    const alpha = Math.round(opacity * 255)
+      .toString(16)
+      .padStart(2, '0');
+    return `#${hex}${alpha}`;
+  }
+  return color;
+};
 
 export const OnboardingScreen = () => {
   const theme = useTheme();
@@ -32,267 +43,422 @@ export const OnboardingScreen = () => {
 
   useEffect(() => {
     const locales = Localization.getLocales();
-    const lang = locales[0]?.languageCode?.startsWith('es') ? 'es' : 'en';
-    setDetectedLang(lang);
-    setLanguage(lang);
-    setDetectedCurrency(lang === 'es' ? 'COP' : 'USD');
+    if (locales && locales.length > 0) {
+      const languageCode = locales[0].languageCode;
+      const detected = languageCode === 'es' ? 'es' : 'en';
+      setDetectedLang(detected);
+      setLanguage(detected);
+
+      const currencyCode = locales[0].currencyCode;
+      if (currencyCode) {
+        const matchesCode = CURRENCIES.some((c) => c.code === currencyCode);
+        if (matchesCode) {
+          setDetectedCurrency(currencyCode);
+        }
+      }
+    }
   }, [setLanguage]);
-
-  const handleContinue = async () => {
-    setLanguage(detectedLang);
-
-    const db = getDb();
-    setCurrency(detectedCurrency);
-    db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
-      'isFirstLaunch',
-      'false',
-    ]);
-    db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
-      'onboarding_date',
-      getLocalDateString(),
-    ]);
-    loadData();
-
-    router.replace('/(tabs)');
-  };
 
   const selectLanguage = (lang: Language) => {
     setDetectedLang(lang);
     setLanguage(lang);
-    setLangMenuVisible(false);
   };
 
   const selectCurrency = (curr: string) => {
     setDetectedCurrency(curr);
-    setCurrencyMenuVisible(false);
+  };
+
+  const handleStart = async () => {
+    try {
+      setLanguage(detectedLang);
+      setCurrency(detectedCurrency);
+
+      const db = await getDb();
+      await db.runAsync(
+        'INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)',
+        ['isFirstLaunch', 'false'],
+      );
+      await db.runAsync(
+        'INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)',
+        ['language', detectedLang],
+      );
+      await db.runAsync(
+        'INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)',
+        ['currency', detectedCurrency],
+      );
+
+      await loadData();
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Failed to save onboarding settings:', error);
+      router.replace('/(tabs)');
+    }
   };
 
   return (
     <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.background,
+          paddingTop: Math.max(insets.top, 20),
+        },
+      ]}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { flexGrow: 1, justifyContent: 'space-between' },
+        ]}
       >
-        <View style={styles.heroSection}>
-          <View style={styles.logoWrapper}>
+        <View style={styles.mainContent}>
+          <View style={styles.header}>
             <Image
               source={require('../../../../assets/images/icon.png')}
-              style={styles.logoImage}
-              contentFit="contain"
-              transition={300}
+              style={styles.logo}
+              priority="high"
             />
-            <View
+            <Text
+              style={[styles.title, { color: theme.colors.onBackground }]}
+              variant="headlineLarge"
+            >
+              Habit Money
+            </Text>
+            <Text
               style={[
-                styles.glowEffect,
-                { backgroundColor: theme.colors.primary },
+                styles.subtitle,
+                { color: theme.colors.onSurfaceVariant },
               ]}
-            />
+              variant="bodyLarge"
+            >
+              {t('onboardingDesc')}
+            </Text>
           </View>
 
-          <Text style={[styles.title, { color: theme.colors.onBackground }]}>
-            {t('onboardingWelcome')}
-          </Text>
-
-          <Text
-            style={[
-              styles.description,
-              { color: theme.colors.onSurfaceVariant },
-            ]}
-          >
-            {t('onboardingDesc')}
-          </Text>
+          <View style={styles.content}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              {t('appCustomization')}
+            </Text>
+            <View
+              style={[
+                styles.settingsCard,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <TouchableOpacity
+                style={styles.settingRow}
+                activeOpacity={0.7}
+                onPress={() => setLangMenuVisible(true)}
+              >
+                <View
+                  style={[
+                    styles.iconBox,
+                    {
+                      backgroundColor: addAlpha(theme.colors.primary, 0.08),
+                      borderColor: addAlpha(theme.colors.primary, 0.17),
+                      borderWidth: 1,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="earth"
+                    size={20}
+                    color={theme.colors.primary}
+                  />
+                </View>
+                <View style={styles.settingTextContainer}>
+                  <Text
+                    style={[
+                      styles.settingLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('detectedLanguage')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.settingValue,
+                      { color: theme.colors.onSurface },
+                    ]}
+                  >
+                    {detectedLang === 'es' ? t('spanish') : t('english')}
+                  </Text>
+                </View>
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </TouchableOpacity>
+              <View
+                style={[
+                  styles.divider,
+                  { backgroundColor: theme.colors.outlineVariant },
+                ]}
+              />
+              <TouchableOpacity
+                style={styles.settingRow}
+                activeOpacity={0.7}
+                onPress={() => setCurrencyMenuVisible(true)}
+              >
+                <View
+                  style={[
+                    styles.iconBox,
+                    {
+                      backgroundColor: addAlpha(theme.colors.primary, 0.08),
+                      borderColor: addAlpha(theme.colors.primary, 0.17),
+                      borderWidth: 1,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="cash-outline"
+                    size={20}
+                    color={theme.colors.primary}
+                  />
+                </View>
+                <View style={styles.settingTextContainer}>
+                  <Text
+                    style={[
+                      styles.settingLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('detectedCurrency')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.settingValue,
+                      { color: theme.colors.onSurface },
+                    ]}
+                  >
+                    {t(
+                      CURRENCIES.find((c) => c.code === detectedCurrency)
+                        ?.tKey as any,
+                    )}
+                  </Text>
+                </View>
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
 
-        <View style={styles.preferencesSection}>
+        <View
+          style={[
+            styles.footer,
+            {
+              borderTopWidth: 1,
+              borderTopColor: theme.colors.outlineVariant,
+              paddingBottom: Math.max(insets.bottom, 24),
+            },
+          ]}
+        >
           <Text
-            style={[
-              styles.sectionTitle,
-              { color: theme.colors.onSurfaceVariant },
-            ]}
+            style={[styles.termsText, { color: theme.colors.onSurfaceVariant }]}
           >
-            {t('preferences') || 'Preferences'}
+            {t('agreeToTermsPrefix')}{' '}
+            <Text
+              style={[styles.termsLink, { color: theme.colors.primary }]}
+              onPress={() =>
+                Linking.openURL(
+                  'https://nmenag.github.io/habit-money/privacy.html',
+                )
+              }
+            >
+              {t('privacyPolicy')}
+            </Text>
           </Text>
-
-          <View
-            style={[
-              styles.settingsCard,
-              {
-                backgroundColor: theme.colors.surface,
-                borderColor: theme.colors.outlineVariant,
-              },
-            ]}
+          <Button
+            mode="contained"
+            onPress={handleStart}
+            style={styles.button}
+            contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
           >
-            <Menu
-              visible={langMenuVisible}
-              onDismiss={() => setLangMenuVisible(false)}
-              anchor={
-                <TouchableOpacity
-                  style={styles.settingRow}
-                  activeOpacity={0.7}
-                  onPress={() => setLangMenuVisible(true)}
-                >
-                  <View
-                    style={[
-                      styles.iconBox,
-                      { backgroundColor: theme.colors.primaryContainer },
-                    ]}
-                  >
-                    <Ionicons
-                      name="earth"
-                      size={20}
-                      color={theme.colors.primary}
-                    />
-                  </View>
-                  <View style={styles.settingTextContainer}>
-                    <Text
-                      style={[
-                        styles.settingLabel,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
-                    >
-                      {t('detectedLanguage')}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.settingValue,
-                        { color: theme.colors.onSurface },
-                      ]}
-                    >
-                      {detectedLang === 'es' ? t('spanish') : t('english')}
-                    </Text>
-                  </View>
-                  <Ionicons
-                    name="chevron-down"
-                    size={20}
-                    color={theme.colors.onSurfaceVariant}
-                  />
-                </TouchableOpacity>
-              }
-            >
-              <Menu.Item
-                onPress={() => selectLanguage('en')}
-                title={t('english')}
-              />
-              <Menu.Item
-                onPress={() => selectLanguage('es')}
-                title={t('spanish')}
-              />
-            </Menu>
-            <View
-              style={[
-                styles.divider,
-                { backgroundColor: theme.colors.outlineVariant },
-              ]}
-            />
-            <Menu
-              visible={currencyMenuVisible}
-              onDismiss={() => setCurrencyMenuVisible(false)}
-              anchor={
-                <TouchableOpacity
-                  style={styles.settingRow}
-                  activeOpacity={0.7}
-                  onPress={() => setCurrencyMenuVisible(true)}
-                >
-                  <View
-                    style={[
-                      styles.iconBox,
-                      { backgroundColor: theme.colors.primaryContainer },
-                    ]}
-                  >
-                    <Ionicons
-                      name="cash-outline"
-                      size={20}
-                      color={theme.colors.primary}
-                    />
-                  </View>
-                  <View style={styles.settingTextContainer}>
-                    <Text
-                      style={[
-                        styles.settingLabel,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
-                    >
-                      {t('detectedCurrency')}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.settingValue,
-                        { color: theme.colors.onSurface },
-                      ]}
-                    >
-                      {t(
-                        CURRENCIES.find((c) => c.code === detectedCurrency)
-                          ?.tKey as any,
-                      )}
-                    </Text>
-                  </View>
-                  <Ionicons
-                    name="chevron-down"
-                    size={20}
-                    color={theme.colors.onSurfaceVariant}
-                  />
-                </TouchableOpacity>
-              }
-              contentStyle={{ backgroundColor: theme.colors.elevation.level3 }}
-            >
-              <ScrollView style={{ maxHeight: 300 }}>
-                {CURRENCIES.map((curr) => (
-                  <Menu.Item
-                    key={curr.code}
-                    onPress={() => selectCurrency(curr.code)}
-                    title={`${t(curr.tKey as any)} (${curr.code})`}
-                  />
-                ))}
-              </ScrollView>
-            </Menu>
-          </View>
+            {t('startOnboarding')}
+          </Button>
         </View>
       </ScrollView>
 
-      <View
-        style={[
-          styles.footer,
-          {
-            backgroundColor: theme.colors.background,
-            paddingBottom: Math.max(insets.bottom + 24, 48),
-          },
-        ]}
+      <BottomSheet
+        visible={langMenuVisible}
+        onClose={() => setLangMenuVisible(false)}
+        title={t('detectedLanguage') || 'Select Language'}
       >
-        <Text
-          style={[styles.termsText, { color: theme.colors.onSurfaceVariant }]}
+        <TouchableOpacity
+          style={[
+            styles.modalListItem,
+            { borderColor: theme.colors.outlineVariant },
+            detectedLang === 'en' && {
+              backgroundColor: theme.dark
+                ? addAlpha(theme.colors.primary, 0.16)
+                : addAlpha(theme.colors.primary, 0.08),
+            },
+          ]}
+          onPress={() => {
+            selectLanguage('en');
+            setLangMenuVisible(false);
+          }}
+          accessibilityRole="button"
+          accessibilityState={{ selected: detectedLang === 'en' }}
         >
-          {t('agreeToTermsPrefix')}{' '}
           <Text
-            style={[styles.termsLink, { color: theme.colors.primary }]}
-            onPress={() =>
-              Linking.openURL('https://nmenag.github.io/fin-habit/privacy.html')
-            }
+            style={{
+              fontFamily: 'Inter-Medium',
+              fontWeight: '500',
+              color: theme.colors.onSurface,
+            }}
           >
-            {t('privacyPolicy')}
-          </Text>{' '}
-          {t('agreeToTermsAnd')}{' '}
-          <Text
-            style={[styles.termsLink, { color: theme.colors.primary }]}
-            onPress={() =>
-              Linking.openURL('https://nmenag.github.io/fin-habit/terms.html')
-            }
-          >
-            {t('termsOfUse')}
+            {t('english')}
           </Text>
-        </Text>
+          <View
+            style={[
+              styles.radioOuter,
+              {
+                borderColor:
+                  detectedLang === 'en'
+                    ? theme.colors.primary
+                    : theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            {detectedLang === 'en' && (
+              <View
+                style={[
+                  styles.radioInner,
+                  { backgroundColor: theme.colors.primary },
+                ]}
+              />
+            )}
+          </View>
+        </TouchableOpacity>
 
-        <Button
-          mode="contained"
-          onPress={handleContinue}
-          style={styles.button}
-          contentStyle={styles.buttonContent}
-          labelStyle={styles.buttonLabel}
+        <TouchableOpacity
+          style={[
+            styles.modalListItem,
+            { borderColor: theme.colors.outlineVariant },
+            detectedLang === 'es' && {
+              backgroundColor: theme.dark
+                ? addAlpha(theme.colors.primary, 0.16)
+                : addAlpha(theme.colors.primary, 0.08),
+            },
+          ]}
+          onPress={() => {
+            selectLanguage('es');
+            setLangMenuVisible(false);
+          }}
+          accessibilityRole="button"
+          accessibilityState={{ selected: detectedLang === 'es' }}
         >
-          {t('getStarted')}
-        </Button>
-      </View>
+          <Text
+            style={{
+              fontFamily: 'Inter-Medium',
+              fontWeight: '500',
+              color: theme.colors.onSurface,
+            }}
+          >
+            {t('spanish')}
+          </Text>
+          <View
+            style={[
+              styles.radioOuter,
+              {
+                borderColor:
+                  detectedLang === 'es'
+                    ? theme.colors.primary
+                    : theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            {detectedLang === 'es' && (
+              <View
+                style={[
+                  styles.radioInner,
+                  { backgroundColor: theme.colors.primary },
+                ]}
+              />
+            )}
+          </View>
+        </TouchableOpacity>
+      </BottomSheet>
+
+      <BottomSheet
+        visible={currencyMenuVisible}
+        onClose={() => setCurrencyMenuVisible(false)}
+        title={t('detectedCurrency') || 'Select Currency'}
+      >
+        <ScrollView
+          style={{ maxHeight: 400 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {CURRENCIES.map((curr) => {
+            const isSelected = detectedCurrency === curr.code;
+            return (
+              <TouchableOpacity
+                key={curr.code}
+                style={[
+                  styles.modalListItem,
+                  { borderColor: theme.colors.outlineVariant },
+                  isSelected && {
+                    backgroundColor: theme.dark
+                      ? addAlpha(theme.colors.primary, 0.16)
+                      : addAlpha(theme.colors.primary, 0.08),
+                  },
+                ]}
+                onPress={() => {
+                  selectCurrency(curr.code);
+                  setCurrencyMenuVisible(false);
+                }}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+              >
+                <Text
+                  style={{
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    color: theme.colors.onSurface,
+                  }}
+                >
+                  {t(curr.tKey as any)} ({curr.code})
+                </Text>
+                <View
+                  style={[
+                    styles.radioOuter,
+                    {
+                      borderColor: isSelected
+                        ? theme.colors.primary
+                        : theme.colors.outlineVariant,
+                    },
+                  ]}
+                >
+                  {isSelected && (
+                    <View
+                      style={[
+                        styles.radioInner,
+                        { backgroundColor: theme.colors.primary },
+                      ]}
+                    />
+                  )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </BottomSheet>
     </View>
   );
 };
@@ -302,60 +468,49 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1,
+    width: '100%',
+    maxWidth: 600,
+    alignSelf: 'center',
+  },
+  mainContent: {
     padding: 24,
-    paddingTop: 60,
-    justifyContent: 'center',
+    paddingBottom: 16,
+    width: '100%',
   },
-  heroSection: {
+  header: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginTop: 40,
+    marginBottom: 40,
   },
-  logoWrapper: {
-    position: 'relative',
-    marginBottom: 32,
-  },
-  logoImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 32,
-    zIndex: 2,
-  },
-  glowEffect: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    right: -10,
-    bottom: -10,
-    borderRadius: 60,
-    opacity: 0.15,
-    zIndex: 1,
-    transform: [{ scale: 1.1 }],
-    filter: 'blur(10px)',
+  logo: {
+    width: 90,
+    height: 90,
+    borderRadius: 22,
+    marginBottom: 16,
   },
   title: {
-    fontSize: 36,
-    fontWeight: '900',
-    textAlign: 'center',
-    marginBottom: 16,
-    letterSpacing: -1,
-    lineHeight: 42,
+    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600',
+    fontSize: 28,
+    marginBottom: 8,
+    letterSpacing: -0.5,
   },
-  description: {
+  subtitle: {
+    fontFamily: 'Inter-Regular',
+    fontWeight: '400',
     fontSize: 16,
     textAlign: 'center',
-    fontWeight: '500',
-    paddingHorizontal: 16,
-    lineHeight: 24,
+    paddingHorizontal: 12,
   },
-  preferencesSection: {
+  content: {
     width: '100%',
     maxWidth: 600,
     alignSelf: 'center',
   },
   sectionTitle: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
+    fontSize: 10,
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     marginBottom: 12,
@@ -385,15 +540,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   settingLabel: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
+    fontSize: 10,
     marginBottom: 4,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   settingValue: {
+    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600',
     fontSize: 16,
-    fontWeight: '700',
   },
   divider: {
     height: 1,
@@ -407,6 +564,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   termsText: {
+    fontFamily: 'Inter-Regular',
+    fontWeight: '400',
     fontSize: 12,
     textAlign: 'center',
     marginBottom: 20,
@@ -414,22 +573,43 @@ const styles = StyleSheet.create({
   },
   termsLink: {
     textDecorationLine: 'underline',
-    fontWeight: '700',
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
   },
   button: {
     borderRadius: 100,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    elevation: 0,
   },
   buttonContent: {
     height: 60,
   },
   buttonLabel: {
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
     letterSpacing: 0.5,
+  },
+  modalListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  radioOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
 });

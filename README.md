@@ -9,13 +9,14 @@ Habit Money is a modern, high-performance personal finance tracker built with **
 ## 🌟 Key Features
 
 - **Expo Router Navigation**: Modern, file-based routing architecture for robust deep linking and smooth transitions.
-- **First-Launch Onboarding**: Detects system language and currency on first run, letting users confirm or customize their locale settings before entering the app.
+- **First-Launch Onboarding**: Auto-detects system language and currency on first launch, providing a completely localized experience backed by a highly stable, asynchronous prepared SQLite statement validation pipeline to ensure transaction safety during initialization.
 - **Dynamic Ledger Grid**: Beautiful standalone contained Material Design 3 cards separating Real Income, Expenses, and Remaining Balance with responsive font sizing, directional icon badges, and dynamic container styling for positive vs. negative cash flows.
 - **Dedicated Settings Tab**: A centralized hub for managing Accounts, Categories, Budgets, and Goals, keeping the main dashboard clean and focused.
-- **Interactive Reordering**: Full **Drag & Drop** support for Accounts, Categories, Budgets, and Goals, allowing for personal organization and layout customization.
-- **Category & Account Localizer**: Fixed editing translations so that default categories (e.g., Food, Rent, Salary) and default accounts (e.g., Bank) initialize using the active translation language, rather than English fallbacks.
+- **Interactive Reordering**: Full **Drag & Drop** support for Accounts, Categories, Budgets, and Goals, utilizing robust gesture controls (`onLongPress` sort reordering) to ensure vertical list scrolling remains perfectly smooth and free from accidental drag triggers.
+- **Category & Account Localizer**: Handled complete locale integration so that editing screens, default category names (e.g. food, rent, entertainment), account types, and input placeholders dynamically translate and initialize in the active language instead of falling back to English.
 - **Visual Financial Health**:
   - **Dynamic Dashboard**: Real-time overview of net balance and monthly cash flow.
+  - **Premium Budget Details**: The upgraded `BudgetDetailScreen` replicates the exact high-fidelity credit-card style aggregate ledger of the Accounts detail view, complete with dynamic progress bars, target limits, color-shifting gamified savings insights capsules, and elegant date-grouped transaction aggregation.
   - **Interactive Insights**: Smart analysis of spending growth, savings rates with a dynamic ProgressBar visualizer, frequency alerts, and accurate separation of real income from balance adjustments.
   - **Expense Charts**: Beautiful, responsive pie and bar charts visualizing category-wise spending and month-over-month growth.
   - **Full WCAG Screen Reader Accessibility**: SVG charts, summaries, and metrics now support native `accessible={true}` and custom `accessibilityLabel` parameters for 100% VoiceOver and TalkBack screen-reader coverage.
@@ -27,7 +28,7 @@ Habit Money is a modern, high-performance personal finance tracker built with **
 - **Customization & UX**:
   - **Expanded Registry & Palette**: Added pre-seeded icons (`home-city` for Rent, `controller-classic` for Entertainment, `format-list-bulleted` for Other) and pre-seeded colors (`#16A34A` for Salary, `#ff4081` for Gifts, `#ff5722` for Bills & Taxes) directly into editing choice grids.
   - **Ergonomic FAB Placement**: List absolute button offsets optimized to hover close to the bottom tab bar (where no banner ads reside to cause overlaps) for comfortable reachability.
-  - **Dark Mode Ready**: Sleek, high-contrast layouts utilising themed outline tokens (`theme.colors.outlineVariant`) to ensure visible legend boundaries under dark mode.
+  - **Dark Mode Ready**: Sleek, high-contrast layouts utilising themed outline tokens (`theme.colors.outlineVariant`) across all modules (Accounts, Categories, Goals, Transactions) to ensure beautiful visual boundaries under dark mode.
   - **Local Timezone Support**: Accurate financial reporting based on your device's local time, ensuring transactions align with your real-world calendar.
   - **Smart Reminders**: Automated daily and weekly notifications to help you stay consistent with your financial tracking.
 
@@ -60,8 +61,8 @@ Habit Money is a modern, high-performance personal finance tracker built with **
 1. **Clone & Install**
 
    ```bash
-   git clone git@github.com:nmenag/fin-habit.git
-   cd fin-habit
+   git clone git@github.com:nmenag/habit-money.git
+   cd habit-money
    npm install
    ```
 
@@ -174,7 +175,7 @@ This project is configured for **EAS (Expo Application Services)** to handle bui
 
 The application configuration is dynamic and handles three variants: `development`, `preview`, and `production`.
 
-- **Slug**: `fin-habit` (Matches the associated EAS Project ID).
+- **Slug**: `habit-money` (Matches the associated EAS Project ID).
 - **Name**: `Habit Money`.
 - **Scheme**: `habitmoney`.
 

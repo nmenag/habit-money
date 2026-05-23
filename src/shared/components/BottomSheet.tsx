@@ -9,6 +9,7 @@ import {
 import { Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { fontScale } from '../../utils/responsive';
 
 interface BottomSheetProps {
   visible: boolean;
@@ -44,12 +45,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             styles.modalContent,
             {
               backgroundColor: theme.colors.surface,
-              borderTopLeftRadius: 28,
-              borderTopRightRadius: 28,
+              borderColor: theme.colors.outline,
               paddingBottom: Math.max(insets.bottom, 20),
-              maxWidth: 600,
-              width: '100%',
-              alignSelf: 'center',
             },
           ]}
         >
@@ -64,15 +61,25 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
           <View style={styles.modalHeader}>
             <Text
-              variant="titleMedium"
-              style={{ fontWeight: '800', color: theme.colors.onSurface }}
+              style={[styles.modalTitle, { color: theme.colors.onSurface }]}
             >
               {title}
             </Text>
-            <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={[
+                styles.modalCloseBtn,
+                {
+                  backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                  borderColor: theme.colors.outline,
+                },
+              ]}
+              accessibilityLabel="Close modal"
+              accessibilityRole="button"
+            >
               <Ionicons
                 name="close"
-                size={22}
+                size={18}
                 color={theme.colors.onSurfaceVariant}
               />
             </TouchableOpacity>
@@ -100,23 +107,25 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   modalContent: {
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    elevation: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    maxWidth: 600,
+    width: '100%',
+    alignSelf: 'center',
   },
   modalHandleContainer: {
     width: '100%',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   modalHandle: {
-    width: 40,
+    width: 36,
     height: 4,
     borderRadius: 2,
+    opacity: 0.6,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -125,8 +134,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
   },
+  modalTitle: {
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
+    fontSize: fontScale(15),
+    letterSpacing: -0.1,
+  },
   modalCloseBtn: {
-    padding: 4,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modalScrollContent: {
     paddingHorizontal: 20,

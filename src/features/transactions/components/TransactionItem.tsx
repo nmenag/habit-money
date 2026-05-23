@@ -17,6 +17,35 @@ interface Props {
   category?: Category;
 }
 
+const addAlpha = (
+  color: string | undefined,
+  opacity: number,
+  fallbackHex: string,
+) => {
+  let resolvedColor = color || fallbackHex;
+
+  if (typeof resolvedColor !== 'string') {
+    resolvedColor = fallbackHex;
+  }
+
+  if (resolvedColor.startsWith('rgb')) {
+    const match = resolvedColor.match(/\d+/g);
+    if (match && match.length >= 3) {
+      return `rgba(${match[0]}, ${match[1]}, ${match[2]}, ${opacity})`;
+    }
+  }
+
+  if (!resolvedColor.startsWith('#')) {
+    resolvedColor = fallbackHex;
+  }
+
+  const hex = resolvedColor.replace('#', '');
+  const alpha = Math.round(opacity * 255)
+    .toString(16)
+    .padStart(2, '0');
+  return `#${hex}${alpha}`;
+};
+
 export const TransactionItem: React.FC<Props> = memo(
   ({ transaction, category }) => {
     const accountCurrency = useStore(
@@ -49,6 +78,7 @@ export const TransactionItem: React.FC<Props> = memo(
     const LeftContent = useCallback(
       (props: any) => {
         if (isTransfer) {
+          const accentColor = theme.dark ? '#60A5FA' : '#3B82F6';
           return (
             <Avatar.Icon
               {...props}
@@ -56,14 +86,19 @@ export const TransactionItem: React.FC<Props> = memo(
               icon="swap-horizontal"
               style={[
                 styles.avatar,
-                { backgroundColor: theme.colors.tertiary },
+                {
+                  backgroundColor: addAlpha(accentColor, 0.08, '#3B82F6'),
+                  borderColor: addAlpha(accentColor, 0.17, '#3B82F6'),
+                  borderWidth: 1,
+                },
               ]}
-              color={theme.colors.onSecondary}
+              color={accentColor}
             />
           );
         }
 
         if (isAdjustment) {
+          const accentColor = theme.colors.onSurfaceVariant;
           return (
             <Avatar.Icon
               {...props}
@@ -71,13 +106,18 @@ export const TransactionItem: React.FC<Props> = memo(
               icon="scale-balance"
               style={[
                 styles.avatar,
-                { backgroundColor: theme.colors.surfaceVariant },
+                {
+                  backgroundColor: addAlpha(accentColor, 0.08, '#64748B'),
+                  borderColor: addAlpha(accentColor, 0.17, '#64748B'),
+                  borderWidth: 1,
+                },
               ]}
-              color={theme.colors.onSurfaceVariant}
+              color={accentColor}
             />
           );
         }
 
+        const accentColor = category?.color || theme.colors.primary;
         const iconName =
           getValidCategoryIcon(category?.icon) || (isIncome ? 'plus' : 'minus');
 
@@ -89,10 +129,12 @@ export const TransactionItem: React.FC<Props> = memo(
             style={[
               styles.avatar,
               {
-                backgroundColor: category?.color || theme.colors.surfaceVariant,
+                backgroundColor: addAlpha(accentColor, 0.08, '#22C55E'),
+                borderColor: addAlpha(accentColor, 0.17, '#22C55E'),
+                borderWidth: 1,
               },
             ]}
-            color={theme.colors.onPrimary}
+            color={accentColor}
           />
         );
       },
@@ -103,7 +145,6 @@ export const TransactionItem: React.FC<Props> = memo(
       return (
         <View style={styles.rightContainer}>
           <Text
-            variant="titleMedium"
             style={[
               styles.amount,
               {
@@ -112,6 +153,9 @@ export const TransactionItem: React.FC<Props> = memo(
                   : isIncome
                     ? theme.colors.income
                     : theme.colors.error,
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
+                fontSize: 14,
               },
             ]}
             numberOfLines={1}
@@ -155,6 +199,12 @@ export const TransactionItem: React.FC<Props> = memo(
         right={RightContent}
         style={styles.listItem}
         titleStyle={styles.title}
+        descriptionStyle={{
+          fontFamily: 'Inter-Regular',
+          fontWeight: '400',
+          fontSize: 12,
+          color: theme.colors.onSurfaceVariant,
+        }}
         accessibilityLabel={`${displayTitle}, ${isTransfer ? t('transfer') : formatCurrency(transaction.amount, accountCurrency)}, ${formattedDate}`}
         accessibilityRole="button"
       />
@@ -184,10 +234,12 @@ const defaultStyles = (theme: AppTheme) =>
       borderRadius: 12,
     },
     amount: {
-      fontWeight: '700',
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     title: {
       textTransform: 'capitalize',
-      fontWeight: '700',
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
   });

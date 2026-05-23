@@ -20,8 +20,36 @@ import { useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme, spacing } from '../../../theme/theme';
 import { fontScale, moderateScale } from '../../../utils/responsive';
 
+const addAlpha = (
+  color: string | undefined,
+  opacity: number,
+  fallbackHex: string,
+) => {
+  let resolvedColor = color || fallbackHex;
+
+  if (typeof resolvedColor !== 'string') {
+    resolvedColor = fallbackHex;
+  }
+
+  if (resolvedColor.startsWith('rgb')) {
+    const match = resolvedColor.match(/\d+/g);
+    if (match && match.length >= 3) {
+      return `rgba(${match[0]}, ${match[1]}, ${match[2]}, ${opacity})`;
+    }
+  }
+
+  if (!resolvedColor.startsWith('#')) {
+    resolvedColor = fallbackHex;
+  }
+
+  const hex = resolvedColor.replace('#', '');
+  const alpha = Math.round(opacity * 255)
+    .toString(16)
+    .padStart(2, '0');
+  return `#${hex}${alpha}`;
+};
+
 export const DashboardScreen = React.memo(() => {
-  // Use granular selectors to avoid unnecessary re-renders
   const transactions = useStore((s) => s.transactions);
   const categories = useStore((s) => s.categories);
   const goals = useStore((s) => s.goals);
@@ -157,8 +185,13 @@ export const DashboardScreen = React.memo(() => {
             {
               backgroundColor:
                 data.remainingBalance >= 0
-                  ? theme.colors.incomeContainer
-                  : theme.colors.errorContainer,
+                  ? addAlpha(theme.colors.income, 0.08, '#16A34A')
+                  : addAlpha(theme.colors.error, 0.08, '#EF4444'),
+              borderColor:
+                data.remainingBalance >= 0
+                  ? addAlpha(theme.colors.income, 0.17, '#16A34A')
+                  : addAlpha(theme.colors.error, 0.17, '#EF4444'),
+              borderWidth: 1,
             },
           ]}
           mode="contained"
@@ -166,11 +199,12 @@ export const DashboardScreen = React.memo(() => {
           <Card.Content>
             <View style={styles.remainingHeader}>
               <Text
-                variant="labelSmall"
                 style={{
                   color: theme.colors.onSurfaceVariant,
-                  fontWeight: '800',
-                  letterSpacing: 0.8,
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 10,
+                  letterSpacing: 1.5,
                 }}
               >
                 {t('remaining').toUpperCase()}
@@ -196,8 +230,10 @@ export const DashboardScreen = React.memo(() => {
                     data.remainingBalance >= 0
                       ? theme.colors.income
                       : theme.colors.error,
-                  fontSize: fontScale(32),
-                  lineHeight: fontScale(38),
+                  fontSize: fontScale(26),
+                  fontFamily: 'Inter-SemiBold',
+                  fontWeight: '600',
+                  lineHeight: fontScale(32),
                   marginTop: spacing.xs,
                 },
               ]}
@@ -229,34 +265,59 @@ export const DashboardScreen = React.memo(() => {
           </Card.Content>
         </Card>
 
-        {/* Separated Flow row: Incomes & Expenses side-by-side */}
         <View style={styles.flowRow}>
-          {/* Income Container */}
           <Card
-            style={[styles.flowCard, { marginRight: spacing.xs }]}
-            mode="elevated"
+            style={[
+              styles.flowCard,
+              {
+                marginRight: spacing.xs,
+                borderWidth: 1,
+                borderColor: theme.colors.outlineVariant,
+                backgroundColor: theme.colors.surface,
+              },
+            ]}
+            mode="contained"
           >
             <Card.Content style={styles.flowCardContent}>
               <View style={styles.flowHeader}>
                 <Avatar.Icon
                   size={28}
                   icon="arrow-up-bold"
-                  style={{ backgroundColor: theme.colors.incomeContainer }}
+                  style={{
+                    backgroundColor: addAlpha(
+                      theme.colors.income,
+                      0.08,
+                      '#16A34A',
+                    ),
+                  }}
                   color={theme.colors.income}
                 />
                 <Text
-                  variant="labelSmall"
                   style={[
                     styles.flowLabel,
-                    { color: theme.colors.onSurfaceVariant },
+                    {
+                      color: theme.colors.onSurfaceVariant,
+                      fontFamily: 'Inter-Medium',
+                      fontWeight: '500',
+                      fontSize: 10,
+                      letterSpacing: 1.2,
+                    },
                   ]}
                   numberOfLines={1}
                 >
-                  {t('monthlyIncome')}
+                  {t('monthlyIncome').toUpperCase()}
                 </Text>
               </View>
               <Text
-                style={[styles.flowAmount, { color: theme.colors.income }]}
+                style={[
+                  styles.flowAmount,
+                  {
+                    color: theme.colors.income,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                    fontSize: fontScale(18),
+                  },
+                ]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
@@ -265,32 +326,58 @@ export const DashboardScreen = React.memo(() => {
             </Card.Content>
           </Card>
 
-          {/* Expenses Container */}
           <Card
-            style={[styles.flowCard, { marginLeft: spacing.xs }]}
-            mode="elevated"
+            style={[
+              styles.flowCard,
+              {
+                marginLeft: spacing.xs,
+                borderWidth: 1,
+                borderColor: theme.colors.outlineVariant,
+                backgroundColor: theme.colors.surface,
+              },
+            ]}
+            mode="contained"
           >
             <Card.Content style={styles.flowCardContent}>
               <View style={styles.flowHeader}>
                 <Avatar.Icon
                   size={28}
                   icon="arrow-down-bold"
-                  style={{ backgroundColor: theme.colors.errorContainer }}
+                  style={{
+                    backgroundColor: addAlpha(
+                      theme.colors.error,
+                      0.08,
+                      '#EF4444',
+                    ),
+                  }}
                   color={theme.colors.error}
                 />
                 <Text
-                  variant="labelSmall"
                   style={[
                     styles.flowLabel,
-                    { color: theme.colors.onSurfaceVariant },
+                    {
+                      color: theme.colors.onSurfaceVariant,
+                      fontFamily: 'Inter-Medium',
+                      fontWeight: '500',
+                      fontSize: 10,
+                      letterSpacing: 1.2,
+                    },
                   ]}
                   numberOfLines={1}
                 >
-                  {t('monthlyExpenses')}
+                  {t('monthlyExpenses').toUpperCase()}
                 </Text>
               </View>
               <Text
-                style={[styles.flowAmount, { color: theme.colors.error }]}
+                style={[
+                  styles.flowAmount,
+                  {
+                    color: theme.colors.error,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                    fontSize: fontScale(18),
+                  },
+                ]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
@@ -300,11 +387,18 @@ export const DashboardScreen = React.memo(() => {
           </Card>
         </View>
 
-        {/* AA. Accounts Summary */}
-        <Card style={styles.card} mode="elevated">
+        <Card style={styles.card} mode="contained">
           <Card.Content>
             <View style={styles.cardHeader}>
-              <Text variant="titleMedium" style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: fontScale(15),
+                  color: theme.colors.onSurface,
+                  flex: 1,
+                }}
+              >
                 {t('accounts')}
               </Text>
               <TouchableOpacity
@@ -314,8 +408,13 @@ export const DashboardScreen = React.memo(() => {
                 accessibilityRole="button"
               >
                 <Text
-                  variant="labelLarge"
-                  style={{ color: theme.colors.primary, marginLeft: 8 }}
+                  style={{
+                    color: theme.colors.primary,
+                    marginLeft: 8,
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    fontSize: fontScale(14),
+                  }}
                 >
                   {t('viewAll')}
                 </Text>
@@ -323,14 +422,24 @@ export const DashboardScreen = React.memo(() => {
             </View>
             <View style={{ marginBottom: 8 }}>
               <Text
-                variant="labelSmall"
-                style={{ color: theme.colors.outline }}
+                style={{
+                  color: theme.colors.onSurfaceVariant,
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                }}
               >
-                {t('totalBalance')}
+                {t('totalBalance').toUpperCase()}
               </Text>
               <Text
-                variant="headlineSmall"
-                style={{ fontWeight: '900' }}
+                style={{
+                  fontFamily: 'Inter-SemiBold',
+                  fontWeight: '600',
+                  fontSize: fontScale(22),
+                  color: theme.colors.onSurface,
+                  marginTop: 2,
+                }}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
@@ -361,23 +470,39 @@ export const DashboardScreen = React.memo(() => {
                           : 'cash'
                     }
                     style={{
-                      backgroundColor: acc.color || theme.colors.primary,
+                      backgroundColor: addAlpha(
+                        acc.color || theme.colors.primary,
+                        0.08,
+                        '#22C55E',
+                      ),
+                      borderColor: addAlpha(
+                        acc.color || theme.colors.primary,
+                        0.17,
+                        '#22C55E',
+                      ),
+                      borderWidth: 1,
                     }}
-                    color={theme.colors.onPrimary}
+                    color={acc.color || theme.colors.primary}
                   />
                   <View style={{ marginLeft: 12, flex: 1 }}>
                     <Text
-                      variant="bodyMedium"
-                      style={{ fontWeight: '700' }}
+                      style={{
+                        fontFamily: 'Inter-Medium',
+                        fontWeight: '500',
+                        fontSize: fontScale(14),
+                        color: theme.colors.onSurface,
+                      }}
                       numberOfLines={1}
                     >
                       {translateName(acc.name)}
                     </Text>
                   </View>
                   <Text
-                    variant="bodyLarge"
                     style={{
-                      fontWeight: 'bold',
+                      fontFamily: 'Inter-Medium',
+                      fontWeight: '500',
+                      fontSize: fontScale(14),
+                      color: theme.colors.onSurface,
                       flexShrink: 1,
                       textAlign: 'right',
                     }}
@@ -393,17 +518,26 @@ export const DashboardScreen = React.memo(() => {
           </Card.Content>
         </Card>
 
-        {/* B. Monthly Spending Progress */}
-        <Card style={styles.card} mode="elevated">
+        <Card style={styles.card} mode="contained">
           <Card.Content>
             <View style={styles.cardHeader}>
-              <Text variant="titleMedium" style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: fontScale(15),
+                  color: theme.colors.onSurface,
+                  flex: 1,
+                }}
+              >
                 {t('spendingProgress')}
               </Text>
               <Text
-                variant="titleSmall"
                 style={{
-                  fontWeight: 'bold',
+                  fontFamily: 'Inter-SemiBold',
+                  fontWeight: '600',
+                  fontSize: fontScale(15),
+                  color: theme.colors.onSurface,
                   flexShrink: 1,
                   textAlign: 'right',
                   marginLeft: 8,
@@ -461,10 +595,17 @@ export const DashboardScreen = React.memo(() => {
           </Card.Content>
         </Card>
 
-        {/* C. Top Category */}
-        <Card style={styles.card} mode="elevated">
+        <Card style={styles.card} mode="contained">
           <Card.Content>
-            <Text variant="titleMedium" style={styles.cardTitle}>
+            <Text
+              style={{
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
+                fontSize: fontScale(15),
+                color: theme.colors.onSurface,
+                marginBottom: spacing.md,
+              }}
+            >
               {t('topSpendingCategory')}
             </Text>
             {data.topCategory ? (
@@ -473,22 +614,49 @@ export const DashboardScreen = React.memo(() => {
                   size={40}
                   icon={getValidCategoryIcon(data.topCategory.icon)}
                   style={{
-                    backgroundColor:
+                    backgroundColor: addAlpha(
                       data.topCategory.color || theme.colors.primary,
+                      0.08,
+                      '#22C55E',
+                    ),
+                    borderColor: addAlpha(
+                      data.topCategory.color || theme.colors.primary,
+                      0.17,
+                      '#22C55E',
+                    ),
+                    borderWidth: 1,
                   }}
+                  color={data.topCategory.color || theme.colors.primary}
                 />
                 <View style={{ marginLeft: 12, flex: 1 }}>
-                  <Text variant="titleMedium">
+                  <Text
+                    style={{
+                      fontFamily: 'Inter-Medium',
+                      fontWeight: '500',
+                      fontSize: fontScale(14),
+                      color: theme.colors.onSurface,
+                    }}
+                  >
                     {translateName(data.topCategory.name)}
                   </Text>
-                  <Text variant="labelSmall">
+                  <Text
+                    style={{
+                      fontFamily: 'Inter-Regular',
+                      fontWeight: '400',
+                      fontSize: fontScale(12),
+                      color: theme.colors.onSurfaceVariant,
+                      marginTop: 2,
+                    }}
+                  >
                     {data.topCatPercent.toFixed(1)}% {t('ofTotalExpenses')}
                   </Text>
                 </View>
                 <Text
-                  variant="titleMedium"
                   style={{
-                    fontWeight: 'bold',
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    fontSize: fontScale(14),
+                    color: theme.colors.onSurface,
                     flexShrink: 1,
                     textAlign: 'right',
                   }}
@@ -500,8 +668,12 @@ export const DashboardScreen = React.memo(() => {
               </View>
             ) : (
               <Text
-                variant="bodyMedium"
-                style={{ color: theme.colors.outline, fontStyle: 'italic' }}
+                style={{
+                  fontFamily: 'Inter-Regular',
+                  fontStyle: 'italic',
+                  color: theme.colors.onSurfaceVariant,
+                  fontSize: fontScale(13),
+                }}
               >
                 {t('noDataForPeriod')}
               </Text>
@@ -509,25 +681,33 @@ export const DashboardScreen = React.memo(() => {
           </Card.Content>
         </Card>
 
-        {/* D. Main Insight */}
         <Card
           style={[
             styles.card,
-            { backgroundColor: theme.colors.primaryContainer },
+            {
+              backgroundColor: addAlpha(theme.colors.primary, 0.08, '#22C55E'),
+              borderColor: addAlpha(theme.colors.primary, 0.17, '#22C55E'),
+              borderWidth: 1,
+            },
           ]}
           mode="contained"
         >
           <Card.Content style={styles.insightContent}>
             <Ionicons
               name="bulb-outline"
-              size={24}
-              color={theme.colors.onPrimaryContainer}
+              size={22}
+              color={theme.colors.primary}
             />
             <Text
-              variant="bodyLarge"
               style={[
                 styles.insightText,
-                { color: theme.colors.onPrimaryContainer },
+                {
+                  color: theme.colors.onSurface,
+                  fontFamily: 'Inter-Regular',
+                  fontWeight: '400',
+                  fontSize: fontScale(13),
+                  lineHeight: fontScale(18),
+                },
               ]}
             >
               {data.insight}
@@ -535,12 +715,19 @@ export const DashboardScreen = React.memo(() => {
           </Card.Content>
         </Card>
 
-        {/* E. Goals Preview */}
         {goals.length > 0 && (
-          <Card style={styles.card} mode="elevated">
+          <Card style={styles.card} mode="contained">
             <Card.Content>
               <View style={styles.cardHeader}>
-                <Text variant="titleMedium" style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    fontSize: fontScale(15),
+                    color: theme.colors.onSurface,
+                    flex: 1,
+                  }}
+                >
                   {t('goals')}
                 </Text>
                 <TouchableOpacity
@@ -550,8 +737,13 @@ export const DashboardScreen = React.memo(() => {
                   accessibilityRole="button"
                 >
                   <Text
-                    variant="labelLarge"
-                    style={{ color: theme.colors.primary, marginLeft: 8 }}
+                    style={{
+                      color: theme.colors.primary,
+                      marginLeft: 8,
+                      fontFamily: 'Inter-Medium',
+                      fontWeight: '500',
+                      fontSize: fontScale(14),
+                    }}
                   >
                     {t('viewAll')}
                   </Text>
@@ -562,15 +754,23 @@ export const DashboardScreen = React.memo(() => {
                   <View key={goal.id} style={{ marginBottom: 16 }}>
                     <View style={styles.cardHeader}>
                       <Text
-                        variant="bodyMedium"
-                        style={{ fontWeight: 'bold', flex: 1 }}
+                        style={{
+                          fontFamily: 'Inter-Medium',
+                          fontWeight: '500',
+                          fontSize: fontScale(13),
+                          color: theme.colors.onSurface,
+                          flex: 1,
+                        }}
                         numberOfLines={1}
                       >
                         {goal.name}
                       </Text>
                       <Text
-                        variant="labelSmall"
                         style={{
+                          fontFamily: 'Inter-Regular',
+                          fontWeight: '400',
+                          fontSize: fontScale(12),
+                          color: theme.colors.onSurfaceVariant,
                           flexShrink: 1,
                           textAlign: 'right',
                           marginLeft: 8,
@@ -603,8 +803,12 @@ export const DashboardScreen = React.memo(() => {
                 ))
               ) : (
                 <Text
-                  variant="bodyMedium"
-                  style={{ color: theme.colors.outline, fontStyle: 'italic' }}
+                  style={{
+                    fontFamily: 'Inter-Regular',
+                    fontStyle: 'italic',
+                    color: theme.colors.onSurfaceVariant,
+                    fontSize: fontScale(13),
+                  }}
                 >
                   {t('noGoals')}
                 </Text>
@@ -613,11 +817,18 @@ export const DashboardScreen = React.memo(() => {
           </Card>
         )}
 
-        {/* F. Recent Transactions */}
-        <Card style={styles.card} mode="elevated">
+        <Card style={styles.card} mode="contained">
           <Card.Content>
             <View style={[styles.cardHeader, { marginBottom: 12 }]}>
-              <Text variant="titleMedium" style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: fontScale(15),
+                  color: theme.colors.onSurface,
+                  flex: 1,
+                }}
+              >
                 {t('recentTransactions')}
               </Text>
               <TouchableOpacity
@@ -627,8 +838,13 @@ export const DashboardScreen = React.memo(() => {
                 accessibilityRole="button"
               >
                 <Text
-                  variant="labelLarge"
-                  style={{ color: theme.colors.primary, marginLeft: 8 }}
+                  style={{
+                    color: theme.colors.primary,
+                    marginLeft: 8,
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    fontSize: fontScale(14),
+                  }}
                 >
                   {t('seeAll')}
                 </Text>
@@ -639,6 +855,17 @@ export const DashboardScreen = React.memo(() => {
                 const cat = categories.find((c) => c.id === tr.categoryId);
                 const isAdjustment =
                   tr.note && translateName(tr.note) === t('balanceAdjustment');
+                const accentColor =
+                  tr.type === 'transfer'
+                    ? theme.dark
+                      ? '#60A5FA'
+                      : '#3B82F6'
+                    : isAdjustment
+                      ? theme.colors.onSurfaceVariant
+                      : cat?.color ||
+                        (tr.type === 'income'
+                          ? theme.colors.income
+                          : theme.colors.error);
                 return (
                   <View key={tr.id}>
                     <TouchableOpacity
@@ -658,26 +885,38 @@ export const DashboardScreen = React.memo(() => {
                                 (tr.type === 'income' ? 'plus' : 'minus')
                         }
                         style={{
-                          backgroundColor:
+                          backgroundColor: addAlpha(
+                            accentColor,
+                            0.08,
                             tr.type === 'transfer'
-                              ? theme.colors.tertiary
+                              ? '#3B82F6'
                               : isAdjustment
-                                ? theme.colors.surfaceVariant
-                                : cat?.color ||
-                                  (tr.type === 'income'
-                                    ? theme.colors.income
-                                    : theme.colors.error),
+                                ? '#64748B'
+                                : '#22C55E',
+                          ),
+                          borderColor: addAlpha(
+                            accentColor,
+                            0.17,
+                            tr.type === 'transfer'
+                              ? '#3B82F6'
+                              : isAdjustment
+                                ? '#64748B'
+                                : '#22C55E',
+                          ),
+                          borderWidth: 1,
                         }}
-                        color={
-                          tr.type === 'transfer'
-                            ? theme.colors.onSecondary
-                            : isAdjustment
-                              ? theme.colors.onSurfaceVariant
-                              : theme.colors.onPrimary
-                        }
+                        color={accentColor}
                       />
                       <View style={{ marginLeft: 12, flex: 1 }}>
-                        <Text variant="bodyLarge" numberOfLines={1}>
+                        <Text
+                          style={{
+                            fontFamily: 'Inter-Medium',
+                            fontWeight: '500',
+                            fontSize: fontScale(14),
+                            color: theme.colors.onSurface,
+                          }}
+                          numberOfLines={1}
+                        >
                           {tr.note &&
                           translateName(tr.note) === t('balanceAdjustment')
                             ? t('balanceAdjustment')
@@ -687,8 +926,13 @@ export const DashboardScreen = React.memo(() => {
                                 : translateName(cat?.name || 'Other'))}
                         </Text>
                         <Text
-                          variant="labelSmall"
-                          style={{ color: theme.colors.outline }}
+                          style={{
+                            fontFamily: 'Inter-Regular',
+                            fontWeight: '400',
+                            fontSize: fontScale(12),
+                            color: theme.colors.onSurfaceVariant,
+                            marginTop: 2,
+                          }}
                         >
                           {format(parseISO(tr.date), 'MMM dd, yyyy', {
                             locale: language === 'es' ? esLocale : enUS,
@@ -696,7 +940,6 @@ export const DashboardScreen = React.memo(() => {
                         </Text>
                       </View>
                       <Text
-                        variant="bodyLarge"
                         style={[
                           styles.amountText,
                           {
@@ -706,6 +949,9 @@ export const DashboardScreen = React.memo(() => {
                                 : tr.type === 'income'
                                   ? theme.colors.income
                                   : theme.colors.error,
+                            fontFamily: 'Inter-Medium',
+                            fontWeight: '500',
+                            fontSize: fontScale(14),
                             flexShrink: 1,
                             textAlign: 'right',
                             marginLeft: 8,
@@ -728,12 +974,13 @@ export const DashboardScreen = React.memo(() => {
               })
             ) : (
               <Text
-                variant="bodyMedium"
                 style={{
-                  color: theme.colors.outline,
+                  fontFamily: 'Inter-Regular',
                   fontStyle: 'italic',
+                  color: theme.colors.onSurfaceVariant,
                   textAlign: 'center',
                   paddingVertical: 20,
+                  fontSize: fontScale(13),
                 }}
               >
                 {t('noTransactions')}
@@ -783,17 +1030,27 @@ const defaultStyles = (theme: AppTheme) =>
       marginTop: spacing.sm,
     },
     monthText: {
-      fontWeight: '900',
-      color: theme.colors.primary,
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      fontSize: fontScale(22),
+      color: theme.colors.onSurface,
       textTransform: 'capitalize',
     },
     card: {
       marginBottom: spacing.md,
-      borderRadius: theme.roundness,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surface,
+      elevation: 0,
+      overflow: 'hidden',
     },
     cardTitle: {
       marginBottom: spacing.md,
-      fontWeight: 'bold',
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      fontSize: fontScale(15),
+      color: theme.colors.onSurface,
     },
     cardHeader: {
       flexDirection: 'row',
@@ -808,7 +1065,8 @@ const defaultStyles = (theme: AppTheme) =>
     },
     amountText: {
       fontSize: fontScale(18),
-      fontWeight: '900',
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
     },
     remainingHeader: {
       flexDirection: 'row',
@@ -822,7 +1080,12 @@ const defaultStyles = (theme: AppTheme) =>
     },
     flowCard: {
       flex: 1,
-      borderRadius: theme.roundness,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surface,
+      elevation: 0,
+      overflow: 'hidden',
     },
     flowCardContent: {
       paddingVertical: spacing.md,
@@ -835,12 +1098,14 @@ const defaultStyles = (theme: AppTheme) =>
     },
     flowLabel: {
       marginLeft: spacing.xs + 2,
-      fontWeight: '800',
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       flex: 1,
     },
     flowAmount: {
       fontSize: fontScale(18),
-      fontWeight: '900',
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
     },
     adjustmentsRow: {
       flexDirection: 'row',
@@ -850,12 +1115,13 @@ const defaultStyles = (theme: AppTheme) =>
     },
     adjustmentsText: {
       marginLeft: 4,
-      fontWeight: '700',
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
       fontSize: fontScale(12),
     },
     progressBar: {
-      height: 8,
-      borderRadius: 4,
+      height: 4,
+      borderRadius: 2,
     },
     row: {
       flexDirection: 'row',
@@ -868,30 +1134,34 @@ const defaultStyles = (theme: AppTheme) =>
     },
     sectionCard: {
       marginHorizontal: spacing.md,
-      marginBottom: spacing.md, // Consistent rhythm
-      borderRadius: 16,
-      elevation: 2,
+      marginBottom: spacing.md,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surface,
+      elevation: 0,
+      overflow: 'hidden',
     },
     headerCard: {
       marginHorizontal: spacing.md,
       marginTop: spacing.sm,
-      marginBottom: spacing.lg, // Generous separation after hero
+      marginBottom: spacing.lg,
       borderRadius: 24,
-      elevation: 4,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surface,
+      elevation: 0,
+      overflow: 'hidden',
     },
     insightText: {
       marginLeft: spacing.md,
       flex: 1,
-      fontWeight: '600',
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
     },
     fab: {
       position: 'absolute',
       right: spacing.md,
       borderRadius: 16,
-      elevation: 6,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
     },
   });

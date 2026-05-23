@@ -68,7 +68,7 @@ export const AboutScreen = () => {
             {version}
           </Text>
         </View>
-        <Divider style={{ opacity: 0.5 }} />
+        <Divider style={{ backgroundColor: theme.colors.outlineVariant }} />
         <View style={styles.infoRow}>
           <Text variant="labelLarge" style={styles.infoLabel}>
             {t('license')}
@@ -78,7 +78,7 @@ export const AboutScreen = () => {
           </Text>
         </View>
 
-        <Divider style={{ opacity: 0.5 }} />
+        <Divider style={{ backgroundColor: theme.colors.outlineVariant }} />
 
         <TouchableOpacity
           style={styles.infoRow}
@@ -123,10 +123,11 @@ const createStyles = (theme: any) =>
       borderRadius: 24,
       marginBottom: 20,
       borderWidth: 1,
-      borderColor: 'rgba(0,0,0,0.05)',
+      borderColor: theme.colors.outlineVariant,
     },
     appName: {
-      fontWeight: '900',
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
       color: theme.colors.onBackground,
       marginBottom: 12,
       letterSpacing: 0.5,
@@ -138,10 +139,12 @@ const createStyles = (theme: any) =>
       lineHeight: fontScale(24),
       paddingHorizontal: 16,
       fontSize: fontScale(16),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
     },
     divider: {
       marginBottom: 32,
-      opacity: 0.5,
+      backgroundColor: theme.colors.outlineVariant,
     },
     infoSection: {
       backgroundColor: theme.colors.surface,
@@ -159,19 +162,22 @@ const createStyles = (theme: any) =>
     },
     infoLabel: {
       color: theme.colors.onSurfaceVariant,
-      fontWeight: '700',
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       letterSpacing: 0.3,
       flexShrink: 0,
     },
     infoValue: {
-      fontWeight: '600',
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       color: theme.colors.onSurface,
       flexShrink: 1,
       textAlign: 'right',
     },
     link: {
       color: theme.colors.primary,
-      fontWeight: '600',
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
       flexShrink: 1,
       textAlign: 'right',
     },
@@ -182,7 +188,8 @@ const createStyles = (theme: any) =>
     copyright: {
       color: theme.colors.onSurfaceVariant,
       opacity: 0.7,
-      fontWeight: '500',
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
       letterSpacing: 0.5,
     },
   });

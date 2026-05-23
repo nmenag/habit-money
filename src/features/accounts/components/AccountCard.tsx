@@ -1,13 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
-import { Card, IconButton, Text, useTheme } from 'react-native-paper';
+import { StyleSheet, View } from 'react-native';
+import { Card, Text, useTheme } from 'react-native-paper';
+
 import { Account, useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme } from '../../../theme/theme';
+import { fontScale } from '../../../utils/responsive';
 
 interface Props {
   account: Account;
-  onDelete?: () => void;
   onPress?: () => void;
   onLongPress?: () => void;
   isActive?: boolean;
@@ -15,7 +16,6 @@ interface Props {
 
 export const AccountCard: React.FC<Props> = ({
   account,
-  onDelete,
   onPress,
   onLongPress,
   isActive,
@@ -24,19 +24,6 @@ export const AccountCard: React.FC<Props> = ({
   const { t, translateName } = useTranslation();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
-
-  const handleDelete = () => {
-    if (onDelete) {
-      Alert.alert(
-        t('deleteAccount'),
-        t('deleteAccountConfirm', { name: translateName(account.name) }),
-        [
-          { text: t('cancel'), style: 'cancel' },
-          { text: t('delete'), style: 'destructive', onPress: onDelete },
-        ],
-      );
-    }
-  };
 
   const getAccountIcon = (type: string) => {
     switch (type) {
@@ -51,17 +38,24 @@ export const AccountCard: React.FC<Props> = ({
     }
   };
 
+  const accountColor = account.color || theme.colors.primary;
+
+  const cardBackground = isActive
+    ? theme.colors.elevation.level3
+    : `${accountColor}12`;
+
+  const cardBorder = isActive ? theme.colors.primary : `${accountColor}2B`;
+
   return (
     <Card
       style={[
         styles.card,
         {
-          backgroundColor: isActive
-            ? theme.colors.elevation.level3
-            : theme.colors.surface,
+          backgroundColor: cardBackground,
+          borderColor: cardBorder,
         },
       ]}
-      mode="elevated"
+      mode="contained"
       onPress={onPress}
       onLongPress={onLongPress}
       disabled={isActive}
@@ -70,32 +64,54 @@ export const AccountCard: React.FC<Props> = ({
     >
       <Card.Content style={styles.cardContent}>
         <View style={styles.cardHeader}>
+          {onLongPress && (
+            <View style={styles.dragHandle} pointerEvents="none">
+              <Ionicons
+                name="reorder-two-outline"
+                size={18}
+                color={theme.colors.outline}
+                style={{ opacity: 0.35 }}
+              />
+            </View>
+          )}
+
           <View
             style={[
               styles.iconContainer,
-              { backgroundColor: account.color || theme.colors.primary },
+              {
+                backgroundColor: `${accountColor}12`,
+                borderColor: `${accountColor}2B`,
+              },
             ]}
           >
             <Ionicons
               name={getAccountIcon(account.type) as any}
-              size={24}
-              color={theme.colors.onPrimary}
+              size={20}
+              color={accountColor}
             />
           </View>
+
           <View style={styles.textContainer}>
-            <Text variant="titleMedium" style={styles.name}>
+            <Text style={[styles.name, { color: theme.colors.onSurface }]}>
               {translateName(account.name)}
             </Text>
-            <Text
-              variant="labelMedium"
-              style={[styles.typeText, { color: theme.colors.outline }]}
-            >
-              {t(account.type).toUpperCase()}
-            </Text>
+            <View style={styles.badgeRow}>
+              <Text
+                style={[
+                  styles.typeText,
+                  {
+                    color: accountColor,
+                    backgroundColor: `${accountColor}12`,
+                  },
+                ]}
+              >
+                {t(account.type).toUpperCase()}
+              </Text>
+            </View>
           </View>
+
           <View style={styles.balanceContainer}>
             <Text
-              variant="titleMedium"
               style={[
                 styles.balanceText,
                 {
@@ -111,18 +127,6 @@ export const AccountCard: React.FC<Props> = ({
               {formatCurrency(account.currentBalance, account.currency)}
             </Text>
           </View>
-          {onDelete && (
-            <IconButton
-              icon="trash-can-outline"
-              iconColor={theme.colors.error}
-              size={20}
-              onPress={(e) => {
-                e.stopPropagation();
-                handleDelete();
-              }}
-              style={styles.deleteButton}
-            />
-          )}
         </View>
       </Card.Content>
     </Card>
@@ -132,50 +136,67 @@ export const AccountCard: React.FC<Props> = ({
 const defaultStyles = (theme: AppTheme) =>
   StyleSheet.create({
     card: {
-      marginBottom: 16,
-      borderRadius: 16,
+      marginBottom: 12,
+      borderRadius: theme.roundness || 12,
+      borderWidth: 1,
       overflow: 'hidden',
     },
     cardContent: {
-      padding: 16,
+      paddingVertical: 12,
+      paddingHorizontal: 12,
     },
     cardHeader: {
       flexDirection: 'row',
       alignItems: 'center',
     },
-    iconContainer: {
-      width: 48,
-      height: 48,
-      borderRadius: 12,
+    dragHandle: {
+      marginRight: 6,
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: 16,
-      elevation: 2,
-      shadowColor: theme.colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
+    },
+    iconContainer: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      borderWidth: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 12,
     },
     textContainer: {
-      flex: 1,
+      flex: 1.2,
+      justifyContent: 'center',
     },
     name: {
-      fontWeight: '800',
-      letterSpacing: 0.2,
+      fontSize: fontScale(14),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      letterSpacing: -0.1,
+    },
+    badgeRow: {
+      flexDirection: 'row',
+      marginTop: 4,
     },
     typeText: {
-      marginTop: 2,
+      fontSize: fontScale(8),
+      fontFamily: 'Inter-Medium',
       fontWeight: '500',
+      letterSpacing: 1,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 6,
+      overflow: 'hidden',
     },
     balanceContainer: {
       alignItems: 'flex-end',
-      marginRight: 8,
-      flexShrink: 1,
+      justifyContent: 'center',
+      flex: 1,
+      marginRight: 4,
     },
     balanceText: {
-      fontWeight: '800',
-    },
-    deleteButton: {
-      margin: 0,
+      fontSize: fontScale(15),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      letterSpacing: -0.2,
     },
   });
