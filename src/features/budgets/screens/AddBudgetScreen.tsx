@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
@@ -7,17 +7,27 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  TextInput as RNTextInput,
 } from 'react-native';
-import { Button, Chip, Text, TextInput, useTheme } from 'react-native-paper';
+import { Button, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Budget, useStore, useTranslation } from '../../../store/useStore';
 import { BottomSheet } from '../../../shared/components/BottomSheet';
-import { COLORS } from '../../../constants';
+import { COLORS, getValidCategoryIcon } from '../../../constants';
 import { formatNumber } from '../../../utils/formatters';
 import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
 import { AppTheme } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
+
+const addAlpha = (color: string, opacity: number): string => {
+  if (!color.startsWith('#')) return color;
+  const hex = color.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 
 export const AddBudgetScreen = () => {
   const params = useLocalSearchParams<{ budget?: string }>();
@@ -58,7 +68,24 @@ export const AddBudgetScreen = () => {
     editingBudget?.categoryId || null,
   );
 
+  const [categorySheetOpen, setCategorySheetOpen] = useState(false);
+  const [isAmountFocused, setIsAmountFocused] = useState(false);
+
   const isAmountValid = amount > 0;
+
+  const selectedCategoryObj = useMemo(() => {
+    return categories.find((c) => c.id === selectedCategoryId);
+  }, [categories, selectedCategoryId]);
+
+  const activeColors = useMemo(() => {
+    return {
+      bg: theme.dark ? '#2A1818' : '#FFF5F5',
+      border: theme.dark ? '#5E2727' : '#FEE2E2',
+      badgeBg: theme.dark ? '#3A1E1E' : '#FEE2E2',
+      text: theme.colors.error,
+      badgeText: theme.colors.error,
+    };
+  }, [theme]);
 
   const handleSave = () => {
     const amountNum = amount;
@@ -167,57 +194,196 @@ export const AddBudgetScreen = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.formSection}>
-          <View style={styles.fieldContainer}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
-              {t('monthlyLimit') || 'MONTHLY BUDGET LIMIT'}
+          {/* Amount Hero Card */}
+          <View
+            style={[
+              styles.amountHeroCard,
+              {
+                backgroundColor: activeColors.bg,
+                borderColor: activeColors.border,
+                borderWidth: 1.5,
+                paddingVertical: 16,
+                marginBottom: 8,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.amountLabel,
+                {
+                  color: activeColors.text,
+                  opacity: 0.8,
+                  marginBottom: 8,
+                },
+              ]}
+            >
+              {(t('monthlyLimit') || 'MONTHLY BUDGET LIMIT').toUpperCase()}
             </Text>
-            <TextInput
-              value={displayAmount}
-              onChangeText={handleAmountChange}
-              mode="outlined"
-              keyboardType="numeric"
-              style={styles.inputField}
-              outlineColor={theme.dark ? '#27272A' : '#E4E4E7'}
-              activeOutlineColor={theme.colors.primary}
-              textColor={theme.colors.onSurface}
-              placeholder="0"
-              placeholderTextColor={theme.colors.outline}
-              left={<TextInput.Affix text={`${currency} `} />}
-            />
+
+            <View style={styles.amountInputContainer}>
+              <View
+                style={[
+                  styles.currencyBadge,
+                  {
+                    backgroundColor: activeColors.badgeBg,
+                    borderColor: activeColors.text,
+                    borderWidth: 1,
+                  },
+                ]}
+              >
+                <Text
+                  style={[styles.currencyText, { color: activeColors.text }]}
+                >
+                  {currency}
+                </Text>
+              </View>
+
+              <View style={styles.amountInputWrapper}>
+                <RNTextInput
+                  value={displayAmount}
+                  onChangeText={handleAmountChange}
+                  keyboardType="decimal-pad"
+                  placeholder={isAmountFocused ? '' : '0'}
+                  placeholderTextColor={theme.colors.outlineVariant}
+                  style={[
+                    styles.amountTextInputCentered,
+                    {
+                      color: activeColors.text,
+                      fontSize: 36,
+                      textAlign: 'center',
+                    },
+                  ]}
+                  selectionColor={activeColors.text}
+                  onFocus={() => setIsAmountFocused(true)}
+                  onBlur={() => setIsAmountFocused(false)}
+                />
+              </View>
+
+              <View style={styles.spacer} />
+
+              {amount > 0 && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setDisplayAmount('');
+                    setAmount(0);
+                  }}
+                  style={styles.amountClearBtn}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                >
+                  <Ionicons
+                    name="close-circle"
+                    size={24}
+                    color={addAlpha(activeColors.text, 0.53)}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
 
+          {/* Category Picker Card */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('associatedCategory') || 'ASSOCIATED CATEGORY'}
             </Text>
-            <View style={styles.chipsRow}>
-              <Chip
-                selected={!selectedCategoryId}
-                onPress={() => setSelectedCategoryId(null)}
-                style={styles.chip}
-                mode="flat"
-                showSelectedOverlay
-                textStyle={styles.chipText}
-              >
-                {t('none')}
-              </Chip>
-              {categories.map((cat) => (
-                <Chip
-                  key={cat.id}
-                  selected={selectedCategoryId === cat.id}
-                  onPress={() => setSelectedCategoryId(cat.id)}
-                  style={styles.chip}
-                  mode="flat"
-                  selectedColor={cat.color || theme.colors.primary}
-                  showSelectedOverlay
-                  textStyle={styles.chipText}
+
+            <TouchableOpacity
+              style={[
+                styles.selectorCard,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.outlineVariant,
+                  borderWidth: 1,
+                  paddingLeft: 20,
+                },
+              ]}
+              onPress={() => setCategorySheetOpen(true)}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={`${t('associatedCategory') || 'Associated Category'}: ${selectedCategoryObj ? translateName(selectedCategoryObj.name) : t('none')}`}
+            >
+              <View
+                style={[
+                  styles.selectorAccentBar,
+                  {
+                    backgroundColor:
+                      selectedCategoryObj?.color || theme.colors.primary,
+                  },
+                ]}
+              />
+              <View style={styles.selectorCardLeft}>
+                <View
+                  style={[
+                    styles.selectorIconBg,
+                    {
+                      backgroundColor: selectedCategoryObj
+                        ? `${selectedCategoryObj.color || theme.colors.primary}12`
+                        : `${theme.colors.outline}12`,
+                      borderColor: selectedCategoryObj
+                        ? `${selectedCategoryObj.color || theme.colors.primary}2B`
+                        : `${theme.colors.outline}2B`,
+                      borderWidth: 1,
+                    },
+                  ]}
                 >
-                  {translateName(cat.name)}
-                </Chip>
-              ))}
-            </View>
+                  <MaterialCommunityIcons
+                    name={
+                      selectedCategoryObj
+                        ? (getValidCategoryIcon(
+                            selectedCategoryObj.icon,
+                          ) as any)
+                        : 'slash-forward'
+                    }
+                    size={20}
+                    color={selectedCategoryObj?.color || theme.colors.outline}
+                  />
+                </View>
+                <View style={styles.selectorCardTextCol}>
+                  <Text
+                    style={{
+                      fontFamily: 'Inter-Medium',
+                      fontWeight: '500',
+                      fontSize: 10,
+                      letterSpacing: 1.5,
+                      color: theme.colors.onSurfaceVariant,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {t('associatedCategory') || 'Associated Category'}
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: 'Inter-Medium',
+                      fontWeight: '500',
+                      fontSize: 15,
+                      color: theme.colors.onSurface,
+                      marginTop: 2,
+                    }}
+                  >
+                    {selectedCategoryObj
+                      ? translateName(selectedCategoryObj.name)
+                      : t('none')}
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={[
+                  styles.chevronCircle,
+                  {
+                    backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                    borderColor: theme.colors.outlineVariant,
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="chevron-forward"
+                  size={14}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </View>
+            </TouchableOpacity>
           </View>
 
+          {/* Color Selector */}
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: theme.colors.outline }]}>
               {t('color') || 'BUDGET THEME COLOR'}
@@ -271,6 +437,108 @@ export const AddBudgetScreen = () => {
       </ScrollView>
 
       <BannerAdComponent />
+
+      {/* Category Bottom Sheet */}
+      <BottomSheet
+        visible={categorySheetOpen}
+        onClose={() => setCategorySheetOpen(false)}
+        title={t('categories') || 'Select Category'}
+      >
+        <View style={styles.modalGrid}>
+          {/* None Option */}
+          <TouchableOpacity
+            style={[
+              styles.modalGridItem,
+              !selectedCategoryId && {
+                backgroundColor: theme.dark
+                  ? addAlpha(theme.colors.outline, 0.12)
+                  : addAlpha(theme.colors.outline, 0.06),
+              },
+            ]}
+            onPress={() => {
+              setSelectedCategoryId(null);
+              setCategorySheetOpen(false);
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: !selectedCategoryId }}
+            accessibilityLabel={t('none')}
+          >
+            <View
+              style={[
+                styles.modalGridIcon,
+                { backgroundColor: theme.colors.outline },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="slash-forward"
+                size={24}
+                color="#fff"
+              />
+            </View>
+            <Text
+              style={{
+                fontFamily: !selectedCategoryId
+                  ? 'Inter-Medium'
+                  : 'Inter-Regular',
+                fontWeight: !selectedCategoryId ? '500' : '400',
+                color: theme.colors.onSurface,
+                marginTop: 6,
+                textAlign: 'center',
+                fontSize: fontScale(10),
+              }}
+            >
+              {t('none')}
+            </Text>
+          </TouchableOpacity>
+
+          {categories.map((cat) => {
+            const isSelected = selectedCategoryId === cat.id;
+            const catColor = cat.color || theme.colors.primary;
+            return (
+              <TouchableOpacity
+                key={cat.id}
+                style={[
+                  styles.modalGridItem,
+                  isSelected && {
+                    backgroundColor: theme.dark
+                      ? addAlpha(catColor, 0.12)
+                      : addAlpha(catColor, 0.06),
+                  },
+                ]}
+                onPress={() => {
+                  setSelectedCategoryId(cat.id);
+                  setCategorySheetOpen(false);
+                }}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityLabel={translateName(cat.name)}
+              >
+                <View
+                  style={[styles.modalGridIcon, { backgroundColor: catColor }]}
+                >
+                  <MaterialCommunityIcons
+                    name={getValidCategoryIcon(cat.icon) as any}
+                    size={24}
+                    color="#fff"
+                  />
+                </View>
+                <Text
+                  style={{
+                    fontFamily: isSelected ? 'Inter-Medium' : 'Inter-Regular',
+                    fontWeight: isSelected ? '500' : '400',
+                    color: theme.colors.onSurface,
+                    marginTop: 6,
+                    textAlign: 'center',
+                    fontSize: fontScale(10),
+                  }}
+                >
+                  {translateName(cat.name)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </BottomSheet>
 
       <BottomSheet
         visible={menuOpen}
@@ -329,21 +597,6 @@ const defaultStyles = (theme: AppTheme) =>
       fontWeight: '500',
       backgroundColor: 'transparent',
     },
-    chipsRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8,
-      paddingLeft: 4,
-    },
-    chip: {
-      borderRadius: 12,
-      margin: 0,
-    },
-    chipText: {
-      fontSize: fontScale(12),
-      fontFamily: 'Inter-Regular',
-      fontWeight: '400',
-    },
     colorPaletteRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',
@@ -388,5 +641,129 @@ const defaultStyles = (theme: AppTheme) =>
       fontSize: fontScale(16),
       fontFamily: 'Inter-Medium',
       fontWeight: '500',
+    },
+
+    // Amount Hero Card styles
+    amountHeroCard: {
+      borderRadius: 20,
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      alignItems: 'center',
+      marginBottom: 16,
+      elevation: 0,
+    },
+    amountLabel: {
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      letterSpacing: 1.5,
+      fontSize: 10,
+      marginBottom: 8,
+    },
+    amountInputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative',
+      width: '100%',
+      paddingHorizontal: 12,
+    },
+    currencyBadge: {
+      width: 56,
+      height: 32,
+      borderRadius: 14,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    currencyText: {
+      fontFamily: 'Inter-Medium',
+      fontSize: 14,
+      fontWeight: '500',
+    },
+    amountInputWrapper: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    spacer: {
+      width: 56,
+    },
+    amountTextInputCentered: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 36,
+      fontWeight: '600',
+      padding: 0,
+      letterSpacing: -0.5,
+    },
+    amountClearBtn: {
+      padding: 4,
+      position: 'absolute',
+      right: 12,
+    },
+
+    // Selector Card styles
+    selectorCard: {
+      borderRadius: 16,
+      padding: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      elevation: 0,
+    },
+    selectorAccentBar: {
+      position: 'absolute',
+      left: 0,
+      top: 16,
+      bottom: 16,
+      width: 4,
+      borderTopRightRadius: 4,
+      borderBottomRightRadius: 4,
+    },
+    selectorCardLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    selectorIconBg: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    selectorCardTextCol: {
+      marginLeft: 12,
+      flex: 1,
+      justifyContent: 'center',
+    },
+    chevronCircle: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      borderWidth: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+
+    // Bottom Sheet Grid styles
+    modalGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 12,
+      paddingVertical: 8,
+    },
+    modalGridItem: {
+      width: '30%',
+      aspectRatio: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 16,
+      padding: 8,
+    },
+    modalGridIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 0,
     },
   });

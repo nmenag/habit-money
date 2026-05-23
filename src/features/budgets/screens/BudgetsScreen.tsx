@@ -1,31 +1,24 @@
 import { router } from 'expo-router';
 import React, { useMemo } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
 } from 'react-native-draggable-flatlist';
-import {
-  Card,
-  FAB,
-  IconButton,
-  ProgressBar,
-  Text,
-  useTheme,
-} from 'react-native-paper';
+import { Card, FAB, ProgressBar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
 
 import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
 import { Budget, useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme, spacing } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
+import { getValidCategoryIcon } from '../../../constants';
 
 export const BudgetsScreen = () => {
   const {
     budgets,
-    deleteBudget,
     transactions,
     formatCurrency,
     categories,
@@ -103,32 +96,6 @@ export const BudgetsScreen = () => {
     }
   }, [averageProgress, budgets.length, theme, t]);
 
-  const handleDelete = (budget: Budget) => {
-    const isUsed = transactions.some((t) => t.budgetId === budget.id);
-    if (isUsed) {
-      Alert.alert(t('cannotDelete'), t('budgetUsedError'));
-      return;
-    }
-
-    const category = categories.find((c) => c.id === budget.categoryId);
-    const budgetDisplayName = category?.name
-      ? translateName(category.name)
-      : t('budgets');
-
-    Alert.alert(
-      t('deleteBudget'),
-      `${t('confirmDelete')} ${budgetDisplayName}?`,
-      [
-        { text: t('cancel'), style: 'cancel' },
-        {
-          text: t('delete'),
-          style: 'destructive',
-          onPress: () => deleteBudget(budget.id),
-        },
-      ],
-    );
-  };
-
   const renderItem = ({ item, drag, isActive }: RenderItemParams<Budget>) => {
     const spent = transactions
       .filter((t) => {
@@ -153,7 +120,7 @@ export const BudgetsScreen = () => {
               {
                 borderColor: isActive
                   ? theme.colors.primary
-                  : theme.colors.outline,
+                  : theme.colors.outlineVariant,
                 backgroundColor: theme.colors.surface,
               },
             ]}
@@ -164,49 +131,56 @@ export const BudgetsScreen = () => {
               })
             }
             onLongPress={drag}
+            delayLongPress={180}
             disabled={isActive}
             mode="contained"
           >
             <Card.Content style={styles.cardContent}>
               <View style={styles.cardHeader}>
-                <View style={styles.textContainer}>
-                  <View style={styles.titleRow}>
-                    <View
-                      style={[
-                        styles.iconCircle,
-                        {
-                          backgroundColor: `${categoryColor}12`,
-                          borderColor: `${categoryColor}2B`,
-                        },
-                      ]}
-                    >
-                      <Ionicons
-                        name={(category?.icon || 'tag-outline') as any}
-                        size={18}
-                        color={categoryColor}
-                      />
-                    </View>
-                    <Text style={styles.name}>
-                      {category?.name
-                        ? translateName(category.name)
-                        : t('budgets')}
-                    </Text>
+                {budgets.length > 1 && (
+                  <View style={styles.dragHandle} pointerEvents="none">
+                    <Ionicons
+                      name="reorder-two-outline"
+                      size={18}
+                      color={theme.colors.outline}
+                      style={{ opacity: 0.35 }}
+                    />
                   </View>
-                  <Text style={styles.limitText}>
+                )}
+
+                <View
+                  style={[
+                    styles.iconCircle,
+                    {
+                      backgroundColor: `${categoryColor}12`,
+                      borderColor: `${categoryColor}2B`,
+                      marginRight: 12,
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name={getValidCategoryIcon(category?.icon) as any}
+                    size={18}
+                    color={categoryColor}
+                  />
+                </View>
+
+                <View style={styles.textContainer}>
+                  <Text style={styles.name} numberOfLines={1}>
+                    {category?.name
+                      ? translateName(category.name)
+                      : t('budgets')}
+                  </Text>
+                </View>
+
+                <View style={styles.limitContainer}>
+                  <Text style={styles.limitText} numberOfLines={1}>
                     {formatCurrency(spent)}{' '}
                     <Text style={styles.limitTarget}>
                       / {formatCurrency(item.amount)}
                     </Text>
                   </Text>
                 </View>
-                <IconButton
-                  icon="trash-can-outline"
-                  iconColor={theme.colors.onSurfaceVariant}
-                  size={20}
-                  accessibilityLabel={t('delete')}
-                  style={styles.deleteBtn}
-                  onPress={() => handleDelete(item)}
-                />
               </View>
 
               <View style={styles.progressContainer}>
@@ -243,6 +217,98 @@ export const BudgetsScreen = () => {
     );
   };
 
+  const HeaderComponent = useMemo(() => {
+    if (budgets.length === 0) return null;
+
+    return (
+      <Animated.View
+        entering={FadeIn.duration(400)}
+        style={styles.dashboardHeader}
+      >
+        <Card style={styles.statCard} mode="contained">
+          <Card.Content style={styles.statCardContent}>
+            <View style={styles.overviewTextRow}>
+              <View>
+                <Text style={styles.overviewLabel}>
+                  {t('aggregateSpending')}
+                </Text>
+                <Text style={styles.overviewValue}>
+                  {formatCurrency(totalSpent)}
+                  <Text style={styles.overviewBudgetGoal}>
+                    {' '}
+                    / {formatCurrency(totalBudgeted)}
+                  </Text>
+                </Text>
+              </View>
+              {allWithinLimit && (
+                <View style={styles.streakBadge}>
+                  <Text style={styles.streakBadgeText}>
+                    {t('streakActive')}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <ProgressBar
+              progress={averageProgress}
+              color={theme.colors.primary}
+              style={styles.summaryBar}
+            />
+
+            <View style={styles.summaryFooterRow}>
+              <Text style={styles.summaryFooterText}>
+                {t('overallBudgetDepletion')}
+              </Text>
+              <Text style={styles.summaryFooterPercent}>
+                {Math.round(averageProgress * 100)}%
+              </Text>
+            </View>
+          </Card.Content>
+        </Card>
+
+        {smartRecommendation && (
+          <View
+            style={[
+              styles.recommendationBox,
+              {
+                backgroundColor: smartRecommendation.bgColor,
+                borderColor: `${smartRecommendation.color}2B`,
+              },
+            ]}
+          >
+            <Ionicons
+              name="sparkles-outline"
+              size={16}
+              color={smartRecommendation.color}
+              style={{ marginRight: 10 }}
+            />
+            <Text
+              style={[
+                styles.recommendationText,
+                { color: theme.colors.onSurface },
+              ]}
+            >
+              {smartRecommendation.text}
+            </Text>
+          </View>
+        )}
+
+        <Text style={styles.sectionTitle}>{t('budgetAllocations')}</Text>
+      </Animated.View>
+    );
+  }, [
+    budgets.length,
+    totalSpent,
+    totalBudgeted,
+    allWithinLimit,
+    averageProgress,
+    smartRecommendation,
+    theme,
+    t,
+    formatCurrency,
+    styles,
+  ]);
+
   return (
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
@@ -256,82 +322,7 @@ export const BudgetsScreen = () => {
           styles.listContent,
           { paddingBottom: insets.bottom + 140 },
         ]}
-        ListHeaderComponent={
-          budgets.length > 0 ? (
-            <Animated.View
-              entering={FadeIn.duration(400)}
-              style={styles.dashboardHeader}
-            >
-              <View style={styles.statCard}>
-                <View style={styles.overviewTextRow}>
-                  <View>
-                    <Text style={styles.overviewLabel}>
-                      {t('aggregateSpending')}
-                    </Text>
-                    <Text style={styles.overviewValue}>
-                      {formatCurrency(totalSpent)}
-                      <Text style={styles.overviewBudgetGoal}>
-                        {' '}
-                        / {formatCurrency(totalBudgeted)}
-                      </Text>
-                    </Text>
-                  </View>
-                  {allWithinLimit && (
-                    <View style={styles.streakBadge}>
-                      <Text style={styles.streakBadgeText}>
-                        {t('streakActive')}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-
-                <ProgressBar
-                  progress={averageProgress}
-                  color={theme.colors.primary}
-                  style={styles.summaryBar}
-                />
-
-                <View style={styles.summaryFooterRow}>
-                  <Text style={styles.summaryFooterText}>
-                    {t('overallBudgetDepletion')}
-                  </Text>
-                  <Text style={styles.summaryFooterPercent}>
-                    {Math.round(averageProgress * 100)}%
-                  </Text>
-                </View>
-              </View>
-
-              {smartRecommendation && (
-                <View
-                  style={[
-                    styles.recommendationBox,
-                    {
-                      backgroundColor: smartRecommendation.bgColor,
-                      borderColor: `${smartRecommendation.color}2B`,
-                    },
-                  ]}
-                >
-                  <Ionicons
-                    name="sparkles-outline"
-                    size={16}
-                    color={smartRecommendation.color}
-                    style={{ marginRight: 10 }}
-                  />
-                  <Text
-                    style={[
-                      styles.recommendationText,
-                      { color: theme.colors.onSurface },
-                    ]}
-                  >
-                    {smartRecommendation.text}
-                  </Text>
-                </View>
-              )}
-
-              <Text style={styles.sectionTitle}>{t('budgetAllocations')}</Text>
-            </Animated.View>
-          ) : null
-        }
+        ListHeaderComponent={HeaderComponent}
         ListEmptyComponent={
           <Animated.View entering={FadeIn.duration(400)} style={styles.empty}>
             <View
@@ -384,20 +375,23 @@ const defaultStyles = (theme: AppTheme) =>
       flex: 1,
     },
     listContent: {
+      padding: 16,
       paddingTop: spacing.xs,
     },
     dashboardHeader: {
-      paddingHorizontal: 16,
       marginTop: 16,
       marginBottom: 8,
     },
     statCard: {
-      borderWidth: 1,
-      borderColor: theme.colors.outline,
       borderRadius: theme.roundness || 12,
       backgroundColor: theme.colors.surface,
-      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      elevation: 0,
       marginBottom: 12,
+    },
+    statCardContent: {
+      padding: 16,
     },
     overviewTextRow: {
       flexDirection: 'row',
@@ -489,7 +483,6 @@ const defaultStyles = (theme: AppTheme) =>
     },
     card: {
       marginBottom: 12,
-      marginHorizontal: 16,
       borderRadius: theme.roundness || 12,
       borderWidth: 1,
       overflow: 'hidden',
@@ -499,17 +492,23 @@ const defaultStyles = (theme: AppTheme) =>
     },
     cardHeader: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
+      alignItems: 'center',
       marginBottom: 12,
     },
-    textContainer: {
-      flex: 1,
-    },
-    titleRow: {
-      flexDirection: 'row',
+    dragHandle: {
+      marginRight: 6,
+      justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 6,
+    },
+    textContainer: {
+      flex: 1.2,
+      justifyContent: 'center',
+    },
+    limitContainer: {
+      alignItems: 'flex-end',
+      justifyContent: 'center',
+      flex: 1,
+      marginRight: 4,
     },
     iconCircle: {
       width: 32,
@@ -538,11 +537,6 @@ const defaultStyles = (theme: AppTheme) =>
       fontFamily: 'Inter-Regular',
       fontWeight: '400',
       color: theme.colors.onSurfaceVariant,
-    },
-    deleteBtn: {
-      margin: 0,
-      marginRight: -8,
-      marginTop: -4,
     },
     progressContainer: {
       marginBottom: 8,

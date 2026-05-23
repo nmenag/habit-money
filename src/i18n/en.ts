@@ -444,4 +444,8 @@ export const en = {
   smartAdviceAchievedAll:
     '🎉 Congratulations! You have fully achieved all of your set financial targets. Consider defining a new long-term investment milestone.',
   holdAndDragToReorder: 'Hold & drag cards to adjust their priority order',
+  budgetExceededTip:
+    '💡 Budget Exceeded: Reducing weekly spending here by {{weeklySaving}} will help re-align your cash flow and secure liquidity.',
+  smartSavingsTip:
+    '💡 Smart tip: Scaling down spending in this category by just {{dailySaving}} per day will unlock {{monthlySaving}} per month to accelerate your active Savings Goals.',
 };

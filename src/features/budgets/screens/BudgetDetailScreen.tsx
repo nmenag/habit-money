@@ -1,8 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
+import { format, parseISO } from 'date-fns';
+import { enUS, es } from 'date-fns/locale';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Card, Divider, ProgressBar, Text, useTheme } from 'react-native-paper';
+import {
+  Card,
+  IconButton,
+  ProgressBar,
+  Text,
+  useTheme,
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 
@@ -16,7 +24,7 @@ export const BudgetDetailScreen = () => {
   const params = useLocalSearchParams<{ budgetId: string }>();
   const { budgetId } = params;
   const { budgets, transactions, categories, formatCurrency } = useStore();
-  const { t, translateName } = useTranslation();
+  const { t, translateName, language } = useTranslation();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
@@ -34,6 +42,32 @@ export const BudgetDetailScreen = () => {
       .sort((a, b) => b.date.localeCompare(a.date));
   }, [transactions, budgetId, budget?.categoryId]);
 
+  const groupedTransactions = useMemo(() => {
+    const groups: { title: string; data: typeof budgetTransactions }[] = [];
+    const dateLocale = language === 'es' ? es : enUS;
+
+    budgetTransactions.forEach((tx) => {
+      const txDayStr = tx.date.substring(0, 10);
+      let groupTitle = '';
+      try {
+        groupTitle = format(parseISO(txDayStr), 'EEEE, MMMM d', {
+          locale: dateLocale,
+        });
+      } catch {
+        groupTitle = txDayStr;
+      }
+
+      const existingGroup = groups.find((g) => g.title === groupTitle);
+      if (existingGroup) {
+        existingGroup.data.push(tx);
+      } else {
+        groups.push({ title: groupTitle, data: [tx] });
+      }
+    });
+
+    return groups;
+  }, [budgetTransactions, language]);
+
   // Actionable savings advice
   const savingsInsight = useMemo(() => {
     if (!budget) return '';
@@ -43,11 +77,16 @@ export const BudgetDetailScreen = () => {
     const isOverLimitVal = spentVal > budget.amount;
 
     if (isOverLimitVal) {
-      return `💡 Budget Exceeded: Reducing weekly spending here by ${formatCurrency(dailySaving * 7)} will help re-align your cash flow and secure liquidity.`;
+      return t('budgetExceededTip', {
+        weeklySaving: formatCurrency(dailySaving * 7),
+      });
     } else {
-      return `💡 Smart tip: Scaling down spending in this category by just ${formatCurrency(dailySaving)} per day will unlock ${formatCurrency(monthlySaving)} per month to accelerate your active Savings Goals.`;
+      return t('smartSavingsTip', {
+        dailySaving: formatCurrency(dailySaving),
+        monthlySaving: formatCurrency(monthlySaving),
+      });
     }
-  }, [budget, budgetTransactions, formatCurrency]);
+  }, [budget, budgetTransactions, formatCurrency, t]);
 
   if (!budget) {
     return (
@@ -73,53 +112,61 @@ export const BudgetDetailScreen = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: insets.bottom + 100,
+          paddingTop: Math.max(16, insets.top),
+          paddingBottom: insets.bottom + 200,
         }}
       >
         <Animated.View entering={FadeIn.duration(300)}>
-          <Card style={styles.headerCard} mode="contained">
-            <Card.Content style={styles.headerContent}>
-              <View
-                style={[
-                  styles.iconCircle,
-                  {
-                    backgroundColor: `${categoryColor}12`,
-                    borderColor: `${categoryColor}2B`,
-                  },
-                ]}
-              >
-                <Ionicons
-                  name={(category?.icon || 'tag-outline') as any}
-                  size={24}
-                  color={categoryColor}
-                />
+          <Card
+            style={[
+              styles.creditCard,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+            mode="contained"
+          >
+            <Card.Content style={styles.creditCardContent}>
+              <View style={styles.cardMidRow}>
+                <Text
+                  style={[
+                    styles.cardBalanceLabel,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {t('aggregateSpending').toUpperCase()}
+                </Text>
+                <Text
+                  style={[
+                    styles.cardBalance,
+                    {
+                      color: isOverLimit
+                        ? theme.colors.error
+                        : theme.colors.onSurface,
+                    },
+                  ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {formatCurrency(spent)}
+                  <Text style={styles.cardGoalText}>
+                    {' '}
+                    / {formatCurrency(budget.amount)}
+                  </Text>
+                </Text>
               </View>
 
-              <Text style={styles.budgetName}>
-                {category?.name ? translateName(category.name) : t('budgets')}
-              </Text>
-
-              <View style={styles.progressSection}>
-                <View style={styles.headerRow}>
-                  <Text style={styles.amountText} numberOfLines={1}>
-                    {formatCurrency(spent)}
-                    <Text style={styles.amountTarget}>
-                      {' '}
-                      / {formatCurrency(budget.amount)}
-                    </Text>
-                  </Text>
-                </View>
-
+              <View style={styles.progressContainer}>
                 <ProgressBar
                   progress={progress}
                   color={isOverLimit ? theme.colors.error : categoryColor}
                   style={styles.progressBar}
                 />
-
-                <View style={styles.headerRow}>
-                  <Text style={styles.remainingText} numberOfLines={1}>
+                <View style={styles.progressInfoRow}>
+                  <Text style={styles.remainingText}>
                     {isOverLimit
-                      ? t('overLimit' as any) || 'Budget Overspent!'
+                      ? t('overLimit' as any) || 'Over limit'
                       : `${t('remainingAmount')}: ${formatCurrency(remaining)}`}
                   </Text>
                   <Text
@@ -137,117 +184,190 @@ export const BudgetDetailScreen = () => {
                 </View>
               </View>
 
-              <View style={styles.headerActions}>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  style={[
-                    styles.actionBtn,
-                    { borderColor: theme.colors.outline },
-                  ]}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/add-budget',
-                      params: { budget: JSON.stringify(budget) },
-                    })
-                  }
-                >
-                  <Ionicons
-                    name="pencil-outline"
+              <View style={styles.cardBottomRow}>
+                <View style={styles.cardInfoCol}>
+                  <Text
+                    style={[
+                      styles.cardHolderLabel,
+                      { color: theme.colors.outline },
+                    ]}
+                  >
+                    {t('categoryName').toUpperCase()}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.cardHolderName,
+                      { color: theme.colors.onSurface },
+                    ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                  >
+                    {category?.name
+                      ? translateName(category.name)
+                      : t('budgets')}
+                  </Text>
+                </View>
+                <View style={styles.headerActions}>
+                  <IconButton
+                    icon="pencil-outline"
+                    mode="contained"
+                    containerColor={theme.colors.elevation.level1}
+                    iconColor={theme.colors.onSurface}
                     size={16}
-                    color={theme.colors.onSurface}
-                    style={{ marginRight: 6 }}
+                    accessibilityLabel={t('edit')}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/add-budget',
+                        params: { budget: JSON.stringify(budget) },
+                      })
+                    }
+                    style={styles.actionIconBtn}
                   />
-                  <Text style={styles.actionBtnLabel}>{t('edit')}</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  style={[
-                    styles.actionBtnPrimary,
-                    { backgroundColor: theme.colors.primary },
-                  ]}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/add-transaction',
-                      params: { budgetId: budget.id },
-                    })
-                  }
-                >
-                  <Ionicons
-                    name="add"
+                  <IconButton
+                    icon="plus"
+                    mode="contained"
+                    containerColor={theme.colors.primary}
+                    iconColor="#fff"
                     size={16}
-                    color="#fff"
-                    style={{ marginRight: 4 }}
+                    accessibilityLabel="Add Transaction"
+                    onPress={() =>
+                      router.push({
+                        pathname: '/add-transaction',
+                        params: { budgetId: budget.id },
+                      })
+                    }
+                    style={styles.actionIconBtn}
                   />
-                  <Text style={styles.actionBtnLabelPrimary}>Add Expense</Text>
-                </TouchableOpacity>
+                </View>
               </View>
             </Card.Content>
           </Card>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(100).duration(300)}>
-          <View style={styles.insightBox}>
-            <Ionicons
-              name="bulb-outline"
-              size={18}
-              color={isOverLimit ? theme.colors.error : theme.colors.primary}
-              style={{ marginRight: 12, marginTop: 2 }}
-            />
-            <Text style={styles.insightText}>{savingsInsight}</Text>
+          <View
+            style={[
+              styles.insightCapsule,
+              {
+                backgroundColor: isOverLimit
+                  ? theme.dark
+                    ? '#341F1C'
+                    : '#FBECE9'
+                  : theme.dark
+                    ? '#052E16'
+                    : '#DCFCE7',
+                borderColor: isOverLimit
+                  ? theme.dark
+                    ? '#991B1B2B'
+                    : '#FCA5A5'
+                  : theme.dark
+                    ? '#065F462B'
+                    : '#A7F3D0',
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.insightIconBox,
+                {
+                  backgroundColor: isOverLimit
+                    ? '#EF4444'
+                    : theme.colors.primary,
+                },
+              ]}
+            >
+              <Ionicons name="bulb-outline" size={14} color="#fff" />
+            </View>
+            <View style={styles.insightTextCol}>
+              <Text
+                style={[
+                  styles.insightLabel,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {isOverLimit
+                  ? t('insightBalanceNegativeTitle').toUpperCase()
+                  : t('insightBalancePositiveTitle').toUpperCase()}
+              </Text>
+              <Text style={styles.insightDesc}>{savingsInsight}</Text>
+            </View>
           </View>
         </Animated.View>
 
         <Animated.View
           entering={FadeInUp.delay(200).duration(300)}
-          style={styles.sectionTransactions}
+          style={styles.transactionsSection}
         >
-          <Text style={styles.sectionTitleTransactions}>
+          <Text
+            style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+          >
             {t('recentTransactions')}
           </Text>
 
-          <View style={styles.transactionsCard}>
-            {budgetTransactions.length > 0 ? (
-              budgetTransactions.map((tx, index) => {
-                const txCategory = categories.find(
-                  (c) => c.id === tx.categoryId,
-                );
-                return (
-                  <View key={tx.id}>
-                    <TouchableOpacity
-                      activeOpacity={0.7}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/add-transaction',
-                          params: {
-                            transaction: JSON.stringify(tx),
-                            isEditing: 'true',
-                          },
-                        })
-                      }
-                    >
-                      <TransactionItem transaction={tx} category={txCategory} />
-                    </TouchableOpacity>
-                    {index < budgetTransactions.length - 1 && (
-                      <Divider style={styles.divider} />
-                    )}
-                  </View>
-                );
-              })
-            ) : (
-              <View style={styles.emptyTransactions}>
-                <Ionicons
-                  name="receipt-outline"
-                  size={40}
-                  color={theme.colors.outlineVariant}
-                />
-                <Text style={styles.emptyTransactionsText}>
-                  {t('noTransactions') ||
-                    'No transactions tracked inside this budget yet.'}
-                </Text>
+          {groupedTransactions.length > 0 ? (
+            groupedTransactions.map((group) => (
+              <View key={group.title} style={styles.dateGroup}>
+                <View
+                  style={[
+                    styles.sectionHeader,
+                    { backgroundColor: theme.colors.background, height: 32 },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.sectionHeaderText,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {group.title}
+                  </Text>
+                </View>
+                <View style={styles.transactionsList}>
+                  {group.data.map((tx) => {
+                    const txCategory = categories.find(
+                      (c) => c.id === tx.categoryId,
+                    );
+                    return (
+                      <TouchableOpacity
+                        key={tx.id}
+                        activeOpacity={0.7}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/add-transaction',
+                            params: {
+                              transaction: JSON.stringify(tx),
+                              isEditing: 'true',
+                            },
+                          })
+                        }
+                      >
+                        <TransactionItem
+                          transaction={tx}
+                          category={txCategory}
+                        />
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               </View>
-            )}
-          </View>
+            ))
+          ) : (
+            <View style={styles.transactionsList}>
+              <Card style={styles.transactionsCard} mode="contained">
+                <Card.Content style={styles.emptyTransactions}>
+                  <Ionicons
+                    name="receipt-outline"
+                    size={40}
+                    color={theme.colors.outlineVariant}
+                  />
+                  <Text style={styles.emptyTransactionsText}>
+                    {t('noTransactions') ||
+                      'No transactions tracked inside this budget yet.'}
+                  </Text>
+                </Card.Content>
+              </Card>
+            </View>
+          )}
         </Animated.View>
       </ScrollView>
       <BannerAdComponent />
@@ -260,60 +380,52 @@ const defaultStyles = (theme: AppTheme) =>
     container: {
       flex: 1,
     },
-    headerCard: {
-      margin: 16,
+    creditCard: {
+      marginHorizontal: 16,
       marginTop: 20,
       borderRadius: theme.roundness || 12,
       borderWidth: 1,
-      borderColor: theme.colors.outline,
-      backgroundColor: theme.colors.surface,
+      elevation: 0,
+    },
+    creditCardContent: {
       paddingVertical: 16,
+      paddingHorizontal: 16,
     },
-    headerContent: {
-      alignItems: 'center',
+    cardMidRow: {
+      marginBottom: 20,
     },
-    iconCircle: {
-      width: 48,
-      height: 48,
-      borderRadius: 14,
-      borderWidth: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    budgetName: {
-      fontSize: fontScale(18),
+    cardBalanceLabel: {
+      fontSize: fontScale(10),
       fontFamily: 'Inter-Medium',
       fontWeight: '500',
-      color: theme.colors.onSurface,
-      marginBottom: 16,
+      textTransform: 'uppercase',
+      letterSpacing: 1.5,
+      marginBottom: 4,
     },
-    progressSection: {
-      width: '100%',
-      paddingHorizontal: 12,
-    },
-    headerRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 6,
-    },
-    amountText: {
-      fontSize: fontScale(22),
+    cardBalance: {
+      fontSize: fontScale(24),
       fontFamily: 'Inter-SemiBold',
       fontWeight: '600',
-      color: theme.colors.onSurface,
+      letterSpacing: -0.2,
     },
-    amountTarget: {
+    cardGoalText: {
       fontSize: fontScale(14),
       fontFamily: 'Inter-Regular',
       fontWeight: '400',
       color: theme.colors.onSurfaceVariant,
     },
+    progressContainer: {
+      marginBottom: 20,
+    },
     progressBar: {
       height: 4,
       borderRadius: 2,
       marginBottom: 8,
+    },
+    progressInfoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
     },
     remainingText: {
       fontSize: fontScale(12),
@@ -327,77 +439,109 @@ const defaultStyles = (theme: AppTheme) =>
       fontFamily: 'Inter-Medium',
       fontWeight: '500',
     },
-    headerActions: {
+    cardBottomRow: {
       flexDirection: 'row',
-      marginTop: 24,
+      justifyContent: 'space-between',
+      alignItems: 'flex-end',
       gap: 12,
-      width: '100%',
-      paddingHorizontal: 12,
     },
-    actionBtn: {
+    cardInfoCol: {
       flex: 1,
-      height: 40,
-      borderRadius: 10,
-      borderWidth: 1,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
+      marginRight: 8,
     },
-    actionBtnLabel: {
-      fontSize: fontScale(13),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
-      color: theme.colors.onSurface,
-    },
-    actionBtnPrimary: {
-      flex: 1.2,
-      height: 40,
-      borderRadius: 10,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    actionBtnLabelPrimary: {
-      fontSize: fontScale(13),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
-      color: '#fff',
-    },
-    insightBox: {
-      marginHorizontal: 16,
-      borderWidth: 1,
-      borderColor: theme.colors.outline,
-      borderRadius: theme.roundness || 12,
-      backgroundColor: theme.colors.surface,
-      padding: 14,
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-    },
-    insightText: {
-      flex: 1,
-      fontSize: fontScale(12),
-      fontFamily: 'Inter-Regular',
-      fontWeight: '400',
-      lineHeight: 18,
-      color: theme.colors.onSurface,
-    },
-    sectionTransactions: {
-      marginTop: 24,
-      paddingHorizontal: 16,
-    },
-    sectionTitleTransactions: {
-      fontSize: fontScale(11),
+    cardHolderLabel: {
+      fontSize: fontScale(9),
       fontFamily: 'Inter-Medium',
       fontWeight: '500',
       textTransform: 'uppercase',
       letterSpacing: 1,
-      color: theme.colors.onSurfaceVariant,
-      marginLeft: 4,
-      marginBottom: 10,
+      marginBottom: 2,
+    },
+    cardHolderName: {
+      fontSize: fontScale(14),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      letterSpacing: -0.1,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      gap: 6,
+      alignItems: 'center',
+    },
+    actionIconBtn: {
+      margin: 0,
+      borderRadius: 10,
+      width: 36,
+      height: 36,
+    },
+    insightCapsule: {
+      marginHorizontal: 16,
+      marginTop: 20,
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 12,
+      borderRadius: theme.roundness || 12,
+      borderWidth: 1,
+      gap: 10,
+    },
+    insightIconBox: {
+      width: 30,
+      height: 30,
+      borderRadius: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    insightTextCol: {
+      flex: 1,
+    },
+    insightLabel: {
+      fontSize: fontScale(9),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
+      marginBottom: 2,
+    },
+    insightDesc: {
+      fontSize: fontScale(12),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      letterSpacing: -0.2,
+      lineHeight: 16,
+      flex: 1,
+    },
+    transactionsSection: {
+      paddingHorizontal: 16,
+      marginTop: 24,
+    },
+    sectionTitle: {
+      fontSize: fontScale(14),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      marginBottom: 16,
+      paddingLeft: 4,
+    },
+    dateGroup: {
+      marginBottom: 16,
+    },
+    sectionHeader: {
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      paddingBottom: 4,
+    },
+    sectionHeaderText: {
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+    },
+    transactionsList: {
+      paddingHorizontal: 16,
     },
     transactionsCard: {
       borderWidth: 1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.outlineVariant,
       borderRadius: theme.roundness || 12,
       backgroundColor: theme.colors.surface,
       overflow: 'hidden',
@@ -414,8 +558,5 @@ const defaultStyles = (theme: AppTheme) =>
       color: theme.colors.outline,
       marginTop: 8,
       lineHeight: 16,
-    },
-    divider: {
-      backgroundColor: theme.colors.outline,
     },
   });
