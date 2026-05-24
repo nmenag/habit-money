@@ -68,10 +68,9 @@ export const BudgetDetailScreen = () => {
     return groups;
   }, [budgetTransactions, language]);
 
-  // Actionable savings advice
   const savingsInsight = useMemo(() => {
     if (!budget) return '';
-    const dailySaving = Math.round(budget.amount * 0.05); // 5% of budget limit
+    const dailySaving = Math.round(budget.amount * 0.05);
     const monthlySaving = dailySaving * 30;
     const spentVal = budgetTransactions.reduce((sum, t) => sum + t.amount, 0);
     const isOverLimitVal = spentVal > budget.amount;
@@ -92,7 +91,7 @@ export const BudgetDetailScreen = () => {
     return (
       <View style={styles.container}>
         <Text style={{ textAlign: 'center', marginTop: 40 }}>
-          {t('budgetNotFound' as any) || 'Budget not found'}
+          {t('budgetNotFound')}
         </Text>
       </View>
     );
@@ -166,7 +165,7 @@ export const BudgetDetailScreen = () => {
                 <View style={styles.progressInfoRow}>
                   <Text style={styles.remainingText}>
                     {isOverLimit
-                      ? t('overLimit' as any) || 'Over limit'
+                      ? t('overLimit')
                       : `${t('remainingAmount')}: ${formatCurrency(remaining)}`}
                   </Text>
                   <Text
@@ -361,8 +360,7 @@ export const BudgetDetailScreen = () => {
                     color={theme.colors.outlineVariant}
                   />
                   <Text style={styles.emptyTransactionsText}>
-                    {t('noTransactions') ||
-                      'No transactions tracked inside this budget yet.'}
+                    {t('noTransactions')}
                   </Text>
                 </Card.Content>
               </Card>

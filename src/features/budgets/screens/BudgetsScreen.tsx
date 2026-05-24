@@ -193,7 +193,7 @@ export const BudgetsScreen = () => {
               <View style={styles.footerRow}>
                 <Text style={styles.remainingText}>
                   {isOverLimit
-                    ? t('overLimit' as any) || 'Over limit'
+                    ? t('overLimit')
                     : `${t('remainingAmount')}: ${formatCurrency(remaining)}`}
                 </Text>
                 <Text
@@ -227,11 +227,15 @@ export const BudgetsScreen = () => {
         <Card style={styles.statCard} mode="contained">
           <Card.Content style={styles.statCardContent}>
             <View style={styles.overviewTextRow}>
-              <View>
+              <View style={{ flex: 1, marginRight: 8 }}>
                 <Text style={styles.overviewLabel}>
                   {t('aggregateSpending')}
                 </Text>
-                <Text style={styles.overviewValue}>
+                <Text
+                  style={styles.overviewValue}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
                   {formatCurrency(totalSpent)}
                   <Text style={styles.overviewBudgetGoal}>
                     {' '}
@@ -241,7 +245,7 @@ export const BudgetsScreen = () => {
               </View>
               {allWithinLimit && (
                 <View style={styles.streakBadge}>
-                  <Text style={styles.streakBadgeText}>
+                  <Text style={styles.streakBadgeText} numberOfLines={1}>
                     {t('streakActive')}
                   </Text>
                 </View>
