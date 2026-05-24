@@ -259,11 +259,15 @@ export const GoalsScreen = () => {
             >
               <View style={styles.statCard}>
                 <View style={styles.overviewTextRow}>
-                  <View>
+                  <View style={{ flex: 1, marginRight: 8 }}>
                     <Text style={styles.overviewLabel}>
                       {t('savingsCapital')}
                     </Text>
-                    <Text style={styles.overviewValue}>
+                    <Text
+                      style={styles.overviewValue}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
                       {formatCurrency(totalSaved)}
                       <Text style={styles.overviewTargetGoal}>
                         {' '}
@@ -273,7 +277,7 @@ export const GoalsScreen = () => {
                   </View>
                   {completedCount > 0 && (
                     <View style={styles.completedBadge}>
-                      <Text style={styles.completedBadgeText}>
+                      <Text style={styles.completedBadgeText} numberOfLines={1}>
                         {t('reachedGoalCount', { count: completedCount })}
                       </Text>
                     </View>
