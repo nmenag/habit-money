@@ -14,6 +14,8 @@ export const COLORS = [
   '#ff5722',
   '#795548',
   '#607d8b',
+  '#1e293b',
+  '#18181b',
 ];
 
 export const CURRENCIES = [
@@ -38,12 +40,6 @@ export const CURRENCIES = [
   { code: 'PYG', name: 'Paraguayan Guaraní', symbol: '₲', tKey: 'currPYG' },
   { code: 'UYU', name: 'Uruguayan Peso', symbol: '$U', tKey: 'currUYU' },
   { code: 'VES', name: 'Venezuelan Bolívar', symbol: 'Bs.S', tKey: 'currVES' },
-  {
-    code: 'XAF',
-    name: 'Central African CFA Franc',
-    symbol: 'FCFA',
-    tKey: 'currXAF',
-  },
   { code: 'INR', name: 'Indian Rupee', symbol: '₹', tKey: 'currINR' },
   { code: 'ZAR', name: 'South African Rand', symbol: 'R', tKey: 'currZAR' },
   { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', tKey: 'currSGD' },
@@ -52,12 +48,6 @@ export const CURRENCIES = [
   { code: 'PKR', name: 'Pakistani Rupee', symbol: '₨', tKey: 'currPKR' },
   { code: 'JMD', name: 'Jamaican Dollar', symbol: 'J$', tKey: 'currJMD' },
   { code: 'BSD', name: 'Bahamian Dollar', symbol: 'B$', tKey: 'currBSD' },
-  {
-    code: 'TTD',
-    name: 'Trinidad and Tobago Dollar',
-    symbol: 'TT$',
-    tKey: 'currTTD',
-  },
   { code: 'BZD', name: 'Belize Dollar', symbol: 'BZ$', tKey: 'currBZD' },
   { code: 'BBD', name: 'Barbadian Dollar', symbol: 'Bds$', tKey: 'currBBD' },
   { code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh', tKey: 'currKES' },

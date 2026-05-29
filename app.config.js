@@ -22,12 +22,14 @@ const getAppName = () => {
 const isDev = variant === 'development';
 
 const getIcon = () => {
-  if (isDev) return './assets/images/icon-dev.png';
+  if (variant === 'development') return './assets/images/icon-dev.png';
+  if (variant === 'preview') return './assets/images/icon-preview.png';
   return './assets/images/icon.png';
 };
 
 const getAdaptiveForeground = () => {
-  if (isDev) return './assets/images/android-icon-foreground-dev.png';
+  if (variant === 'development') return './assets/images/android-icon-foreground-dev.png';
+  if (variant === 'preview') return './assets/images/android-icon-foreground-preview.png';
   return './assets/images/android-icon-foreground.png';
 };
 
