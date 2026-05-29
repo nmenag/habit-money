@@ -19,8 +19,6 @@ const getAppName = () => {
   return baseName;
 };
 
-const isDev = variant === 'development';
-
 const getIcon = () => {
   if (variant === 'development') return './assets/images/icon-dev.png';
   if (variant === 'preview') return './assets/images/icon-preview.png';
@@ -29,7 +27,6 @@ const getIcon = () => {
 
 const getAdaptiveForeground = () => {
   if (variant === 'development') return './assets/images/android-icon-foreground-dev.png';
-  if (variant === 'preview') return './assets/images/android-icon-foreground-preview.png';
   return './assets/images/android-icon-foreground.png';
 };
 
@@ -59,6 +56,7 @@ module.exports = {
       adaptiveIcon: {
         backgroundColor: '#22C55E',
         foregroundImage: getAdaptiveForeground(),
+        monochromeImage: './assets/images/android-icon-monochrome.png',
       },
       predictiveBackGestureEnabled: false,
       package: getPackageName(),
