@@ -7,7 +7,7 @@ const getAppVariant = () => {
 const variant = getAppVariant();
 
 const getPackageName = () => {
-  if (variant === 'development') return 'com.finhabit.dev';
+  if (variant === 'development') return 'com.habitmoney.dev';
   if (variant === 'preview') return 'com.habitmoney.preview';
   return 'com.finhabit';
 };
@@ -72,7 +72,7 @@ module.exports = {
         'expo-splash-screen',
         {
           image: './assets/images/splash-icon.png',
-          imageWidth: 160,
+          imageWidth: 300,
           resizeMode: 'contain',
           backgroundColor: '#F8FAFC',
           dark: {
