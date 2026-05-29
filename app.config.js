@@ -26,7 +26,8 @@ const getIcon = () => {
 };
 
 const getAdaptiveForeground = () => {
-  if (variant === 'development') return './assets/images/android-icon-foreground-dev.png';
+  if (variant === 'development')
+    return './assets/images/android-icon-foreground-dev.png';
   return './assets/images/android-icon-foreground.png';
 };
 
@@ -71,11 +72,11 @@ module.exports = {
         'expo-splash-screen',
         {
           image: './assets/images/splash-icon.png',
-          imageWidth: 200,
+          imageWidth: 160,
           resizeMode: 'contain',
-          backgroundColor: '#F9FAFB',
+          backgroundColor: '#F8FAFC',
           dark: {
-            backgroundColor: '#0B0F0C',
+            backgroundColor: '#040908',
           },
         },
       ],

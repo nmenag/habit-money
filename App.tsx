@@ -20,6 +20,11 @@ import {
   registerTranslation,
 } from 'react-native-paper-dates';
 import { CombinedDarkTheme, CombinedDefaultTheme } from './src/theme/theme';
+import * as ExpoSplashScreen from 'expo-splash-screen';
+import { SplashScreen } from './src/shared/components/SplashScreen';
+
+// Keep native splash screen visible while app data loads
+ExpoSplashScreen.preventAutoHideAsync().catch(() => {});
 
 registerTranslation('en', paperDatesEn);
 registerTranslation('es', paperDatesEs);
@@ -73,29 +78,22 @@ export default function App() {
     }
   }, [dbInitialized, isLoaded, loadData]);
 
+  useEffect(() => {
+    if (dbInitialized && isLoaded) {
+      // Hide the splash screen once JS loads and DB/store are ready
+      const hideSplash = async () => {
+        try {
+          await ExpoSplashScreen.hideAsync();
+        } catch (e) {
+          // Ignore errors if splash screen has already hidden
+        }
+      };
+      hideSplash();
+    }
+  }, [dbInitialized, isLoaded]);
+
   if (!dbInitialized || !isLoaded) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: theme.colors.background,
-        }}
-      >
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-        <RNText
-          style={{
-            marginTop: 16,
-            color: theme.colors.onSurfaceVariant,
-            fontWeight: '600',
-            fontSize: 16,
-          }}
-        >
-          {t('loadingApp')}
-        </RNText>
-      </View>
-    );
+    return <SplashScreen />;
   }
 
   return (
