@@ -112,14 +112,6 @@ export const createSettingsSlice: StateCreator<
       [dateLimit],
     );
 
-    const oldestTransaction = db.getFirstSync<{ date: string }>(
-      `SELECT date FROM transactions ORDER BY date ASC LIMIT 1`,
-    );
-    const firstDate = oldestTransaction
-      ? new Date(oldestTransaction.date)
-      : null;
-    useFilterStore.getState().initDefaultFilter(firstDate);
-
     let currencySetting;
     let languageSetting;
     let premiumSetting;
