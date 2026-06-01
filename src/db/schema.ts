@@ -155,10 +155,10 @@ export const initDb = () => {
       },
       {
         id: '3',
-        name: t.catHome,
+        name: t.catShopping,
         type: 'expense',
-        icon: 'home',
-        color: '#9c27b0',
+        icon: 'cart',
+        color: '#ff4081',
       },
       {
         id: '4',
@@ -176,66 +176,88 @@ export const initDb = () => {
       },
       {
         id: '6',
-        name: t.catOther,
+        name: t.catHome,
         type: 'expense',
-        icon: 'format-list-bulleted',
-        color: '#607d8b',
+        icon: 'home',
+        color: '#9c27b0',
       },
       {
         id: '7',
-        name: t.catSalary,
-        type: 'income',
-        icon: 'cash',
-        color: '#16A34A',
-      },
-      {
-        id: '8',
-        name: t.catOtherIncome,
-        type: 'income',
-        icon: 'wallet',
-        color: '#009688',
-      },
-      {
-        id: '9',
-        name: t.catInvestments,
-        type: 'expense',
-        icon: 'chart-line',
-        color: '#3f51b5',
-      },
-      {
-        id: '10',
-        name: t.catGifts,
-        type: 'expense',
-        icon: 'gift',
-        color: '#ff4081',
-      },
-      {
-        id: '11',
         name: t.catRent,
         type: 'expense',
         icon: 'home-city',
         color: '#795548',
       },
       {
-        id: '12',
+        id: '8',
         name: t.catBills,
         type: 'expense',
         icon: 'receipt',
         color: '#ff5722',
       },
+      {
+        id: '9',
+        name: t.catEducation,
+        type: 'expense',
+        icon: 'school',
+        color: '#3f51b5',
+      },
+      {
+        id: '10',
+        name: t.catTravel,
+        type: 'expense',
+        icon: 'airplane',
+        color: '#673ab7',
+      },
+      {
+        id: '11',
+        name: t.catGifts,
+        type: 'expense',
+        icon: 'gift',
+        color: '#ffc107',
+      },
+      {
+        id: '12',
+        name: t.catSavings,
+        type: 'expense',
+        icon: 'piggy-bank',
+        color: '#4caf50',
+      },
+      {
+        id: '13',
+        name: t.catOther,
+        type: 'expense',
+        icon: 'format-list-bulleted',
+        color: '#607d8b',
+      },
+      {
+        id: '14',
+        name: t.catSalary,
+        type: 'income',
+        icon: 'cash',
+        color: '#16A34A',
+      },
+      {
+        id: '15',
+        name: t.catOtherIncome,
+        type: 'income',
+        icon: 'wallet',
+        color: '#009688',
+      },
     ];
 
     const statement = db.prepareSync(
-      'INSERT INTO categories (id, name, type, icon, color) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO categories (id, name, type, icon, color, displayOrder) VALUES (?, ?, ?, ?, ?, ?)',
     );
     try {
-      defaultCategories.forEach((cat) => {
+      defaultCategories.forEach((cat, idx) => {
         statement.executeSync([
           cat.id,
           cat.name,
           cat.type,
           cat.icon,
           cat.color,
+          idx,
         ]);
       });
     } finally {

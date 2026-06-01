@@ -62,11 +62,11 @@
         "displayOrder": 1
       },
       {
-        "id": "3",
-        "name": "home",
+        "id": "13",
+        "name": "Shopping",
         "type": "expense",
-        "icon": "home",
-        "color": "#9c27b0",
+        "icon": "cart",
+        "color": "#ff4081",
         "displayOrder": 2
       },
       {
@@ -86,44 +86,12 @@
         "displayOrder": 4
       },
       {
-        "id": "6",
-        "name": "Other",
+        "id": "3",
+        "name": "Home",
         "type": "expense",
-        "icon": "format-list-bulleted",
-        "color": "#607d8b",
+        "icon": "home",
+        "color": "#9c27b0",
         "displayOrder": 5
-      },
-      {
-        "id": "7",
-        "name": "Salary",
-        "type": "income",
-        "icon": "cash",
-        "color": "#16A34A",
-        "displayOrder": 6
-      },
-      {
-        "id": "8",
-        "name": "Other Income",
-        "type": "income",
-        "icon": "wallet",
-        "color": "#009688",
-        "displayOrder": 7
-      },
-      {
-        "id": "9",
-        "name": "Investments",
-        "type": "expense",
-        "icon": "chart-line",
-        "color": "#3f51b5",
-        "displayOrder": 8
-      },
-      {
-        "id": "10",
-        "name": "Gifts",
-        "type": "expense",
-        "icon": "gift",
-        "color": "#ff4081",
-        "displayOrder": 9
       },
       {
         "id": "11",
@@ -131,7 +99,7 @@
         "type": "expense",
         "icon": "home-city",
         "color": "#795548",
-        "displayOrder": 10
+        "displayOrder": 6
       },
       {
         "id": "12",
@@ -139,7 +107,63 @@
         "type": "expense",
         "icon": "receipt",
         "color": "#ff5722",
+        "displayOrder": 7
+      },
+      {
+        "id": "14",
+        "name": "Education",
+        "type": "expense",
+        "icon": "school",
+        "color": "#3f51b5",
+        "displayOrder": 8
+      },
+      {
+        "id": "15",
+        "name": "Travel",
+        "type": "expense",
+        "icon": "airplane",
+        "color": "#673ab7",
+        "displayOrder": 9
+      },
+      {
+        "id": "10",
+        "name": "Gifts",
+        "type": "expense",
+        "icon": "gift",
+        "color": "#ffc107",
+        "displayOrder": 10
+      },
+      {
+        "id": "9",
+        "name": "Savings",
+        "type": "expense",
+        "icon": "piggy-bank",
+        "color": "#4caf50",
         "displayOrder": 11
+      },
+      {
+        "id": "6",
+        "name": "Other",
+        "type": "expense",
+        "icon": "format-list-bulleted",
+        "color": "#607d8b",
+        "displayOrder": 12
+      },
+      {
+        "id": "7",
+        "name": "Salary",
+        "type": "income",
+        "icon": "cash",
+        "color": "#16A34A",
+        "displayOrder": 13
+      },
+      {
+        "id": "8",
+        "name": "Other Income",
+        "type": "income",
+        "icon": "wallet",
+        "color": "#009688",
+        "displayOrder": 14
       }
     ],
     "transactions": [
