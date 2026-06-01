@@ -6,6 +6,7 @@ import { Language } from '../../i18n/translations';
 import { AnalyticsManager } from '../../features/insights/services/AnalyticsManager';
 import { AnalyticsReport } from '../../features/insights/services/types';
 import { getLocalDateString } from '../../utils/dateUtils';
+import { getLast30DaysRange } from '../../utils/dateFilters';
 import { formatCurrency as formatCurrencyUtil } from '../../utils/formatters';
 import { Account, Category, Transaction } from '../types';
 import { useFilterStore } from '../useFilterStore';
@@ -59,6 +60,7 @@ export interface SettingsSlice {
   isLoaded: boolean;
   isPremiumUser: boolean;
   analyticsReport: AnalyticsReport | null;
+  dashboardReport: AnalyticsReport | null;
   notificationsEnabled: boolean;
   notificationTime: string;
 
@@ -87,6 +89,7 @@ export const createSettingsSlice: StateCreator<
   isLoaded: false,
   isPremiumUser: false,
   analyticsReport: null,
+  dashboardReport: null,
   notificationsEnabled: false,
   notificationTime: '20:00',
 
@@ -296,7 +299,11 @@ export const createSettingsSlice: StateCreator<
           language,
           selectedRange,
         );
-        set({ analyticsReport: report });
+        const dReport = await AnalyticsManager.generateFullReport(
+          language,
+          getLast30DaysRange(),
+        );
+        set({ analyticsReport: report, dashboardReport: dReport });
         analyticsDebounceTimer = null;
       } catch (error) {
         console.error('refreshAnalytics Error:', error);

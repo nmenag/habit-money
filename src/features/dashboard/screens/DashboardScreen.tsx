@@ -16,7 +16,6 @@ import {
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getValidCategoryIcon } from '../../../constants';
-import { FilterBar } from '../../transactions/components/FilterBar';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme, spacing } from '../../../theme/theme';
 import { fontScale, moderateScale } from '../../../utils/responsive';
@@ -58,25 +57,26 @@ export const DashboardScreen = React.memo(() => {
   const accounts = useStore((s) => s.accounts);
   const isLoaded = useStore((s) => s.isLoaded);
   const formatCurrency = useStore((s) => s.formatCurrency);
-  const analyticsReport = useStore((s) => s.analyticsReport);
+  const dashboardReport = useStore((s) => s.dashboardReport);
   const refreshAnalytics = useStore((s) => s.refreshAnalytics);
   const language = useStore((s) => s.language);
 
   const { t, translateName } = useTranslation();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
+
   const insets = useSafeAreaInsets();
 
   React.useEffect(() => {
-    if (!analyticsReport) {
+    if (!dashboardReport) {
       refreshAnalytics();
     }
-  }, [analyticsReport, refreshAnalytics]);
+  }, [dashboardReport, refreshAnalytics]);
 
   const financialData = useMemo(() => {
-    if (!analyticsReport) return null;
+    if (!dashboardReport) return null;
 
-    const { currentMonth } = analyticsReport;
+    const { currentMonth } = dashboardReport;
     const monthlyIncome = currentMonth.income;
     const monthlyExpenses = currentMonth.expenses;
     const monthlyAdjustments = currentMonth.adjustments;
@@ -114,9 +114,9 @@ export const DashboardScreen = React.memo(() => {
       progress,
       totalBalance,
       ratio,
-      insightMessage: analyticsReport.insights[0]?.message,
+      insightMessage: dashboardReport.insights[0]?.message,
     };
-  }, [analyticsReport, accounts, goals, transactions, budgets, categories]);
+  }, [dashboardReport, accounts, goals, transactions, budgets, categories]);
 
   const data = useMemo(() => {
     if (!financialData) return null;
@@ -162,11 +162,11 @@ export const DashboardScreen = React.memo(() => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <ScrollView contentContainerStyle={[styles.content, { paddingTop: 0 }]}>
-        <View
-          style={{ marginHorizontal: -spacing.md, marginBottom: spacing.md }}
-        >
-          <FilterBar />
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingTop: spacing.md }]}
+      >
+        <View style={styles.monthHeader}>
+          <Text style={styles.monthText}>{t('filterLast30Days' as any)}</Text>
         </View>
         <Card
           style={[
