@@ -273,6 +273,7 @@ export const en = {
   filterWeek: 'Week',
   filterMonth: 'Month',
   filterLastMonth: 'Last Mo.',
+  filterLast30Days: 'Last 30 Days',
   filterYear: 'Year',
   filterCustom: 'Custom',
   filterCustomRange: 'Custom Date Range',

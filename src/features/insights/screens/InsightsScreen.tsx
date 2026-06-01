@@ -185,12 +185,13 @@ export const InsightsScreen = () => {
 
   const rangeLabel = useMemo(() => {
     const { type, startDate, endDate } = selectedRange;
-    if (type === 'today') return t('filterToday');
-    if (type === 'week') return t('filterWeek');
-    if (type === 'month') return t('filterMonth');
-    if (type === 'lastMonth') return t('filterLastMonth');
-    if (type === 'year') return t('filterYear');
-    if (type === 'allTime') return t('filterAllTime');
+    if (type === 'today') return t('filterToday' as any);
+    if (type === 'week') return t('filterWeek' as any);
+    if (type === 'month') return t('filterMonth' as any);
+    if (type === 'lastMonth') return t('filterLastMonth' as any);
+    if (type === 'year') return t('filterYear' as any);
+    if (type === 'allTime') return t('filterAllTime' as any);
+    if (type === 'last30Days') return t('filterLast30Days' as any);
     return `${format(startDate, 'MMM d')} – ${format(endDate, 'MMM d, yyyy')}`;
   }, [selectedRange, t]);
 
@@ -721,49 +722,84 @@ export const InsightsScreen = () => {
               >
                 {t('expenseGrowthTitle')}
               </Text>
-              <Text
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                  fontFamily: 'Inter-Regular',
-                  fontWeight: '400',
-                  fontSize: 12,
-                  marginBottom: 8,
-                }}
-              >
-                {t('basedOnLastMonths')}
-              </Text>
-              {memoizedBarChart}
-              <View style={styles.growthContainer}>
-                <Text
-                  style={[
-                    styles.growthValue,
-                    {
-                      color:
-                        expenseGrowth > 0
-                          ? theme.colors.error
-                          : theme.colors.income,
-                      fontFamily: 'Inter-SemiBold',
-                      fontWeight: '600',
-                      fontSize: 22,
-                    },
-                  ]}
-                >
-                  {expenseGrowth > 0 ? '+' : ''}
-                  {expenseGrowth.toFixed(1)}%
-                </Text>
-                <Text
-                  style={[
-                    styles.subtext,
-                    {
+
+              {analyticsReport?.hasEnoughHistory ? (
+                <>
+                  <Text
+                    style={{
+                      color: theme.colors.onSurfaceVariant,
                       fontFamily: 'Inter-Regular',
                       fontWeight: '400',
                       fontSize: 12,
-                    },
-                  ]}
-                >
-                  {t('comparedToLastMonth')}
-                </Text>
-              </View>
+                      marginBottom: 8,
+                    }}
+                  >
+                    {t('basedOnLastMonths')}
+                  </Text>
+                  {memoizedBarChart}
+                  <View style={styles.growthContainer}>
+                    <Text
+                      style={[
+                        styles.growthValue,
+                        {
+                          color:
+                            expenseGrowth > 0
+                              ? theme.colors.error
+                              : theme.colors.income,
+                          fontFamily: 'Inter-SemiBold',
+                          fontWeight: '600',
+                          fontSize: 22,
+                        },
+                      ]}
+                    >
+                      {expenseGrowth > 0 ? '+' : ''}
+                      {expenseGrowth.toFixed(1)}%
+                    </Text>
+                    <Text
+                      style={[
+                        styles.subtext,
+                        {
+                          fontFamily: 'Inter-Regular',
+                          fontWeight: '400',
+                          fontSize: 12,
+                        },
+                      ]}
+                    >
+                      {t('comparedToLastMonth')}
+                    </Text>
+                  </View>
+                </>
+              ) : (
+                <View style={{ paddingVertical: 20, alignItems: 'center' }}>
+                  <Ionicons
+                    name="time-outline"
+                    size={32}
+                    color={theme.colors.outline}
+                    style={{ marginBottom: 8 }}
+                  />
+                  <Text
+                    style={{
+                      fontFamily: 'Inter-Medium',
+                      color: theme.colors.onSurfaceVariant,
+                      fontSize: 14,
+                      textAlign: 'center',
+                    }}
+                  >
+                    Not enough historical data yet.
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: 'Inter-Regular',
+                      color: theme.colors.outline,
+                      fontSize: 12,
+                      textAlign: 'center',
+                      marginTop: 4,
+                    }}
+                  >
+                    Keep tracking your finances to unlock monthly comparisons.
+                  </Text>
+                </View>
+              )}
             </Card.Content>
           </Card>
         )}

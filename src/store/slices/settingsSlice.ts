@@ -8,6 +8,7 @@ import { AnalyticsReport } from '../../features/insights/services/types';
 import { getLocalDateString } from '../../utils/dateUtils';
 import { formatCurrency as formatCurrencyUtil } from '../../utils/formatters';
 import { Account, Category, Transaction } from '../types';
+import { useFilterStore } from '../useFilterStore';
 import type { AppStore } from '../useStore';
 
 let analyticsDebounceTimer: any = null;
@@ -290,7 +291,11 @@ export const createSettingsSlice: StateCreator<
     analyticsDebounceTimer = setTimeout(async () => {
       try {
         const { language } = get();
-        const report = await AnalyticsManager.generateFullReport(language);
+        const { selectedRange } = useFilterStore.getState();
+        const report = await AnalyticsManager.generateFullReport(
+          language,
+          selectedRange,
+        );
         set({ analyticsReport: report });
         analyticsDebounceTimer = null;
       } catch (error) {

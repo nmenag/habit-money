@@ -15,9 +15,9 @@ Habit Money is a modern, high-performance personal finance tracker built with **
 - **Interactive Reordering**: Full **Drag & Drop** support for Accounts, Categories, Budgets, and Goals, utilizing robust gesture controls (`onLongPress` sort reordering) to ensure vertical list scrolling remains perfectly smooth and free from accidental drag triggers.
 - **Category & Account Localizer**: Handled complete locale integration so that editing screens, default category names (e.g. food, rent, entertainment), account types, and input placeholders dynamically translate and initialize in the active language instead of falling back to English.
 - **Visual Financial Health**:
-  - **Dynamic Dashboard**: Real-time overview of net balance and monthly cash flow.
+  - **Dynamic Dashboard**: Real-time overview of net balance and cash flow, defaulting to the Last 30 Days with dynamic timeline filtering.
   - **Premium Budget Details**: The upgraded `BudgetDetailScreen` replicates the exact high-fidelity credit-card style aggregate ledger of the Accounts detail view, complete with dynamic progress bars, target limits, color-shifting gamified savings insights capsules, and elegant date-grouped transaction aggregation.
-  - **Interactive Insights**: Smart analysis of spending growth, savings rates with a dynamic ProgressBar visualizer, frequency alerts, and accurate separation of real income from balance adjustments.
+  - **Interactive Insights**: Smart analysis of spending growth, savings rates with a dynamic ProgressBar visualizer, frequency alerts, and month-over-month comparisons that intelligently adapt to historical data availability (requires > 60 days of history).
   - **Expense Charts**: Beautiful, responsive pie and bar charts visualizing category-wise spending and month-over-month growth.
   - **Full WCAG Screen Reader Accessibility**: SVG charts, summaries, and metrics now support native `accessible={true}` and custom `accessibilityLabel` parameters for 100% VoiceOver and TalkBack screen-reader coverage.
 

@@ -101,7 +101,7 @@ We use **Zustand v5** with a **sliced store pattern** for lightweight, performan
 | `transactionsSlice` | Transaction CRUD, filtering, and totals      |
 | `settingsSlice`     | Language, currency, theme, and notifications |
 
-- **`useFilterStore`**: Dedicated store for transaction filter state (date range, type, category), keeping filter logic isolated from the main data store.
+- **`useFilterStore`**: Dedicated store for transaction filter state (date range, type, custom boundaries), defaulting to "Last 30 Days", keeping filter logic isolated from the main data store.
 
 ### 3. Data Persistence (SQLite)
 
@@ -115,7 +115,7 @@ See [DATABASE_DESIGN.md](DATABASE_DESIGN.md) for the full schema and ERD.
 
 ### 4. Service Layer (Analytics, Insights, & Notifications)
 
-- **`AnalyticsService`**: Queries SQLite directly to compute spending totals, income vs. balance-adjustment breakdowns, and category-level growth rates.
+- **`AnalyticsService`**: Queries SQLite directly to compute spending totals, income vs. balance-adjustment breakdowns, and category-level growth rates utilizing flexible `DateRange` objects.
 - **`InsightEngine`**: Wraps `AnalyticsService` to derive actionable insights (savings rate, frequency alerts, financial health score).
 - **`AnalyticsManager`**: Facade that aggregates and caches insight data for the Insights screen.
 - **`NotificationService`**: Schedules and cancels local daily/weekly reminders via `expo-notifications` to encourage consistent app usage.
