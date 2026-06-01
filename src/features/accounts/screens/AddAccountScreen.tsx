@@ -197,6 +197,7 @@ export const AddAccountScreen = () => {
               activeOutlineColor={theme.colors.primary}
               textColor={theme.colors.onSurface}
               placeholderTextColor={theme.colors.outline}
+              maxLength={40}
             />
             {name.length > 0 && !isNameValid && (
               <Text
