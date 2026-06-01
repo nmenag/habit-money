@@ -32,6 +32,9 @@ export const en = {
   language: 'Language',
   currency: 'Currency',
   exportData: 'Export Data (CSV)',
+  notEnoughDataTitle: 'Not enough historical data yet.',
+  notEnoughDataMessage:
+    'Keep tracking your finances to unlock monthly comparisons.',
   exportDataDesc: 'Download all your transactions in a CSV file.',
   changeLanguageDesc: 'Change the app language to your preference.',
   changeCurrencyDesc:

@@ -785,7 +785,7 @@ export const InsightsScreen = () => {
                       textAlign: 'center',
                     }}
                   >
-                    Not enough historical data yet.
+                    {t('notEnoughDataTitle' as any)}
                   </Text>
                   <Text
                     style={{
@@ -796,7 +796,7 @@ export const InsightsScreen = () => {
                       marginTop: 4,
                     }}
                   >
-                    Keep tracking your finances to unlock monthly comparisons.
+                    {t('notEnoughDataMessage' as any)}
                   </Text>
                 </View>
               )}

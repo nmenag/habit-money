@@ -32,6 +32,9 @@ export const es = {
   language: 'Idioma',
   currency: 'Moneda',
   exportData: 'Exportar Datos (CSV)',
+  notEnoughDataTitle: 'Aún no hay suficientes datos históricos.',
+  notEnoughDataMessage:
+    'Sigue registrando tus finanzas para desbloquear comparaciones mensuales.',
   exportDataDesc: 'Descarga todas tus transacciones en un archivo CSV.',
   changeLanguageDesc: 'Cambia el idioma de la aplicación a tu preferencia.',
   changeCurrencyDesc:
