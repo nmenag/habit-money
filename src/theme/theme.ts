@@ -17,8 +17,8 @@ const palette = {
     200: '#BBF7D0',
     300: '#86EFAC',
     400: '#4ADE80',
-    500: '#22C55E', // Primary
-    600: '#16A34A', // Income
+    500: '#22C55E',
+    600: '#16A34A',
     700: '#15803D',
     800: '#166534',
     900: '#14532D',
@@ -26,7 +26,7 @@ const palette = {
   },
   emerald: {
     900: '#064E3B',
-    950: '#065F46', // Dark Background
+    950: '#065F46',
   },
   slate: {
     50: '#F8FAFC',
@@ -59,16 +59,16 @@ export const spacing = {
 };
 
 export const chartColors = [
-  '#22C55E', // primary
-  '#3B82F6', // blue
-  '#F59E0B', // amber
-  '#EF4444', // red
-  '#8B5CF6', // violet
-  '#EC4899', // pink
-  '#06B6D4', // cyan
-  '#F97316', // orange
-  '#10B981', // emerald
-  '#6366F1', // indigo
+  '#22C55E',
+  '#3B82F6',
+  '#F59E0B',
+  '#EF4444',
+  '#8B5CF6',
+  '#EC4899',
+  '#06B6D4',
+  '#F97316',
+  '#10B981',
+  '#6366F1',
 ];
 
 const fontConfig = {
@@ -200,11 +200,11 @@ export const lightTheme = {
   colors: {
     ...MD3LightTheme.colors,
     primary: palette.green[500],
-    onPrimary: palette.slate[50], // Tinted white
+    onPrimary: palette.slate[50],
     secondary: palette.green[300],
     onSecondary: palette.green[950],
     tertiary: palette.green[200],
-    surface: palette.slate[50], // Tinted white
+    surface: palette.slate[50],
     background: '#F8FAFC',
     onSurface: palette.slate[900],
     onSurfaceVariant: palette.slate[700],
@@ -226,7 +226,7 @@ export const darkTheme = {
   colors: {
     ...MD3DarkTheme.colors,
     primary: palette.green[500],
-    onPrimary: palette.slate[950], // Tinted dark
+    onPrimary: palette.slate[950],
     secondary: palette.green[400],
     onSecondary: palette.green[950],
     tertiary: palette.green[300],

@@ -29,7 +29,6 @@ export const BudgetsScreen = () => {
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
 
-  // Aggregate values
   const { totalBudgeted, totalSpent, averageProgress, allWithinLimit } =
     useMemo(() => {
       let budgetedSum = 0;
@@ -70,7 +69,6 @@ export const BudgetsScreen = () => {
       };
     }, [budgets, transactions]);
 
-  // Contextual financial recommendation
   const smartRecommendation = useMemo(() => {
     if (budgets.length === 0) return null;
     const percent = Math.round(averageProgress * 100);

@@ -1,6 +1,3 @@
-// Shared domain entity types used across features and store slices.
-// Import from here — never from individual slice files — to avoid circular deps.
-
 import { AnalyticsReport } from '../features/insights/services/types';
 export type { AnalyticsReport };
 

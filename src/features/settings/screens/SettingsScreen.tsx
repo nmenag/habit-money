@@ -204,31 +204,31 @@ export const SettingsScreen = () => {
       name: t('manageAccounts'),
       icon: 'wallet-outline',
       screen: '/accounts',
-      color: '#10B981', // Emerald
+      color: '#10B981',
     },
     {
       name: t('manageCategories'),
       icon: 'pricetags-outline',
       screen: '/categories',
-      color: '#8B5CF6', // Purple
+      color: '#8B5CF6',
     },
     {
       name: t('manageBudgets'),
       icon: 'pie-chart-outline',
       screen: '/budgets',
-      color: '#3B82F6', // Blue
+      color: '#3B82F6',
     },
     {
       name: t('manageGoals'),
       icon: 'flag-outline',
       screen: '/goals',
-      color: '#F59E0B', // Amber
+      color: '#F59E0B',
     },
     {
       name: t('calendar'),
       icon: 'calendar-outline',
       screen: '/calendar',
-      color: '#EC4899', // Pink
+      color: '#EC4899',
     },
   ];
 

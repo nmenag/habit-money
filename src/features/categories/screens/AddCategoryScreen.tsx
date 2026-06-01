@@ -169,6 +169,7 @@ export const AddCategoryScreen = () => {
             activeOutlineColor={theme.colors.primary}
             textColor={theme.colors.onSurface}
             placeholderTextColor={theme.colors.outline}
+            maxLength={30}
           />
           {name.length > 0 && !isNameValid && (
             <Text

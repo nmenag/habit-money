@@ -13,6 +13,7 @@ import { interstitialManager } from './src/ads/InterstitialManager';
 import { initDb } from './src/db/schema';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { useStore, useTranslation } from './src/store/useStore';
+import { checkBackupReminder } from './src/utils/dataBackup';
 
 import {
   en as paperDatesEn,
@@ -89,8 +90,10 @@ export default function App() {
         }
       };
       hideSplash();
+
+      checkBackupReminder(t);
     }
-  }, [dbInitialized, isLoaded]);
+  }, [dbInitialized, isLoaded, t]);
 
   if (!dbInitialized || !isLoaded) {
     return <SplashScreen />;

@@ -1,7 +1,3 @@
-// Combined Zustand store — composed from feature slices.
-// Consumers should import useStore and useTranslation from this file as before.
-// Entity types are imported from ./types to avoid circular dependencies.
-
 import React from 'react';
 import { create } from 'zustand';
 import { getTranslatedName, translations } from '../i18n/translations';
@@ -18,7 +14,6 @@ import {
   TransactionsSlice,
 } from './slices/transactionsSlice';
 
-// Re-export all types so existing import paths keep working
 export type {
   Account,
   AccountType,
@@ -30,7 +25,6 @@ export type {
 } from './types';
 export type { AnalyticsReport } from './types';
 
-// The combined store type — used internally by slice StateCreator generics
 export type AppStore = AccountsSlice &
   TransactionsSlice &
   CategoriesSlice &
@@ -47,9 +41,6 @@ export const useStore = create<AppStore>()((...args) => ({
   ...createSettingsSlice(...args),
 }));
 
-// ---------------------------------------------------------------------------
-// useTranslation — unchanged public API, kept here so all imports still work
-// ---------------------------------------------------------------------------
 export const useTranslation = () => {
   const language = useStore((state) => state.language);
 

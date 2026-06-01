@@ -173,7 +173,6 @@ export const createSettingsSlice: StateCreator<
       isLoaded: true,
     });
 
-    // Defer loading of non-critical data
     setTimeout(() => {
       get().loadBudgets();
       get().loadGoals();

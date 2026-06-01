@@ -66,7 +66,6 @@ export const InsightsScreen = () => {
   React.useEffect(() => {
     loadFullData();
 
-    // Show interstitial occasionally (30% chance)
     if (Math.random() < 0.3) {
       const timer = setTimeout(() => {
         checkAndShowAd();

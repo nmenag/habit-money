@@ -191,6 +191,7 @@ export const AddGoalScreen = () => {
               activeOutlineColor={theme.colors.primary}
               textColor={theme.colors.onSurface}
               placeholderTextColor={theme.colors.outline}
+              maxLength={50}
             />
             {name.length > 0 && !isNameValid && (
               <Text

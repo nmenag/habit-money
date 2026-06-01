@@ -6,7 +6,6 @@ import { ActivityIndicator, View } from 'react-native';
 import { DashboardScreen } from '../features/dashboard';
 import { useTranslation } from '../store/useStore';
 
-// Lazy load non-essential screens from feature barrels
 const AccountsScreen = lazy(() =>
   import('../features/accounts').then((m) => ({
     default: m.AccountsScreen,

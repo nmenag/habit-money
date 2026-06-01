@@ -68,7 +68,6 @@ export const createTransactionsSlice: StateCreator<
       ],
     );
 
-    // Update account balances
     if (transaction.type === 'transfer' && transaction.toAccountId) {
       db.runSync(
         'UPDATE accounts SET currentBalance = currentBalance - ? WHERE id = ?',
@@ -133,7 +132,6 @@ export const createTransactionsSlice: StateCreator<
     }
 
     try {
-      // Revert old transaction amount
       if (oldTransaction.type === 'transfer' && oldTransaction.toAccountId) {
         db.runSync(
           'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
@@ -154,7 +152,6 @@ export const createTransactionsSlice: StateCreator<
         );
       }
 
-      // Apply new transaction amount
       if (transaction.type === 'transfer' && transaction.toAccountId) {
         db.runSync(
           'UPDATE accounts SET currentBalance = currentBalance - ? WHERE id = ?',

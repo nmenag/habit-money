@@ -21,7 +21,6 @@ export class InsightEngine {
     } = report;
     const t = translations[language] || translations.en;
 
-    // A. Monthly Comparison
     if (previousMonth.expenses > 0) {
       const growth =
         ((currentMonth.expenses - previousMonth.expenses) /
@@ -55,9 +54,8 @@ export class InsightEngine {
       }
     }
 
-    // B. Top Category
     if (categoryExpenses.length > 0) {
-      const topCat = categoryExpenses[0]; // Sorted by amount in service
+      const topCat = categoryExpenses[0];
       const translatedName = getTranslatedName(topCat.categoryName, language);
       insights.push({
         id: 'top-category',
@@ -71,7 +69,6 @@ export class InsightEngine {
       });
     }
 
-    // C. Category Growth
     if (previousCategoryExpenses.length > 0) {
       let maxIncrease = 0;
       let targetCat: (typeof categoryExpenses)[0] | null = null;
@@ -107,7 +104,6 @@ export class InsightEngine {
       }
     }
 
-    // D. Balance Insight
     if (currentMonth.income > 0 || currentMonth.expenses > 0) {
       if (currentMonth.income > currentMonth.expenses) {
         insights.push({
@@ -130,7 +126,6 @@ export class InsightEngine {
       }
     }
 
-    // E. Spending Projection
     const now = new Date();
     const currentDay = now.getDate();
     const daysInMonth = new Date(
@@ -154,7 +149,6 @@ export class InsightEngine {
       });
     }
 
-    // Default if few insights
     if (insights.length === 0) {
       insights.push({
         id: 'no-data',
@@ -166,6 +160,6 @@ export class InsightEngine {
       });
     }
 
-    return insights.slice(0, 5); // Max 5 insights
+    return insights.slice(0, 5);
   }
 }

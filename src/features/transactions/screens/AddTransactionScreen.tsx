@@ -967,10 +967,9 @@ export const AddTransactionScreen = () => {
               { color: theme.colors.onSurface, maxHeight: 100 },
             ]}
             multiline={true}
-            numberOfLines={1}
-            returnKeyType="done"
-            blurOnSubmit={true}
-            onSubmitEditing={Keyboard.dismiss}
+            numberOfLines={3}
+            maxLength={150}
+            blurOnSubmit={false}
             onFocus={handleNoteFocus}
           />
         </View>
