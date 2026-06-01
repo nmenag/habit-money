@@ -46,5 +46,6 @@ export interface AnalyticsReport {
   }[];
   spendingDays: number;
   expenseGrowth: number;
+  hasEnoughHistory: boolean;
   insights: Insight[];
 }

@@ -1,42 +1,24 @@
 import { getDb } from '../../../db/schema';
+import { DateRange } from '../../../utils/dateFilters';
 import { CategoryExpense, MonthlyMetrics } from './types';
 
 export class AnalyticsService {
-  private static getMonthDateRange(offset: number = 0) {
-    const now = new Date();
-    const start = new Date(
-      now.getFullYear(),
-      now.getMonth() - offset,
-      1,
-      0,
-      0,
-      0,
-      0,
-    );
-    const end = new Date(
-      now.getFullYear(),
-      now.getMonth() - offset + 1,
-      0,
-      23,
-      59,
-      59,
-      999,
-    );
-
+  private static formatDateRange(range: DateRange) {
     const pad = (n: number) => String(n).padStart(2, '0');
     const formatLocal = (d: Date) =>
       `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3, '0')}`;
 
+    const monthStr = `${range.startDate.getFullYear()}-${pad(range.startDate.getMonth() + 1)}`;
     return {
-      start: formatLocal(start),
-      end: formatLocal(end),
-      month: `${start.getFullYear()}-${pad(start.getMonth() + 1)}`,
+      start: formatLocal(range.startDate),
+      end: formatLocal(range.endDate),
+      month: monthStr,
     };
   }
 
-  static async getMonthlyMetrics(offset: number = 0): Promise<MonthlyMetrics> {
+  static async getMonthlyMetrics(range: DateRange): Promise<MonthlyMetrics> {
     const db = getDb();
-    const { start, end, month } = this.getMonthDateRange(offset);
+    const { start, end, month } = this.formatDateRange(range);
 
     const transactions = await db.getAllAsync<{
       type: string;
@@ -102,10 +84,10 @@ export class AnalyticsService {
   }
 
   static async getCategoryExpenses(
-    offset: number = 0,
+    range: DateRange,
   ): Promise<CategoryExpense[]> {
     const db = getDb();
-    const { start, end } = this.getMonthDateRange(offset);
+    const { start, end } = this.formatDateRange(range);
 
     const rows = await db.getAllAsync<{
       categoryId: string;
@@ -138,9 +120,9 @@ export class AnalyticsService {
     }));
   }
 
-  static async getSpendingDays(offset: number = 0): Promise<number> {
+  static async getSpendingDays(range: DateRange): Promise<number> {
     const db = getDb();
-    const { start, end } = this.getMonthDateRange(offset);
+    const { start, end } = this.formatDateRange(range);
 
     const result = await db.getFirstAsync<{ count: number }>(
       `
@@ -156,9 +138,9 @@ export class AnalyticsService {
     return result?.count || 0;
   }
 
-  static async getBudgetAdherence() {
+  static async getBudgetAdherence(range: DateRange) {
     const db = getDb();
-    const { start, end } = this.getMonthDateRange(0);
+    const { start, end } = this.formatDateRange(range);
 
     const rows = await db.getAllAsync<{
       categoryId: string;

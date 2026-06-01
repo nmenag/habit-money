@@ -280,6 +280,7 @@ export const es = {
   filterWeek: 'Semana',
   filterMonth: 'Mes',
   filterLastMonth: 'Mes Ant.',
+  filterLast30Days: 'Últimos 30 Días',
   filterYear: 'Año',
   filterCustom: 'Personalizado',
   filterCustomRange: 'Rango de Fechas',

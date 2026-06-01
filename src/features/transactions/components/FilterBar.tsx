@@ -19,6 +19,7 @@ const FILTER_OPTIONS: FilterOption[] = [
   { type: 'allTime', labelKey: 'filterAllTime', short: 'All' },
   { type: 'today', labelKey: 'filterToday', short: 'Today' },
   { type: 'week', labelKey: 'filterWeek', short: 'Week' },
+  { type: 'last30Days', labelKey: 'filterLast30Days', short: 'Last 30 Days' },
   { type: 'month', labelKey: 'filterMonth', short: 'Month' },
   { type: 'lastMonth', labelKey: 'filterLastMonth', short: 'Last Mo.' },
   { type: 'year', labelKey: 'filterYear', short: 'Year' },

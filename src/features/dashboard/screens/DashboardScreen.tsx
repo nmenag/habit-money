@@ -16,6 +16,7 @@ import {
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getValidCategoryIcon } from '../../../constants';
+import { FilterBar } from '../../transactions/components/FilterBar';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme, spacing } from '../../../theme/theme';
 import { fontScale, moderateScale } from '../../../utils/responsive';
@@ -143,13 +144,6 @@ export const DashboardScreen = React.memo(() => {
     };
   }, [financialData, theme, t]);
 
-  const currentMonthDisplay = useMemo(() => {
-    const now = new Date();
-    return format(now, 'MMMM yyyy', {
-      locale: language === 'es' ? esLocale : enUS,
-    });
-  }, [language]);
-
   if (!isLoaded || !data) {
     return (
       <View
@@ -168,16 +162,11 @@ export const DashboardScreen = React.memo(() => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.monthHeader} accessibilityRole="header">
-          <Text
-            variant="headlineSmall"
-            style={styles.monthText}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-          >
-            {currentMonthDisplay}
-          </Text>
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: 0 }]}>
+        <View
+          style={{ marginHorizontal: -spacing.md, marginBottom: spacing.md }}
+        >
+          <FilterBar />
         </View>
         <Card
           style={[
