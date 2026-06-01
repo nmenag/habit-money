@@ -44,7 +44,6 @@ export const GoalDetailScreen = () => {
 
   const goal = goals.find((g) => g.id === goalId);
 
-  // Math insights memoized
   const calculations = useMemo(() => {
     if (!goal) return null;
     const progress = Math.min(
@@ -66,7 +65,6 @@ export const GoalDetailScreen = () => {
       }
     }
 
-    // Dynamic gamified tip: saved months by contributing $30/mo extra
     let monthsSavedWithExtra = 0;
     const extraContribution = 30;
     if (monthlyEstimate > 0 && monthsRemaining > 0) {

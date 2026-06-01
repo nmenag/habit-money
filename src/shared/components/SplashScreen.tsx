@@ -11,7 +11,6 @@ export const SplashScreen = () => {
   const progressTranslation = useRef(new Animated.Value(-40)).current;
 
   useEffect(() => {
-    // Hide the native splash screen immediately on mount so the custom animated JS splash is visible
     ExpoSplashScreen.hideAsync().catch(() => {});
   }, []);
 

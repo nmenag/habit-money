@@ -30,7 +30,6 @@ export const FilterBar: React.FC = React.memo(() => {
   const { t } = useTranslation();
   const language = useStore((s) => s.language);
 
-  // Use granular selectors
   const selectedRange = useFilterStore((s) => s.selectedRange);
   const setFilter = useFilterStore((s) => s.setFilter);
   const setCustomRange = useFilterStore((s) => s.setCustomRange);

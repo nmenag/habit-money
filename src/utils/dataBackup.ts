@@ -175,7 +175,6 @@ export const restoreFromJSON = async (
       insertBudget.finalizeSync();
     }
 
-    // Goals
     const insertGoal = db.prepareSync(
       'INSERT INTO goals (id, name, targetAmount, currentAmount, color, icon, deadline, status, displayOrder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
