@@ -103,7 +103,7 @@ export const es = {
   defaultAccountName: 'Banco',
   catFood: 'Alimentación',
   catTransport: 'Transporte',
-  catHousing: 'Vivienda',
+  catHome: 'Hogar',
   catEntertainment: 'Entretenimiento',
   catHealth: 'Salud',
   catOther: 'Otros',

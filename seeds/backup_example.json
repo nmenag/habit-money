@@ -63,7 +63,7 @@
       },
       {
         "id": "3",
-        "name": "Housing",
+        "name": "home",
         "type": "expense",
         "icon": "home",
         "color": "#9c27b0",

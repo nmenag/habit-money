@@ -100,7 +100,7 @@ export const en = {
   defaultAccountName: 'Bank',
   catFood: 'Food',
   catTransport: 'Transport',
-  catHousing: 'Housing',
+  catHome: 'home',
   catEntertainment: 'Entertainment',
   catHealth: 'Health',
   catOther: 'Other',

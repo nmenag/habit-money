@@ -155,7 +155,7 @@ export const initDb = () => {
       },
       {
         id: '3',
-        name: t.catHousing,
+        name: t.catHome,
         type: 'expense',
         icon: 'home',
         color: '#9c27b0',
