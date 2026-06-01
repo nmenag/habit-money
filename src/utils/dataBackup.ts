@@ -12,6 +12,7 @@ import { getLocalDateString, getLocalISOString } from './dateUtils';
 
 let isBackupInProgress = false;
 let isRestoreInProgress = false;
+let hasCheckedReminderThisSession = false;
 
 export const backupToJSON = async () => {
   if (isBackupInProgress) return;
@@ -217,6 +218,7 @@ export const restoreFromJSON = async (
       console.error('Failed to set restore day backup reminder settings', e);
     }
 
+    hasCheckedReminderThisSession = true;
     onSuccess();
     Alert.alert(t('success'), t('restoreSuccess'));
   } catch (error) {
@@ -228,6 +230,9 @@ export const restoreFromJSON = async (
 };
 
 export const checkBackupReminder = async (t: (key: any) => string) => {
+  if (hasCheckedReminderThisSession) return;
+  hasCheckedReminderThisSession = true;
+
   const db = getDb();
   const today = getLocalDateString();
 
