@@ -2,6 +2,7 @@ import { StateCreator } from 'zustand';
 import { getDb } from '../../db/schema';
 import { Goal } from '../types';
 import type { AppStore } from '../useStore';
+import { ProductAnalyticsService } from '../../services/ProductAnalyticsService';
 
 export interface GoalsSlice {
   goals: Goal[];
@@ -29,6 +30,8 @@ export const createGoalsSlice: StateCreator<AppStore, [], [], GoalsSlice> = (
 
   addGoal: (goalData) => {
     const db = getDb();
+
+    ProductAnalyticsService.logGoalCreated().catch(() => {});
     const id = Math.random().toString(36).substring(2, 9);
     const maxOrder = db.getFirstSync<{ maxOrder: number }>(
       'SELECT MAX(displayOrder) as maxOrder FROM goals',
@@ -55,6 +58,8 @@ export const createGoalsSlice: StateCreator<AppStore, [], [], GoalsSlice> = (
 
   editGoal: (goal) => {
     const db = getDb();
+
+    ProductAnalyticsService.logGoalUpdated().catch(() => {});
     db.runSync(
       'UPDATE goals SET name = ?, targetAmount = ?, currentAmount = ?, color = ?, icon = ?, deadline = ?, status = ? WHERE id = ?',
       [

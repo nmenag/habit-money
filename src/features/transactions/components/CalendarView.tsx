@@ -33,7 +33,8 @@ export const CalendarView = ({
   selectedDate,
   onDayPress,
 }: CalendarViewProps) => {
-  const { transactions, formatCurrency } = useStore();
+  const transactions = useStore((s) => s.transactions);
+  const formatCurrency = useStore((s) => s.formatCurrency);
   const { language } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);

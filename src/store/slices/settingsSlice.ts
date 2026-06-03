@@ -71,6 +71,7 @@ export interface SettingsSlice {
   setNotificationTime: (time: string) => void;
   setCurrency: (currency: string) => void;
   setPremium: (isPremium: boolean) => void;
+  completeOnboarding: (lang: Language, currency: string) => void;
   formatCurrency: (amount: number, currencyCode?: string) => string;
   checkAndShowAd: () => Promise<void>;
   refreshAnalytics: () => Promise<void>;
@@ -268,6 +269,33 @@ export const createSettingsSlice: StateCreator<
       ]);
     } catch (error) {
       console.error('setPremium DB Error:', error);
+    }
+  },
+
+  completeOnboarding: (lang, currency) => {
+    try {
+      const db = getDb();
+      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+        'isFirstLaunch',
+        'false',
+      ]);
+      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+        'language',
+        lang,
+      ]);
+      db.runSync('INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)', [
+        'currency',
+        currency,
+      ]);
+
+      const currencySymbol = CURRENCY_SYMBOLS[currency] || '$';
+      set({ language: lang, currency, currencySymbol });
+
+      db.runSync('UPDATE accounts SET currency = ?', [currency]);
+      get().loadData();
+    } catch (error) {
+      console.error('completeOnboarding DB Error:', error);
+      throw error;
     }
   },
 

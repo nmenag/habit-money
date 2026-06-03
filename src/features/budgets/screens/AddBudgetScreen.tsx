@@ -636,7 +636,6 @@ const defaultStyles = (theme: AppTheme) =>
       fontWeight: '500',
     },
 
-    // Amount Hero Card styles
     amountHeroCard: {
       borderRadius: 20,
       paddingVertical: 16,
@@ -692,7 +691,6 @@ const defaultStyles = (theme: AppTheme) =>
       right: 12,
     },
 
-    // Selector Card styles
     selectorCard: {
       borderRadius: 16,
       padding: 16,
@@ -735,8 +733,6 @@ const defaultStyles = (theme: AppTheme) =>
       justifyContent: 'center',
       alignItems: 'center',
     },
-
-    // Bottom Sheet Grid styles
     modalGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
