@@ -41,12 +41,6 @@ module.exports = {
     scheme: 'habitmoney',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
-    runtimeVersion: {
-      policy: 'appVersion',
-    },
-    updates: {
-      url: 'https://u.expo.dev/bed3f721-6ec2-417a-8e38-4d5f66778b4d',
-    },
     jsEngine: 'hermes',
     ios: {
       supportsTablet: true,
@@ -61,6 +55,8 @@ module.exports = {
       },
       predictiveBackGestureEnabled: false,
       package: getPackageName(),
+      googleServicesFile:
+        process.env.GOOGLE_SERVICES_JSON || './google-services.json',
       jsEngine: 'hermes',
     },
     web: {
@@ -68,6 +64,8 @@ module.exports = {
       favicon: './assets/images/favicon.png',
     },
     plugins: [
+      '@react-native-firebase/app',
+      '@react-native-firebase/crashlytics',
       [
         'expo-splash-screen',
         {

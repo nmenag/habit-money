@@ -2,6 +2,7 @@ import { StateCreator } from 'zustand';
 import { getDb } from '../../db/schema';
 import { Budget, Goal, Transaction, TransactionType } from '../types';
 import type { AppStore } from '../useStore';
+import { ProductAnalyticsService } from '../../services/ProductAnalyticsService';
 
 export interface TransactionsSlice {
   transactions: Transaction[];
@@ -52,6 +53,14 @@ export const createTransactionsSlice: StateCreator<
     const db = getDb();
     const isIncome = transaction.type === 'income';
     const amountModifier = isIncome ? transaction.amount : -transaction.amount;
+
+    const isFirstTransaction = get().transactions.length === 0;
+    if (isFirstTransaction) {
+      ProductAnalyticsService.logFirstTransactionCreated().catch(() => {});
+    }
+    ProductAnalyticsService.logTransactionCreated(
+      transaction.type || 'expense',
+    ).catch(() => {});
 
     db.runSync(
       'INSERT INTO transactions (id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -131,6 +140,10 @@ export const createTransactionsSlice: StateCreator<
       return;
     }
 
+    ProductAnalyticsService.logTransactionUpdated(
+      transaction.type || 'expense',
+    ).catch(() => {});
+
     try {
       if (oldTransaction.type === 'transfer' && oldTransaction.toAccountId) {
         db.runSync(
@@ -199,6 +212,10 @@ export const createTransactionsSlice: StateCreator<
     const db = getDb();
     const isIncome = type === 'income';
     const amountModifier = isIncome ? -amount : amount;
+
+    ProductAnalyticsService.logTransactionDeleted(type || 'expense').catch(
+      () => {},
+    );
 
     db.runSync('DELETE FROM transactions WHERE id = ?', [id ?? null]);
 

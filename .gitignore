@@ -31,9 +31,11 @@ app-example
 /ios
 /android
 .env
+.env.development
+.env.preview
+.env.production
 /.agents
 .agents-memory/
 skills-lock.json
-DESIGN.md
 PRODUCT.md
 CODE.md

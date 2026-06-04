@@ -2,6 +2,7 @@ import { StateCreator } from 'zustand';
 import { getDb } from '../../db/schema';
 import { Account } from '../types';
 import type { AppStore } from '../useStore';
+import { ProductAnalyticsService } from '../../services/ProductAnalyticsService';
 
 export interface AccountsSlice {
   accounts: Account[];
@@ -39,6 +40,15 @@ export const createAccountsSlice: StateCreator<
         displayOrder,
       ],
     );
+
+    const isFirstAccount = get().accounts.length === 0;
+    if (isFirstAccount) {
+      ProductAnalyticsService.logFirstAccountCreated().catch(() => {});
+    }
+    ProductAnalyticsService.logAccountCreated(account.type || 'unknown').catch(
+      () => {},
+    );
+
     set((state) => ({
       accounts: [...state.accounts, { ...account, displayOrder }],
     }));
@@ -58,6 +68,11 @@ export const createAccountsSlice: StateCreator<
         account.id ?? null,
       ],
     );
+
+    ProductAnalyticsService.logAccountUpdated(account.type || 'unknown').catch(
+      () => {},
+    );
+
     set((state) => ({
       accounts: state.accounts.map((a) => (a.id === account.id ? account : a)),
     }));
@@ -65,7 +80,13 @@ export const createAccountsSlice: StateCreator<
 
   deleteAccount: (id) => {
     const db = getDb();
+    const account = get().accounts.find((a) => a.id === id);
+    const accountType = account?.type || 'unknown';
+
     db.runSync('DELETE FROM accounts WHERE id = ?', [id ?? null]);
+
+    ProductAnalyticsService.logAccountDeleted(accountType).catch(() => {});
+
     set((state) => ({
       accounts: state.accounts.filter((a) => a.id !== id),
       transactions: state.transactions.filter((t) => t.accountId !== id),

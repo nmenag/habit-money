@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
-import { getDb } from '../../../db/schema';
 import { Language } from '../../../i18n/translations';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { CURRENCIES } from '../../../constants';
@@ -33,7 +32,7 @@ export const OnboardingScreen = () => {
   const theme = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { setLanguage, setCurrency, loadData } = useStore();
+  const { setLanguage, completeOnboarding } = useStore();
   const { t } = useTranslation();
 
   const [detectedLang, setDetectedLang] = useState<Language>('en');
@@ -68,26 +67,9 @@ export const OnboardingScreen = () => {
     setDetectedCurrency(curr);
   };
 
-  const handleStart = async () => {
+  const handleStart = () => {
     try {
-      setLanguage(detectedLang);
-      setCurrency(detectedCurrency);
-
-      const db = await getDb();
-      await db.runAsync(
-        'INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)',
-        ['isFirstLaunch', 'false'],
-      );
-      await db.runAsync(
-        'INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)',
-        ['language', detectedLang],
-      );
-      await db.runAsync(
-        'INSERT OR REPLACE INTO settings (id, val) VALUES (?, ?)',
-        ['currency', detectedCurrency],
-      );
-
-      await loadData();
+      completeOnboarding(detectedLang, detectedCurrency);
       router.replace('/(tabs)');
     } catch (error) {
       console.error('Failed to save onboarding settings:', error);

@@ -17,7 +17,9 @@ const formatAmount = (amount: number, formatCurrency: any) => {
 };
 
 export const CalendarScreen = () => {
-  const { transactions, categories, formatCurrency } = useStore();
+  const transactions = useStore((s) => s.transactions);
+  const categories = useStore((s) => s.categories);
+  const formatCurrency = useStore((s) => s.formatCurrency);
   const { t, language, translateName } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);

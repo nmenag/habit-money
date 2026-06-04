@@ -1,38 +1,19 @@
-# Description
+# PR Title
 
-Please include a summary of the changes and the related issue. Please also include relevant motivation and context. List any dependencies that are required for this change.
+<!-- Use a Conventional Commit title, e.g., feat: integrate Firebase Analytics -->
 
-Fixes # (issue)
+## Summary
 
-## Type of change
+<!-- Keep descriptions concise and focused on business value. Why are we doing this? -->
 
-Please delete options that are not relevant.
+## Changes
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] This change requires a documentation update
+<!-- Detail the key changes introduced by this pull request. Keep bullet points brief. -->
 
-# How Has This Been Tested?
+## Testing Notes
 
-Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration
+<!-- Describe how the changes were verified, commands run (e.g. npm run check-types), and edge cases tested. -->
 
-- [ ] Test A
-- [ ] Test B
+## Breaking Changes (if any)
 
-**Test Configuration**:
-
-- Firmware version:
-- Hardware:
-- SDK:
-
-# Checklist:
-
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published in downstream modules
+<!-- List any breaking changes, database migrations, or required config modifications here. If none, state "None". -->

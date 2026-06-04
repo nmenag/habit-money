@@ -2,6 +2,7 @@ import { StateCreator } from 'zustand';
 import { getDb } from '../../db/schema';
 import { Budget } from '../types';
 import type { AppStore } from '../useStore';
+import { ProductAnalyticsService } from '../../services/ProductAnalyticsService';
 
 export interface BudgetsSlice {
   budgets: Budget[];
@@ -30,6 +31,8 @@ export const createBudgetsSlice: StateCreator<
 
   addBudget: (budget) => {
     const db = getDb();
+
+    ProductAnalyticsService.logBudgetCreated().catch(() => {});
     const maxOrder = db.getFirstSync<{ maxOrder: number }>(
       'SELECT MAX(displayOrder) as maxOrder FROM budgets',
     );
@@ -53,6 +56,8 @@ export const createBudgetsSlice: StateCreator<
 
   editBudget: (budget) => {
     const db = getDb();
+
+    ProductAnalyticsService.logBudgetUpdated().catch(() => {});
     db.runSync(
       'UPDATE budgets SET name = ?, amount = ?, color = ?, categoryId = ? WHERE id = ?',
       [
