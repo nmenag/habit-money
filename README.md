@@ -42,10 +42,12 @@ Habit Money is a modern, high-performance personal finance tracker built with **
   - **High-Resolution Iconography**: Custom, professionally designed app icons for Production and Preview builds.
   - **Android Adaptive Icons**: Full support for adaptive layers (Android 13+ material themed icons).
 - **Monetization**: Seamlessly integrated Google Mobile Ads (Banner and Interstitial) with test mode for development.
+- **Analytics & Crash Monitoring**: Google Firebase SDK integration (Analytics and Crashlytics) to capture usage trends and improve application stability, utilizing a strict, automated data-sanitization service to ensure no transaction amounts, balances, notes, descriptions, or PII ever leave the device.
 
 ## 🛠️ Tech Stack
 
 - **Core**: [Expo SDK 55](https://expo.dev) & React Native 0.83 — [Architecture Details](docs/ARCHITECTURE.md)
+- **Telemetry**: [Google Firebase Analytics & Crashlytics](https://firebase.google.com) — [Analytics Details](docs/ANALYTICS.md)
 - **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/) (File-based navigation)
 - **State**: [Zustand v5](https://github.com/pmndrs/zustand) (Sliced & Persisted state)
 - **Database**: [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) (High-performance local storage, WAL mode) — [Schema Details](docs/DATABASE_DESIGN.md)

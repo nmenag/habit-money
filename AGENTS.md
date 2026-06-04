@@ -129,15 +129,7 @@ Always cross-reference this file and the design guidelines in `DESIGN.md` before
 
 ---
 
-## 10. Git and Pull Request Rules
-
-- **Small Changes**: Keep pull requests small and tightly focused. Avoid mixing unrelated features, refactorings, or documentation tasks.
-- **Meaningful Commits**: Use conventional commits (e.g., `feat: add budget indicator`, `fix: correct transfer double entry`).
-- **Checks**: Run `npm run check-types` and `npm run lint` locally and ensure they pass before submitting code.
-
----
-
-## 11. AI Agent Instructions
+## 10. AI Agent Instructions
 
 - **Prioritize Rules**: AI agents must read and strictly follow this document and `DESIGN.md` in every response and code modification task.
 - **Preserve Patterns**: Always check the repository for existing patterns (e.g., SQLite query formatting, state slicing, localization lookup mechanisms) before introducing new abstractions. Favor consistency over novelty.

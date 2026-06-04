@@ -308,7 +308,10 @@ export const en = {
   website: 'Website',
   dataCollectionTitle: 'Data Collection',
   dataCollectionContent:
-    'Habit Money does NOT collect any personal data. All information you enter (transactions, accounts, goals) is stored locally on your device and is never uploaded to our servers.',
+    "Your financial data is yours alone. Habit Money is designed as an offline-first application. All transactions, accounts, budgets, and goals you enter are stored locally on your device's local database. We do not transmit, copy, or store this financial data on any external servers.",
+  analyticsMonitoringTitle: 'Analytics & Stability Monitoring',
+  analyticsMonitoringContent:
+    'To help us improve the application, we collect anonymous usage statistics and diagnostics data. We use Google Analytics for Firebase to understand feature usage and Firebase Crashlytics to monitor crashes. We enforce strict, automated parameter-sanitization before telemetry is transmitted: we NEVER collect or transmit transaction amounts, account balances, transaction descriptions, notes, category names, or any PII.',
   howDataIsUsedTitle: 'How Data is Used',
   howDataIsUsedContent:
     'The data you provide is used exclusively to show you your financial statistics, manage your budgets, and track your goals within the app.',
@@ -317,7 +320,7 @@ export const en = {
     'Your data lives on your device. When you uninstall the app, the data is removed unless you have created a manual backup.',
   thirdPartyTitle: 'Third-Party Services',
   thirdPartyContent:
-    'We use Google AdMob to display ads. AdMob may collect device identifiers or other information to serve personalized ads.',
+    'We use Google AdMob for advertisements, and Google Firebase for analytics/crash monitoring. These services may collect device identifiers or other anonymous metadata in accordance with their privacy policy.',
   userRightsTitle: 'User Rights',
   userRightsContent:
     'You have full control over your data. You can delete individual transactions or the entire app data at any time.',
@@ -326,10 +329,10 @@ export const en = {
     'If you have any questions regarding this privacy policy, you can contact us at:',
   contactEmailAddress: 'nmena.garzon@gmail.com',
   lastUpdated: 'Last Updated',
-  lastUpdatedDate: '2026-05-21',
+  lastUpdatedDate: '2026-06-04',
   app: 'App',
   adMobPrivacyUrl: 'https://policies.google.com/privacy',
-  viewAdMobPrivacy: 'View Google/AdMob Privacy Policy',
+  viewAdMobPrivacy: 'View Google Services Privacy Policy',
   balanceSummary: 'Balance Summary',
   remaining: 'Remaining',
   spendingProgress: 'Monthly Spending Progress',

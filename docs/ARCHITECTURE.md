@@ -56,7 +56,8 @@ habit-money/
 │   │   └── slices/             # Domain slices (accounts, categories, transactions, …)
 │   ├── services/
 │   │   ├── analytics/          # AnalyticsService, InsightEngine, AnalyticsManager
-│   │   └── NotificationService.ts
+│   │   ├── NotificationService.ts
+│   │   └── ProductAnalyticsService.ts # Strongly typed Firebase Analytics & Crashlytics service
 │   ├── i18n/                   # Translations (en.ts / es.ts) and locale helpers
 │   ├── theme/                  # Color tokens and Material Design 3 theme config
 │   ├── constants/              # App-wide constants (colors, icon sets, currencies…)
@@ -119,6 +120,7 @@ See [DATABASE_DESIGN.md](DATABASE_DESIGN.md) for the full schema and ERD.
 - **`InsightEngine`**: Wraps `AnalyticsService` to derive actionable insights (savings rate, frequency alerts, financial health score).
 - **`AnalyticsManager`**: Facade that aggregates and caches insight data for the Insights screen.
 - **`NotificationService`**: Schedules and cancels local daily/weekly reminders via `expo-notifications` to encourage consistent app usage.
+- **`ProductAnalyticsService`**: Strongly typed interface wrapping Firebase Analytics and Crashlytics, enforcing automated parameter sanitization to filter out financial details and PII before transmitting logs.
 
 All service logic is decoupled from the UI layer to maximize testability and enable future unit tests.
 

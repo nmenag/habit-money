@@ -314,7 +314,10 @@ export const es = {
   contactEmailLabel: 'Email',
   dataCollectionTitle: 'Recopilación de Datos',
   dataCollectionContent:
-    'Habit Money NO recopila ningún dato personal. Toda la información que ingresas (transacciones, cuentas, metas) se almacena localmente en tu dispositivo y nunca se sube a nuestros servidores.',
+    'Tus datos financieros son solo tuyos. Habit Money está diseñada como una aplicación offline-first. Todos los datos de transacciones, cuentas, presupuestos y metas que ingresas se almacenan localmente en la base de datos de tu dispositivo. No transmitimos, copiamos ni almacenamos estos datos financieros en servidores externos.',
+  analyticsMonitoringTitle: 'Análisis y Monitoreo de Estabilidad',
+  analyticsMonitoringContent:
+    'Para ayudarnos a mejorar la aplicación, recopilamos estadísticas de uso anónimas y datos de diagnóstico. Usamos Google Analytics para Firebase para comprender el uso de las funciones y Firebase Crashlytics para monitorear errores. Aplicamos estrictas reglas automáticas de sanitización de datos antes de transmitir la telemetría: NUNCA recopilamos ni transmitimos montos de transacciones, saldos de cuentas, descripciones, notas, nombres de categorías ni PII (información de identificación personal).',
   howDataIsUsedTitle: 'Cómo se usan los datos',
   howDataIsUsedContent:
     'Los datos que proporcionas se utilizan exclusivamente para mostrarte tus estadísticas financieras, gestionar tus presupuestos y rastrear tus metas dentro de la aplicación.',
@@ -323,7 +326,7 @@ export const es = {
     'Tus datos viven en tu dispositivo. Al desinstalar la aplicación, los datos se eliminan a menos que hayas creado una copia de seguridad manual.',
   thirdPartyTitle: 'Servicios de Terceros',
   thirdPartyContent:
-    'Utilizamos Google AdMob para mostrar anuncios. AdMob puede recopilar identificadores de dispositivo u otra información para mostrar anuncios personalizados.',
+    'Utilizamos Google AdMob para mostrar anuncios y Google Firebase para análisis y monitoreo de estabilidad. Estos servicios pueden recopilar identificadores de dispositivo u otra metadata anónima de acuerdo con sus políticas de privacidad.',
   userRightsTitle: 'Derechos del Usuario',
   userRightsContent:
     'Tienes control total sobre tus datos. Puedes eliminar transacciones individuales o todos los datos de la aplicación en cualquier momento.',
@@ -332,11 +335,11 @@ export const es = {
     'Si tienes alguna pregunta sobre esta política de privacidad, puedes contactarnos en:',
   contactEmailAddress: 'nmena.garzon@gmail.com',
   lastUpdated: 'Última actualización',
-  lastUpdatedDate: '21 de mayo de 2026',
+  lastUpdatedDate: '4 de junio de 2026',
   app: 'App',
   website: 'Sitio Web',
   adMobPrivacyUrl: 'https://policies.google.com/privacy',
-  viewAdMobPrivacy: 'Ver Política de Privacidad de Google/AdMob',
+  viewAdMobPrivacy: 'Ver Política de Privacidad de los Servicios de Google',
   balanceSummary: 'Resumen de Saldo',
   remaining: 'Restante',
   spendingProgress: 'Progreso de Gastos Mensuales',
