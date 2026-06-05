@@ -16,6 +16,10 @@ export const PrivacyPolicyScreen = () => {
       content: t('dataCollectionContent'),
     },
     {
+      title: t('analyticsMonitoringTitle'),
+      content: t('analyticsMonitoringContent'),
+    },
+    {
       title: t('howDataIsUsedTitle'),
       content: t('howDataIsUsedContent'),
     },

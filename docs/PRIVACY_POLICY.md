@@ -1,6 +1,6 @@
 # Privacy Policy for Habit Money
 
-**Effective Date: May 21, 2026**
+**Effective Date: June 4, 2026**
 
 Habit Money ("we", "us", or "our") built the Habit Money app as a Freemium app. This SERVICE is provided by Habit Money at no cost and is intended for use as is.
 
@@ -13,18 +13,26 @@ The terms used in this Privacy Policy have the same meanings as in our Terms and
 ## Information Collection and Use
 
 **1. Local Data Storage**
-Habit Money is an **offline-first** application. All financial data, transactions, accounts, and budget information you enter is stored exclusively on your device. We do not transmit or store this data on any external servers.
+Habit Money is an **offline-first** application. All financial data, transactions, accounts, and budget information you enter is stored exclusively on your device's local database. We do not transmit, copy, or store this financial data on any external servers.
 
-**2. Third-Party Services**
+**2. Analytics & Stability Monitoring**
+To help us improve the application's functionality, performance, and stability, we collect anonymous usage statistics and diagnostics data.
+
+- **Product Telemetry**: We use Google Analytics for Firebase to understand feature usage and improve the user experience. Only anonymous usage behavior and structural metadata (such as whether an account is cash or bank, or whether a transaction is an income or expense) are tracked.
+- **Privacy Guardrails**: We enforce strict, automated parameter sanitization before telemetry is transmitted. We **NEVER** collect, store, or transmit your transaction amounts, account balances, transaction descriptions, notes, category names, or any other personally identifiable information (PII).
+- **Crash Reporting**: We use Firebase Crashlytics to monitor application crashes and errors in real-time. This helps us ensure the app remains reliable.
+
+**3. Third-Party Services**
 The app does use third-party services that may collect information used to identify you.
 
 Link to the privacy policy of third-party service providers used by the app:
 
 - [Google Play Services](https://www.google.com/policies/privacy/)
 - [AdMob](https://support.google.com/admob/answer/6128543?hl=en)
+- [Firebase Analytics and Crashlytics](https://firebase.google.com/support/privacy)
 - [Expo](https://expo.dev/privacy)
 
-**3. Log Data**
+**4. Log Data**
 We want to inform you that whenever you use our Service, in a case of an error in the app we may collect data and information (through third-party products) on your phone called Log Data. This Log Data may include information such as your device Internet Protocol (“IP”) address, device name, operating system version, the configuration of the app when utilizing our Service, the time and date of your use of the Service, and other statistics.
 
 ## Cookies
