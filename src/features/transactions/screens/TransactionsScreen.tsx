@@ -4,17 +4,31 @@ import { enUS, es } from 'date-fns/locale';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Chip, FAB, Menu, Searchbar, Text, useTheme } from 'react-native-paper';
+import { Avatar, Button, Chip, FAB, Searchbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FilterBar } from '../components/FilterBar';
 import { TransactionItem } from '../components/TransactionItem';
 import { useFilterStore } from '../../../store/useFilterStore';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { isInRange } from '../../../utils/dateFilters';
+import { BottomSheet } from '../../../shared/components/BottomSheet';
+import { getValidCategoryIcon } from '../../../constants';
 
 import { FlashList } from '@shopify/flash-list';
 
 const TypedFlashList = FlashList as any;
+
+const addAlpha = (color: string | undefined, opacity: number) => {
+  const resolvedColor = color || '#10B981';
+  if (resolvedColor.startsWith('#')) {
+    const hex = resolvedColor.replace('#', '');
+    const alpha = Math.round(opacity * 255)
+      .toString(16)
+      .padStart(2, '0');
+    return `#${hex}${alpha}`;
+  }
+  return resolvedColor;
+};
 
 export const TransactionsScreen = () => {
   const params = useLocalSearchParams<{ accountId?: string }>();
@@ -36,49 +50,33 @@ export const TransactionsScreen = () => {
   }, [loadFullData]);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
-    params.accountId ?? null,
+  const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>(
+    params.accountId ? [params.accountId] : [],
   );
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    null,
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
+    [],
   );
-  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
-
-  const activeAccount = useMemo(
-    () =>
-      selectedAccountId
-        ? accounts.find((a) => a.id === selectedAccountId)
-        : null,
-    [selectedAccountId, accounts],
-  );
-
-  const activeCategory = useMemo(
-    () =>
-      selectedCategoryId
-        ? categories.find((c) => c.id === selectedCategoryId)
-        : null,
-    [selectedCategoryId, categories],
-  );
+  const [accountSheetOpen, setAccountSheetOpen] = useState(false);
+  const [categorySheetOpen, setCategorySheetOpen] = useState(false);
 
   const hasActiveFilters = !!(
     searchQuery ||
-    selectedAccountId ||
-    selectedCategoryId
+    selectedAccountIds.length > 0 ||
+    selectedCategoryIds.length > 0
   );
 
   const clearAllFilters = useCallback(() => {
     setSearchQuery('');
-    setSelectedAccountId(null);
-    setSelectedCategoryId(null);
+    setSelectedAccountIds([]);
+    setSelectedCategoryIds([]);
   }, []);
 
   const filteredTransactions = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     return transactions.filter((tx) => {
       if (!isInRange(tx.date, selectedRange)) return false;
-      if (selectedAccountId && tx.accountId !== selectedAccountId) return false;
-      if (selectedCategoryId && tx.categoryId !== selectedCategoryId)
+      if (selectedAccountIds.length > 0 && !selectedAccountIds.includes(tx.accountId)) return false;
+      if (selectedCategoryIds.length > 0 && (!tx.categoryId || !selectedCategoryIds.includes(tx.categoryId)))
         return false;
 
       if (query) {
@@ -102,8 +100,8 @@ export const TransactionsScreen = () => {
   }, [
     transactions,
     selectedRange,
-    selectedAccountId,
-    selectedCategoryId,
+    selectedAccountIds,
+    selectedCategoryIds,
     searchQuery,
     categories,
     accounts,
@@ -214,86 +212,36 @@ export const TransactionsScreen = () => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.chipsScroll}
         >
-          <Menu
-            visible={accountMenuOpen}
-            onDismiss={() => setAccountMenuOpen(false)}
-            anchor={
-              <Chip
-                icon={selectedAccountId ? 'check-circle' : 'bank'}
-                onPress={() => setAccountMenuOpen(true)}
-                selected={!!selectedAccountId}
-                showSelectedOverlay
-                style={styles.filterChip}
-                compact
-              >
-                {activeAccount
-                  ? translateName(activeAccount.name)
-                  : t('filterByAccount' as any)}
-              </Chip>
-            }
+          <Chip
+            icon={selectedAccountIds.length > 0 ? 'check-circle' : 'bank'}
+            onPress={() => setAccountSheetOpen(true)}
+            selected={selectedAccountIds.length > 0}
+            showSelectedOverlay
+            style={styles.filterChip}
+            compact
           >
-            <Menu.Item
-              title={t('allAccounts' as any)}
-              leadingIcon="close-circle-outline"
-              onPress={() => {
-                setSelectedAccountId(null);
-                setAccountMenuOpen(false);
-              }}
-            />
-            {accounts.map((acc) => (
-              <Menu.Item
-                key={acc.id}
-                title={translateName(acc.name)}
-                leadingIcon={
-                  selectedAccountId === acc.id ? 'check-circle' : 'bank-outline'
-                }
-                onPress={() => {
-                  setSelectedAccountId(acc.id);
-                  setAccountMenuOpen(false);
-                }}
-              />
-            ))}
-          </Menu>
-          <Menu
-            visible={categoryMenuOpen}
-            onDismiss={() => setCategoryMenuOpen(false)}
-            anchor={
-              <Chip
-                icon={selectedCategoryId ? 'check-circle' : 'tag'}
-                onPress={() => setCategoryMenuOpen(true)}
-                selected={!!selectedCategoryId}
-                showSelectedOverlay
-                style={styles.filterChip}
-                compact
-              >
-                {activeCategory
-                  ? translateName(activeCategory.name)
-                  : t('filterByCategory' as any)}
-              </Chip>
-            }
+            {selectedAccountIds.length === 0
+              ? t('filterByAccount' as any)
+              : selectedAccountIds.length === 1
+                ? translateName(accounts.find((a) => a.id === selectedAccountIds[0])?.name || '')
+                : `${selectedAccountIds.length} ${t('accounts' as any)}`}
+          </Chip>
+
+          <Chip
+            icon={selectedCategoryIds.length > 0 ? 'check-circle' : 'tag'}
+            onPress={() => setCategorySheetOpen(true)}
+            selected={selectedCategoryIds.length > 0}
+            showSelectedOverlay
+            style={styles.filterChip}
+            compact
           >
-            <Menu.Item
-              title={t('allCategories' as any)}
-              leadingIcon="close-circle-outline"
-              onPress={() => {
-                setSelectedCategoryId(null);
-                setCategoryMenuOpen(false);
-              }}
-            />
-            {categories.map((cat) => (
-              <Menu.Item
-                key={cat.id}
-                title={translateName(cat.name)}
-                leadingIcon={
-                  selectedCategoryId === cat.id ? 'check-circle' : 'tag-outline'
-                }
-                onPress={() => {
-                  setSelectedCategoryId(cat.id);
-                  setCategoryMenuOpen(false);
-                }}
-              />
-            ))}
-          </Menu>
+            {selectedCategoryIds.length === 0
+              ? t('filterByCategory' as any)
+              : selectedCategoryIds.length === 1
+                ? translateName(categories.find((c) => c.id === selectedCategoryIds[0])?.name || '')
+                : `${selectedCategoryIds.length} ${t('categories' as any)}`}
+          </Chip>
+
           {hasActiveFilters && (
             <Chip
               icon="close"
@@ -368,10 +316,261 @@ export const TransactionsScreen = () => {
         onPress={() =>
           router.push({
             pathname: '/add-transaction',
-            params: { accountId: selectedAccountId || '' },
+            params: { accountId: selectedAccountIds.length === 1 ? selectedAccountIds[0] : '' },
           })
         }
       />
+
+      <BottomSheet
+        visible={accountSheetOpen}
+        onClose={() => setAccountSheetOpen(false)}
+        title={t('filterByAccount' as any)}
+        footer={
+          <Button
+            mode="contained"
+            onPress={() => setAccountSheetOpen(false)}
+            style={{ borderRadius: 12, width: '100%' }}
+            labelStyle={{ fontFamily: 'Inter-Medium', fontWeight: '500' }}
+          >
+            {t('filterApply' as any) || 'Apply'}
+          </Button>
+        }
+      >
+        <TouchableOpacity
+          style={[
+            styles.modalListItem,
+            { borderColor: theme.colors.outlineVariant },
+            selectedAccountIds.length === 0 && {
+              backgroundColor: theme.dark
+                ? addAlpha(theme.colors.primary, 0.16)
+                : addAlpha(theme.colors.primary, 0.08),
+            },
+          ]}
+          onPress={() => {
+            setSelectedAccountIds([]);
+            setAccountSheetOpen(false);
+          }}
+          accessibilityRole="button"
+          accessibilityState={{ selected: selectedAccountIds.length === 0 }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View
+              style={[
+                styles.listItemIconBox,
+                {
+                  backgroundColor: `${theme.colors.primary}12`,
+                  borderColor: `${theme.colors.primary}2B`,
+                },
+              ]}
+            >
+              <Ionicons
+                name="wallet-outline"
+                size={20}
+                color={theme.colors.primary}
+              />
+            </View>
+            <Text
+              style={{
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
+                color: theme.colors.onSurface,
+              }}
+            >
+              {t('allAccounts' as any)}
+            </Text>
+          </View>
+          <Ionicons
+            name={selectedAccountIds.length === 0 ? 'checkbox' : 'square-outline'}
+            size={20}
+            color={selectedAccountIds.length === 0 ? theme.colors.primary : theme.colors.outline}
+          />
+        </TouchableOpacity>
+
+        {accounts.map((acc) => {
+          const isSelected = selectedAccountIds.includes(acc.id);
+          const accColor = acc.color || theme.colors.primary;
+          const accIcon = acc.type === 'cash' ? 'cash-outline' : acc.type === 'bank' ? 'business-outline' : 'card-outline';
+          return (
+            <TouchableOpacity
+              key={acc.id}
+              style={[
+                styles.modalListItem,
+                { borderColor: theme.colors.outlineVariant },
+                isSelected && {
+                  backgroundColor: theme.dark
+                    ? addAlpha(accColor, 0.16)
+                    : addAlpha(accColor, 0.08),
+                },
+              ]}
+              onPress={() => {
+                setSelectedAccountIds((prev) =>
+                  prev.includes(acc.id)
+                    ? prev.filter((id) => id !== acc.id)
+                    : [...prev, acc.id]
+                );
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={[
+                    styles.listItemIconBox,
+                    {
+                      backgroundColor: `${accColor}12`,
+                      borderColor: `${accColor}2B`,
+                    },
+                  ]}
+                >
+                  <Ionicons name={accIcon as any} size={20} color={accColor} />
+                </View>
+                <Text
+                  style={{
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    color: theme.colors.onSurface,
+                  }}
+                >
+                  {translateName(acc.name)}
+                </Text>
+              </View>
+              <Ionicons
+                name={isSelected ? 'checkbox' : 'square-outline'}
+                size={20}
+                color={isSelected ? accColor : theme.colors.outline}
+              />
+            </TouchableOpacity>
+          );
+        })}
+      </BottomSheet>
+
+      <BottomSheet
+        visible={categorySheetOpen}
+        onClose={() => setCategorySheetOpen(false)}
+        title={t('filterByCategory' as any)}
+        footer={
+          <Button
+            mode="contained"
+            onPress={() => setCategorySheetOpen(false)}
+            style={{ borderRadius: 12, width: '100%' }}
+            labelStyle={{ fontFamily: 'Inter-Medium', fontWeight: '500' }}
+          >
+            {t('filterApply' as any) || 'Apply'}
+          </Button>
+        }
+      >
+        <TouchableOpacity
+          style={[
+            styles.modalListItem,
+            { borderColor: theme.colors.outlineVariant },
+            selectedCategoryIds.length === 0 && {
+              backgroundColor: theme.dark
+                ? addAlpha(theme.colors.primary, 0.16)
+                : addAlpha(theme.colors.primary, 0.08),
+            },
+          ]}
+          onPress={() => {
+            setSelectedCategoryIds([]);
+            setCategorySheetOpen(false);
+          }}
+          accessibilityRole="button"
+          accessibilityState={{ selected: selectedCategoryIds.length === 0 }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View
+              style={[
+                styles.listItemIconBox,
+                {
+                  backgroundColor: `${theme.colors.primary}12`,
+                  borderColor: `${theme.colors.primary}2B`,
+                },
+              ]}
+            >
+              <Ionicons
+                name="pricetag-outline"
+                size={20}
+                color={theme.colors.primary}
+              />
+            </View>
+            <Text
+              style={{
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
+                color: theme.colors.onSurface,
+              }}
+            >
+              {t('allCategories' as any)}
+            </Text>
+          </View>
+          <Ionicons
+            name={selectedCategoryIds.length === 0 ? 'checkbox' : 'square-outline'}
+            size={20}
+            color={selectedCategoryIds.length === 0 ? theme.colors.primary : theme.colors.outline}
+          />
+        </TouchableOpacity>
+
+        {categories.map((cat) => {
+          const isSelected = selectedCategoryIds.includes(cat.id);
+          const catColor = cat.color || theme.colors.primary;
+          const iconName = getValidCategoryIcon(cat.icon);
+          return (
+            <TouchableOpacity
+              key={cat.id}
+              style={[
+                styles.modalListItem,
+                { borderColor: theme.colors.outlineVariant },
+                isSelected && {
+                  backgroundColor: theme.dark
+                    ? addAlpha(catColor, 0.16)
+                    : addAlpha(catColor, 0.08),
+                },
+              ]}
+              onPress={() => {
+                setSelectedCategoryIds((prev) =>
+                  prev.includes(cat.id)
+                    ? prev.filter((id) => id !== cat.id)
+                    : [...prev, cat.id]
+                );
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={[
+                    styles.listItemIconBox,
+                    {
+                      backgroundColor: `${catColor}12`,
+                      borderColor: `${catColor}2B`,
+                    },
+                  ]}
+                >
+                  <Avatar.Icon
+                    size={24}
+                    icon={iconName}
+                    style={{ backgroundColor: 'transparent' }}
+                    color={catColor}
+                  />
+                </View>
+                <Text
+                  style={{
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    color: theme.colors.onSurface,
+                  }}
+                >
+                  {translateName(cat.name)}
+                </Text>
+              </View>
+              <Ionicons
+                name={isSelected ? 'checkbox' : 'square-outline'}
+                size={20}
+                color={isSelected ? catColor : theme.colors.outline}
+              />
+            </TouchableOpacity>
+          );
+        })}
+      </BottomSheet>
     </View>
   );
 };
@@ -451,5 +650,24 @@ const defaultStyles = (theme: any) =>
       position: 'absolute',
       right: 16,
       borderRadius: 16,
+    },
+    modalListItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 16,
+      borderWidth: 1,
+      marginBottom: 10,
+    },
+    listItemIconBox: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      borderWidth: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 12,
     },
   });
