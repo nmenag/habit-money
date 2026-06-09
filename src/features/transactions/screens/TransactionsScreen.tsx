@@ -4,7 +4,15 @@ import { enUS, es } from 'date-fns/locale';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Avatar, Button, Chip, FAB, Searchbar, Text, useTheme } from 'react-native-paper';
+import {
+  Avatar,
+  Button,
+  Chip,
+  FAB,
+  Searchbar,
+  Text,
+  useTheme,
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FilterBar } from '../components/FilterBar';
 import { TransactionItem } from '../components/TransactionItem';
@@ -53,9 +61,7 @@ export const TransactionsScreen = () => {
   const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>(
     params.accountId ? [params.accountId] : [],
   );
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
-    [],
-  );
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
   const [categorySheetOpen, setCategorySheetOpen] = useState(false);
 
@@ -75,8 +81,15 @@ export const TransactionsScreen = () => {
     const query = searchQuery.toLowerCase().trim();
     return transactions.filter((tx) => {
       if (!isInRange(tx.date, selectedRange)) return false;
-      if (selectedAccountIds.length > 0 && !selectedAccountIds.includes(tx.accountId)) return false;
-      if (selectedCategoryIds.length > 0 && (!tx.categoryId || !selectedCategoryIds.includes(tx.categoryId)))
+      if (
+        selectedAccountIds.length > 0 &&
+        !selectedAccountIds.includes(tx.accountId)
+      )
+        return false;
+      if (
+        selectedCategoryIds.length > 0 &&
+        (!tx.categoryId || !selectedCategoryIds.includes(tx.categoryId))
+      )
         return false;
 
       if (query) {
@@ -223,7 +236,10 @@ export const TransactionsScreen = () => {
             {selectedAccountIds.length === 0
               ? t('filterByAccount' as any)
               : selectedAccountIds.length === 1
-                ? translateName(accounts.find((a) => a.id === selectedAccountIds[0])?.name || '')
+                ? translateName(
+                    accounts.find((a) => a.id === selectedAccountIds[0])
+                      ?.name || '',
+                  )
                 : `${selectedAccountIds.length} ${t('accounts' as any)}`}
           </Chip>
 
@@ -238,7 +254,10 @@ export const TransactionsScreen = () => {
             {selectedCategoryIds.length === 0
               ? t('filterByCategory' as any)
               : selectedCategoryIds.length === 1
-                ? translateName(categories.find((c) => c.id === selectedCategoryIds[0])?.name || '')
+                ? translateName(
+                    categories.find((c) => c.id === selectedCategoryIds[0])
+                      ?.name || '',
+                  )
                 : `${selectedCategoryIds.length} ${t('categories' as any)}`}
           </Chip>
 
@@ -316,7 +335,10 @@ export const TransactionsScreen = () => {
         onPress={() =>
           router.push({
             pathname: '/add-transaction',
-            params: { accountId: selectedAccountIds.length === 1 ? selectedAccountIds[0] : '' },
+            params: {
+              accountId:
+                selectedAccountIds.length === 1 ? selectedAccountIds[0] : '',
+            },
           })
         }
       />
@@ -380,16 +402,27 @@ export const TransactionsScreen = () => {
             </Text>
           </View>
           <Ionicons
-            name={selectedAccountIds.length === 0 ? 'checkbox' : 'square-outline'}
+            name={
+              selectedAccountIds.length === 0 ? 'checkbox' : 'square-outline'
+            }
             size={20}
-            color={selectedAccountIds.length === 0 ? theme.colors.primary : theme.colors.outline}
+            color={
+              selectedAccountIds.length === 0
+                ? theme.colors.primary
+                : theme.colors.outline
+            }
           />
         </TouchableOpacity>
 
         {accounts.map((acc) => {
           const isSelected = selectedAccountIds.includes(acc.id);
           const accColor = acc.color || theme.colors.primary;
-          const accIcon = acc.type === 'cash' ? 'cash-outline' : acc.type === 'bank' ? 'business-outline' : 'card-outline';
+          const accIcon =
+            acc.type === 'cash'
+              ? 'cash-outline'
+              : acc.type === 'bank'
+                ? 'business-outline'
+                : 'card-outline';
           return (
             <TouchableOpacity
               key={acc.id}
@@ -406,7 +439,7 @@ export const TransactionsScreen = () => {
                 setSelectedAccountIds((prev) =>
                   prev.includes(acc.id)
                     ? prev.filter((id) => id !== acc.id)
-                    : [...prev, acc.id]
+                    : [...prev, acc.id],
                 );
               }}
               accessibilityRole="button"
@@ -503,9 +536,15 @@ export const TransactionsScreen = () => {
             </Text>
           </View>
           <Ionicons
-            name={selectedCategoryIds.length === 0 ? 'checkbox' : 'square-outline'}
+            name={
+              selectedCategoryIds.length === 0 ? 'checkbox' : 'square-outline'
+            }
             size={20}
-            color={selectedCategoryIds.length === 0 ? theme.colors.primary : theme.colors.outline}
+            color={
+              selectedCategoryIds.length === 0
+                ? theme.colors.primary
+                : theme.colors.outline
+            }
           />
         </TouchableOpacity>
 
@@ -529,7 +568,7 @@ export const TransactionsScreen = () => {
                 setSelectedCategoryIds((prev) =>
                   prev.includes(cat.id)
                     ? prev.filter((id) => id !== cat.id)
-                    : [...prev, cat.id]
+                    : [...prev, cat.id],
                 );
               }}
               accessibilityRole="button"

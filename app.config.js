@@ -38,7 +38,7 @@ module.exports = {
     name: getAppName(),
     slug: 'fin-habit',
     version: packageJson.version,
-    orientation: 'portrait',
+    orientation: 'default',
     icon: getIcon(),
     scheme: 'habitmoney',
     userInterfaceStyle: 'automatic',
