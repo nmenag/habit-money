@@ -16,6 +16,7 @@ interface BottomSheetProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
 }
 
 export const BottomSheet: React.FC<BottomSheetProps> = ({
@@ -23,6 +24,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   onClose,
   title,
   children,
+  footer,
 }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -46,7 +48,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             {
               backgroundColor: theme.colors.surface,
               borderColor: theme.colors.outline,
-              paddingBottom: Math.max(insets.bottom, 20),
+              paddingBottom: footer ? 0 : Math.max(insets.bottom, 20),
             },
           ]}
         >
@@ -91,6 +93,21 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           >
             {children}
           </ScrollView>
+
+          {footer && (
+            <View
+              style={[
+                styles.modalFooter,
+                {
+                  borderTopColor: theme.colors.outlineVariant,
+                  backgroundColor: theme.colors.surface,
+                  paddingBottom: Math.max(insets.bottom, 16),
+                },
+              ]}
+            >
+              {footer}
+            </View>
+          )}
         </View>
       </View>
     </Modal>
@@ -152,5 +169,10 @@ const styles = StyleSheet.create({
   modalScrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 24,
+  },
+  modalFooter: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    borderTopWidth: 1,
   },
 });

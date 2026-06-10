@@ -28,6 +28,8 @@ const getIcon = () => {
 const getAdaptiveForeground = () => {
   if (variant === 'development')
     return './assets/images/android-icon-foreground-dev.png';
+  if (variant === 'preview')
+    return './assets/images/android-icon-foreground-preview.png';
   return './assets/images/android-icon-foreground.png';
 };
 
@@ -36,7 +38,7 @@ module.exports = {
     name: getAppName(),
     slug: 'fin-habit',
     version: packageJson.version,
-    orientation: 'portrait',
+    orientation: 'default',
     icon: getIcon(),
     scheme: 'habitmoney',
     userInterfaceStyle: 'automatic',

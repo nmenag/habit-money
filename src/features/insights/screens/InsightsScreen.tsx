@@ -1,7 +1,12 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { Card, ProgressBar, Text, useTheme } from 'react-native-paper';
 import { getValidCategoryIcon } from '../../../constants';
@@ -13,11 +18,7 @@ import { AppTheme, chartColors } from '../../../theme/theme';
 import { isInRange } from '../../../utils/dateFilters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import {
-  SCREEN_WIDTH,
-  fontScale,
-  moderateScale,
-} from '../../../utils/responsive';
+import { fontScale, moderateScale } from '../../../utils/responsive';
 
 const addAlpha = (
   color: string | undefined,
@@ -62,6 +63,16 @@ export const InsightsScreen = () => {
   const styles = defaultStyles(theme);
   const selectedRange = useFilterStore((s) => s.selectedRange);
   const insets = useSafeAreaInsets();
+  const { width: windowWidth } = useWindowDimensions();
+  const isTablet = windowWidth >= 600;
+
+  const chartWidth = useMemo(() => {
+    if (isTablet) {
+      const colWidth = (windowWidth - 48) / 2;
+      return Math.min(colWidth - 32, 500);
+    }
+    return Math.min(windowWidth - 64, 500);
+  }, [windowWidth, isTablet]);
 
   React.useEffect(() => {
     loadFullData();
@@ -219,7 +230,7 @@ export const InsightsScreen = () => {
             ((d.population / filtered.totalExpenses) * 100).toFixed(1),
           ),
         }))}
-        width={SCREEN_WIDTH - 64}
+        width={chartWidth}
         height={200}
         chartConfig={{
           color: (opacity = 1) => `rgba(0,0,0,${opacity})`,
@@ -231,7 +242,7 @@ export const InsightsScreen = () => {
         hasLegend={false}
       />
     );
-  }, [pieData, filtered.totalExpenses]);
+  }, [pieData, filtered.totalExpenses, chartWidth]);
 
   const memoizedLegend = useMemo(
     () => (
@@ -305,7 +316,7 @@ export const InsightsScreen = () => {
     return (
       <BarChart
         data={barData}
-        width={SCREEN_WIDTH - 64}
+        width={chartWidth}
         height={220}
         yAxisLabel={currencySymbol}
         yAxisSuffix=""
@@ -317,7 +328,648 @@ export const InsightsScreen = () => {
         style={styles.chart}
       />
     );
-  }, [barData, currencySymbol, chartConfig, styles.chart]);
+  }, [barData, currencySymbol, chartConfig, styles.chart, chartWidth]);
+
+  const rangeBadge = (
+    <View
+      style={[
+        styles.rangeBadge,
+        {
+          backgroundColor: addAlpha(theme.colors.primary, 0.08, '#22C55E'),
+          borderColor: addAlpha(theme.colors.primary, 0.17, '#22C55E'),
+          borderWidth: 1,
+        },
+      ]}
+    >
+      {selectedRange.type !== 'allTime' && (
+        <>
+          <Ionicons name="calendar" size={14} color={theme.colors.primary} />
+          <Text
+            style={{
+              fontFamily: 'Inter-Medium',
+              color: theme.colors.primary,
+              marginLeft: 6,
+              fontWeight: '500',
+              fontSize: 10,
+              letterSpacing: 1.2,
+              textTransform: 'uppercase',
+            }}
+          >
+            {rangeLabel}
+          </Text>
+          <Text
+            style={{
+              color: theme.colors.primary,
+              marginLeft: 4,
+              fontSize: 10,
+            }}
+          >
+            ·{' '}
+          </Text>
+        </>
+      )}
+      <Text
+        style={{
+          fontFamily: 'Inter-Medium',
+          color: theme.colors.primary,
+          fontWeight: '500',
+          fontSize: 10,
+          letterSpacing: 1.2,
+          textTransform: 'uppercase',
+        }}
+      >
+        {filtered.txCount}{' '}
+        {filtered.txCount === 1 ? 'transaction' : 'transactions'}
+      </Text>
+    </View>
+  );
+
+  const summarySection = (
+    <View style={{ width: '100%' }}>
+      <View style={styles.summaryContainer}>
+        <Card
+          style={[
+            styles.miniCard,
+            {
+              backgroundColor: addAlpha(theme.colors.income, 0.08, '#16A34A'),
+              borderColor: addAlpha(theme.colors.income, 0.17, '#16A34A'),
+              borderWidth: 1,
+            },
+          ]}
+          mode="contained"
+          accessible={true}
+          accessibilityLabel={`${t('realIncome')}: ${formatCurrency(filtered.totalIncome)}`}
+        >
+          <Card.Content style={styles.miniCardContent}>
+            <Ionicons
+              name="arrow-up-circle"
+              size={20}
+              color={theme.colors.income}
+            />
+            <Text
+              style={[
+                styles.miniLabel,
+                {
+                  color: theme.colors.income,
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                },
+              ]}
+              numberOfLines={1}
+            >
+              {t('realIncome')}
+            </Text>
+            <Text
+              style={[
+                styles.miniValue,
+                {
+                  color: theme.colors.income,
+                  fontFamily: 'Inter-SemiBold',
+                  fontWeight: '600',
+                  fontSize: fontScale(14),
+                },
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {formatCurrency(filtered.totalIncome)}
+            </Text>
+          </Card.Content>
+        </Card>
+
+        {filtered.hasAdjustments && (
+          <Card
+            style={[
+              styles.miniCard,
+              {
+                backgroundColor: addAlpha(
+                  theme.colors.onSurfaceVariant,
+                  0.08,
+                  '#64748B',
+                ),
+                borderColor: addAlpha(
+                  theme.colors.onSurfaceVariant,
+                  0.17,
+                  '#64748B',
+                ),
+                borderWidth: 1,
+              },
+            ]}
+            mode="contained"
+            accessible={true}
+            accessibilityLabel={`${t('adjustments')}: ${formatCurrency(filtered.totalAdjustments)}`}
+          >
+            <Card.Content style={styles.miniCardContent}>
+              <Ionicons
+                name="options-outline"
+                size={20}
+                color={theme.colors.onSurfaceVariant}
+              />
+              <Text
+                style={[
+                  styles.miniLabel,
+                  {
+                    color: theme.colors.onSurfaceVariant,
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                  },
+                ]}
+                numberOfLines={1}
+              >
+                {t('adjustments')}
+              </Text>
+              <Text
+                style={[
+                  styles.miniValue,
+                  {
+                    color: theme.colors.onSurfaceVariant,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                    fontSize: fontScale(14),
+                  },
+                ]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {formatCurrency(filtered.totalAdjustments)}
+              </Text>
+            </Card.Content>
+          </Card>
+        )}
+
+        <Card
+          style={[
+            styles.miniCard,
+            {
+              backgroundColor: addAlpha(theme.colors.error, 0.08, '#EF4444'),
+              borderColor: addAlpha(theme.colors.error, 0.17, '#EF4444'),
+              borderWidth: 1,
+            },
+          ]}
+          mode="contained"
+          accessible={true}
+          accessibilityLabel={`${t('expenses')}: ${formatCurrency(filtered.totalExpenses)}`}
+        >
+          <Card.Content style={styles.miniCardContent}>
+            <Ionicons
+              name="arrow-down-circle"
+              size={20}
+              color={theme.colors.error}
+            />
+            <Text
+              style={[
+                styles.miniLabel,
+                {
+                  color: theme.colors.error,
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                },
+              ]}
+              numberOfLines={1}
+            >
+              {t('expenses')}
+            </Text>
+            <Text
+              style={[
+                styles.miniValue,
+                {
+                  color: theme.colors.error,
+                  fontFamily: 'Inter-SemiBold',
+                  fontWeight: '600',
+                  fontSize: fontScale(14),
+                },
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {formatCurrency(filtered.totalExpenses)}
+            </Text>
+          </Card.Content>
+        </Card>
+      </View>
+
+      {filtered.hasAdjustments && filtered.totalAdjustments !== 0 && (
+        <View style={{ marginBottom: 12, alignItems: 'center' }}>
+          <Text
+            style={{
+              fontFamily: 'Inter-Regular',
+              fontWeight: '400',
+              fontSize: 11,
+              color: theme.colors.outline,
+            }}
+          >
+            {t('combinedTotal')}: {formatCurrency(filtered.combinedIncome)}
+          </Text>
+        </View>
+      )}
+
+      <Card
+        style={[
+          styles.savingsCard,
+          {
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.outlineVariant,
+            borderWidth: 1,
+          },
+        ]}
+        mode="contained"
+        accessible={true}
+        accessibilityLabel={`${t('savingsRateTitle')}: ${filtered.savingsRate.toFixed(1)}%. ${t('spendingFrequencyTitle')}: ${filtered.spendingDays} ${t('daysLabel')}, ${filtered.txCount} ${filtered.txCount === 1 ? 'transaction' : 'transactions'}`}
+      >
+        <Card.Content style={styles.savingsRow}>
+          <View style={styles.savingsItem}>
+            <Text
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
+                fontSize: 10,
+                letterSpacing: 1.5,
+                textTransform: 'uppercase',
+              }}
+            >
+              {t('savingsRateTitle')}
+            </Text>
+            <Text
+              style={{
+                fontFamily: 'Inter-SemiBold',
+                fontWeight: '600',
+                fontSize: 22,
+                color:
+                  filtered.savingsRate >= 0
+                    ? theme.colors.income
+                    : theme.colors.error,
+                marginTop: 4,
+              }}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {filtered.savingsRate.toFixed(1)}%
+            </Text>
+            <ProgressBar
+              progress={Math.max(0, Math.min(1, filtered.savingsRate / 100))}
+              color={
+                filtered.savingsRate >= 0
+                  ? theme.colors.income
+                  : theme.colors.error
+              }
+              style={styles.savingsProgress}
+            />
+          </View>
+          <View
+            style={[
+              styles.savingsDivider,
+              { backgroundColor: theme.colors.outlineVariant },
+            ]}
+          />
+          <View style={styles.savingsItem}>
+            <Text
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                fontFamily: 'Inter-Medium',
+                fontWeight: '500',
+                fontSize: 10,
+                letterSpacing: 1.5,
+                textTransform: 'uppercase',
+              }}
+            >
+              {t('spendingFrequencyTitle')}
+            </Text>
+            <Text
+              style={{
+                fontFamily: 'Inter-SemiBold',
+                fontWeight: '600',
+                fontSize: 22,
+                color: theme.colors.onSurface,
+                marginTop: 4,
+              }}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {filtered.spendingDays}{' '}
+              <Text
+                style={{
+                  color: theme.colors.onSurfaceVariant,
+                  fontFamily: 'Inter-Medium',
+                  fontWeight: '500',
+                  fontSize: 12,
+                }}
+              >
+                {t('daysLabel')}
+              </Text>
+            </Text>
+          </View>
+        </Card.Content>
+      </Card>
+    </View>
+  );
+
+  const pieChartCard = pieData.length > 0 && (
+    <Card
+      style={[
+        styles.card,
+        {
+          borderColor: theme.colors.outlineVariant,
+          borderWidth: 1,
+        },
+      ]}
+      mode="contained"
+      accessible={true}
+      accessibilityLabel={`${t('chartTitle')}. ${t('categoryPieChartDescription' as any) || 'Pie chart showing category spending breakdown'}`}
+    >
+      <Card.Content>
+        <Text
+          style={[
+            styles.chartTitle,
+            {
+              color: theme.colors.onSurface,
+              fontFamily: 'Inter-SemiBold',
+              fontWeight: '600',
+            },
+          ]}
+        >
+          {t('chartTitle')}
+        </Text>
+        {memoizedPieChart}
+        {memoizedLegend}
+      </Card.Content>
+    </Card>
+  );
+
+  const barChartCard = barData && (
+    <Card
+      style={[
+        styles.card,
+        {
+          borderColor: theme.colors.outlineVariant,
+          borderWidth: 1,
+        },
+      ]}
+      mode="contained"
+      accessible={true}
+      accessibilityLabel={`${t('expenseGrowthTitle')}. ${t('monthlyBarChartDescription' as any) || 'Bar chart showing monthly expense comparisons'}`}
+    >
+      <Card.Content>
+        <Text
+          style={[
+            styles.chartTitle,
+            {
+              color: theme.colors.onSurface,
+              fontFamily: 'Inter-SemiBold',
+              fontWeight: '600',
+            },
+          ]}
+        >
+          {t('expenseGrowthTitle')}
+        </Text>
+
+        {analyticsReport?.hasEnoughHistory ? (
+          <>
+            <Text
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                fontFamily: 'Inter-Regular',
+                fontWeight: '400',
+                fontSize: 12,
+                marginBottom: 8,
+              }}
+            >
+              {t('basedOnLastMonths')}
+            </Text>
+            {memoizedBarChart}
+            <View style={styles.growthContainer}>
+              <Text
+                style={[
+                  styles.growthValue,
+                  {
+                    color:
+                      expenseGrowth > 0
+                        ? theme.colors.error
+                        : theme.colors.income,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                    fontSize: 22,
+                  },
+                ]}
+              >
+                {expenseGrowth > 0 ? '+' : ''}
+                {expenseGrowth.toFixed(1)}%
+              </Text>
+              <Text
+                style={[
+                  styles.subtext,
+                  {
+                    fontFamily: 'Inter-Regular',
+                    fontWeight: '400',
+                    fontSize: 12,
+                  },
+                ]}
+              >
+                {t('comparedToLastMonth')}
+              </Text>
+            </View>
+          </>
+        ) : (
+          <View style={{ paddingVertical: 20, alignItems: 'center' }}>
+            <Ionicons
+              name="time-outline"
+              size={32}
+              color={theme.colors.outline}
+              style={{ marginBottom: 8 }}
+            />
+            <Text
+              style={{
+                fontFamily: 'Inter-Medium',
+                color: theme.colors.onSurfaceVariant,
+                fontSize: 14,
+                textAlign: 'center',
+              }}
+            >
+              {t('notEnoughDataTitle' as any)}
+            </Text>
+            <Text
+              style={{
+                fontFamily: 'Inter-Regular',
+                color: theme.colors.outline,
+                fontSize: 12,
+                textAlign: 'center',
+                marginTop: 4,
+              }}
+            >
+              {t('notEnoughDataMessage' as any)}
+            </Text>
+          </View>
+        )}
+      </Card.Content>
+    </Card>
+  );
+
+  const insightsSection = analyticsReport &&
+    analyticsReport.insights.length > 0 && (
+      <View style={{ marginTop: 8 }}>
+        <Text
+          style={[
+            styles.sectionTitle,
+            {
+              color: theme.colors.onSurface,
+              fontFamily: 'Inter-SemiBold',
+              fontWeight: '600',
+            },
+          ]}
+        >
+          {t('insights')}
+        </Text>
+        {analyticsReport.insights.map((insight) => {
+          let iconName: any = 'information-circle-outline';
+          let iconColor = theme.colors.primary;
+          let backgroundColor = addAlpha(theme.colors.primary, 0.08, '#22C55E');
+          let borderColor = addAlpha(theme.colors.primary, 0.17, '#22C55E');
+
+          if (insight.level === 'critical' || insight.level === 'warning') {
+            iconName = 'alert-circle-outline';
+            iconColor =
+              insight.level === 'critical'
+                ? theme.colors.error
+                : theme.colors.warning;
+            backgroundColor = addAlpha(
+              iconColor,
+              0.08,
+              insight.level === 'critical' ? '#EF4444' : '#F59E0B',
+            );
+            borderColor = addAlpha(
+              iconColor,
+              0.17,
+              insight.level === 'critical' ? '#EF4444' : '#F59E0B',
+            );
+          } else if (insight.level === 'positive') {
+            iconName = 'checkmark-circle-outline';
+            iconColor = theme.colors.income;
+            backgroundColor = addAlpha(theme.colors.income, 0.08, '#16A34A');
+            borderColor = addAlpha(theme.colors.income, 0.17, '#16A34A');
+          }
+
+          return (
+            <Card
+              key={insight.id}
+              style={[
+                styles.insightCard,
+                {
+                  borderColor: theme.colors.outlineVariant,
+                  borderWidth: 1,
+                },
+              ]}
+              mode="contained"
+            >
+              <Card.Content style={styles.insightContent}>
+                <View
+                  style={[
+                    styles.insightIconContainer,
+                    {
+                      backgroundColor: backgroundColor,
+                      borderColor: borderColor,
+                      borderWidth: 1,
+                    },
+                  ]}
+                >
+                  <Ionicons name={iconName} size={24} color={iconColor} />
+                </View>
+                <View style={styles.insightTextContainer}>
+                  <Text
+                    style={[
+                      styles.insightTitle,
+                      {
+                        color: theme.colors.onSurface,
+                        fontFamily: 'Inter-Medium',
+                        fontWeight: '500',
+                      },
+                    ]}
+                  >
+                    {insight.title}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.insightText,
+                      {
+                        color: theme.colors.onSurfaceVariant,
+                        fontFamily: 'Inter-Regular',
+                        fontWeight: '400',
+                      },
+                    ]}
+                  >
+                    {insight.message}
+                  </Text>
+                  {insight.recommendation && (
+                    <View style={styles.recommendationContainer}>
+                      <Text
+                        style={{
+                          color: theme.colors.primary,
+                          fontFamily: 'Inter-Medium',
+                          fontWeight: '500',
+                          fontSize: 12,
+                        }}
+                      >
+                        {insight.recommendation}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </Card.Content>
+            </Card>
+          );
+        })}
+      </View>
+    );
+
+  const emptySection = (
+    <View style={styles.emptyContainer}>
+      <Ionicons
+        name="bar-chart-outline"
+        size={56}
+        color={theme.colors.outlineVariant}
+      />
+      <Text
+        style={[
+          styles.emptyText,
+          {
+            color: theme.colors.onSurfaceVariant,
+            fontFamily: 'Inter-Medium',
+            fontWeight: '500',
+            fontSize: 14,
+          },
+        ]}
+      >
+        {t('noDataForPeriod')}
+      </Text>
+    </View>
+  );
+
+  const renderInsightsContent = () => {
+    if (filtered.txCount === 0) {
+      return emptySection;
+    }
+    if (isTablet) {
+      return (
+        <View style={styles.gridContainer}>
+          <View style={styles.gridColumn}>
+            {summarySection}
+            {pieChartCard}
+          </View>
+          <View style={styles.gridColumn}>
+            {barChartCard}
+            {insightsSection}
+          </View>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.singleColumn}>
+        {summarySection}
+        {pieChartCard}
+        {barChartCard}
+        {insightsSection}
+      </View>
+    );
+  };
 
   return (
     <View
@@ -332,623 +984,8 @@ export const InsightsScreen = () => {
           { paddingBottom: insets.bottom + 200 },
         ]}
       >
-        <View
-          style={[
-            styles.rangeBadge,
-            {
-              backgroundColor: addAlpha(theme.colors.primary, 0.08, '#22C55E'),
-              borderColor: addAlpha(theme.colors.primary, 0.17, '#22C55E'),
-              borderWidth: 1,
-            },
-          ]}
-        >
-          {selectedRange.type !== 'allTime' && (
-            <>
-              <Ionicons
-                name="calendar"
-                size={14}
-                color={theme.colors.primary}
-              />
-              <Text
-                style={{
-                  fontFamily: 'Inter-Medium',
-                  color: theme.colors.primary,
-                  marginLeft: 6,
-                  fontWeight: '500',
-                  fontSize: 10,
-                  letterSpacing: 1.2,
-                  textTransform: 'uppercase',
-                }}
-              >
-                {rangeLabel}
-              </Text>
-              <Text
-                style={{
-                  color: theme.colors.primary,
-                  marginLeft: 4,
-                  fontSize: 10,
-                }}
-              >
-                ·{' '}
-              </Text>
-            </>
-          )}
-          <Text
-            style={{
-              fontFamily: 'Inter-Medium',
-              color: theme.colors.primary,
-              fontWeight: '500',
-              fontSize: 10,
-              letterSpacing: 1.2,
-              textTransform: 'uppercase',
-            }}
-          >
-            {filtered.txCount}{' '}
-            {filtered.txCount === 1 ? 'transaction' : 'transactions'}
-          </Text>
-        </View>
-
-        <View style={styles.summaryContainer}>
-          <Card
-            style={[
-              styles.miniCard,
-              {
-                backgroundColor: addAlpha(theme.colors.income, 0.08, '#16A34A'),
-                borderColor: addAlpha(theme.colors.income, 0.17, '#16A34A'),
-                borderWidth: 1,
-              },
-            ]}
-            mode="contained"
-            accessible={true}
-            accessibilityLabel={`${t('realIncome')}: ${formatCurrency(filtered.totalIncome)}`}
-          >
-            <Card.Content style={styles.miniCardContent}>
-              <Ionicons
-                name="arrow-up-circle"
-                size={20}
-                color={theme.colors.income}
-              />
-              <Text
-                style={[
-                  styles.miniLabel,
-                  {
-                    color: theme.colors.income,
-                    fontFamily: 'Inter-Medium',
-                    fontWeight: '500',
-                  },
-                ]}
-                numberOfLines={1}
-              >
-                {t('realIncome')}
-              </Text>
-              <Text
-                style={[
-                  styles.miniValue,
-                  {
-                    color: theme.colors.income,
-                    fontFamily: 'Inter-SemiBold',
-                    fontWeight: '600',
-                    fontSize: fontScale(14),
-                  },
-                ]}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                {formatCurrency(filtered.totalIncome)}
-              </Text>
-            </Card.Content>
-          </Card>
-
-          {filtered.hasAdjustments && (
-            <Card
-              style={[
-                styles.miniCard,
-                {
-                  backgroundColor: addAlpha(
-                    theme.colors.onSurfaceVariant,
-                    0.08,
-                    '#64748B',
-                  ),
-                  borderColor: addAlpha(
-                    theme.colors.onSurfaceVariant,
-                    0.17,
-                    '#64748B',
-                  ),
-                  borderWidth: 1,
-                },
-              ]}
-              mode="contained"
-              accessible={true}
-              accessibilityLabel={`${t('adjustments')}: ${formatCurrency(filtered.totalAdjustments)}`}
-            >
-              <Card.Content style={styles.miniCardContent}>
-                <Ionicons
-                  name="options-outline"
-                  size={20}
-                  color={theme.colors.onSurfaceVariant}
-                />
-                <Text
-                  style={[
-                    styles.miniLabel,
-                    {
-                      color: theme.colors.onSurfaceVariant,
-                      fontFamily: 'Inter-Medium',
-                      fontWeight: '500',
-                    },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {t('adjustments')}
-                </Text>
-                <Text
-                  style={[
-                    styles.miniValue,
-                    {
-                      color: theme.colors.onSurfaceVariant,
-                      fontFamily: 'Inter-SemiBold',
-                      fontWeight: '600',
-                      fontSize: fontScale(14),
-                    },
-                  ]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {formatCurrency(filtered.totalAdjustments)}
-                </Text>
-              </Card.Content>
-            </Card>
-          )}
-
-          <Card
-            style={[
-              styles.miniCard,
-              {
-                backgroundColor: addAlpha(theme.colors.error, 0.08, '#EF4444'),
-                borderColor: addAlpha(theme.colors.error, 0.17, '#EF4444'),
-                borderWidth: 1,
-              },
-            ]}
-            mode="contained"
-            accessible={true}
-            accessibilityLabel={`${t('expenses')}: ${formatCurrency(filtered.totalExpenses)}`}
-          >
-            <Card.Content style={styles.miniCardContent}>
-              <Ionicons
-                name="arrow-down-circle"
-                size={20}
-                color={theme.colors.error}
-              />
-              <Text
-                style={[
-                  styles.miniLabel,
-                  {
-                    color: theme.colors.error,
-                    fontFamily: 'Inter-Medium',
-                    fontWeight: '500',
-                  },
-                ]}
-                numberOfLines={1}
-              >
-                {t('expenses')}
-              </Text>
-              <Text
-                style={[
-                  styles.miniValue,
-                  {
-                    color: theme.colors.error,
-                    fontFamily: 'Inter-SemiBold',
-                    fontWeight: '600',
-                    fontSize: fontScale(14),
-                  },
-                ]}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                {formatCurrency(filtered.totalExpenses)}
-              </Text>
-            </Card.Content>
-          </Card>
-        </View>
-
-        {filtered.hasAdjustments && filtered.totalAdjustments !== 0 && (
-          <View style={{ marginBottom: 12, alignItems: 'center' }}>
-            <Text
-              style={{
-                fontFamily: 'Inter-Regular',
-                fontWeight: '400',
-                fontSize: 11,
-                color: theme.colors.outline,
-              }}
-            >
-              {t('combinedTotal')}: {formatCurrency(filtered.combinedIncome)}
-            </Text>
-          </View>
-        )}
-
-        <Card
-          style={[
-            styles.savingsCard,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: theme.colors.outlineVariant,
-              borderWidth: 1,
-            },
-          ]}
-          mode="contained"
-          accessible={true}
-          accessibilityLabel={`${t('savingsRateTitle')}: ${filtered.savingsRate.toFixed(1)}%. ${t('spendingFrequencyTitle')}: ${filtered.spendingDays} ${t('daysLabel')}, ${filtered.txCount} ${filtered.txCount === 1 ? 'transaction' : 'transactions'}`}
-        >
-          <Card.Content style={styles.savingsRow}>
-            <View style={styles.savingsItem}>
-              <Text
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                  fontFamily: 'Inter-Medium',
-                  fontWeight: '500',
-                  fontSize: 10,
-                  letterSpacing: 1.5,
-                  textTransform: 'uppercase',
-                }}
-              >
-                {t('savingsRateTitle')}
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Inter-SemiBold',
-                  fontWeight: '600',
-                  fontSize: 22,
-                  color:
-                    filtered.savingsRate >= 0
-                      ? theme.colors.income
-                      : theme.colors.error,
-                  marginTop: 4,
-                }}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                {filtered.savingsRate.toFixed(1)}%
-              </Text>
-              <ProgressBar
-                progress={Math.max(0, Math.min(1, filtered.savingsRate / 100))}
-                color={
-                  filtered.savingsRate >= 0
-                    ? theme.colors.income
-                    : theme.colors.error
-                }
-                style={styles.savingsProgress}
-              />
-            </View>
-            <View
-              style={[
-                styles.savingsDivider,
-                { backgroundColor: theme.colors.outlineVariant },
-              ]}
-            />
-            <View style={styles.savingsItem}>
-              <Text
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                  fontFamily: 'Inter-Medium',
-                  fontWeight: '500',
-                  fontSize: 10,
-                  letterSpacing: 1.5,
-                  textTransform: 'uppercase',
-                }}
-              >
-                {t('spendingFrequencyTitle')}
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Inter-SemiBold',
-                  fontWeight: '600',
-                  fontSize: 22,
-                  color: theme.colors.onSurface,
-                  marginTop: 4,
-                }}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                {filtered.spendingDays}{' '}
-                <Text
-                  style={{
-                    color: theme.colors.onSurfaceVariant,
-                    fontFamily: 'Inter-Medium',
-                    fontWeight: '500',
-                    fontSize: 12,
-                  }}
-                >
-                  {t('daysLabel')}
-                </Text>
-              </Text>
-            </View>
-          </Card.Content>
-        </Card>
-
-        {pieData.length > 0 && (
-          <Card
-            style={[
-              styles.card,
-              {
-                borderColor: theme.colors.outlineVariant,
-                borderWidth: 1,
-              },
-            ]}
-            mode="contained"
-            accessible={true}
-            accessibilityLabel={`${t('chartTitle')}. ${t('categoryPieChartDescription' as any) || 'Pie chart showing category spending breakdown'}`}
-          >
-            <Card.Content>
-              <Text
-                style={[
-                  styles.chartTitle,
-                  {
-                    color: theme.colors.onSurface,
-                    fontFamily: 'Inter-SemiBold',
-                    fontWeight: '600',
-                  },
-                ]}
-              >
-                {t('chartTitle')}
-              </Text>
-              {memoizedPieChart}
-              {memoizedLegend}
-            </Card.Content>
-          </Card>
-        )}
-
-        {barData && (
-          <Card
-            style={[
-              styles.card,
-              {
-                borderColor: theme.colors.outlineVariant,
-                borderWidth: 1,
-              },
-            ]}
-            mode="contained"
-            accessible={true}
-            accessibilityLabel={`${t('expenseGrowthTitle')}. ${t('monthlyBarChartDescription' as any) || 'Bar chart showing monthly expense comparisons'}`}
-          >
-            <Card.Content>
-              <Text
-                style={[
-                  styles.chartTitle,
-                  {
-                    color: theme.colors.onSurface,
-                    fontFamily: 'Inter-SemiBold',
-                    fontWeight: '600',
-                  },
-                ]}
-              >
-                {t('expenseGrowthTitle')}
-              </Text>
-
-              {analyticsReport?.hasEnoughHistory ? (
-                <>
-                  <Text
-                    style={{
-                      color: theme.colors.onSurfaceVariant,
-                      fontFamily: 'Inter-Regular',
-                      fontWeight: '400',
-                      fontSize: 12,
-                      marginBottom: 8,
-                    }}
-                  >
-                    {t('basedOnLastMonths')}
-                  </Text>
-                  {memoizedBarChart}
-                  <View style={styles.growthContainer}>
-                    <Text
-                      style={[
-                        styles.growthValue,
-                        {
-                          color:
-                            expenseGrowth > 0
-                              ? theme.colors.error
-                              : theme.colors.income,
-                          fontFamily: 'Inter-SemiBold',
-                          fontWeight: '600',
-                          fontSize: 22,
-                        },
-                      ]}
-                    >
-                      {expenseGrowth > 0 ? '+' : ''}
-                      {expenseGrowth.toFixed(1)}%
-                    </Text>
-                    <Text
-                      style={[
-                        styles.subtext,
-                        {
-                          fontFamily: 'Inter-Regular',
-                          fontWeight: '400',
-                          fontSize: 12,
-                        },
-                      ]}
-                    >
-                      {t('comparedToLastMonth')}
-                    </Text>
-                  </View>
-                </>
-              ) : (
-                <View style={{ paddingVertical: 20, alignItems: 'center' }}>
-                  <Ionicons
-                    name="time-outline"
-                    size={32}
-                    color={theme.colors.outline}
-                    style={{ marginBottom: 8 }}
-                  />
-                  <Text
-                    style={{
-                      fontFamily: 'Inter-Medium',
-                      color: theme.colors.onSurfaceVariant,
-                      fontSize: 14,
-                      textAlign: 'center',
-                    }}
-                  >
-                    {t('notEnoughDataTitle' as any)}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: 'Inter-Regular',
-                      color: theme.colors.outline,
-                      fontSize: 12,
-                      textAlign: 'center',
-                      marginTop: 4,
-                    }}
-                  >
-                    {t('notEnoughDataMessage' as any)}
-                  </Text>
-                </View>
-              )}
-            </Card.Content>
-          </Card>
-        )}
-
-        {analyticsReport && analyticsReport.insights.length > 0 && (
-          <View style={{ marginTop: 8 }}>
-            <Text
-              style={[
-                styles.sectionTitle,
-                {
-                  color: theme.colors.onSurface,
-                  fontFamily: 'Inter-SemiBold',
-                  fontWeight: '600',
-                },
-              ]}
-            >
-              {t('insights')}
-            </Text>
-            {analyticsReport.insights.map((insight) => {
-              let iconName: any = 'information-circle-outline';
-              let iconColor = theme.colors.primary;
-              let backgroundColor = addAlpha(
-                theme.colors.primary,
-                0.08,
-                '#22C55E',
-              );
-              let borderColor = addAlpha(theme.colors.primary, 0.17, '#22C55E');
-
-              if (insight.level === 'critical' || insight.level === 'warning') {
-                iconName = 'alert-circle-outline';
-                iconColor =
-                  insight.level === 'critical'
-                    ? theme.colors.error
-                    : theme.colors.warning;
-                backgroundColor = addAlpha(
-                  iconColor,
-                  0.08,
-                  insight.level === 'critical' ? '#EF4444' : '#F59E0B',
-                );
-                borderColor = addAlpha(
-                  iconColor,
-                  0.17,
-                  insight.level === 'critical' ? '#EF4444' : '#F59E0B',
-                );
-              } else if (insight.level === 'positive') {
-                iconName = 'checkmark-circle-outline';
-                iconColor = theme.colors.income;
-                backgroundColor = addAlpha(
-                  theme.colors.income,
-                  0.08,
-                  '#16A34A',
-                );
-                borderColor = addAlpha(theme.colors.income, 0.17, '#16A34A');
-              }
-
-              return (
-                <Card
-                  key={insight.id}
-                  style={[
-                    styles.insightCard,
-                    {
-                      borderColor: theme.colors.outlineVariant,
-                      borderWidth: 1,
-                    },
-                  ]}
-                  mode="contained"
-                >
-                  <Card.Content style={styles.insightContent}>
-                    <View
-                      style={[
-                        styles.insightIconContainer,
-                        {
-                          backgroundColor: backgroundColor,
-                          borderColor: borderColor,
-                          borderWidth: 1,
-                        },
-                      ]}
-                    >
-                      <Ionicons name={iconName} size={24} color={iconColor} />
-                    </View>
-                    <View style={styles.insightTextContainer}>
-                      <Text
-                        style={[
-                          styles.insightTitle,
-                          {
-                            color: theme.colors.onSurface,
-                            fontFamily: 'Inter-Medium',
-                            fontWeight: '500',
-                          },
-                        ]}
-                      >
-                        {insight.title}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.insightText,
-                          {
-                            color: theme.colors.onSurfaceVariant,
-                            fontFamily: 'Inter-Regular',
-                            fontWeight: '400',
-                          },
-                        ]}
-                      >
-                        {insight.message}
-                      </Text>
-                      {insight.recommendation && (
-                        <View style={styles.recommendationContainer}>
-                          <Text
-                            style={{
-                              color: theme.colors.primary,
-                              fontFamily: 'Inter-Medium',
-                              fontWeight: '500',
-                              fontSize: 12,
-                            }}
-                          >
-                            {insight.recommendation}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  </Card.Content>
-                </Card>
-              );
-            })}
-          </View>
-        )}
-
-        {filtered.txCount === 0 && (
-          <View style={styles.emptyContainer}>
-            <Ionicons
-              name="bar-chart-outline"
-              size={56}
-              color={theme.colors.outlineVariant}
-            />
-            <Text
-              style={[
-                styles.emptyText,
-                {
-                  color: theme.colors.onSurfaceVariant,
-                  fontFamily: 'Inter-Medium',
-                  fontWeight: '500',
-                  fontSize: 14,
-                },
-              ]}
-            >
-              {t('noDataForPeriod')}
-            </Text>
-          </View>
-        )}
+        {filtered.txCount > 0 && rangeBadge}
+        {renderInsightsContent()}
       </ScrollView>
       <View style={styles.adContainer}>
         <BannerAdComponent />
@@ -965,6 +1002,21 @@ const defaultStyles = (theme: any) =>
     content: {
       padding: moderateScale(16),
       paddingBottom: 100,
+      width: '100%',
+      maxWidth: 1200,
+      alignSelf: 'center',
+    },
+    gridContainer: {
+      flexDirection: 'row',
+      width: '100%',
+      gap: 16,
+    },
+    gridColumn: {
+      flex: 1,
+      flexDirection: 'column',
+    },
+    singleColumn: {
+      width: '100%',
     },
     rangeBadge: {
       flexDirection: 'row',
