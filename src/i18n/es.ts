@@ -246,6 +246,7 @@ export const es = {
   whatToDo: '¿Qué te gustaría hacer?',
   financialAnalysis: 'Análisis Financiero',
   savingsRateTitle: 'Tasa de Ahorro',
+  netCashFlow: 'Flujo de Caja Neto',
   expenseGrowthTitle: 'Crecimiento de Gastos',
   spendingFrequencyTitle: 'Frecuencia de Gastos',
   recommendationSavings: 'Recomendación: Mantener por encima del 20%',

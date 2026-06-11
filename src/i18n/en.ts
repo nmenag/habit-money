@@ -240,6 +240,7 @@ export const en = {
   whatToDo: 'What would you like to do?',
   financialAnalysis: 'Financial Analysis',
   savingsRateTitle: 'Savings Rate',
+  netCashFlow: 'Net Cash Flow',
   expenseGrowthTitle: 'Expense Growth',
   spendingFrequencyTitle: 'Spending Frequency',
   recommendationSavings: 'Recommendation: Keep it above 20%',
