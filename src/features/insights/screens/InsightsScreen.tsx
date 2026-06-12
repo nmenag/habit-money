@@ -116,7 +116,12 @@ export const InsightsScreen = () => {
     const combinedIncome = totalIncome + totalAdjustments;
     const savings = combinedIncome - totalExpenses;
     const savingsRate =
+      totalIncome > 0
+        ? Math.max(-100, ((totalIncome - totalExpenses) / totalIncome) * 100)
+        : 0;
+    const rawSavingsRate =
       totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
+    const netCashFlow = totalIncome - totalExpenses;
 
     let colorIdx = 0;
     const categoryBreakdown = Object.entries(catExpMap)
@@ -155,6 +160,8 @@ export const InsightsScreen = () => {
       combinedIncome,
       savings,
       savingsRate,
+      rawSavingsRate,
+      netCashFlow,
       categoryBreakdown,
       txCount,
       spendingDays,
@@ -384,6 +391,30 @@ export const InsightsScreen = () => {
     </View>
   );
 
+  const showNetCashFlow =
+    filtered.totalIncome > 0 && Math.abs(filtered.rawSavingsRate) > 200;
+  const isIncomeNegativeOrZero = filtered.totalIncome <= 0;
+
+  const leftItemLabel = showNetCashFlow
+    ? t('netCashFlow')
+    : t('savingsRateTitle');
+
+  const leftItemValueText = isIncomeNegativeOrZero
+    ? 'N/A'
+    : showNetCashFlow
+      ? formatCurrency(filtered.netCashFlow)
+      : `${filtered.savingsRate.toFixed(1)}%`;
+
+  const leftItemColor = isIncomeNegativeOrZero
+    ? theme.colors.onSurfaceVariant
+    : showNetCashFlow
+      ? filtered.netCashFlow >= 0
+        ? theme.colors.income
+        : theme.colors.error
+      : filtered.savingsRate >= 0
+        ? theme.colors.income
+        : theme.colors.error;
+
   const summarySection = (
     <View style={{ width: '100%' }}>
       <View style={styles.summaryContainer}>
@@ -574,7 +605,7 @@ export const InsightsScreen = () => {
         ]}
         mode="contained"
         accessible={true}
-        accessibilityLabel={`${t('savingsRateTitle')}: ${filtered.savingsRate.toFixed(1)}%. ${t('spendingFrequencyTitle')}: ${filtered.spendingDays} ${t('daysLabel')}, ${filtered.txCount} ${filtered.txCount === 1 ? 'transaction' : 'transactions'}`}
+        accessibilityLabel={`${leftItemLabel}: ${leftItemValueText}. ${t('spendingFrequencyTitle')}: ${filtered.spendingDays} ${t('daysLabel')}, ${filtered.txCount} ${filtered.txCount === 1 ? 'transaction' : 'transactions'}`}
       >
         <Card.Content style={styles.savingsRow}>
           <View style={styles.savingsItem}>
@@ -588,33 +619,32 @@ export const InsightsScreen = () => {
                 textTransform: 'uppercase',
               }}
             >
-              {t('savingsRateTitle')}
+              {leftItemLabel}
             </Text>
             <Text
               style={{
                 fontFamily: 'Inter-SemiBold',
                 fontWeight: '600',
                 fontSize: 22,
-                color:
-                  filtered.savingsRate >= 0
-                    ? theme.colors.income
-                    : theme.colors.error,
+                color: leftItemColor,
                 marginTop: 4,
               }}
               numberOfLines={1}
               adjustsFontSizeToFit
             >
-              {filtered.savingsRate.toFixed(1)}%
+              {leftItemValueText}
             </Text>
-            <ProgressBar
-              progress={Math.max(0, Math.min(1, filtered.savingsRate / 100))}
-              color={
-                filtered.savingsRate >= 0
-                  ? theme.colors.income
-                  : theme.colors.error
-              }
-              style={styles.savingsProgress}
-            />
+            {!isIncomeNegativeOrZero && !showNetCashFlow && (
+              <ProgressBar
+                progress={Math.max(0, Math.min(1, filtered.savingsRate / 100))}
+                color={
+                  filtered.savingsRate >= 0
+                    ? theme.colors.income
+                    : theme.colors.error
+                }
+                style={styles.savingsProgress}
+              />
+            )}
           </View>
           <View
             style={[
