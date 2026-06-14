@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: habit-money-app
+    ports:
+      - "8081:8081"
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+    volumes:
+      # Mount workspace for live-reloading
+      - .:/app
+      # Do not overwrite container node_modules or .expo folder with host folders
+      - /app/node_modules
+      - /app/.expo
+    environment:
+      - NODE_ENV=development
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      # NOTE: For physical device debugging (Expo Go or Dev Client over LAN):
+      # 1. Find your host machine's local IP address (e.g. 192.168.1.50)
+      # 2. Uncomment and set the REACT_NATIVE_PACKAGER_HOSTNAME environment variable below:
+      # - REACT_NATIVE_PACKAGER_HOSTNAME=192.168.1.50
+    stdin_open: true
+    tty: true
+
+    # OPTIONAL (LINUX ONLY):
+    # If you are on Linux and want seamless connection to your phone/emulator 
+    # without specifying REACT_NATIVE_PACKAGER_HOSTNAME, you can use host networking:
+    # network_mode: host

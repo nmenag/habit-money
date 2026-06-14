@@ -76,6 +76,13 @@ Habit Money is a modern, high-performance personal finance tracker built with **
    npx expo start
    ```
 
+   Alternatively, you can run the development server via **Docker**:
+   ```bash
+   docker compose up
+   ```
+   For detailed setup and network configuration details (such as connecting physical devices over LAN), check the [Docker Guide](docs/DOCKER.md).
+
+
 ### 📱 Android Development
 
 For local native development on Android, you can run the app directly on your physical device or an emulator.
