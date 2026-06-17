@@ -41,6 +41,7 @@ Habit Money is a modern, high-performance personal finance tracker built with **
 - **Premium Branding & UI**:
   - **High-Resolution Iconography**: Custom, professionally designed app icons for Production and Preview builds.
   - **Android Adaptive Icons**: Full support for adaptive layers (Android 13+ material themed icons).
+  - **Android Home Screen Widget**: Dedicated `HabitMoneyWidget` that displays real-time summaries of monthly income/expenses, respects the active system light/dark theme, and includes a deep-link quick action button to open the transaction entry form directly from the home screen.
 - **Monetization**: Seamlessly integrated Google Mobile Ads (Banner and Interstitial) with test mode for development.
 - **Analytics & Crash Monitoring**: Google Firebase SDK integration (Analytics and Crashlytics) to capture usage trends and improve application stability, utilizing a strict, automated data-sanitization service to ensure no transaction amounts, balances, notes, descriptions, or PII ever leave the device.
 
@@ -166,6 +167,18 @@ To generate a standalone APK directly on your machine without using EAS Cloud:
     ```
     The output will be at: `android/app/build/outputs/apk/release/app-release.apk`
     _Note: Ensure you have your signing config (keystore) properly configured for production builds._
+
+#### 📳 Home Screen Widget
+
+Habit Money features a native Android home screen widget (`HabitMoneyWidget`).
+
+1. **Native Prebuild Requirements**: Because the widget runs as native `RemoteViews` layouts and requires a background headless task registered in the Android Manifest, you must run a native build to test it:
+   ```bash
+   npx expo prebuild --platform android --clean
+   npx expo run:android
+   ```
+2. **Dynamic Data Updates**: The widget synchronizes with the app's SQLite database. Changes in transactions dynamically trigger updates via `triggerWidgetUpdate()` within the analytics settings store slice.
+3. **Expo Go Fallback**: When testing inside Expo Go or an unlinked dev environment, widget updates will fail gracefully with a console warning instead of crashing the app.
 
 ## 🧪 CI/CD
 

@@ -63,6 +63,7 @@ habit-money/
 │   ├── constants/              # App-wide constants (colors, icon sets, currencies…)
 │   ├── navigation/             # Navigation helpers and typed route params
 │   ├── ads/                    # AdMob banner/interstitial wrappers
+│   ├── widgets/                # Android home screen widget layout & task handler
 │   └── utils/
 │       ├── csvExport.ts        # CSV generation and sharing
 │       ├── dataBackup.ts       # JSON backup and restore logic
@@ -127,6 +128,14 @@ All service logic is decoupled from the UI layer to maximize testability and ena
 ### 5. Localization (i18n)
 
 Full internationalization is built-in using `expo-localization`. Every user-facing string is keyed in `src/i18n/en.ts` or `src/i18n/es.ts`. On first launch, the **Onboarding** flow auto-detects the system locale and lets the user confirm or override the language and currency before entering the app.
+
+### 6. Android Home Screen Widget (HabitMoneyWidget)
+
+Habit Money includes a native Android home screen widget built with `react-native-android-widget`.
+
+- **`src/widgets/HabitMoneyWidget.tsx`**: The widget UI component, rendered natively using FlexWidget and TextWidget layout primitives from `react-native-android-widget`. Designed with theme-awareness (supporting light and dark modes) and localization (English/Spanish).
+- **`src/widgets/widgetTaskHandler.tsx`**: A headless background task handler registered at the application's entry point (`index.js`). It dynamically initializes SQLite and computes current month financial metrics during background wakeups or scheduled updates.
+- **`src/utils/widgetUpdater.tsx`**: Trigger function `triggerWidgetUpdate()` that reads database state and pushes visual updates to the widget. This utility is wired to Zustand state modifications (e.g. `refreshAnalytics` in `settingsSlice`) to update the widget in real-time.
 
 ---
 
