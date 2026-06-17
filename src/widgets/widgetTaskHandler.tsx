@@ -4,6 +4,8 @@ import React from 'react';
 import type { WidgetTaskHandlerProps } from 'react-native-android-widget';
 import { HabitMoneyWidget } from './HabitMoneyWidget';
 import { getDb, initDb } from '../db/schema';
+import { getLast30DaysRange } from '../utils/dateFilters';
+import { getLocalISOString } from '../utils/dateUtils';
 
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
   const { widgetAction, renderWidget } = props;
@@ -21,32 +23,9 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     initDb();
     const db = getDb();
 
-    const now = new Date();
-    const startOfMonth = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      1,
-      0,
-      0,
-      0,
-      0,
-    );
-    const endOfMonth = new Date(
-      now.getFullYear(),
-      now.getMonth() + 1,
-      0,
-      23,
-      59,
-      59,
-      999,
-    );
-
-    const pad = (n: number) => String(n).padStart(2, '0');
-    const formatLocal = (d: Date) =>
-      `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3, '0')}`;
-
-    const startStr = formatLocal(startOfMonth);
-    const endStr = formatLocal(endOfMonth);
+    const range = getLast30DaysRange();
+    const startStr = getLocalISOString(range.startDate);
+    const endStr = getLocalISOString(range.endDate);
 
     const transactions = db.getAllSync<{
       type: string;

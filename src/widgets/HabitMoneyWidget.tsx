@@ -3,6 +3,7 @@
 import React from 'react';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
 import { formatCurrency } from '../utils/formatters';
+import { translations } from '../i18n/translations';
 
 interface HabitMoneyWidgetProps {
   income: number;
@@ -33,12 +34,14 @@ export function HabitMoneyWidget({
     border: isDark ? '#1E293B' : '#E2E8F0',
   } as const;
 
+  const langSet = translations[language] || translations.en;
+
   const t = {
     title: 'Habit Money',
-    subtitle: language === 'es' ? 'Este Mes' : 'This Month',
-    incomeLabel: language === 'es' ? 'Ingresos' : 'Income',
-    expenseLabel: language === 'es' ? 'Gastos' : 'Expenses',
-    addButton: language === 'es' ? '+ Transacción' : '+ Transaction',
+    subtitle: langSet.filterLast30Days,
+    incomeLabel: langSet.income,
+    expenseLabel: langSet.expenses,
+    addButton: `+ ${langSet.addTransaction}`,
   };
 
   return (
