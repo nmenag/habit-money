@@ -11,6 +11,7 @@ import { formatCurrency as formatCurrencyUtil } from '../../utils/formatters';
 import { Account, Category, Transaction } from '../types';
 import { useFilterStore } from '../useFilterStore';
 import type { AppStore } from '../useStore';
+import { triggerWidgetUpdate } from '../../utils/widgetUpdater';
 
 let analyticsDebounceTimer: any = null;
 
@@ -333,6 +334,7 @@ export const createSettingsSlice: StateCreator<
         );
         set({ analyticsReport: report, dashboardReport: dReport });
         analyticsDebounceTimer = null;
+        triggerWidgetUpdate();
       } catch (error) {
         console.error('refreshAnalytics Error:', error);
         analyticsDebounceTimer = null;

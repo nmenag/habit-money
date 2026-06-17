@@ -72,16 +72,18 @@ Habit Money is a modern, high-performance personal finance tracker built with **
    Ensure you have your AdMob IDs configured in `.env` (refer to `app.config.js` for required variables).
 
 3. **Launch Development Server**
+
    ```bash
    npx expo start
    ```
 
    Alternatively, you can run the development server via **Docker**:
+
    ```bash
    docker compose up
    ```
-   For detailed setup and network configuration details (such as connecting physical devices over LAN), check the [Docker Guide](docs/DOCKER.md).
 
+   For detailed setup and network configuration details (such as connecting physical devices over LAN), check the [Docker Guide](docs/DOCKER.md).
 
 ### 📱 Android Development
 

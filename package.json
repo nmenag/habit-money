@@ -1,6 +1,6 @@
 {
   "name": "habit-money",
-  "main": "expo-router/entry",
+  "main": "index.js",
   "version": "3.1.1",
   "scripts": {
     "start": "expo start",
@@ -15,6 +15,7 @@
     "lint:commit": "commitlint --edit"
   },
   "dependencies": {
+    "@expo/ui": "^55.0.17",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-community/netinfo": "11.5.2",
     "@react-native-firebase/analytics": "^24.0.0",
@@ -48,9 +49,11 @@
     "expo-system-ui": "~55.0.18",
     "expo-updates": "~55.0.24",
     "expo-web-browser": "~55.0.16",
+    "expo-widgets": "^55.0.20",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-native": "0.83.6",
+    "react-native-android-widget": "^0.20.3",
     "react-native-chart-kit": "^6.12.0",
     "react-native-draggable-flatlist": "^4.0.3",
     "react-native-gesture-handler": "~2.30.0",
