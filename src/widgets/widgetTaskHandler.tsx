@@ -2,7 +2,7 @@
 
 import React from 'react';
 import type { WidgetTaskHandlerProps } from 'react-native-android-widget';
-import { FinHabitWidget } from './FinHabitWidget';
+import { HabitMoneyWidget } from './HabitMoneyWidget';
 import { getDb, initDb } from '../db/schema';
 
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
@@ -89,7 +89,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
 
   renderWidget({
     light: (
-      <FinHabitWidget
+      <HabitMoneyWidget
         income={income}
         expenses={expenses}
         currency={currency}
@@ -98,7 +98,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
       />
     ),
     dark: (
-      <FinHabitWidget
+      <HabitMoneyWidget
         income={income}
         expenses={expenses}
         currency={currency}

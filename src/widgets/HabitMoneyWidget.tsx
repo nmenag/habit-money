@@ -4,7 +4,7 @@ import React from 'react';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
 import { formatCurrency } from '../utils/formatters';
 
-interface FinHabitWidgetProps {
+interface HabitMoneyWidgetProps {
   income: number;
   expenses: number;
   currency: string;
@@ -12,13 +12,13 @@ interface FinHabitWidgetProps {
   theme: 'light' | 'dark';
 }
 
-export function FinHabitWidget({
+export function HabitMoneyWidget({
   income,
   expenses,
   currency,
   language,
   theme,
-}: FinHabitWidgetProps) {
+}: HabitMoneyWidgetProps) {
   const isDark = theme === 'dark';
 
   const colors = {

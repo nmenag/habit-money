@@ -120,7 +120,7 @@ module.exports = {
         {
           widgets: [
             {
-              name: 'FinHabitWidget',
+              name: 'HabitMoneyWidget',
               label: 'Habit Money Status',
               description:
                 'Ver tus ingresos, egresos y agregar transacciones rápidamente.',

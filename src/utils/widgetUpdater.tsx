@@ -1,7 +1,7 @@
 import React from 'react';
 import { Platform } from 'react-native';
 import { requestWidgetUpdate } from 'react-native-android-widget';
-import { FinHabitWidget } from '../widgets/FinHabitWidget';
+import { HabitMoneyWidget } from '../widgets/HabitMoneyWidget';
 import { getDb } from '../db/schema';
 
 export function triggerWidgetUpdate() {
@@ -85,10 +85,10 @@ export function triggerWidgetUpdate() {
     }
 
     requestWidgetUpdate({
-      widgetName: 'FinHabitWidget',
+      widgetName: 'HabitMoneyWidget',
       renderWidget: () => ({
         light: (
-          <FinHabitWidget
+          <HabitMoneyWidget
             income={income}
             expenses={expenses}
             currency={currency}
@@ -97,7 +97,7 @@ export function triggerWidgetUpdate() {
           />
         ),
         dark: (
-          <FinHabitWidget
+          <HabitMoneyWidget
             income={income}
             expenses={expenses}
             currency={currency}
