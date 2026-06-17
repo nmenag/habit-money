@@ -3,6 +3,8 @@ import { Platform } from 'react-native';
 import { requestWidgetUpdate } from 'react-native-android-widget';
 import { HabitMoneyWidget } from '../widgets/HabitMoneyWidget';
 import { getDb } from '../db/schema';
+import { getLast30DaysRange } from './dateFilters';
+import { getLocalISOString } from './dateUtils';
 
 export function triggerWidgetUpdate() {
   if (Platform.OS !== 'android') return;
@@ -16,32 +18,9 @@ export function triggerWidgetUpdate() {
     try {
       const db = getDb();
 
-      const now = new Date();
-      const startOfMonth = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        1,
-        0,
-        0,
-        0,
-        0,
-      );
-      const endOfMonth = new Date(
-        now.getFullYear(),
-        now.getMonth() + 1,
-        0,
-        23,
-        59,
-        59,
-        999,
-      );
-
-      const pad = (n: number) => String(n).padStart(2, '0');
-      const formatLocal = (d: Date) =>
-        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3, '0')}`;
-
-      const startStr = formatLocal(startOfMonth);
-      const endStr = formatLocal(endOfMonth);
+      const range = getLast30DaysRange();
+      const startStr = getLocalISOString(range.startDate);
+      const endStr = getLocalISOString(range.endDate);
 
       const transactions = db.getAllSync<{
         type: string;

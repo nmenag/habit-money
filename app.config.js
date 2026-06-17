@@ -122,8 +122,6 @@ module.exports = {
             {
               name: 'HabitMoneyWidget',
               label: 'Habit Money Status',
-              description:
-                'Ver tus ingresos, egresos y agregar transacciones rápidamente.',
               minWidth: '180dp',
               minHeight: '110dp',
               updatePeriodMillis: 1800000,

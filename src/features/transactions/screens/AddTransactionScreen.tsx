@@ -331,6 +331,14 @@ export const AddTransactionScreen = () => {
 
   const scrollViewRef = useRef<ScrollView>(null);
 
+  const handleGoBack = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  }, []);
+
   useEffect(() => {
     const showSubscription = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
@@ -452,7 +460,7 @@ export const AddTransactionScreen = () => {
       });
     }
 
-    router.back();
+    handleGoBack();
   };
 
   const handleDelete = () => {
@@ -470,7 +478,7 @@ export const AddTransactionScreen = () => {
               editingTransaction.type,
             );
           }
-          router.back();
+          handleGoBack();
         },
       },
     ]);
@@ -498,7 +506,7 @@ export const AddTransactionScreen = () => {
       toAccountId: type === 'transfer' ? selectedToAccount : null,
     });
 
-    router.back();
+    handleGoBack();
   };
 
   const formatAmountInput = useCallback(
@@ -686,6 +694,24 @@ export const AddTransactionScreen = () => {
       <Stack.Screen
         options={{
           title: isEditing ? t('editTransaction') : t('addTransaction'),
+          headerLeft: !router.canGoBack()
+            ? () => (
+                <TouchableOpacity
+                  onPress={handleGoBack}
+                  style={{ padding: 8, marginLeft: -8 }}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('cancel') || 'Cancel'}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons
+                    name="close"
+                    size={24}
+                    color={theme.colors.onSurface}
+                  />
+                </TouchableOpacity>
+              )
+            : undefined,
           headerRight: () =>
             isEditing ? (
               <TouchableOpacity
