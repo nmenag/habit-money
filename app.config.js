@@ -44,11 +44,12 @@ module.exports = {
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     jsEngine: 'hermes',
-    ios: {
-      supportsTablet: true,
-      bundleIdentifier: getPackageName(),
-      jsEngine: 'hermes',
-    },
+    // ios: {
+    //   supportsTablet: true,
+    //   bundleIdentifier: getPackageName(),
+    //   jsEngine: 'hermes',
+    //   googleServicesFile: './GoogleService-Info.plist',
+    // },
     android: {
       adaptiveIcon: {
         backgroundColor: '#22C55E',
@@ -112,6 +113,23 @@ module.exports = {
         {
           icon: './assets/images/notification-icon.png',
           color: '#22C55E',
+        },
+      ],
+      [
+        'react-native-android-widget',
+        {
+          widgets: [
+            {
+              name: 'FinHabitWidget',
+              label: 'Habit Money Status',
+              description:
+                'Ver tus ingresos, egresos y agregar transacciones rápidamente.',
+              minWidth: '180dp',
+              minHeight: '110dp',
+              updatePeriodMillis: 1800000,
+              resizeMode: 'horizontal|vertical',
+            },
+          ],
         },
       ],
     ],

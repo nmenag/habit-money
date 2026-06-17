@@ -5,10 +5,10 @@ services:
       dockerfile: Dockerfile
     container_name: habit-money-app
     ports:
-      - "8081:8081"
-      - "19000:19000"
-      - "19001:19001"
-      - "19002:19002"
+      - '8081:8081'
+      - '19000:19000'
+      - '19001:19001'
+      - '19002:19002'
     volumes:
       # Mount workspace for live-reloading
       - .:/app
@@ -26,6 +26,6 @@ services:
     tty: true
 
     # OPTIONAL (LINUX ONLY):
-    # If you are on Linux and want seamless connection to your phone/emulator 
+    # If you are on Linux and want seamless connection to your phone/emulator
     # without specifying REACT_NATIVE_PACKAGER_HOSTNAME, you can use host networking:
     # network_mode: host
