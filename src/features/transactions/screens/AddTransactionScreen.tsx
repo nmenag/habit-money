@@ -35,6 +35,7 @@ import {
 import { getLocalISOString } from '../../../utils/dateUtils';
 import { formatNumber } from '../../../utils/formatters';
 import { getValidCategoryIcon } from '../../../constants';
+import { getMonthRange, isInRange } from '../../../utils/dateFilters';
 import { BottomSheet } from '../../../shared/components';
 import { ExpenseFormFields } from '../components/ExpenseFormFields';
 import { IncomeFormFields } from '../components/IncomeFormFields';
@@ -635,6 +636,7 @@ export const AddTransactionScreen = () => {
       { spent: number; progress: number; remaining: number }
     > = {};
 
+    const currentMonthRange = getMonthRange();
     const expenses = transactions.filter((t) => t.type === 'expense');
 
     for (const bud of budgets) {
@@ -643,7 +645,8 @@ export const AddTransactionScreen = () => {
           const matchesBudget = t.budgetId === bud.id;
           const matchesCategory =
             bud.categoryId && t.categoryId === bud.categoryId;
-          return matchesBudget || matchesCategory;
+          const isCurrentMonth = isInRange(t.date, currentMonthRange);
+          return (matchesBudget || matchesCategory) && isCurrentMonth;
         })
         .reduce((sum, t) => sum + t.amount, 0);
 

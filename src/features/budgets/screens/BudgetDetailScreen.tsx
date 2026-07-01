@@ -19,6 +19,7 @@ import { TransactionItem } from '../../transactions/components/TransactionItem';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
+import { getMonthRange, isInRange } from '../../../utils/dateFilters';
 
 export const BudgetDetailScreen = () => {
   const params = useLocalSearchParams<{ budgetId: string }>();
@@ -31,16 +32,30 @@ export const BudgetDetailScreen = () => {
 
   const budget = budgets.find((b) => b.id === budgetId);
 
+  const currentMonthRange = useMemo(() => getMonthRange(), []);
+
+  const formattedDateRange = useMemo(() => {
+    const locale = language === 'es' ? es : enUS;
+    const startStr = format(currentMonthRange.startDate, 'MMM d', { locale });
+    const endStr = format(currentMonthRange.endDate, 'MMM d, yyyy', { locale });
+    return `${startStr} – ${endStr}`;
+  }, [currentMonthRange, language]);
+
   const budgetTransactions = useMemo(() => {
     return transactions
       .filter((tx) => {
         const matchesBudget = tx.budgetId === budgetId;
         const matchesCategory =
           budget?.categoryId && tx.categoryId === budget.categoryId;
-        return (matchesBudget || matchesCategory) && tx.type === 'expense';
+        const isCurrentMonth = isInRange(tx.date, currentMonthRange);
+        return (
+          (matchesBudget || matchesCategory) &&
+          tx.type === 'expense' &&
+          isCurrentMonth
+        );
       })
       .sort((a, b) => b.date.localeCompare(a.date));
-  }, [transactions, budgetId, budget?.categoryId]);
+  }, [transactions, budgetId, budget?.categoryId, currentMonthRange]);
 
   const groupedTransactions = useMemo(() => {
     const groups: { title: string; data: typeof budgetTransactions }[] = [];
@@ -135,6 +150,14 @@ export const BudgetDetailScreen = () => {
                   ]}
                 >
                   {t('aggregateSpending').toUpperCase()}
+                </Text>
+                <Text
+                  style={[
+                    styles.cardDates,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {formattedDateRange}
                 </Text>
                 <Text
                   style={[
@@ -399,6 +422,11 @@ const defaultStyles = (theme: AppTheme) =>
       textTransform: 'uppercase',
       letterSpacing: 1.5,
       marginBottom: 4,
+    },
+    cardDates: {
+      fontSize: fontScale(12),
+      fontFamily: 'Inter-Regular',
+      marginBottom: 6,
     },
     cardBalance: {
       fontSize: fontScale(24),

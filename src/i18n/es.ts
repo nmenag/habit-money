@@ -253,6 +253,9 @@ export const es = {
   comparedToLastMonth: 'Comparado con el mes pasado',
   daysLabel: 'días',
   daysSpentMoney: 'Días que gastaste dinero este mes',
+  spentMoreAbsolute: 'Gastaste {{amount}} más que el mes pasado',
+  spentLessAbsolute: 'Gastaste {{amount}} menos que el mes pasado',
+  noComparisonAvailable: 'Comparación no disponible aún',
   insightMonthlyComparisonTitle: 'Comparación Mensual',
   insightSpentMoreThanLastMonth:
     'Gastaste un {{percentage}}% más que el mes pasado',

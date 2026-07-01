@@ -247,6 +247,9 @@ export const en = {
   comparedToLastMonth: 'Compared to last month',
   daysLabel: 'days',
   daysSpentMoney: 'Days you spent money this month',
+  spentMoreAbsolute: 'Spent {{amount}} more than last month',
+  spentLessAbsolute: 'Spent {{amount}} less than last month',
+  noComparisonAvailable: 'No comparison available yet',
   insightMonthlyComparisonTitle: 'Monthly Comparison',
   insightSpentMoreThanLastMonth:
     'You spent {{percentage}}% more than last month',

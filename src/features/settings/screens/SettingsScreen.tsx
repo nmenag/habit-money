@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { Divider, Switch, Text, useTheme } from 'react-native-paper';
-import { TimePickerModal } from 'react-native-paper-dates';
+import { TimePicker } from 'react-native-paper-dates';
 import { BottomSheet } from '../../../shared/components/BottomSheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -163,9 +163,22 @@ export const SettingsScreen = () => {
   );
 
   const [timePickerVisible, setTimePickerVisible] = React.useState(false);
+  const [pickerHours, setPickerHours] = React.useState(20);
+  const [pickerMinutes, setPickerMinutes] = React.useState(0);
+  const [pickerFocused, setPickerFocused] = React.useState<'hours' | 'minutes'>(
+    'hours',
+  );
   const [languageMenuVisible, setLanguageMenuVisible] = React.useState(false);
   const [currencyMenuVisible, setCurrencyMenuVisible] = React.useState(false);
   const [restoreMenuVisible, setRestoreMenuVisible] = React.useState(false);
+
+  const openTimePicker = React.useCallback(() => {
+    const [h, m] = notificationTime.split(':').map(Number);
+    setPickerHours(h ?? 20);
+    setPickerMinutes(m ?? 0);
+    setPickerFocused('hours');
+    setTimePickerVisible(true);
+  }, [notificationTime]);
 
   const onDismissTimePicker = React.useCallback(() => {
     setTimePickerVisible(false);
@@ -197,6 +210,21 @@ export const SettingsScreen = () => {
       }
     },
     [notificationsEnabled, t, setNotificationTime],
+  );
+
+  const handleTimePickerChange = React.useCallback(
+    (params: {
+      hours: number;
+      minutes: number;
+      focused?: 'hours' | 'minutes';
+    }) => {
+      setPickerHours(params.hours);
+      setPickerMinutes(params.minutes);
+      if (params.focused) {
+        setPickerFocused(params.focused);
+      }
+    },
+    [],
   );
 
   const SETTINGS_LINKS = [
@@ -533,9 +561,7 @@ export const SettingsScreen = () => {
               <TouchableOpacity
                 activeOpacity={0.7}
                 style={[styles.rowItem, { paddingLeft: 32 }]}
-                onPress={() => {
-                  setTimePickerVisible(true);
-                }}
+                onPress={openTimePicker}
               >
                 <View
                   style={[
@@ -898,14 +924,85 @@ export const SettingsScreen = () => {
         <BannerAdComponent />
       </View>
 
-      <TimePickerModal
+      <BottomSheet
         visible={timePickerVisible}
-        onDismiss={onDismissTimePicker}
-        onConfirm={onConfirmTimePicker}
-        hours={parseInt(notificationTime.split(':')[0], 10)}
-        minutes={parseInt(notificationTime.split(':')[1], 10)}
-        use24HourClock={is24Hour}
-      />
+        onClose={onDismissTimePicker}
+        title={t('notificationTime') || 'Reminder Time'}
+      >
+        <View
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingVertical: 12,
+          }}
+        >
+          <TimePicker
+            locale={language}
+            inputType="picker"
+            use24HourClock={is24Hour}
+            hours={pickerHours}
+            minutes={pickerMinutes}
+            focused={pickerFocused}
+            onFocusInput={setPickerFocused}
+            onChange={handleTimePickerChange}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              width: '100%',
+              justifyContent: 'space-between',
+              marginTop: 24,
+              gap: 12,
+            }}
+          >
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={onDismissTimePicker}
+              style={[
+                styles.themeButton,
+                {
+                  borderColor: theme.colors.outlineVariant,
+                  backgroundColor: theme.colors.surface,
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  color: theme.colors.onSurfaceVariant,
+                }}
+              >
+                {t('cancel') || 'Cancel'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {
+                onConfirmTimePicker({
+                  hours: pickerHours,
+                  minutes: pickerMinutes,
+                });
+              }}
+              style={[
+                styles.themeButton,
+                {
+                  borderColor: 'transparent',
+                  backgroundColor: theme.colors.primary,
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  fontFamily: 'Inter-Medium',
+                  color: theme.colors.onPrimary,
+                }}
+              >
+                {t('save') || 'Save'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </BottomSheet>
 
       <BottomSheet
         visible={languageMenuVisible}
