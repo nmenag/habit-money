@@ -256,9 +256,7 @@ export const BudgetsScreen = () => {
                 <Text style={styles.overviewLabel}>
                   {t('aggregateSpending')}
                 </Text>
-                <Text style={styles.overviewDates}>
-                  {formattedDateRange}
-                </Text>
+                <Text style={styles.overviewDates}>{formattedDateRange}</Text>
                 <Text
                   style={styles.overviewValue}
                   numberOfLines={1}

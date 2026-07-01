@@ -151,7 +151,12 @@ export const BudgetDetailScreen = () => {
                 >
                   {t('aggregateSpending').toUpperCase()}
                 </Text>
-                <Text style={[styles.cardDates, { color: theme.colors.onSurfaceVariant }]}>
+                <Text
+                  style={[
+                    styles.cardDates,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
                   {formattedDateRange}
                 </Text>
                 <Text

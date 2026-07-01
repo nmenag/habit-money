@@ -227,15 +227,44 @@ export function getPreviousPeriodRange(range: DateRange): DateRange | null {
       0,
       0,
     );
-    const prevMonthEnd = new Date(
-      start.getFullYear(),
-      start.getMonth(),
-      0,
-      23,
-      59,
-      59,
-      999,
-    );
+    const now = new Date();
+    const isCurrentMonth =
+      now.getFullYear() === start.getFullYear() &&
+      now.getMonth() === start.getMonth();
+
+    let prevMonthEnd: Date;
+    if (isCurrentMonth && range.type === 'month') {
+      prevMonthEnd = new Date(
+        start.getFullYear(),
+        start.getMonth() - 1,
+        now.getDate(),
+        23,
+        59,
+        59,
+        999,
+      );
+      if (prevMonthEnd.getMonth() === start.getMonth()) {
+        prevMonthEnd = new Date(
+          start.getFullYear(),
+          start.getMonth(),
+          0,
+          23,
+          59,
+          59,
+          999,
+        );
+      }
+    } else {
+      prevMonthEnd = new Date(
+        start.getFullYear(),
+        start.getMonth(),
+        0,
+        23,
+        59,
+        59,
+        999,
+      );
+    }
     return {
       type: 'custom',
       startDate: prevMonthStart,

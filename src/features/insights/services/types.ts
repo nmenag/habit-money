@@ -35,6 +35,8 @@ export interface CategoryExpense {
 export interface AnalyticsReport {
   currentMonth: MonthlyMetrics;
   previousMonth: MonthlyMetrics;
+  currentCalendarMonth: MonthlyMetrics;
+  previousCalendarMonth: MonthlyMetrics;
   categoryExpenses: CategoryExpense[];
   previousCategoryExpenses: CategoryExpense[];
   budgets: {
@@ -47,5 +49,8 @@ export interface AnalyticsReport {
   spendingDays: number;
   expenseGrowth: number;
   hasEnoughHistory: boolean;
+  hasComparisonData: boolean;
+  comparisonMode: 'percentage' | 'absolute' | 'none';
+  absoluteDifference: number;
   insights: Insight[];
 }

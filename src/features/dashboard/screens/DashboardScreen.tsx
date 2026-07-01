@@ -83,19 +83,22 @@ export const DashboardScreen = React.memo(() => {
   const financialData = useMemo(() => {
     if (!dashboardReport) return null;
 
-    const { currentMonth } = dashboardReport;
+    const { currentMonth, currentCalendarMonth } = dashboardReport;
     const monthlyIncome = currentMonth.income;
     const monthlyExpenses = currentMonth.expenses;
     const monthlyAdjustments = currentMonth.adjustments;
     const remainingBalance = currentMonth.savings;
+
+    const calendarExpenses = currentCalendarMonth?.expenses ?? monthlyExpenses;
+    const calendarIncome = currentCalendarMonth?.income ?? monthlyIncome;
 
     const totalBalance = accounts.reduce((sum, a) => sum + a.currentBalance, 0);
     const activeGoals = goals.filter((g) => g.status === 'active').slice(0, 2);
     const recentTransactions = transactions.slice(0, 5);
 
     const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
-    const limit = totalBudget > 0 ? totalBudget : monthlyIncome;
-    const ratio = limit > 0 ? monthlyExpenses / limit : 0;
+    const limit = totalBudget > 0 ? totalBudget : calendarIncome;
+    const ratio = limit > 0 ? calendarExpenses / limit : 0;
     const progress = Math.min(ratio, 1);
 
     const topCatId = currentMonth.topCategory?.id;
@@ -109,6 +112,7 @@ export const DashboardScreen = React.memo(() => {
     return {
       monthlyIncome,
       monthlyExpenses,
+      calendarExpenses,
       monthlyAdjustments,
       remainingBalance,
       topCategory,
@@ -534,7 +538,7 @@ export const DashboardScreen = React.memo(() => {
             numberOfLines={1}
             adjustsFontSizeToFit
           >
-            {formatCurrency(data.monthlyExpenses)}
+            {formatCurrency(data.calendarExpenses)}
           </Text>
         </View>
         <ProgressBar

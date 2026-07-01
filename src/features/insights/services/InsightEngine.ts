@@ -14,43 +14,66 @@ export class InsightEngine {
   ): Insight[] {
     const insights: Insight[] = [];
     const {
-      currentMonth,
-      previousMonth,
+      currentCalendarMonth: currentMonth,
       categoryExpenses,
       previousCategoryExpenses,
     } = report;
     const t = translations[language] || translations.en;
 
-    if (previousMonth.expenses > 0) {
-      const growth =
-        ((currentMonth.expenses - previousMonth.expenses) /
-          previousMonth.expenses) *
-        100;
-
-      if (growth > 10) {
-        insights.push({
-          id: 'monthly-comparison-warning',
-          title: t.insightMonthlyComparisonTitle,
-          message: t.insightSpentMoreThanLastMonth.replace(
-            '{{percentage}}',
-            growth.toFixed(0),
-          ),
-          level: 'warning',
-          category: 'comparison',
-          timestamp: getLocalISOString(),
-        });
-      } else if (growth < 0) {
-        insights.push({
-          id: 'monthly-comparison-positive',
-          title: t.insightMonthlyComparisonTitle,
-          message: t.insightSpentLessThanLastMonth.replace(
-            '{{percentage}}',
-            Math.abs(growth).toFixed(0),
-          ),
-          level: 'positive',
-          category: 'comparison',
-          timestamp: getLocalISOString(),
-        });
+    if (report.hasComparisonData) {
+      if (report.comparisonMode === 'percentage') {
+        const growth = report.expenseGrowth;
+        if (growth > 10) {
+          insights.push({
+            id: 'monthly-comparison-warning',
+            title: t.insightMonthlyComparisonTitle,
+            message: t.insightSpentMoreThanLastMonth.replace(
+              '{{percentage}}',
+              growth.toFixed(0),
+            ),
+            level: 'warning',
+            category: 'comparison',
+            timestamp: getLocalISOString(),
+          });
+        } else if (growth < 0) {
+          insights.push({
+            id: 'monthly-comparison-positive',
+            title: t.insightMonthlyComparisonTitle,
+            message: t.insightSpentLessThanLastMonth.replace(
+              '{{percentage}}',
+              Math.abs(growth).toFixed(0),
+            ),
+            level: 'positive',
+            category: 'comparison',
+            timestamp: getLocalISOString(),
+          });
+        }
+      } else if (report.comparisonMode === 'absolute') {
+        if (report.absoluteDifference > 0) {
+          insights.push({
+            id: 'monthly-comparison-warning-abs',
+            title: t.insightMonthlyComparisonTitle,
+            message: (t as any).spentMoreAbsolute.replace(
+              '{{amount}}',
+              formatCurrency(report.absoluteDifference),
+            ),
+            level: 'warning',
+            category: 'comparison',
+            timestamp: getLocalISOString(),
+          });
+        } else if (report.absoluteDifference < 0) {
+          insights.push({
+            id: 'monthly-comparison-positive-abs',
+            title: t.insightMonthlyComparisonTitle,
+            message: (t as any).spentLessAbsolute.replace(
+              '{{amount}}',
+              formatCurrency(Math.abs(report.absoluteDifference)),
+            ),
+            level: 'positive',
+            category: 'comparison',
+            timestamp: getLocalISOString(),
+          });
+        }
       }
     }
 

@@ -27,10 +27,135 @@ export class AnalyticsManager {
 
     const prevRange = getPreviousPeriodRange(range);
     if (prevRange) {
-      previousMonth = await AnalyticsService.getMonthlyMetrics(prevRange);
       previousCategoryExpenses =
         await AnalyticsService.getCategoryExpenses(prevRange);
+
+      if (range.type === 'month') {
+        const start = new Date(range.startDate);
+        const fullPrevRange: DateRange = {
+          type: 'custom',
+          startDate: new Date(
+            start.getFullYear(),
+            start.getMonth() - 1,
+            1,
+            0,
+            0,
+            0,
+            0,
+          ),
+          endDate: new Date(
+            start.getFullYear(),
+            start.getMonth(),
+            0,
+            23,
+            59,
+            59,
+            999,
+          ),
+        };
+        previousMonth = await AnalyticsService.getMonthlyMetrics(fullPrevRange);
+      } else {
+        previousMonth = await AnalyticsService.getMonthlyMetrics(prevRange);
+      }
     }
+
+    const start = new Date(range.startDate);
+    const now = new Date();
+
+    let currentCalendarRange: DateRange;
+    let previousCalendarRange: DateRange;
+
+    const isCurrentMonthOrRolling =
+      range.type === 'month' ||
+      range.type === 'last30Days' ||
+      (start.getFullYear() === now.getFullYear() &&
+        start.getMonth() === now.getMonth());
+
+    if (isCurrentMonthOrRolling) {
+      currentCalendarRange = {
+        type: 'custom',
+        startDate: new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0),
+        endDate: new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          23,
+          59,
+          59,
+          999,
+        ),
+      };
+      previousCalendarRange = {
+        type: 'custom',
+        startDate: new Date(
+          now.getFullYear(),
+          now.getMonth() - 1,
+          1,
+          0,
+          0,
+          0,
+          0,
+        ),
+        endDate: new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          0,
+          23,
+          59,
+          59,
+          999,
+        ),
+      };
+    } else {
+      currentCalendarRange = {
+        type: 'custom',
+        startDate: new Date(
+          start.getFullYear(),
+          start.getMonth(),
+          1,
+          0,
+          0,
+          0,
+          0,
+        ),
+        endDate: new Date(
+          start.getFullYear(),
+          start.getMonth() + 1,
+          0,
+          23,
+          59,
+          59,
+          999,
+        ),
+      };
+      previousCalendarRange = {
+        type: 'custom',
+        startDate: new Date(
+          start.getFullYear(),
+          start.getMonth() - 1,
+          1,
+          0,
+          0,
+          0,
+          0,
+        ),
+        endDate: new Date(
+          start.getFullYear(),
+          start.getMonth(),
+          0,
+          23,
+          59,
+          59,
+          999,
+        ),
+      };
+    }
+
+    const currentCalendarMonth =
+      await AnalyticsService.getMonthlyMetrics(currentCalendarRange);
+    const previousCalendarMonth = await AnalyticsService.getMonthlyMetrics(
+      previousCalendarRange,
+    );
 
     const db = getDb();
     const oldestTx = await db.getFirstAsync<{ date: string }>(
@@ -39,7 +164,6 @@ export class AnalyticsManager {
     let hasEnoughHistory = false;
     if (oldestTx && oldestTx.date) {
       const firstDate = new Date(oldestTx.date);
-      const now = new Date();
       const daysSinceFirst = Math.floor(
         (now.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24),
       );
@@ -47,22 +171,35 @@ export class AnalyticsManager {
     }
 
     let expenseGrowth = 0;
-    if (previousMonth.expenses > 0) {
-      expenseGrowth =
-        ((currentMonth.expenses - previousMonth.expenses) /
-          previousMonth.expenses) *
-        100;
+    let comparisonMode: 'percentage' | 'absolute' | 'none' = 'absolute';
+    let absoluteDifference =
+      currentCalendarMonth.expenses - previousCalendarMonth.expenses;
+
+    if (
+      previousCalendarMonth.expenses === 0 &&
+      currentCalendarMonth.expenses === 0
+    ) {
+      comparisonMode = 'none';
     }
+
+    const hasComparisonData =
+      (currentCalendarMonth.expenses > 0 || currentCalendarMonth.income > 0) &&
+      (previousCalendarMonth.expenses > 0 || previousCalendarMonth.income > 0);
 
     const report: AnalyticsReport = {
       currentMonth,
       previousMonth,
+      currentCalendarMonth,
+      previousCalendarMonth,
       categoryExpenses,
       previousCategoryExpenses,
       budgets,
       spendingDays,
       expenseGrowth,
       hasEnoughHistory,
+      hasComparisonData,
+      comparisonMode,
+      absoluteDifference,
       insights: [],
     };
 

@@ -57,6 +57,7 @@ export const InsightsScreen = () => {
   const currencySymbol = useStore((s) => s.currencySymbol);
   const loadFullData = useStore((s) => s.loadFullData);
   const checkAndShowAd = useStore((s) => s.checkAndShowAd);
+  const refreshAnalytics = useStore((s) => s.refreshAnalytics);
 
   const { t, translateName } = useTranslation();
   const theme = useTheme<AppTheme>();
@@ -84,6 +85,10 @@ export const InsightsScreen = () => {
       return () => clearTimeout(timer);
     }
   }, [loadFullData, checkAndShowAd]);
+
+  React.useEffect(() => {
+    refreshAnalytics();
+  }, [selectedRange, refreshAnalytics]);
 
   const filtered = useMemo(() => {
     const inRange = transactions.filter((tx) =>
@@ -175,8 +180,8 @@ export const InsightsScreen = () => {
       datasets: [
         {
           data: [
-            analyticsReport.previousMonth.expenses,
-            analyticsReport.currentMonth.expenses,
+            analyticsReport.previousCalendarMonth.expenses,
+            analyticsReport.currentCalendarMonth.expenses,
           ],
           colors: [
             (_opacity = 1) => theme.colors.primaryContainer,
@@ -188,6 +193,8 @@ export const InsightsScreen = () => {
   }, [analyticsReport, t, theme.colors]);
 
   const expenseGrowth = analyticsReport?.expenseGrowth ?? 0;
+  const comparisonMode = analyticsReport?.comparisonMode ?? 'none';
+  const absoluteDifference = analyticsReport?.absoluteDifference ?? 0;
 
   const pieData = useMemo(
     () =>
@@ -753,50 +760,80 @@ export const InsightsScreen = () => {
           {t('expenseGrowthTitle')}
         </Text>
 
-        {analyticsReport?.hasEnoughHistory ? (
+        {analyticsReport?.hasComparisonData ? (
           <>
-            <Text
-              style={{
-                color: theme.colors.onSurfaceVariant,
-                fontFamily: 'Inter-Regular',
-                fontWeight: '400',
-                fontSize: 12,
-                marginBottom: 8,
-              }}
-            >
-              {t('basedOnLastMonths')}
-            </Text>
             {memoizedBarChart}
             <View style={styles.growthContainer}>
-              <Text
-                style={[
-                  styles.growthValue,
-                  {
+              {comparisonMode === 'percentage' ? (
+                <>
+                  <Text
+                    style={[
+                      styles.growthValue,
+                      {
+                        color:
+                          expenseGrowth > 0
+                            ? theme.colors.error
+                            : theme.colors.income,
+                        fontFamily: 'Inter-SemiBold',
+                        fontWeight: '600',
+                        fontSize: 22,
+                      },
+                    ]}
+                  >
+                    {expenseGrowth > 0 ? '+' : ''}
+                    {expenseGrowth.toFixed(1)}%
+                  </Text>
+                  <Text
+                    style={[
+                      styles.subtext,
+                      {
+                        fontFamily: 'Inter-Regular',
+                        fontWeight: '400',
+                        fontSize: 12,
+                      },
+                    ]}
+                  >
+                    {t('comparedToLastMonth')}
+                  </Text>
+                </>
+              ) : comparisonMode === 'absolute' ? (
+                <Text
+                  style={{
                     color:
-                      expenseGrowth > 0
+                      absoluteDifference > 0
                         ? theme.colors.error
                         : theme.colors.income,
-                    fontFamily: 'Inter-SemiBold',
-                    fontWeight: '600',
-                    fontSize: 22,
-                  },
-                ]}
-              >
-                {expenseGrowth > 0 ? '+' : ''}
-                {expenseGrowth.toFixed(1)}%
-              </Text>
-              <Text
-                style={[
-                  styles.subtext,
-                  {
-                    fontFamily: 'Inter-Regular',
-                    fontWeight: '400',
-                    fontSize: 12,
-                  },
-                ]}
-              >
-                {t('comparedToLastMonth')}
-              </Text>
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    fontSize: 14,
+                    textAlign: 'center',
+                    marginTop: 4,
+                  }}
+                >
+                  {absoluteDifference > 0
+                    ? t('spentMoreAbsolute' as any).replace(
+                        '{{amount}}',
+                        formatCurrency(absoluteDifference),
+                      )
+                    : t('spentLessAbsolute' as any).replace(
+                        '{{amount}}',
+                        formatCurrency(Math.abs(absoluteDifference)),
+                      )}
+                </Text>
+              ) : (
+                <Text
+                  style={{
+                    color: theme.colors.onSurfaceVariant,
+                    fontFamily: 'Inter-Medium',
+                    fontWeight: '500',
+                    fontSize: 14,
+                    textAlign: 'center',
+                    marginTop: 4,
+                  }}
+                >
+                  {t('noComparisonAvailable' as any)}
+                </Text>
+              )}
             </View>
           </>
         ) : (
