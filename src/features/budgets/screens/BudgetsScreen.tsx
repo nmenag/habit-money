@@ -15,6 +15,9 @@ import { Budget, useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme, spacing } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
 import { getValidCategoryIcon } from '../../../constants';
+import { getMonthRange, isInRange } from '../../../utils/dateFilters';
+import { format } from 'date-fns';
+import { enUS, es } from 'date-fns/locale';
 
 export const BudgetsScreen = () => {
   const {
@@ -24,10 +27,19 @@ export const BudgetsScreen = () => {
     categories,
     updateBudgetsOrder,
   } = useStore();
-  const { t, translateName } = useTranslation();
+  const { t, translateName, language } = useTranslation();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
+
+  const currentMonthRange = useMemo(() => getMonthRange(), []);
+
+  const formattedDateRange = useMemo(() => {
+    const locale = language === 'es' ? es : enUS;
+    const startStr = format(currentMonthRange.startDate, 'MMM d', { locale });
+    const endStr = format(currentMonthRange.endDate, 'MMM d, yyyy', { locale });
+    return `${startStr} – ${endStr}`;
+  }, [currentMonthRange, language]);
 
   const { totalBudgeted, totalSpent, averageProgress, allWithinLimit } =
     useMemo(() => {
@@ -42,7 +54,12 @@ export const BudgetsScreen = () => {
             const matchesBudget = tx.budgetId === budget.id;
             const matchesCategory =
               budget.categoryId && tx.categoryId === budget.categoryId;
-            return (matchesBudget || matchesCategory) && tx.type === 'expense';
+            const isCurrentMonth = isInRange(tx.date, currentMonthRange);
+            return (
+              (matchesBudget || matchesCategory) &&
+              tx.type === 'expense' &&
+              isCurrentMonth
+            );
           })
           .reduce((sum, tx) => sum + tx.amount, 0);
         spentSum += spentForBudget;
@@ -55,7 +72,12 @@ export const BudgetsScreen = () => {
             const matchesBudget = tx.budgetId === budget.id;
             const matchesCategory =
               budget.categoryId && tx.categoryId === budget.categoryId;
-            return (matchesBudget || matchesCategory) && tx.type === 'expense';
+            const isCurrentMonth = isInRange(tx.date, currentMonthRange);
+            return (
+              (matchesBudget || matchesCategory) &&
+              tx.type === 'expense' &&
+              isCurrentMonth
+            );
           })
           .reduce((sum, tx) => sum + tx.amount, 0);
         return spentForBudget <= budget.amount;
@@ -67,7 +89,7 @@ export const BudgetsScreen = () => {
         averageProgress: Math.min(avgProg, 1),
         allWithinLimit: withinLimit && count > 0,
       };
-    }, [budgets, transactions]);
+    }, [budgets, transactions, currentMonthRange]);
 
   const smartRecommendation = useMemo(() => {
     if (budgets.length === 0) return null;
@@ -100,7 +122,12 @@ export const BudgetsScreen = () => {
         const matchesBudget = t.budgetId === item.id;
         const matchesCategory =
           item.categoryId && t.categoryId === item.categoryId;
-        return (matchesBudget || matchesCategory) && t.type === 'expense';
+        const isCurrentMonth = isInRange(t.date, currentMonthRange);
+        return (
+          (matchesBudget || matchesCategory) &&
+          t.type === 'expense' &&
+          isCurrentMonth
+        );
       })
       .reduce((sum, t) => sum + t.amount, 0);
     const progress = Math.min(spent / item.amount, 1);
@@ -229,6 +256,9 @@ export const BudgetsScreen = () => {
                 <Text style={styles.overviewLabel}>
                   {t('aggregateSpending')}
                 </Text>
+                <Text style={styles.overviewDates}>
+                  {formattedDateRange}
+                </Text>
                 <Text
                   style={styles.overviewValue}
                   numberOfLines={1}
@@ -304,6 +334,7 @@ export const BudgetsScreen = () => {
     allWithinLimit,
     averageProgress,
     smartRecommendation,
+    formattedDateRange,
     theme,
     t,
     formatCurrency,
@@ -408,6 +439,12 @@ const defaultStyles = (theme: AppTheme) =>
       letterSpacing: 1,
       color: theme.colors.onSurfaceVariant,
       marginBottom: 4,
+    },
+    overviewDates: {
+      fontSize: fontScale(12),
+      fontFamily: 'Inter-Regular',
+      color: theme.colors.onSurfaceVariant,
+      marginBottom: 6,
     },
     overviewValue: {
       fontSize: fontScale(20),
