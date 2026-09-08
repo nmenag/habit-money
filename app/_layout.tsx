@@ -233,6 +233,13 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
+              name="account-detail"
+              options={{
+                headerShown: true,
+                title: t('accountDetails'),
+              }}
+            />
+            <Stack.Screen
               name="categories"
               options={{
                 headerShown: true,
@@ -244,6 +251,13 @@ export default function RootLayout() {
               options={{
                 headerShown: true,
                 title: t('budgets'),
+              }}
+            />
+            <Stack.Screen
+              name="budget-detail"
+              options={{
+                headerShown: true,
+                title: t('budgetDetails'),
               }}
             />
             <Stack.Screen
