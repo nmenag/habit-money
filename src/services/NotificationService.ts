@@ -1,13 +1,32 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { getDb } from '../db/schema';
+import { getLocalDateString } from '../utils/dateUtils';
+
+const hasTodayTransaction = (): boolean => {
+  try {
+    const db = getDb();
+    const today = getLocalDateString();
+    const row = db.getFirstSync<{ count: number }>(
+      'SELECT COUNT(*) as count FROM transactions WHERE date >= ? AND date < ?',
+      [today + 'T00:00:00.000', today + 'T23:59:59.999'],
+    );
+    return (row?.count ?? 0) > 0;
+  } catch {
+    return false;
+  }
+};
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
+  handleNotification: async () => {
+    const alreadyTracked = hasTodayTransaction();
+    return {
+      shouldPlaySound: !alreadyTracked,
+      shouldSetBadge: false,
+      shouldShowBanner: !alreadyTracked,
+      shouldShowList: !alreadyTracked,
+    };
+  },
 });
 
 export class NotificationService {

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { format, parseISO, subDays } from 'date-fns';
 import { enUS, es } from 'date-fns/locale';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, Stack } from 'expo-router';
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Card, IconButton, Text, useTheme } from 'react-native-paper';
@@ -129,11 +129,41 @@ export const AccountDetailScreen = () => {
     return groups;
   }, [accountTransactions, language]);
 
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/accounts');
+    }
+  };
+
   if (!account) {
     return (
       <View style={styles.container}>
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            title: t('accountNotFound'),
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={handleBack}
+                style={{ padding: 8, marginLeft: -8 }}
+                activeOpacity={0.7}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel={t('back')}
+              >
+                <Ionicons
+                  name="arrow-back"
+                  size={24}
+                  color={theme.colors.onSurface}
+                />
+              </TouchableOpacity>
+            ),
+          }}
+        />
         <Text style={[styles.errorText, { color: theme.colors.error }]}>
-          {t('accountNotFound' as any) || 'Account not found'}
+          {t('accountNotFound')}
         </Text>
       </View>
     );
@@ -153,9 +183,31 @@ export const AccountDetailScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: account ? translateName(account.name) : t('accountDetails'),
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={handleBack}
+              style={{ padding: 8, marginLeft: -8 }}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={t('back')}
+            >
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={theme.colors.onSurface}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
       <ScrollView
         contentContainerStyle={{
-          paddingTop: Math.max(16, insets.top),
+          paddingTop: 16,
           paddingBottom: insets.bottom + 200,
         }}
         showsVerticalScrollIndicator={false}
@@ -241,7 +293,7 @@ export const AccountDetailScreen = () => {
                     containerColor={theme.colors.primary}
                     iconColor="#fff"
                     size={16}
-                    accessibilityLabel="Add Transaction"
+                    accessibilityLabel={t('addTransaction')}
                     onPress={() =>
                       router.push({
                         pathname: '/add-transaction',

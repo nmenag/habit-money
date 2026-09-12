@@ -25,6 +25,7 @@ yarn-error.*
 .env*.local
 
 *.tsbuildinfo
+/coverage
 
 app-example
 
