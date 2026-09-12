@@ -1,9 +1,12 @@
 # Habit Money — Workspace Agent Rules
 
-## Release Notes (Notas de la versión)
+## Release Notes (Notas de la versión / notes version)
 
-When asked to write or generate release notes ("Notas de la versión"), always produce them using **exactly** the following format, one block per locale:
+When asked to write or generate release notes ("Notas de la versión", "notes version", "release notes", or `/aso notes version`), always produce them wrapped **strictly inside a markdown code block** (` ``` `) so that the XML/HTML tags `<es-419>` and `<en-US>` are preserved and never stripped by markdown/HTML renderers.
 
+Use **exactly** the following format, one block per locale:
+
+````
 ```
 <es-419>
 Ingresa o pega aquí las notas de la versión para el idioma "es-419".
@@ -12,10 +15,14 @@ Ingresa o pega aquí las notas de la versión para el idioma "es-419".
 Ingresa o pega aquí las notas de la versión para el idioma "en-US".
 </en-US>
 ```
+````
 
+### Rules for Release Notes:
+
+- **Always wrap in a code block** (` ``` `) so the `<es-419>` and `<en-US>` tags remain visible, intact, and easily copyable.
 - Replace the placeholder text inside each tag with the actual release notes for that locale.
 - Always include both `es-419` (Latin American Spanish) and `en-US` (English) blocks.
-- Keep the notes concise, user-facing, and focused on what changed or improved from the user's perspective.
+- Keep the notes concise, user-facing, bullet-pointed, and focused on what changed or improved from the user's perspective.
 - Do **not** include technical jargon, internal ticket numbers, or developer-facing details.
 
 ## Code Formatting (Prettier)

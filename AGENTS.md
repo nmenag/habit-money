@@ -136,4 +136,19 @@ Always cross-reference this file and the design guidelines in `DESIGN.md` before
 - **Always Translate (i18n)**: Whenever adding or modifying any screen, module, or UI component, AI agents must ALWAYS add complete translation keys to both Spanish (`src/i18n/es.ts`) and English (`src/i18n/en.ts`) files, and consume them using `t(...)`. Hardcoded user-facing strings or inline ternary copy in components are strictly prohibited.
 - **Protect Financial Integrity**: Never perform code modifications that risk desynced account balances, incorrect transaction signs, or unsafe database writes.
 - **Pull Requests**: When asked to generate a PR, keep it extremely concise, format it exactly using the structure of `.github/PULL_REQUEST_TEMPLATE.md`, and always return it wrapped in a markdown code block.
+- **Release Notes (Notas de la versión / notes version)**: When asked to write or generate release notes ("Notas de la versión", "notes version", "release notes", or `/aso notes version`), always produce them wrapped **strictly inside a markdown code block** (` ``` `) so that the XML/HTML tags `<es-419>` and `<en-US>` are preserved and never stripped by markdown renderers:
+
+````
+```
+<es-419>
+Ingresa o pega aquí las notas de la versión para el idioma "es-419".
+</es-419>
+<en-US>
+Ingresa o pega aquí las notas de la versión para el idioma "en-US".
+</en-US>
+```
+````
+
+- Always include both `es-419` (Latin American Spanish) and `en-US` (English) blocks.
+- Keep notes concise, user-facing, bullet-pointed, and without technical jargon.
 - **Clarify Ambiguity**: If feature requirements or financial rules (such as calculations, date boundaries, or database schemas) are ambiguous, pause and request clarification from the user.
