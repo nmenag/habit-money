@@ -180,12 +180,51 @@ Habit Money features a native Android home screen widget (`HabitMoneyWidget`).
 2. **Dynamic Data Updates**: The widget synchronizes with the app's SQLite database. Changes in transactions dynamically trigger updates via `triggerWidgetUpdate()` within the analytics settings store slice.
 3. **Expo Go Fallback**: When testing inside Expo Go or an unlinked dev environment, widget updates will fail gracefully with a console warning instead of crashing the app.
 
-## 🧪 CI/CD
+## 🧪 Testing
+
+Habit Money includes a comprehensive unit test suite powered by **Jest** and **jest-expo**, covering pure domain logic, financial scoring algorithms, utilities, application services, and Zustand state slices with >99% code coverage.
+
+### Running Tests
+
+- **Run all tests**:
+
+  ```bash
+  npm test
+  ```
+
+- **Run with coverage report**:
+
+  ```bash
+  npm run test:coverage
+  ```
+
+  This displays a summary table in the terminal and generates an interactive HTML report at:
+
+  ```
+  coverage/lcov-report/index.html
+  ```
+
+  You can open it in your browser (e.g. `xdg-open coverage/lcov-report/index.html` on Linux or `open coverage/lcov-report/index.html` on macOS) to inspect line-by-line coverage for every file.
+
+- **Run in watch mode (interactive development)**:
+
+  ```bash
+  npm run test:watch
+  ```
+
+- **Run a specific test suite**:
+  ```bash
+  npm test src/utils/__tests__/scoreCalculator.test.ts
+  ```
+
+## 🔄 CI/CD
 
 - **GitHub Actions**:
   - **Continuous Integration**: Every Pull Request to `main` triggers a validation pipeline that runs `expo-doctor`, `lint`, and `type-check`.
   - **Automated Releases**: Pushes to `main` trigger a release workflow that automatically creates a GitHub Release tagged with the version from `package.json`.
 - **Quality Control**:
+  - `npm test`: Run the full unit test suite.
+  - `npm run test:coverage`: Run unit tests and generate coverage report.
   - `npm run doctor`: Validate Expo configuration and dependency health.
   - `npm run lint`: Maintain code quality and style consistency.
   - `npm run lint:commit`: Validate commit messages (required for CI).
