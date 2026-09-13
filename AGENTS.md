@@ -117,6 +117,13 @@ Always cross-reference this file and the design guidelines in `DESIGN.md` before
 - **Function Size**: Functions must follow the Single Responsibility Principle. If a function exceeds 30 lines (excluding inline SQL statements), it should be refactored into smaller sub-functions.
 - **Refactoring Guidance**: Abstract complex database aggregation or formatting code out of screen components into helper functions or selector hooks.
 - **Error Handling**: Standardize database interactions inside `try/catch` blocks. Do not crash the app on DB execution failures; log the error to console warnings and display user-friendly fallback states or alerts.
+- **Code Formatting (Prettier)**:
+  - After modifying or creating any file, agents **must** run Prettier on the modified files before finishing:
+    ```bash
+    node_modules/.bin/prettier --write <file1> [file2 ...]
+    ```
+  - Always use the project's `.prettierrc` configuration.
+  - If `node_modules/.bin/prettier` is unavailable, notify the user to run `npm install`.
 
 ---
 
@@ -152,3 +159,19 @@ Ingresa o pega aquí las notas de la versión para el idioma "en-US".
 - Always include both `es-419` (Latin American Spanish) and `en-US` (English) blocks.
 - Keep notes concise, user-facing, bullet-pointed, and without technical jargon.
 - **Clarify Ambiguity**: If feature requirements or financial rules (such as calculations, date boundaries, or database schemas) are ambiguous, pause and request clarification from the user.
+
+---
+
+## 11. Use of Skills
+
+- **Skills Directory (`skills/`)**: All AI agent skills reside directly in the root `skills/` directory (e.g., `skills/<skill-name>/SKILL.md`).
+- **`.agents` is Deprecated**: The legacy `.agents/` folder (including `.agents/skills/` and `.agents/agents/`) is **deprecated and removed**. Agents must never create, reference, or expect skills or configurations under `.agents/`. All skill assets, scripts, references, and configurations live exclusively in `skills/`.
+- **Mandatory Skill Consultation**: Before executing tasks in specialized domains (such as ASO, UI/UX audits, or visual design overhauls), agents **must** check for matching skills in `skills/`, read their `SKILL.md`, and strictly follow their instructions and pre-flight gates.
+- **Available Workspace Skills**:
+  - **`skills/aso`**: App Store Optimization for Google Play and Apple App Store. Covers ASO audits, keyword optimization, store listings, competitor benchmarking, and release note formatting.
+  - **`skills/find-skills`**: Skill discovery and installation from trusted repositories to extend agent capabilities.
+  - **`skills/frontend-design`**: Distinctive, intentional UI design principles, typography scale, palette curation, and avoiding generic UI patterns.
+  - **`skills/impeccable`**: Frontend design engineering suite. Covers UI/UX reviews, visual hierarchy, polish, accessibility, responsiveness, micro-interactions, animations, and design system refinement.
+- **Managing Skills**:
+  - New skills must be installed or placed in `skills/<skill-name>/` with a valid `SKILL.md` file.
+  - Installed skills and their hashes are tracked in `skills-lock.json` at the root of the project.
