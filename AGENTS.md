@@ -117,6 +117,13 @@ Always cross-reference this file and the design guidelines in `DESIGN.md` before
 - **Function Size**: Functions must follow the Single Responsibility Principle. If a function exceeds 30 lines (excluding inline SQL statements), it should be refactored into smaller sub-functions.
 - **Refactoring Guidance**: Abstract complex database aggregation or formatting code out of screen components into helper functions or selector hooks.
 - **Error Handling**: Standardize database interactions inside `try/catch` blocks. Do not crash the app on DB execution failures; log the error to console warnings and display user-friendly fallback states or alerts.
+- **Code Formatting (Prettier)**:
+  - After modifying or creating any file, agents **must** run Prettier on the modified files before finishing:
+    ```bash
+    node_modules/.bin/prettier --write <file1> [file2 ...]
+    ```
+  - Always use the project's `.prettierrc` configuration.
+  - If `node_modules/.bin/prettier` is unavailable, notify the user to run `npm install`.
 
 ---
 
@@ -136,4 +143,35 @@ Always cross-reference this file and the design guidelines in `DESIGN.md` before
 - **Always Translate (i18n)**: Whenever adding or modifying any screen, module, or UI component, AI agents must ALWAYS add complete translation keys to both Spanish (`src/i18n/es.ts`) and English (`src/i18n/en.ts`) files, and consume them using `t(...)`. Hardcoded user-facing strings or inline ternary copy in components are strictly prohibited.
 - **Protect Financial Integrity**: Never perform code modifications that risk desynced account balances, incorrect transaction signs, or unsafe database writes.
 - **Pull Requests**: When asked to generate a PR, keep it extremely concise, format it exactly using the structure of `.github/PULL_REQUEST_TEMPLATE.md`, and always return it wrapped in a markdown code block.
+- **Release Notes (Notas de la versión / notes version)**: When asked to write or generate release notes ("Notas de la versión", "notes version", "release notes", or `/aso notes version`), always produce them wrapped **strictly inside a markdown code block** (` ``` `) so that the XML/HTML tags `<es-419>` and `<en-US>` are preserved and never stripped by markdown renderers:
+
+````
+```
+<es-419>
+Ingresa o pega aquí las notas de la versión para el idioma "es-419".
+</es-419>
+<en-US>
+Ingresa o pega aquí las notas de la versión para el idioma "en-US".
+</en-US>
+```
+````
+
+- Always include both `es-419` (Latin American Spanish) and `en-US` (English) blocks.
+- Keep notes concise, user-facing, bullet-pointed, and without technical jargon.
 - **Clarify Ambiguity**: If feature requirements or financial rules (such as calculations, date boundaries, or database schemas) are ambiguous, pause and request clarification from the user.
+
+---
+
+## 11. Use of Skills
+
+- **Skills Directory (`skills/`)**: All AI agent skills reside directly in the root `skills/` directory (e.g., `skills/<skill-name>/SKILL.md`).
+- **`.agents` is Deprecated**: The legacy `.agents/` folder (including `.agents/skills/` and `.agents/agents/`) is **deprecated and removed**. Agents must never create, reference, or expect skills or configurations under `.agents/`. All skill assets, scripts, references, and configurations live exclusively in `skills/`.
+- **Mandatory Skill Consultation**: Before executing tasks in specialized domains (such as ASO, UI/UX audits, or visual design overhauls), agents **must** check for matching skills in `skills/`, read their `SKILL.md`, and strictly follow their instructions and pre-flight gates.
+- **Available Workspace Skills**:
+  - **`skills/aso`**: App Store Optimization for Google Play and Apple App Store. Covers ASO audits, keyword optimization, store listings, competitor benchmarking, and release note formatting.
+  - **`skills/find-skills`**: Skill discovery and installation from trusted repositories to extend agent capabilities.
+  - **`skills/frontend-design`**: Distinctive, intentional UI design principles, typography scale, palette curation, and avoiding generic UI patterns.
+  - **`skills/impeccable`**: Frontend design engineering suite. Covers UI/UX reviews, visual hierarchy, polish, accessibility, responsiveness, micro-interactions, animations, and design system refinement.
+- **Managing Skills**:
+  - New skills must be installed or placed in `skills/<skill-name>/` with a valid `SKILL.md` file.
+  - Installed skills and their hashes are tracked in `skills-lock.json` at the root of the project.

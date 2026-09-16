@@ -1,0 +1,32 @@
+appId: com.habitmoney.preview
+---
+# - clearState
+- launchApp
+- extendedWaitUntil:
+    visible:
+      text: 'Habit Money'
+    timeout: 15000
+- assertVisible: 'Habit Money'
+- assertVisible: 'The simplest way to track your expenses and build better financial habits.'
+
+# Test Language Selector
+- tapOn: 'Detected Language'
+- assertVisible: 'English'
+- assertVisible: 'Spanish'
+- tapOn: 'Spanish'
+
+# Verify that UI updated to Spanish
+- assertVisible: 'Idioma Detectado'
+- assertVisible: 'Español'
+- assertVisible: 'Comenzar'
+
+# Test Currency Selector (still in Spanish interface)
+- tapOn: 'Moneda Detectada'
+- assertVisible: 'Peso colombiano (COP)'
+- tapOn: 'Peso colombiano (COP)'
+
+# Complete Onboarding
+- tapOn: 'Comenzar'
+
+# Verify navigation to Dashboard (Inicio)
+- assertVisible: 'Balance Total'

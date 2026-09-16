@@ -293,14 +293,24 @@ the app's brand maturity tier — they may be deliberate choices for Dominant ap
 
 ---
 
-## Task-Specific Questions
+## Release Notes / Version Notes (What's New)
 
-1. What is the App Store or Google Play URL?
-2. Is this your app or a competitor's?
-3. What category does the app compete in?
-4. Do you have competitor URLs to compare against?
-5. Are you focused on search visibility, conversion rate, or both?
-6. Do you have access to App Store Connect or Google Play Console data?
+When the user asks for release notes ("Notas de la versión", "notes version", "release notes", or `/aso notes version`), always output the notes wrapped **strictly inside a markdown code block** (` ``` `) using the exact locale tags for Latin American Spanish (`<es-419>`) and English (`<en-US>`):
+
+````
+```
+<es-419>
+Ingresa o pega aquí las notas de la versión para el idioma "es-419".
+</es-419>
+<en-US>
+Ingresa o pega aquí las notas de la versión para el idioma "en-US".
+</en-US>
+```
+````
+
+- Wrap in a code block so the XML/HTML tags are never stripped or hidden by markdown renderers.
+- Always provide both languages.
+- Keep notes concise, user-focused, bullet-pointed, and free of technical jargon.
 
 ---
 

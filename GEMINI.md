@@ -90,3 +90,22 @@ When asked to generate a PR, keep it extremely concise, format it exactly using 
 ## Breaking Changes (if any)
 
 <!-- List breaking changes or "None" -->
+
+## Release Notes (Notas de la versión / notes version)
+
+When asked to write or generate release notes ("Notas de la versión", "notes version", "release notes", or `/aso notes version`), always produce them wrapped **strictly inside a markdown code block** (` ``` `) so that the XML/HTML tags `<es-419>` and `<en-US>` are preserved and never stripped by markdown renderers:
+
+````
+```
+<es-419>
+Ingresa o pega aquí las notas de la versión para el idioma "es-419".
+</es-419>
+<en-US>
+Ingresa o pega aquí las notas de la versión para el idioma "en-US".
+</en-US>
+```
+````
+
+- Always include both `es-419` (Latin American Spanish) and `en-US` (English) blocks.
+- Keep the notes concise, user-facing, bullet-pointed, and focused on what changed or improved from the user's perspective.
+- Do not include technical jargon, internal ticket numbers, or developer-facing details.
