@@ -43,7 +43,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           style={styles.modalBackdrop}
           activeOpacity={1}
           onPress={onClose}
-          accessibilityLabel={t("close")}
+          accessibilityLabel={t('close')}
           accessibilityRole="button"
         />
         <View
@@ -76,11 +76,13 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               style={[
                 styles.modalCloseBtn,
                 {
-                  backgroundColor: theme.dark ? theme.colors.elevation.level2 : theme.colors.surfaceVariant,
+                  backgroundColor: theme.dark
+                    ? theme.colors.elevation.level2
+                    : theme.colors.surfaceVariant,
                   borderColor: theme.colors.outlineVariant,
                 },
               ]}
-              accessibilityLabel={t("close")}
+              accessibilityLabel={t('close')}
               accessibilityRole="button"
             >
               <Ionicons

@@ -365,7 +365,9 @@ export const AddBudgetScreen = () => {
                 style={[
                   styles.chevronCircle,
                   {
-                    backgroundColor: theme.dark ? theme.colors.elevation.level2 : theme.colors.surfaceVariant,
+                    backgroundColor: theme.dark
+                      ? theme.colors.elevation.level2
+                      : theme.colors.surfaceVariant,
                     borderColor: theme.colors.outlineVariant,
                   },
                 ]}

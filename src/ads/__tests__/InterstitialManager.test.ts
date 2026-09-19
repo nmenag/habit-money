@@ -69,15 +69,15 @@ describe('InterstitialManager', () => {
     const manager = new InterstitialManager();
     manager.init();
 
-    // Trigger LOADED
     listeners[AdEventType.LOADED]?.();
 
-    // Trigger CLOSED -> should trigger load()
     listeners[AdEventType.CLOSED]?.();
     expect(mockAdInstance.load).toHaveBeenCalledTimes(2);
 
-    // Trigger ERROR -> sets timeout to load after 30s
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     listeners[AdEventType.ERROR]?.();
+    warnSpy.mockRestore();
+
     jest.advanceTimersByTime(30000);
     expect(mockAdInstance.load).toHaveBeenCalledTimes(3);
 
@@ -91,8 +91,14 @@ describe('InterstitialManager', () => {
       },
     );
 
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const manager = new InterstitialManager();
     expect(() => manager.init()).not.toThrow();
+    expect(errorSpy).toHaveBeenCalledWith(
+      'Failed to initialize InterstitialAd:',
+      expect.any(Error),
+    );
+    errorSpy.mockRestore();
   });
 
   describe('show()', () => {
@@ -230,10 +236,18 @@ describe('InterstitialManager', () => {
         throw new Error('Database locked');
       });
 
+      const errorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       const manager = new InterstitialManager();
       manager.init();
 
       await expect(manager.show()).resolves.not.toThrow();
+      expect(errorSpy).toHaveBeenCalledWith(
+        'InterstitialManager show() Error:',
+        expect.any(Error),
+      );
+      errorSpy.mockRestore();
     });
   });
 });
