@@ -174,9 +174,13 @@ export const AccountDetailScreen = () => {
   const cardBgColor = theme.colors.surface;
 
   const inflowBg = (theme.colors as any).incomeContainer;
-  const inflowBorder = (theme.colors as any).income ? ((theme.colors as any).income + "33") : theme.colors.outlineVariant;
+  const inflowBorder = (theme.colors as any).income
+    ? (theme.colors as any).income + '33'
+    : theme.colors.outlineVariant;
   const outflowBg = theme.colors.errorContainer;
-  const outflowBorder = theme.colors.error ? (theme.colors.error + "33") : theme.colors.outlineVariant;
+  const outflowBorder = theme.colors.error
+    ? theme.colors.error + '33'
+    : theme.colors.outlineVariant;
 
   return (
     <View
@@ -323,7 +327,11 @@ export const AccountDetailScreen = () => {
                 { backgroundColor: (theme.colors as any).incomeContainer },
               ]}
             >
-              <Ionicons name="arrow-down" size={14} color={(theme.colors as any).income || "#10B981"} />
+              <Ionicons
+                name="arrow-down"
+                size={14}
+                color={(theme.colors as any).income || '#10B981'}
+              />
             </View>
             <View style={styles.flowTextCol}>
               <Text
@@ -335,7 +343,10 @@ export const AccountDetailScreen = () => {
                 {t('inflowMonth')}
               </Text>
               <Text
-                style={[styles.flowAmount, { color: (theme.colors as any).income || '#10B981' }]}
+                style={[
+                  styles.flowAmount,
+                  { color: (theme.colors as any).income || '#10B981' },
+                ]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >

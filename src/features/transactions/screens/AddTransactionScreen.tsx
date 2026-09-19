@@ -1498,7 +1498,13 @@ export const AddTransactionScreen = () => {
               'Saves changes and records transaction'
             }
           >
-            <Text variant="labelLarge" style={[styles.primaryActionBtnText, { color: theme.colors.onPrimary }]}>
+            <Text
+              variant="labelLarge"
+              style={[
+                styles.primaryActionBtnText,
+                { color: theme.colors.onPrimary },
+              ]}
+            >
               {isEditing ? t('update') : t('saveTransaction')}
             </Text>
           </TouchableOpacity>

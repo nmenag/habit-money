@@ -312,7 +312,7 @@ export const BudgetsScreen = () => {
                 averageProgress > 0.9
                   ? theme.colors.error
                   : averageProgress > 0.75
-                    ? ((theme.colors as any).warning || '#D97706')
+                    ? (theme.colors as any).warning || '#D97706'
                     : theme.colors.primary
               }
               style={styles.mainProgressBar}

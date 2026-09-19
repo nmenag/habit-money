@@ -182,7 +182,7 @@ Habit Money features a native Android home screen widget (`HabitMoneyWidget`).
 
 ## 🧪 Testing
 
-Habit Money includes a comprehensive unit test suite powered by **Jest** and **jest-expo**, covering pure domain logic, financial scoring algorithms, utilities, application services, and Zustand state slices with >99% code coverage.
+Habit Money includes a comprehensive **unit test suite** powered by **Jest** and **jest-expo**, covering pure domain logic, financial scoring algorithms, utilities, application services, and Zustand state slices with >99% code coverage. In addition, a set of **integration tests** lives under `src/__integration__` and validates cross‑slice interactions (e.g., transaction → account balance, transfers, budget linkage).
 
 ### Running Tests
 
