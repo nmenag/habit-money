@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import React, { useCallback, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
@@ -161,16 +161,45 @@ export const AccountsScreen = () => {
       <View style={styles.headerContainer}>
         <Animated.View
           entering={FadeIn.duration(400)}
-          style={styles.overviewSection}
+          style={[
+            styles.overviewCard,
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.outlineVariant,
+            },
+          ]}
         >
-          <Text
-            style={[
-              styles.overviewLabel,
-              { color: theme.colors.onSurfaceVariant },
-            ]}
-          >
-            {t('totalBalance')}
-          </Text>
+          <View style={styles.overviewTopRow}>
+            <Text
+              style={[
+                styles.overviewLabel,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              {t('totalBalance')}
+            </Text>
+            <View
+              style={[
+                styles.countBadge,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
+            >
+              <Ionicons
+                name="wallet-outline"
+                size={12}
+                color={theme.colors.onSurfaceVariant}
+                style={{ marginRight: 4 }}
+              />
+              <Text
+                style={[
+                  styles.countBadgeText,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {accounts.length} {t('accounts')}
+              </Text>
+            </View>
+          </View>
           <Text
             style={[
               styles.overviewValue,
@@ -178,9 +207,11 @@ export const AccountsScreen = () => {
                 color:
                   totalBalance < 0
                     ? theme.colors.error
-                    : theme.colors.onBackground,
+                    : theme.colors.onSurface,
               },
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
           >
             {formatCurrency(totalBalance, defaultCurrencyCode)}
           </Text>
@@ -300,10 +331,10 @@ export const AccountsScreen = () => {
         {accounts.length > 1 && (
           <View style={styles.dragHelpRow}>
             <Ionicons
-              name="information-circle-outline"
-              size={13}
+              name="reorder-two-outline"
+              size={15}
               color={theme.colors.outline}
-              style={{ marginRight: 4 }}
+              style={{ marginRight: 6 }}
             />
             <Text
               style={[styles.dragHelpText, { color: theme.colors.outline }]}
@@ -331,6 +362,40 @@ export const AccountsScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: t('accounts'),
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.headerBtn}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={t('back')}
+            >
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={theme.colors.onSurface}
+              />
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={handleAddAccount}
+              style={styles.headerBtn}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={t('addAccount')}
+            >
+              <Ionicons name="add" size={26} color={theme.colors.primary} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
       <DraggableFlatList
         data={accounts}
         keyExtractor={(item) => item.id}
@@ -402,17 +467,44 @@ const defaultStyles = (theme: AppTheme) =>
     headerContainer: {
       marginBottom: 8,
     },
-    overviewSection: {
+    headerBtn: {
+      padding: 8,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
       alignItems: 'center',
-      marginVertical: 20,
+    },
+    overviewCard: {
+      borderRadius: theme.roundness || 12,
+      borderWidth: 1,
+      padding: 16,
+      marginBottom: 16,
+      marginTop: 8,
+    },
+    overviewTopRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    countBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 12,
+    },
+    countBadgeText: {
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     overviewLabel: {
       fontSize: fontScale(10),
       fontFamily: 'Inter-Medium',
       fontWeight: '500',
       textTransform: 'uppercase',
-      letterSpacing: 1.5,
-      marginBottom: 6,
+      letterSpacing: 1.2,
     },
     overviewValue: {
       fontSize: fontScale(26),

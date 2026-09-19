@@ -577,4 +577,6 @@ export const en = {
   monthlyBarChartDescription: 'Bar chart showing monthly expense comparisons',
   transactionSingle: 'transaction',
   transactionPlural: 'transactions',
+  offlineAndPrivate: '100% Offline & Private',
+  overBudgetAlert: 'Over Budget',
 };

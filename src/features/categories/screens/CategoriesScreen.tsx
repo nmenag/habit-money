@@ -1,7 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
@@ -110,9 +110,41 @@ export const CategoriesScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <View
-        style={[styles.headerSection, { paddingTop: Math.max(12, insets.top) }]}
-      >
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: t('categories'),
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.headerBtn}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={t('back')}
+            >
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={theme.colors.onSurface}
+              />
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => router.push('/add-category')}
+              style={styles.headerBtn}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={t('addCategory')}
+            >
+              <Ionicons name="add" size={26} color={theme.colors.primary} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <View style={styles.headerSection}>
         <SegmentedButtons
           value={activeTab}
           onValueChange={(v) => setActiveTab(v as TransactionType)}
@@ -130,6 +162,30 @@ export const CategoriesScreen = () => {
           ]}
           style={styles.segmentedButtons}
         />
+        <View style={styles.tabSummaryRow}>
+          <View
+            style={[
+              styles.countBadge,
+              { backgroundColor: theme.colors.surfaceVariant },
+            ]}
+          >
+            <Ionicons
+              name="pricetags-outline"
+              size={12}
+              color={theme.colors.onSurfaceVariant}
+              style={{ marginRight: 4 }}
+            />
+            <Text
+              style={[
+                styles.countBadgeText,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              {filteredCategories.length}{' '}
+              {activeTab === 'expense' ? t('expenses') : t('income')}
+            </Text>
+          </View>
+        </View>
       </View>
 
       <DraggableFlatList
@@ -150,10 +206,10 @@ export const CategoriesScreen = () => {
           filteredCategories.length > 1 ? (
             <View style={styles.dragHelpRow}>
               <Ionicons
-                name="information-circle-outline"
-                size={13}
+                name="reorder-two-outline"
+                size={15}
                 color={theme.colors.outline}
-                style={{ marginRight: 4 }}
+                style={{ marginRight: 6 }}
               />
               <Text
                 style={[styles.dragHelpText, { color: theme.colors.outline }]}
@@ -216,11 +272,37 @@ const defaultStyles = (theme: AppTheme) =>
     container: {
       flex: 1,
     },
+    headerBtn: {
+      padding: 8,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     headerSection: {
       paddingHorizontal: 16,
-      paddingBottom: 16,
+      paddingTop: 12,
+      paddingBottom: 12,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.outlineVariant,
+    },
+    tabSummaryRow: {
+      flexDirection: 'row',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      marginTop: 10,
+    },
+    countBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 12,
+    },
+    countBadgeText: {
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     segmentedButtons: {
       borderRadius: 14,

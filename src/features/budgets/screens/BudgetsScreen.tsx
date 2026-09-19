@@ -1,6 +1,6 @@
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import React, { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
@@ -263,10 +263,35 @@ export const BudgetsScreen = () => {
           <Card.Content style={styles.statCardContent}>
             <View style={styles.overviewTextRow}>
               <View style={{ flex: 1, marginRight: 8 }}>
-                <Text style={styles.overviewLabel}>
-                  {t('aggregateSpending')}
-                </Text>
-                <Text style={styles.overviewDates}>{formattedDateRange}</Text>
+                <View style={styles.labelRow}>
+                  <Text style={styles.overviewLabel}>
+                    {t('aggregateSpending')}
+                  </Text>
+                  <View
+                    style={[
+                      styles.countBadge,
+                      { backgroundColor: theme.colors.surfaceVariant },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.countBadgeText,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {budgets.length} {t('budgets')}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.dateRow}>
+                  <Ionicons
+                    name="calendar-outline"
+                    size={12}
+                    color={theme.colors.onSurfaceVariant}
+                    style={{ marginRight: 4 }}
+                  />
+                  <Text style={styles.overviewDates}>{formattedDateRange}</Text>
+                </View>
                 <Text
                   style={styles.overviewValue}
                   numberOfLines={1}
@@ -279,18 +304,41 @@ export const BudgetsScreen = () => {
                   </Text>
                 </Text>
               </View>
-              {allWithinLimit && (
+              {totalSpent > totalBudgeted ? (
+                <View
+                  style={[
+                    styles.streakBadge,
+                    {
+                      backgroundColor: '#EF444420',
+                      borderColor: '#EF444440',
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[styles.streakBadgeText, { color: '#EF4444' }]}
+                    numberOfLines={1}
+                  >
+                    {t('overBudgetAlert')}
+                  </Text>
+                </View>
+              ) : allWithinLimit ? (
                 <View style={styles.streakBadge}>
                   <Text style={styles.streakBadgeText} numberOfLines={1}>
                     {t('streakActive')}
                   </Text>
                 </View>
-              )}
+              ) : null}
             </View>
 
             <ProgressBar
               progress={averageProgress}
-              color={theme.colors.primary}
+              color={
+                totalSpent > totalBudgeted
+                  ? theme.colors.error
+                  : averageProgress >= 0.8
+                    ? '#D97706'
+                    : theme.colors.primary
+              }
               style={styles.summaryBar}
             />
 
@@ -298,7 +346,12 @@ export const BudgetsScreen = () => {
               <Text style={styles.summaryFooterText}>
                 {t('overallBudgetDepletion')}
               </Text>
-              <Text style={styles.summaryFooterPercent}>
+              <Text
+                style={[
+                  styles.summaryFooterPercent,
+                  totalSpent > totalBudgeted && { color: theme.colors.error },
+                ]}
+              >
                 {Math.round(averageProgress * 100)}%
               </Text>
             </View>
@@ -332,6 +385,22 @@ export const BudgetsScreen = () => {
           </View>
         )}
 
+        {budgets.length > 1 && (
+          <View style={styles.dragHelpRow}>
+            <Ionicons
+              name="reorder-two-outline"
+              size={15}
+              color={theme.colors.outline}
+              style={{ marginRight: 6 }}
+            />
+            <Text
+              style={[styles.dragHelpText, { color: theme.colors.outline }]}
+            >
+              {t('holdAndDragToReorder')}
+            </Text>
+          </View>
+        )}
+
         <Text style={styles.sectionTitle}>{t('budgetAllocations')}</Text>
       </Animated.View>
     );
@@ -353,6 +422,40 @@ export const BudgetsScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: t('budgets'),
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.headerBtn}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={t('back')}
+            >
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={theme.colors.onSurface}
+              />
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => router.push('/add-budget')}
+              style={styles.headerBtn}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={t('addBudget')}
+            >
+              <Ionicons name="add" size={26} color={theme.colors.primary} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
       <DraggableFlatList
         data={budgets}
         keyExtractor={(item) => item.id}
@@ -430,8 +533,50 @@ const defaultStyles = (theme: AppTheme) =>
       elevation: 0,
       marginBottom: 12,
     },
+    headerBtn: {
+      padding: 8,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     statCardContent: {
       padding: 16,
+    },
+    labelRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 4,
+    },
+    countBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 12,
+    },
+    countBadgeText: {
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+    },
+    dateRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 6,
+    },
+    dragHelpRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 12,
+      opacity: 0.8,
+    },
+    dragHelpText: {
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
     },
     overviewTextRow: {
       flexDirection: 'row',

@@ -20,6 +20,11 @@ export default function TabsLayout() {
           backgroundColor: theme.colors.elevation.level1,
         },
         headerTintColor: theme.colors.onSurface,
+        headerShadowVisible: false,
+        headerTitleStyle: {
+          fontFamily: 'Inter-SemiBold',
+          fontSize: 18,
+        },
         headerShown: true,
       }}
     >

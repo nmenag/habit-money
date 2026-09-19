@@ -587,4 +587,6 @@ export const es = {
     'Gráfico de barras que muestra la comparación mensual de gastos',
   transactionSingle: 'transacción',
   transactionPlural: 'transacciones',
+  offlineAndPrivate: '100% Fuera de línea y Privado',
+  overBudgetAlert: 'Presupuesto Excedido',
 };
