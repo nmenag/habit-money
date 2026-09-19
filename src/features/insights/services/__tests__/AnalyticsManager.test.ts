@@ -35,9 +35,17 @@ describe('AnalyticsManager', () => {
     };
     (getDb as jest.Mock).mockReturnValue(mockDb);
 
-    (AnalyticsService.getMonthlyMetrics as jest.Mock).mockResolvedValue(dummyMetrics);
+    (AnalyticsService.getMonthlyMetrics as jest.Mock).mockResolvedValue(
+      dummyMetrics,
+    );
     (AnalyticsService.getCategoryExpenses as jest.Mock).mockResolvedValue([
-      { categoryId: 'c1', categoryName: 'Food', amount: 500, color: '#000', percentage: 50 },
+      {
+        categoryId: 'c1',
+        categoryName: 'Food',
+        amount: 500,
+        color: '#000',
+        percentage: 50,
+      },
     ]);
     (AnalyticsService.getSpendingDays as jest.Mock).mockResolvedValue(12);
     (AnalyticsService.getBudgetAdherence as jest.Mock).mockResolvedValue([]);
@@ -54,7 +62,11 @@ describe('AnalyticsManager', () => {
       date: pastDate.toISOString(),
     });
 
-    const report = await AnalyticsManager.generateFullReport('en', mockDateRange, 1);
+    const report = await AnalyticsManager.generateFullReport(
+      'en',
+      mockDateRange,
+      1,
+    );
 
     expect(report.currentMonth).toEqual(dummyMetrics);
     expect(report.spendingDays).toBe(12);
@@ -75,7 +87,11 @@ describe('AnalyticsManager', () => {
       date: pastDate.toISOString(),
     });
 
-    const report = await AnalyticsManager.generateFullReport('es', mockDateRange, 1);
+    const report = await AnalyticsManager.generateFullReport(
+      'es',
+      mockDateRange,
+      1,
+    );
 
     expect(report.hasEnoughHistory).toBe(false);
   });
@@ -88,7 +104,11 @@ describe('AnalyticsManager', () => {
     });
     mockDb.getFirstAsync.mockResolvedValueOnce(null);
 
-    const report = await AnalyticsManager.generateFullReport('en', mockDateRange, 1);
+    const report = await AnalyticsManager.generateFullReport(
+      'en',
+      mockDateRange,
+      1,
+    );
 
     expect(report.comparisonMode).toBe('none');
     expect(report.hasComparisonData).toBe(false);
@@ -103,10 +123,13 @@ describe('AnalyticsManager', () => {
 
     mockDb.getFirstAsync.mockResolvedValueOnce(null);
 
-    const report = await AnalyticsManager.generateFullReport('en', historicalRange, 1);
+    const report = await AnalyticsManager.generateFullReport(
+      'en',
+      historicalRange,
+      1,
+    );
 
     expect(report).toBeDefined();
     expect(AnalyticsService.getMonthlyMetrics).toHaveBeenCalled();
   });
 });
-

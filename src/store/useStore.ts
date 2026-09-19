@@ -1,4 +1,5 @@
 import React from 'react';
+import { setCycleDayGetter } from './useFilterStore';
 import { create } from 'zustand';
 import { getTranslatedName, translations } from '../i18n/translations';
 import { createAccountsSlice, AccountsSlice } from './slices/accountsSlice';
@@ -36,6 +37,8 @@ export const useStore = create<AppStore>()((...args) => ({
   ...createBudgetsSlice(...args),
   ...createSettingsSlice(...args),
 }));
+
+setCycleDayGetter(() => useStore.getState().cycleStartDay);
 
 export const useTranslation = () => {
   const language = useStore((state) => state.language);

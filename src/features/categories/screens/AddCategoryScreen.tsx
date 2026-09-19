@@ -165,7 +165,7 @@ export const AddCategoryScreen = () => {
             onChangeText={setName}
             mode="outlined"
             style={styles.inputField}
-            outlineColor={theme.dark ? '#27272A' : '#E4E4E7'}
+            outlineColor={theme.colors.outlineVariant}
             activeOutlineColor={theme.colors.primary}
             textColor={theme.colors.onSurface}
             placeholderTextColor={theme.colors.outline}
@@ -426,7 +426,7 @@ const defaultStyles = (theme: AppTheme) =>
     btnLabel: {
       fontSize: 15,
       fontWeight: '600',
-      color: '#fff',
+      color: theme.colors.onPrimary,
     },
     menuContainer: {
       paddingHorizontal: 16,

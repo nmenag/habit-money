@@ -1,4 +1,4 @@
-import * as SQLite from 'expo-sqlite';
+import type * as SQLite from 'expo-sqlite';
 import { AdEventType, InterstitialAd } from 'react-native-google-mobile-ads';
 import { AD_UNIT_IDS, DEV_AD_UNIT_IDS } from './AdService';
 import { getDb } from '../db/schema';
@@ -6,7 +6,7 @@ import { getDb } from '../db/schema';
 const COOLDOWN_MS = 5 * 60 * 1000;
 const MAX_PER_DAY = 3;
 
-class InterstitialManager {
+export class InterstitialManager {
   private interstitial: InterstitialAd | null = null;
   private adUnitId: string;
   private loaded: boolean = false;

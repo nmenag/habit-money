@@ -189,7 +189,20 @@ export default function RootLayout() {
       <PaperProvider theme={theme}>
         <ThemeProvider value={theme as any}>
           <StatusBar style={isDarkTheme ? 'light' : 'dark'} />
-          <Stack screenOptions={{ headerShown: false }}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              headerStyle: {
+                backgroundColor: theme.colors.elevation.level1,
+              },
+              headerTintColor: theme.colors.onSurface,
+              headerShadowVisible: false,
+              headerTitleStyle: {
+                fontFamily: 'Inter-SemiBold',
+                fontSize: 18,
+              },
+            }}
+          >
             <Stack.Screen name="onboarding" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen

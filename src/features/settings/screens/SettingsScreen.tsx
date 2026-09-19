@@ -295,17 +295,11 @@ export const SettingsScreen = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingTop: insets.top > 0 ? insets.top + spacing.sm : spacing.lg,
+          paddingTop: spacing.md,
           paddingBottom: (insets.bottom || 0) + 120,
           paddingHorizontal: spacing.md,
         }}
       >
-        <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: theme.colors.onSurface }]}>
-            {t('preferences') || 'Settings'}
-          </Text>
-        </View>
-
         <View style={styles.section}>
           <Text
             style={[
@@ -1603,14 +1597,29 @@ const defaultStyles = (theme: AppTheme) =>
     container: {
       flex: 1,
     },
-    header: {
+    profileCard: {
+      borderRadius: radius.md,
+      borderWidth: 1,
+      padding: spacing.md,
       marginBottom: spacing.md,
-      paddingHorizontal: spacing.sm,
     },
-    headerTitle: {
-      ...theme.fonts.titleLarge,
-      fontSize: fontScale(24),
-      letterSpacing: -0.5,
+    profileStatusRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      flexWrap: 'wrap',
+    },
+    profileChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 8,
+    },
+    profileChipText: {
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     section: {
       marginBottom: spacing.md,

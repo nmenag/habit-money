@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { getDb } from '../../db/schema';
-import { Category } from '../types';
+import type { Category } from '../types';
 import type { AppStore } from '../useStore';
 
 export interface CategoriesSlice {
@@ -38,7 +38,10 @@ export const createCategoriesSlice: StateCreator<
       ],
     );
     set((state) => ({
-      categories: [...state.categories, { ...category, displayOrder }],
+      categories: [
+        ...state.categories,
+        { ...category, displayOrder: displayOrder },
+      ],
     }));
   },
 
@@ -56,7 +59,9 @@ export const createCategoriesSlice: StateCreator<
     );
     set((state) => ({
       categories: state.categories.map((c) =>
-        c.id === category.id ? category : c,
+        c.id === category.id
+          ? { ...category, displayOrder: c.displayOrder }
+          : c,
       ),
     }));
   },
@@ -80,6 +85,6 @@ export const createCategoriesSlice: StateCreator<
         cat.displayOrder = index;
       });
     });
-    set({ categories });
+    set({ categories: [...categories] });
   },
 });

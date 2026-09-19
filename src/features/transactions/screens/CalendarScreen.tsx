@@ -2,7 +2,7 @@ import { format, isSameDay } from 'date-fns';
 import { enUS, es as esLocale } from 'date-fns/locale';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { FAB, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
@@ -129,12 +129,11 @@ export const CalendarScreen = () => {
         renderItem={({ item }) => {
           const category = categories.find((c) => c.id === item.categoryId);
           return (
-            <TouchableOpacity
+            <TransactionItem
+              transaction={item}
+              category={category}
               onPress={() => handleTransactionPress(item)}
-              activeOpacity={0.7}
-            >
-              <TransactionItem transaction={item} category={category} />
-            </TouchableOpacity>
+            />
           );
         }}
         ListEmptyComponent={

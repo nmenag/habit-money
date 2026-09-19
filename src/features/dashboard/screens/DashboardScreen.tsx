@@ -25,6 +25,7 @@ import {
   Text,
   useTheme,
 } from 'react-native-paper';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getValidCategoryIcon } from '../../../constants';
 import { useStore, useTranslation } from '../../../store/useStore';
@@ -122,12 +123,7 @@ export const DashboardScreen = React.memo(() => {
       return isInRange(t.date, activeRange);
     });
 
-    const budgetedCategoryIds = new Set(
-      budgets
-        .map((b) => b.categoryId)
-        .filter((catId): catId is string => !!catId),
-    );
-
+    const budgetedCategoryIds = new Set(budgets.map((b) => b.categoryId));
     let budgetedExpensesSum = 0;
     let unbudgetedExpensesSum = 0;
 
@@ -220,832 +216,768 @@ export const DashboardScreen = React.memo(() => {
     );
   }
 
-  const monthHeader = (
-    <View style={styles.monthHeader}>
-      <Text style={styles.monthText}>
-        {data.hasCurrentMonthData
-          ? (() => {
-              const locale = language === 'es' ? esLocale : enUS;
-              if (cycleStartDay > 1) {
-                const range = getRangeForType(
-                  'month',
-                  undefined,
-                  undefined,
-                  cycleStartDay,
-                );
-                const startStr = format(range.startDate, 'd MMM', { locale });
-                const endStr = format(range.endDate, 'd MMM yyyy', { locale });
-                return `${startStr} - ${endStr}`;
-              } else {
-                const name = format(new Date(), 'MMMM yyyy', { locale });
-                return name.charAt(0).toUpperCase() + name.slice(1);
-              }
-            })()
-          : t('filterLast30Days' as any)}
-      </Text>
-    </View>
-  );
+  const periodLabel = data.hasCurrentMonthData
+    ? (() => {
+        const locale = language === 'es' ? esLocale : enUS;
+        if (cycleStartDay > 1) {
+          const range = getRangeForType(
+            'month',
+            undefined,
+            undefined,
+            cycleStartDay,
+          );
+          const startStr = format(range.startDate, 'd MMM', { locale });
+          const endStr = format(range.endDate, 'd MMM yyyy', { locale });
+          return `${startStr} - ${endStr}`;
+        } else {
+          const name = format(new Date(), 'MMMM yyyy', { locale });
+          return name.charAt(0).toUpperCase() + name.slice(1);
+        }
+      })()
+    : t('filterLast30Days' as any);
 
-  const remainingCard = (
-    <Card
-      style={[
-        styles.card,
-        {
-          backgroundColor:
-            data.remainingBalance >= 0
-              ? addAlpha(theme.colors.income, 0.08, '#16A34A')
-              : addAlpha(theme.colors.error, 0.08, '#EF4444'),
-          borderColor:
-            data.remainingBalance >= 0
-              ? addAlpha(theme.colors.income, 0.17, '#16A34A')
-              : addAlpha(theme.colors.error, 0.17, '#EF4444'),
-          borderWidth: 1,
-        },
-      ]}
-      mode="contained"
-    >
-      <Card.Content>
-        <View style={styles.remainingHeader}>
-          <Text
-            style={{
-              color: theme.colors.onSurfaceVariant,
-              fontFamily: 'Inter-Medium',
-              fontWeight: '500',
-              fontSize: 10,
-              letterSpacing: 1.5,
-            }}
-          >
-            {t('remaining').toUpperCase()}
-          </Text>
-          <Avatar.Icon
-            size={24}
-            icon={data.remainingBalance >= 0 ? 'trending-up' : 'trending-down'}
-            style={{ backgroundColor: 'transparent' }}
-            color={
-              data.remainingBalance >= 0
-                ? theme.colors.income
-                : theme.colors.error
-            }
-          />
-        </View>
-        <Text
-          style={[
-            styles.amountText,
-            {
-              color:
-                data.remainingBalance >= 0
-                  ? theme.colors.income
-                  : theme.colors.error,
-              fontSize: fontScale(26),
-              fontFamily: 'Inter-SemiBold',
-              fontWeight: '600',
-              lineHeight: fontScale(32),
-              marginTop: spacing.xs,
-            },
-          ]}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
-          {formatCurrency(data.remainingBalance)}
-        </Text>
-
-        {data.monthlyAdjustments !== 0 && (
-          <View style={styles.adjustmentsRow}>
-            <Ionicons
-              name="information-circle-outline"
-              size={16}
-              color={theme.colors.onSurfaceVariant}
-            />
-            <Text
-              variant="bodySmall"
-              style={[
-                styles.adjustmentsText,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
-            >
-              {t('adjustments')}: {data.monthlyAdjustments > 0 ? '+' : ''}
-              {formatCurrency(data.monthlyAdjustments)}
-            </Text>
-          </View>
-        )}
-      </Card.Content>
-    </Card>
-  );
-
-  const flowRow = (
-    <View style={styles.flowRow}>
+  // Unified Financial Health Hero (Layout & Visual Anchor)
+  const heroSection = (
+    <Animated.View entering={FadeIn.duration(180)}>
       <Card
         style={[
-          styles.flowCard,
+          styles.heroCard,
           {
-            marginRight: spacing.xs,
-            borderWidth: 1,
-            borderColor: theme.colors.outlineVariant,
             backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.outlineVariant,
           },
         ]}
         mode="contained"
       >
-        <Card.Content style={styles.flowCardContent}>
-          <View style={styles.flowHeader}>
-            <Avatar.Icon
-              size={28}
-              icon="arrow-up-bold"
-              style={{
-                backgroundColor: addAlpha(theme.colors.income, 0.08, '#16A34A'),
-              }}
-              color={theme.colors.income}
-            />
-            <Text
+        <Card.Content style={styles.heroContent}>
+          {/* Period Pill & Status Indicator */}
+          <View style={styles.heroTopRow}>
+            <View
               style={[
-                styles.flowLabel,
+                styles.periodBadge,
                 {
-                  color: theme.colors.onSurfaceVariant,
-                  fontFamily: 'Inter-Medium',
-                  fontWeight: '500',
-                  fontSize: 10,
-                  letterSpacing: 1.2,
-                },
-              ]}
-              numberOfLines={1}
-            >
-              {t('monthlyIncome').toUpperCase()}
-            </Text>
-          </View>
-          <Text
-            style={[
-              styles.flowAmount,
-              {
-                color: theme.colors.income,
-                fontFamily: 'Inter-SemiBold',
-                fontWeight: '600',
-                fontSize: fontScale(18),
-              },
-            ]}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-          >
-            {formatCurrency(data.monthlyIncome)}
-          </Text>
-        </Card.Content>
-      </Card>
-
-      <Card
-        style={[
-          styles.flowCard,
-          {
-            marginLeft: spacing.xs,
-            borderWidth: 1,
-            borderColor: theme.colors.outlineVariant,
-            backgroundColor: theme.colors.surface,
-          },
-        ]}
-        mode="contained"
-      >
-        <Card.Content style={styles.flowCardContent}>
-          <View style={styles.flowHeader}>
-            <Avatar.Icon
-              size={28}
-              icon="arrow-down-bold"
-              style={{
-                backgroundColor: addAlpha(theme.colors.error, 0.08, '#EF4444'),
-              }}
-              color={theme.colors.error}
-            />
-            <Text
-              style={[
-                styles.flowLabel,
-                {
-                  color: theme.colors.onSurfaceVariant,
-                  fontFamily: 'Inter-Medium',
-                  fontWeight: '500',
-                  fontSize: 10,
-                  letterSpacing: 1.2,
-                },
-              ]}
-              numberOfLines={1}
-            >
-              {t('monthlyExpenses').toUpperCase()}
-            </Text>
-          </View>
-          <Text
-            style={[
-              styles.flowAmount,
-              {
-                color: theme.colors.error,
-                fontFamily: 'Inter-SemiBold',
-                fontWeight: '600',
-                fontSize: fontScale(18),
-              },
-            ]}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-          >
-            {formatCurrency(data.monthlyExpenses)}
-          </Text>
-        </Card.Content>
-      </Card>
-    </View>
-  );
-
-  const accountsCard = (
-    <Card style={styles.card} mode="contained">
-      <Card.Content>
-        <View style={styles.cardHeader}>
-          <Text
-            style={{
-              fontFamily: 'Inter-Medium',
-              fontWeight: '500',
-              fontSize: fontScale(15),
-              color: theme.colors.onSurface,
-              flex: 1,
-            }}
-          >
-            {t('accounts')}
-          </Text>
-          <TouchableOpacity
-            onPress={() => router.push('/accounts')}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            accessibilityLabel={t('viewAll')}
-            accessibilityRole="button"
-          >
-            <Text
-              style={{
-                color: theme.colors.primary,
-                marginLeft: 8,
-                fontFamily: 'Inter-Medium',
-                fontWeight: '500',
-                fontSize: fontScale(14),
-              }}
-            >
-              {t('viewAll')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{ marginBottom: 8 }}>
-          <Text
-            style={{
-              color: theme.colors.onSurfaceVariant,
-              fontFamily: 'Inter-Medium',
-              fontWeight: '500',
-              fontSize: 10,
-              letterSpacing: 1.2,
-            }}
-          >
-            {t('totalBalance').toUpperCase()}
-          </Text>
-          <Text
-            style={{
-              fontFamily: 'Inter-SemiBold',
-              fontWeight: '600',
-              fontSize: fontScale(22),
-              color: theme.colors.onSurface,
-              marginTop: 2,
-            }}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-          >
-            {formatCurrency(data.totalBalance)}
-          </Text>
-        </View>
-        <Divider style={{ marginVertical: 8 }} />
-        {accounts.slice(0, 3).map((acc, index) => (
-          <View key={acc.id}>
-            <TouchableOpacity
-              onPress={() =>
-                router.push({
-                  pathname: '/account-detail',
-                  params: { accountId: acc.id },
-                })
-              }
-              style={[styles.row, { paddingVertical: 10 }]}
-              accessibilityLabel={`${translateName(acc.name)}, ${formatCurrency(acc.currentBalance, acc.currency)}`}
-              accessibilityRole="button"
-            >
-              <Avatar.Icon
-                size={32}
-                icon={
-                  acc.type === 'bank'
-                    ? 'bank'
-                    : acc.type === 'credit'
-                      ? 'credit-card'
-                      : 'cash'
-                }
-                style={{
                   backgroundColor: addAlpha(
-                    acc.color || theme.colors.primary,
+                    theme.colors.onSurfaceVariant,
                     0.08,
-                    '#22C55E',
+                    '#64748B',
                   ),
                   borderColor: addAlpha(
-                    acc.color || theme.colors.primary,
-                    0.17,
-                    '#22C55E',
+                    theme.colors.onSurfaceVariant,
+                    0.15,
+                    '#64748B',
                   ),
-                  borderWidth: 1,
-                }}
-                color={acc.color || theme.colors.primary}
+                },
+              ]}
+            >
+              <Ionicons
+                name="calendar-outline"
+                size={13}
+                color={theme.colors.onSurfaceVariant}
+                style={{ marginRight: 6 }}
               />
-              <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text
+                style={[
+                  styles.periodBadgeText,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {periodLabel}
+              </Text>
+            </View>
+
+            <View
+              style={[
+                styles.growthBadge,
+                {
+                  backgroundColor:
+                    data.remainingBalance >= 0
+                      ? addAlpha(theme.colors.income, 0.1, '#16A34A')
+                      : addAlpha(theme.colors.error, 0.1, '#EF4444'),
+                },
+              ]}
+            >
+              <Ionicons
+                name={
+                  data.remainingBalance >= 0
+                    ? 'trending-up-outline'
+                    : 'trending-down-outline'
+                }
+                size={14}
+                color={
+                  data.remainingBalance >= 0
+                    ? theme.colors.income
+                    : theme.colors.error
+                }
+              />
+              <Text
+                style={[
+                  styles.growthBadgeText,
+                  {
+                    color:
+                      data.remainingBalance >= 0
+                        ? theme.colors.income
+                        : theme.colors.error,
+                  },
+                ]}
+              >
+                {t('remaining')}
+              </Text>
+            </View>
+          </View>
+
+          {/* Focal Metric: Net Remaining */}
+          <View style={styles.heroFocalBlock}>
+            <Text
+              style={[
+                styles.heroFocalAmount,
+                {
+                  color:
+                    data.remainingBalance >= 0
+                      ? theme.colors.income
+                      : theme.colors.error,
+                },
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {formatCurrency(data.remainingBalance)}
+            </Text>
+
+            {data.monthlyAdjustments !== 0 && (
+              <View style={styles.adjustmentsRow}>
+                <Ionicons
+                  name="information-circle-outline"
+                  size={14}
+                  color={theme.colors.onSurfaceVariant}
+                />
                 <Text
-                  style={{
-                    fontFamily: 'Inter-Medium',
-                    fontWeight: '500',
-                    fontSize: fontScale(14),
-                    color: theme.colors.onSurface,
-                  }}
+                  variant="bodySmall"
+                  style={[
+                    styles.adjustmentsText,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {t('adjustments')}: {data.monthlyAdjustments > 0 ? '+' : ''}
+                  {formatCurrency(data.monthlyAdjustments)}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Integrated Cash Flow Split */}
+          <View style={styles.heroFlowGrid}>
+            <View
+              style={[
+                styles.flowBox,
+                {
+                  backgroundColor: addAlpha(
+                    theme.colors.income,
+                    0.06,
+                    '#16A34A',
+                  ),
+                  borderColor: addAlpha(theme.colors.income, 0.15, '#16A34A'),
+                },
+              ]}
+            >
+              <View style={styles.flowBoxHeader}>
+                <View
+                  style={[
+                    styles.flowIconPill,
+                    {
+                      backgroundColor: addAlpha(
+                        theme.colors.income,
+                        0.14,
+                        '#16A34A',
+                      ),
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="arrow-up"
+                    size={14}
+                    color={theme.colors.income}
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.flowBoxLabel,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
                   numberOfLines={1}
                 >
-                  {translateName(acc.name)}
+                  {t('monthlyIncome').toUpperCase()}
                 </Text>
               </View>
               <Text
-                style={{
-                  fontFamily: 'Inter-Medium',
-                  fontWeight: '500',
-                  fontSize: fontScale(14),
-                  color: theme.colors.onSurface,
-                  flexShrink: 1,
-                  textAlign: 'right',
-                }}
+                style={[styles.flowBoxAmount, { color: theme.colors.income }]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
-                {formatCurrency(acc.currentBalance, acc.currency)}
+                {formatCurrency(data.monthlyIncome)}
               </Text>
-            </TouchableOpacity>
-            {index < Math.min(accounts.length, 3) - 1 && <Divider />}
+            </View>
+
+            <View
+              style={[
+                styles.flowBox,
+                {
+                  backgroundColor: addAlpha(
+                    theme.colors.error,
+                    0.06,
+                    '#EF4444',
+                  ),
+                  borderColor: addAlpha(theme.colors.error, 0.15, '#EF4444'),
+                },
+              ]}
+            >
+              <View style={styles.flowBoxHeader}>
+                <View
+                  style={[
+                    styles.flowIconPill,
+                    {
+                      backgroundColor: addAlpha(
+                        theme.colors.error,
+                        0.14,
+                        '#EF4444',
+                      ),
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="arrow-down"
+                    size={14}
+                    color={theme.colors.error}
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.flowBoxLabel,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {t('monthlyExpenses').toUpperCase()}
+                </Text>
+              </View>
+              <Text
+                style={[styles.flowBoxAmount, { color: theme.colors.error }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {formatCurrency(data.monthlyExpenses)}
+              </Text>
+            </View>
           </View>
-        ))}
-      </Card.Content>
-    </Card>
+        </Card.Content>
+      </Card>
+    </Animated.View>
   );
 
-  const progressCard = (
-    <Card style={styles.card} mode="contained">
-      <Card.Content>
-        {data.totalBudget > 0 ? (
-          <>
-            <View style={styles.cardHeader}>
+  // Accounts Section with Modern Typographic Density
+  const accountsSection = (
+    <Animated.View entering={FadeIn.duration(180)}>
+      <Card style={styles.sectionCard} mode="contained">
+        <Card.Content>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>{t('accounts')}</Text>
               <Text
-                style={{
-                  fontFamily: 'Inter-Medium',
-                  fontWeight: '500',
-                  fontSize: fontScale(15),
-                  color: theme.colors.onSurface,
-                  flex: 1,
-                }}
+                style={[
+                  styles.sectionSubtitle,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
               >
-                {t('spendingProgress')}
+                {t('totalBalance')}:{' '}
+                <Text
+                  style={{
+                    color: theme.colors.onSurface,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                  }}
+                >
+                  {formatCurrency(data.totalBalance)}
+                </Text>
               </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => router.push('/accounts')}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              activeOpacity={0.7}
+              accessibilityLabel={t('viewAll')}
+              accessibilityRole="button"
+            >
               <Text
-                style={{
-                  fontFamily: 'Inter-SemiBold',
-                  fontWeight: '600',
-                  fontSize: fontScale(15),
-                  color: theme.colors.onSurface,
-                  flexShrink: 1,
-                  textAlign: 'right',
-                  marginLeft: 8,
-                }}
+                style={[styles.actionLinkText, { color: theme.colors.primary }]}
+              >
+                {t('viewAll')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <Divider style={{ marginVertical: spacing.sm }} />
+
+          {accounts.slice(0, 3).map((acc, index) => (
+            <View key={acc.id}>
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: '/account-detail',
+                    params: { accountId: acc.id },
+                  })
+                }
+                activeOpacity={0.7}
+                style={[styles.accountRow, { paddingVertical: 10 }]}
+                accessibilityLabel={`${translateName(acc.name)}, ${formatCurrency(acc.currentBalance, acc.currency)}`}
+                accessibilityRole="button"
+              >
+                <Avatar.Icon
+                  size={34}
+                  icon={
+                    acc.type === 'bank'
+                      ? 'bank'
+                      : acc.type === 'credit'
+                        ? 'credit-card'
+                        : 'cash'
+                  }
+                  style={{
+                    backgroundColor: addAlpha(
+                      acc.color || theme.colors.primary,
+                      0.09,
+                      '#22C55E',
+                    ),
+                    borderColor: addAlpha(
+                      acc.color || theme.colors.primary,
+                      0.18,
+                      '#22C55E',
+                    ),
+                    borderWidth: 1,
+                  }}
+                  color={acc.color || theme.colors.primary}
+                />
+                <View style={{ marginLeft: 12, flex: 1 }}>
+                  <Text
+                    style={[
+                      styles.accountName,
+                      { color: theme.colors.onSurface },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {translateName(acc.name)}
+                  </Text>
+                </View>
+                <Text
+                  style={[
+                    styles.accountBalance,
+                    { color: theme.colors.onSurface },
+                  ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {formatCurrency(acc.currentBalance, acc.currency)}
+                </Text>
+              </TouchableOpacity>
+              {index < Math.min(accounts.length, 3) - 1 && <Divider />}
+            </View>
+          ))}
+        </Card.Content>
+      </Card>
+    </Animated.View>
+  );
+
+  // Budget & Spending Health Section
+  const spendingHealthSection = (
+    <Animated.View entering={FadeIn.duration(180)}>
+      <Card style={styles.sectionCard} mode="contained">
+        <Card.Content>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t('spendingProgress')}</Text>
+            {data.totalBudget > 0 && (
+              <Text
+                style={[
+                  styles.budgetRatioText,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
                 {`${formatCurrency(data.budgetedExpensesSum)} / ${formatCurrency(data.totalBudget)}`}
               </Text>
-            </View>
-            <ProgressBar
-              progress={data.progress}
-              color={data.progressColor}
-              style={styles.progressBar}
-              accessibilityLabel={t('spendingProgress')}
-              accessibilityValue={{
-                now: Math.round(data.progress * 100),
-                min: 0,
-                max: 100,
-                text: `${Math.round(data.progress * 100)}%`,
-              }}
-            />
-            <View
-              style={[
-                styles.row,
-                { justifyContent: 'space-between', marginTop: 6 },
-              ]}
-            >
-              {data.progressMessage ? (
+            )}
+          </View>
+
+          {data.totalBudget > 0 ? (
+            <>
+              <ProgressBar
+                progress={data.progress}
+                color={data.progressColor}
+                style={styles.progressBar}
+                accessibilityLabel={t('spendingProgress')}
+                accessibilityValue={{
+                  now: Math.round(data.progress * 100),
+                  min: 0,
+                  max: 100,
+                  text: `${Math.round(data.progress * 100)}%`,
+                }}
+              />
+              <View
+                style={[
+                  styles.row,
+                  { justifyContent: 'space-between', marginTop: 8 },
+                ]}
+              >
+                {data.progressMessage ? (
+                  <Text
+                    variant="labelSmall"
+                    style={{ color: data.progressColor, fontWeight: '600' }}
+                  >
+                    {data.progressMessage}
+                  </Text>
+                ) : null}
                 <Text
                   variant="labelSmall"
-                  style={{ color: data.progressColor, fontWeight: 'bold' }}
+                  style={{
+                    color: theme.colors.onSurfaceVariant,
+                    flex: 1,
+                    textAlign: 'right',
+                    marginLeft: 8,
+                    fontFamily: 'Inter-Medium',
+                  }}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
                 >
-                  {data.progressMessage}
+                  {`${Math.round(data.progress * 100)}%`}
                 </Text>
-              ) : null}
-              <Text
-                variant="labelSmall"
-                style={{
-                  color: theme.colors.outline,
-                  flex: 1,
-                  textAlign: 'right',
-                  marginLeft: 8,
-                }}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                {`${Math.round(data.progress * 100)}%`}
-              </Text>
-            </View>
-          </>
-        ) : (
-          <View style={{ alignItems: 'center', paddingVertical: 16 }}>
-            <Ionicons
-              name="pie-chart-outline"
-              size={36}
-              color={theme.colors.onSurfaceVariant}
-              style={{ marginBottom: 8, opacity: 0.7 }}
-            />
-            <Text
-              style={{
-                fontFamily: 'Inter-Medium',
-                fontWeight: '500',
-                fontSize: fontScale(15),
-                color: theme.colors.onSurface,
-                textAlign: 'center',
-                marginBottom: 6,
-              }}
-            >
-              {t('spendingProgress')}
-            </Text>
-            <Text
-              style={{
-                fontFamily: 'Inter-Regular',
-                fontSize: fontScale(13),
-                color: theme.colors.onSurfaceVariant,
-                textAlign: 'center',
-                marginBottom: 16,
-                paddingHorizontal: 16,
-                lineHeight: 18,
-              }}
-            >
-              {t('noBudgets')}
-            </Text>
-            <TouchableOpacity
-              onPress={() => router.push('/budgets')}
-              style={{
-                backgroundColor: addAlpha(
-                  theme.colors.primary,
-                  0.08,
-                  '#22C55E',
-                ),
-                borderColor: addAlpha(theme.colors.primary, 0.17, '#22C55E'),
-                borderWidth: 1,
-                borderRadius: 12,
-                paddingVertical: 8,
-                paddingHorizontal: 16,
-              }}
-            >
-              <Text
-                style={{
-                  color: theme.colors.primary,
-                  fontFamily: 'Inter-SemiBold',
-                  fontWeight: '600',
-                  fontSize: fontScale(13),
-                }}
-              >
-                {t('manageBudgets')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+              </View>
 
-        {data.totalBudget > 0 && data.unbudgetedExpensesSum > 0 && (
-          <>
-            <Divider style={{ marginVertical: 12 }} />
-            <View style={styles.row}>
-              <Text
-                style={{
-                  fontFamily: 'Inter-Medium',
-                  fontWeight: '500',
-                  fontSize: fontScale(14),
-                  color: theme.colors.onSurfaceVariant,
-                  flex: 1,
-                }}
-              >
-                {t('unbudgetedSpending')}
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Inter-SemiBold',
-                  fontWeight: '600',
-                  fontSize: fontScale(14),
-                  color: theme.colors.onSurfaceVariant,
-                  flexShrink: 1,
-                  textAlign: 'right',
-                  marginLeft: 8,
-                }}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                {formatCurrency(data.unbudgetedExpensesSum)}
-              </Text>
-            </View>
-          </>
-        )}
-      </Card.Content>
-    </Card>
-  );
-
-  const topCategoryCard = data.topCategory ? (
-    <Card style={styles.card} mode="contained">
-      <Card.Content>
-        <Text
-          style={{
-            fontFamily: 'Inter-Medium',
-            fontWeight: '500',
-            fontSize: fontScale(15),
-            color: theme.colors.onSurface,
-            marginBottom: spacing.md,
-          }}
-        >
-          {t('topSpendingCategory')}
-        </Text>
-        {data.topCategory ? (
-          <View style={styles.row}>
-            <Avatar.Icon
-              size={40}
-              icon={getValidCategoryIcon(data.topCategory.icon)}
-              style={{
-                backgroundColor: addAlpha(
-                  data.topCategory.color || theme.colors.primary,
-                  0.08,
-                  '#22C55E',
-                ),
-                borderColor: addAlpha(
-                  data.topCategory.color || theme.colors.primary,
-                  0.17,
-                  '#22C55E',
-                ),
-                borderWidth: 1,
-              }}
-              color={data.topCategory.color || theme.colors.primary}
-            />
-            <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text
-                style={{
-                  fontFamily: 'Inter-Medium',
-                  fontWeight: '500',
-                  fontSize: fontScale(14),
-                  color: theme.colors.onSurface,
-                }}
-              >
-                {translateName(data.topCategory.name)}
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Inter-Regular',
-                  fontWeight: '400',
-                  fontSize: fontScale(12),
-                  color: theme.colors.onSurfaceVariant,
-                  marginTop: 2,
-                }}
-              >
-                {data.topCatPercent.toFixed(1)}% {t('ofTotalExpenses')}
-              </Text>
-            </View>
-            <Text
-              style={{
-                fontFamily: 'Inter-Medium',
-                fontWeight: '500',
-                fontSize: fontScale(14),
-                color: theme.colors.onSurface,
-                flexShrink: 1,
-                textAlign: 'right',
-              }}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              {formatCurrency(data.topCatAmount)}
-            </Text>
-          </View>
-        ) : (
-          <Text
-            style={{
-              fontFamily: 'Inter-Regular',
-              fontStyle: 'italic',
-              color: theme.colors.onSurfaceVariant,
-              fontSize: fontScale(13),
-            }}
-          >
-            {t('noDataForPeriod')}
-          </Text>
-        )}
-      </Card.Content>
-    </Card>
-  ) : null;
-
-  const insightCard = (
-    <Card
-      style={[
-        styles.card,
-        {
-          backgroundColor: addAlpha(theme.colors.primary, 0.08, '#22C55E'),
-          borderColor: addAlpha(theme.colors.primary, 0.17, '#22C55E'),
-          borderWidth: 1,
-        },
-      ]}
-      mode="contained"
-    >
-      <Card.Content style={styles.insightContent}>
-        <Ionicons name="bulb-outline" size={22} color={theme.colors.primary} />
-        <Text
-          style={[
-            styles.insightText,
-            {
-              color: theme.colors.onSurface,
-              fontFamily: 'Inter-Regular',
-              fontWeight: '400',
-              fontSize: fontScale(13),
-              lineHeight: fontScale(18),
-            },
-          ]}
-        >
-          {data.insight}
-        </Text>
-      </Card.Content>
-    </Card>
-  );
-
-  const recentTransactionsCard = (
-    <Card style={styles.card} mode="contained">
-      <Card.Content>
-        <View style={[styles.cardHeader, { marginBottom: 12 }]}>
-          <Text
-            style={{
-              fontFamily: 'Inter-Medium',
-              fontWeight: '500',
-              fontSize: fontScale(15),
-              color: theme.colors.onSurface,
-              flex: 1,
-            }}
-          >
-            {t('recentTransactions')}
-          </Text>
-          <TouchableOpacity
-            onPress={() => router.push('/transactions')}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            accessibilityLabel={t('seeAll')}
-            accessibilityRole="button"
-          >
-            <Text
-              style={{
-                color: theme.colors.primary,
-                marginLeft: 8,
-                fontFamily: 'Inter-Medium',
-                fontWeight: '500',
-                fontSize: fontScale(14),
-              }}
-            >
-              {t('seeAll')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        {data.recentTransactions.length > 0 ? (
-          data.recentTransactions.map((tr, index) => {
-            const cat = categories.find((c) => c.id === tr.categoryId);
-            const isAdjustment =
-              tr.note && translateName(tr.note) === t('balanceAdjustment');
-            const accentColor =
-              tr.type === 'transfer'
-                ? theme.dark
-                  ? '#60A5FA'
-                  : '#3B82F6'
-                : isAdjustment
-                  ? theme.colors.onSurfaceVariant
-                  : cat?.color ||
-                    (tr.type === 'income'
-                      ? theme.colors.income
-                      : theme.colors.error);
-            return (
-              <View key={tr.id}>
-                <TouchableOpacity
-                  onPress={() => router.push('/transactions')}
-                  style={[styles.row, { paddingVertical: 12 }]}
-                  accessibilityLabel={`${tr.note || translateName(cat?.name || 'Other')}, ${tr.type === 'income' ? '+' : '-'}${formatCurrency(tr.amount)}, ${format(parseISO(tr.date), 'MMM dd', { locale: language === 'es' ? esLocale : enUS })}`}
-                  accessibilityRole="button"
-                >
-                  <Avatar.Icon
-                    size={36}
-                    icon={
-                      tr.type === 'transfer'
-                        ? 'swap-horizontal'
-                        : isAdjustment
-                          ? 'scale-balance'
-                          : getValidCategoryIcon(cat?.icon) ||
-                            (tr.type === 'income' ? 'plus' : 'minus')
-                    }
-                    style={{
-                      backgroundColor: addAlpha(
-                        accentColor,
-                        0.08,
-                        tr.type === 'transfer'
-                          ? '#3B82F6'
-                          : isAdjustment
-                            ? '#64748B'
-                            : '#22C55E',
-                      ),
-                      borderColor: addAlpha(
-                        accentColor,
-                        0.17,
-                        tr.type === 'transfer'
-                          ? '#3B82F6'
-                          : isAdjustment
-                            ? '#64748B'
-                            : '#22C55E',
-                      ),
-                      borderWidth: 1,
-                    }}
-                    color={accentColor}
-                  />
-                  <View style={{ marginLeft: 12, flex: 1 }}>
-                    <Text
-                      style={{
-                        fontFamily: 'Inter-Medium',
-                        fontWeight: '500',
-                        fontSize: fontScale(14),
-                        color: theme.colors.onSurface,
-                      }}
-                      numberOfLines={1}
-                    >
-                      {tr.note &&
-                      translateName(tr.note) === t('balanceAdjustment')
-                        ? t('balanceAdjustment')
-                        : tr.note ||
-                          (tr.type === 'transfer'
-                            ? t('transfer')
-                            : translateName(cat?.name || 'Other'))}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: 'Inter-Regular',
-                        fontWeight: '400',
-                        fontSize: fontScale(12),
-                        color: theme.colors.onSurfaceVariant,
-                        marginTop: 2,
-                      }}
-                    >
-                      {format(parseISO(tr.date), 'MMM dd, yyyy', {
-                        locale: language === 'es' ? esLocale : enUS,
-                      })}
-                    </Text>
-                  </View>
+              {data.unbudgetedExpensesSum > 0 && (
+                <View style={styles.unbudgetedRow}>
                   <Text
                     style={[
-                      styles.amountText,
-                      {
-                        color:
-                          tr.type === 'transfer'
-                            ? theme.colors.onSurface
-                            : tr.type === 'income'
-                              ? theme.colors.income
-                              : theme.colors.error,
-                        fontFamily: 'Inter-Medium',
-                        fontWeight: '500',
-                        fontSize: fontScale(14),
-                        flexShrink: 1,
-                        textAlign: 'right',
-                        marginLeft: 8,
-                      },
+                      styles.unbudgetedLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('unbudgetedSpending')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.unbudgetedValue,
+                      { color: theme.colors.onSurfaceVariant },
                     ]}
                     numberOfLines={1}
                     adjustsFontSizeToFit
                   >
-                    {tr.type === 'transfer'
-                      ? ''
-                      : tr.type === 'income'
-                        ? '+'
-                        : '-'}
-                    {formatCurrency(tr.amount)}
+                    {formatCurrency(data.unbudgetedExpensesSum)}
                   </Text>
-                </TouchableOpacity>
-                {index < data.recentTransactions.length - 1 && <Divider />}
+                </View>
+              )}
+            </>
+          ) : (
+            <View style={styles.noBudgetsContainer}>
+              <Ionicons
+                name="pie-chart-outline"
+                size={34}
+                color={theme.colors.onSurfaceVariant}
+                style={{ marginBottom: 8, opacity: 0.7 }}
+              />
+              <Text
+                style={[
+                  styles.noBudgetsText,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {t('noBudgets')}
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push('/budgets')}
+                activeOpacity={0.7}
+                style={[
+                  styles.manageBudgetsButton,
+                  {
+                    backgroundColor: addAlpha(
+                      theme.colors.primary,
+                      0.09,
+                      '#22C55E',
+                    ),
+                    borderColor: addAlpha(theme.colors.primary, 0.2, '#22C55E'),
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.manageBudgetsButtonText,
+                    { color: theme.colors.primary },
+                  ]}
+                >
+                  {t('manageBudgets')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Integrated Top Category Highlight */}
+          {data.topCategory && (
+            <>
+              <Divider style={{ marginVertical: spacing.md }} />
+              <View style={styles.topCategoryBlock}>
+                <Text
+                  style={[
+                    styles.topCategoryTitle,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {t('topSpendingCategory').toUpperCase()}
+                </Text>
+                <View style={[styles.row, { marginTop: spacing.xs }]}>
+                  <Avatar.Icon
+                    size={36}
+                    icon={getValidCategoryIcon(data.topCategory.icon)}
+                    style={{
+                      backgroundColor: addAlpha(
+                        data.topCategory.color || theme.colors.primary,
+                        0.09,
+                        '#22C55E',
+                      ),
+                      borderColor: addAlpha(
+                        data.topCategory.color || theme.colors.primary,
+                        0.2,
+                        '#22C55E',
+                      ),
+                      borderWidth: 1,
+                    }}
+                    color={data.topCategory.color || theme.colors.primary}
+                  />
+                  <View style={{ marginLeft: 12, flex: 1 }}>
+                    <Text
+                      style={[
+                        styles.topCategoryName,
+                        { color: theme.colors.onSurface },
+                      ]}
+                    >
+                      {translateName(data.topCategory.name)}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.topCategoryPercent,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {data.topCatPercent.toFixed(1)}% {t('ofTotalExpenses')}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.topCategoryAmount,
+                      { color: theme.colors.onSurface },
+                    ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                  >
+                    {formatCurrency(data.topCatAmount)}
+                  </Text>
+                </View>
               </View>
-            );
-          })
-        ) : (
-          <Text
-            style={{
-              fontFamily: 'Inter-Regular',
-              fontStyle: 'italic',
-              color: theme.colors.onSurfaceVariant,
-              textAlign: 'center',
-              paddingVertical: 20,
-              fontSize: fontScale(13),
-            }}
+            </>
+          )}
+        </Card.Content>
+      </Card>
+    </Animated.View>
+  );
+
+  // Financial Insight Section
+  const insightSection = (
+    <Animated.View entering={FadeIn.duration(180)}>
+      <Card
+        style={[
+          styles.sectionCard,
+          {
+            backgroundColor: addAlpha(theme.colors.primary, 0.07, '#22C55E'),
+            borderColor: addAlpha(theme.colors.primary, 0.18, '#22C55E'),
+          },
+        ]}
+        mode="contained"
+      >
+        <Card.Content style={styles.insightContent}>
+          <View
+            style={[
+              styles.insightIconWrapper,
+              {
+                backgroundColor: addAlpha(
+                  theme.colors.primary,
+                  0.15,
+                  '#22C55E',
+                ),
+              },
+            ]}
           >
-            {t('noTransactions')}
+            <Ionicons
+              name="bulb-outline"
+              size={18}
+              color={theme.colors.primary}
+            />
+          </View>
+          <Text
+            style={[
+              styles.insightText,
+              {
+                color: theme.colors.onSurface,
+              },
+            ]}
+          >
+            {data.insight}
           </Text>
-        )}
-      </Card.Content>
-    </Card>
+        </Card.Content>
+      </Card>
+    </Animated.View>
+  );
+
+  // Recent Transactions Section
+  const recentTransactionsSection = (
+    <Animated.View entering={FadeIn.duration(180)}>
+      <Card style={styles.sectionCard} mode="contained">
+        <Card.Content>
+          <View style={[styles.sectionHeader, { marginBottom: 8 }]}>
+            <Text style={styles.sectionTitle}>{t('recentTransactions')}</Text>
+            <TouchableOpacity
+              onPress={() => router.push('/transactions')}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              activeOpacity={0.7}
+              accessibilityLabel={t('seeAll')}
+              accessibilityRole="button"
+            >
+              <Text
+                style={[styles.actionLinkText, { color: theme.colors.primary }]}
+              >
+                {t('seeAll')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {data.recentTransactions.length > 0 ? (
+            data.recentTransactions.map((tr, index) => {
+              const cat = categories.find((c) => c.id === tr.categoryId);
+              const isAdjustment =
+                tr.note && translateName(tr.note) === t('balanceAdjustment');
+              const accentColor =
+                tr.type === 'transfer'
+                  ? theme.dark
+                    ? '#60A5FA'
+                    : '#3B82F6'
+                  : isAdjustment
+                    ? theme.colors.onSurfaceVariant
+                    : cat?.color ||
+                      (tr.type === 'income'
+                        ? theme.colors.income
+                        : theme.colors.error);
+              return (
+                <View key={tr.id}>
+                  <TouchableOpacity
+                    onPress={() => router.push('/transactions')}
+                    activeOpacity={0.7}
+                    style={[styles.transactionRow, { paddingVertical: 12 }]}
+                    accessibilityLabel={`${tr.note || translateName(cat?.name || 'Other')}, ${tr.type === 'income' ? '+' : '-'}${formatCurrency(tr.amount)}, ${format(parseISO(tr.date), 'MMM dd', { locale: language === 'es' ? esLocale : enUS })}`}
+                    accessibilityRole="button"
+                  >
+                    <Avatar.Icon
+                      size={36}
+                      icon={
+                        tr.type === 'transfer'
+                          ? 'swap-horizontal'
+                          : isAdjustment
+                            ? 'scale-balance'
+                            : getValidCategoryIcon(cat?.icon) ||
+                              (tr.type === 'income' ? 'plus' : 'minus')
+                      }
+                      style={{
+                        backgroundColor: addAlpha(
+                          accentColor,
+                          0.09,
+                          tr.type === 'transfer'
+                            ? '#3B82F6'
+                            : isAdjustment
+                              ? '#64748B'
+                              : '#22C55E',
+                        ),
+                        borderColor: addAlpha(
+                          accentColor,
+                          0.18,
+                          tr.type === 'transfer'
+                            ? '#3B82F6'
+                            : isAdjustment
+                              ? '#64748B'
+                              : '#22C55E',
+                        ),
+                        borderWidth: 1,
+                      }}
+                      color={accentColor}
+                    />
+                    <View style={{ marginLeft: 12, flex: 1 }}>
+                      <Text
+                        style={[
+                          styles.transactionTitle,
+                          { color: theme.colors.onSurface },
+                        ]}
+                        numberOfLines={1}
+                      >
+                        {tr.note &&
+                        translateName(tr.note) === t('balanceAdjustment')
+                          ? t('balanceAdjustment')
+                          : tr.note ||
+                            (tr.type === 'transfer'
+                              ? t('transfer')
+                              : translateName(cat?.name || 'Other'))}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.transactionDate,
+                          { color: theme.colors.onSurfaceVariant },
+                        ]}
+                      >
+                        {format(parseISO(tr.date), 'MMM dd, yyyy', {
+                          locale: language === 'es' ? esLocale : enUS,
+                        })}
+                      </Text>
+                    </View>
+                    <Text
+                      style={[
+                        styles.transactionAmount,
+                        {
+                          color:
+                            tr.type === 'transfer'
+                              ? theme.colors.onSurface
+                              : tr.type === 'income'
+                                ? theme.colors.income
+                                : theme.colors.error,
+                        },
+                      ]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
+                      {tr.type === 'transfer'
+                        ? ''
+                        : tr.type === 'income'
+                          ? '+'
+                          : '-'}
+                      {formatCurrency(tr.amount)}
+                    </Text>
+                  </TouchableOpacity>
+                  {index < data.recentTransactions.length - 1 && <Divider />}
+                </View>
+              );
+            })
+          ) : (
+            <Text
+              style={[
+                styles.emptyTransactionsText,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              {t('noTransactions')}
+            </Text>
+          )}
+        </Card.Content>
+      </Card>
+    </Animated.View>
   );
 
   const renderDashboardContent = () => {
@@ -1053,44 +985,38 @@ export const DashboardScreen = React.memo(() => {
       return (
         <View style={styles.gridContainer}>
           <View style={styles.gridColumn}>
-            {remainingCard}
-            {flowRow}
-            {accountsCard}
+            {heroSection}
+            {accountsSection}
           </View>
           <View style={styles.gridColumn}>
-            {progressCard}
-            {topCategoryCard}
-            {insightCard}
+            {spendingHealthSection}
+            {insightSection}
           </View>
-          <View style={styles.gridColumn}>{recentTransactionsCard}</View>
+          <View style={styles.gridColumn}>{recentTransactionsSection}</View>
         </View>
       );
     } else if (width >= 600) {
       return (
         <View style={styles.gridContainer}>
           <View style={styles.gridColumn}>
-            {remainingCard}
-            {flowRow}
-            {accountsCard}
-            {recentTransactionsCard}
+            {heroSection}
+            {accountsSection}
+            {recentTransactionsSection}
           </View>
           <View style={styles.gridColumn}>
-            {progressCard}
-            {topCategoryCard}
-            {insightCard}
+            {spendingHealthSection}
+            {insightSection}
           </View>
         </View>
       );
     } else {
       return (
         <View style={styles.singleColumnContainer}>
-          {remainingCard}
-          {flowRow}
-          {accountsCard}
-          {progressCard}
-          {topCategoryCard}
-          {insightCard}
-          {recentTransactionsCard}
+          {heroSection}
+          {accountsSection}
+          {spendingHealthSection}
+          {insightSection}
+          {recentTransactionsSection}
         </View>
       );
     }
@@ -1104,9 +1030,8 @@ export const DashboardScreen = React.memo(() => {
         contentContainerStyle={[styles.content, { paddingTop: spacing.md }]}
         showsVerticalScrollIndicator={false}
       >
-        {monthHeader}
         {renderDashboardContent()}
-        <View style={{ height: 20 }} />
+        <View style={{ height: 28 }} />
       </ScrollView>
 
       <FAB
@@ -1152,144 +1077,299 @@ const defaultStyles = (theme: AppTheme) =>
     },
     singleColumnContainer: {
       width: '100%',
+      gap: spacing.md,
     },
     center: {
       justifyContent: 'center',
       alignItems: 'center',
     },
-    monthHeader: {
+    // Hero Card Styling
+    heroCard: {
+      borderRadius: 24,
+      borderWidth: 1,
+      elevation: 0,
+      overflow: 'hidden',
+    },
+    heroContent: {
+      paddingVertical: spacing.md + 2,
+      paddingHorizontal: spacing.md,
+    },
+    heroTopRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.md,
+    },
+    periodBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 100,
+      borderWidth: 1,
+    },
+    periodBadgeText: {
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      fontSize: fontScale(12),
+      letterSpacing: 0.2,
+    },
+    growthBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 100,
+      gap: 4,
+    },
+    growthBadgeText: {
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      fontSize: fontScale(11),
+      letterSpacing: 0.5,
+      textTransform: 'uppercase',
+    },
+    heroFocalBlock: {
       marginBottom: spacing.lg,
-      marginTop: spacing.sm,
     },
-    monthText: {
+    heroFocalAmount: {
       fontFamily: 'Inter-SemiBold',
       fontWeight: '600',
-      fontSize: fontScale(22),
-      color: theme.colors.onSurface,
-      textTransform: 'capitalize',
-    },
-    card: {
-      marginBottom: spacing.md,
-      borderRadius: 24,
-      borderWidth: 1,
-      borderColor: theme.colors.outlineVariant,
-      backgroundColor: theme.colors.surface,
-      elevation: 0,
-      overflow: 'hidden',
-    },
-    cardTitle: {
-      marginBottom: spacing.md,
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
-      fontSize: fontScale(15),
-      color: theme.colors.onSurface,
-    },
-    cardHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: spacing.sm,
-    },
-    balanceRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    amountText: {
-      fontSize: fontScale(18),
-      fontFamily: 'Inter-SemiBold',
-      fontWeight: '600',
-    },
-    remainingHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    flowRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: spacing.md,
-    },
-    flowCard: {
-      flex: 1,
-      borderRadius: 24,
-      borderWidth: 1,
-      borderColor: theme.colors.outlineVariant,
-      backgroundColor: theme.colors.surface,
-      elevation: 0,
-      overflow: 'hidden',
-    },
-    flowCardContent: {
-      paddingVertical: spacing.md,
-      paddingHorizontal: spacing.sm,
-    },
-    flowHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: spacing.sm,
-    },
-    flowLabel: {
-      marginLeft: spacing.xs + 2,
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
-      flex: 1,
-    },
-    flowAmount: {
-      fontSize: fontScale(18),
-      fontFamily: 'Inter-SemiBold',
-      fontWeight: '600',
+      fontSize: fontScale(32),
+      lineHeight: fontScale(38),
+      letterSpacing: -0.5,
     },
     adjustmentsRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginTop: spacing.sm,
-      opacity: 0.8,
+      marginTop: spacing.xs,
+      gap: 4,
     },
     adjustmentsText: {
-      marginLeft: 4,
       fontFamily: 'Inter-Regular',
       fontWeight: '400',
       fontSize: fontScale(12),
     },
+    heroFlowGrid: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+    },
+    flowBox: {
+      flex: 1,
+      paddingVertical: spacing.sm + 2,
+      paddingHorizontal: spacing.sm + 4,
+      borderRadius: 16,
+      borderWidth: 1,
+    },
+    flowBoxHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginBottom: 6,
+    },
+    flowIconPill: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    flowBoxLabel: {
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      fontSize: fontScale(10),
+      letterSpacing: 1,
+      flex: 1,
+    },
+    flowBoxAmount: {
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      fontSize: fontScale(17),
+    },
+    // Section Card & Headers
+    sectionCard: {
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surface,
+      elevation: 0,
+      overflow: 'hidden',
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+    },
+    sectionTitle: {
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      fontSize: fontScale(15),
+      color: theme.colors.onSurface,
+    },
+    sectionSubtitle: {
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
+      fontSize: fontScale(12),
+      marginTop: 2,
+    },
+    actionLinkText: {
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      fontSize: fontScale(13),
+    },
+    // Account Rows
+    accountRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    accountName: {
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      fontSize: fontScale(14),
+    },
+    accountBalance: {
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      fontSize: fontScale(14),
+      flexShrink: 1,
+      textAlign: 'right',
+    },
+    // Budget & Progress
+    budgetRatioText: {
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      fontSize: fontScale(13),
+      flexShrink: 1,
+      textAlign: 'right',
+      marginLeft: 8,
+    },
     progressBar: {
-      height: 4,
-      borderRadius: 2,
+      height: 6,
+      borderRadius: 3,
+      marginTop: spacing.md,
     },
     row: {
       flexDirection: 'row',
       alignItems: 'center',
     },
+    unbudgetedRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: spacing.sm,
+      paddingTop: spacing.xs,
+    },
+    unbudgetedLabel: {
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
+      fontSize: fontScale(12),
+    },
+    unbudgetedValue: {
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      fontSize: fontScale(12),
+    },
+    noBudgetsContainer: {
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+    },
+    noBudgetsText: {
+      fontFamily: 'Inter-Regular',
+      fontSize: fontScale(13),
+      textAlign: 'center',
+      marginBottom: spacing.md,
+      paddingHorizontal: spacing.md,
+      lineHeight: 18,
+    },
+    manageBudgetsButton: {
+      borderWidth: 1,
+      borderRadius: 12,
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+    },
+    manageBudgetsButtonText: {
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      fontSize: fontScale(13),
+    },
+    topCategoryBlock: {
+      marginTop: 2,
+    },
+    topCategoryTitle: {
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      fontSize: fontScale(10),
+      letterSpacing: 1.2,
+    },
+    topCategoryName: {
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      fontSize: fontScale(14),
+    },
+    topCategoryPercent: {
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
+      fontSize: fontScale(12),
+      marginTop: 2,
+    },
+    topCategoryAmount: {
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      fontSize: fontScale(14),
+      flexShrink: 1,
+      textAlign: 'right',
+    },
+    // Insight Section
     insightContent: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: spacing.sm,
+      paddingVertical: spacing.xs,
     },
-    sectionCard: {
-      marginHorizontal: spacing.md,
-      marginBottom: spacing.md,
-      borderRadius: 24,
-      borderWidth: 1,
-      borderColor: theme.colors.outlineVariant,
-      backgroundColor: theme.colors.surface,
-      elevation: 0,
-      overflow: 'hidden',
-    },
-    headerCard: {
-      marginHorizontal: spacing.md,
-      marginTop: spacing.sm,
-      marginBottom: spacing.lg,
-      borderRadius: 24,
-      borderWidth: 1,
-      borderColor: theme.colors.outlineVariant,
-      backgroundColor: theme.colors.surface,
-      elevation: 0,
-      overflow: 'hidden',
+    insightIconWrapper: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: spacing.sm + 4,
     },
     insightText: {
-      marginLeft: spacing.md,
       flex: 1,
       fontFamily: 'Inter-Regular',
       fontWeight: '400',
+      fontSize: fontScale(13),
+      lineHeight: fontScale(19),
+    },
+    // Transaction Rows
+    transactionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    transactionTitle: {
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      fontSize: fontScale(14),
+    },
+    transactionDate: {
+      fontFamily: 'Inter-Regular',
+      fontWeight: '400',
+      fontSize: fontScale(12),
+      marginTop: 2,
+    },
+    transactionAmount: {
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      fontSize: fontScale(14),
+      flexShrink: 1,
+      textAlign: 'right',
+      marginLeft: 8,
+    },
+    emptyTransactionsText: {
+      fontFamily: 'Inter-Regular',
+      fontStyle: 'italic',
+      textAlign: 'center',
+      paddingVertical: spacing.md,
+      fontSize: fontScale(13),
     },
     fab: {
       position: 'absolute',

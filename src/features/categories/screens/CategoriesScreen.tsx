@@ -1,7 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
@@ -36,7 +36,9 @@ export const CategoriesScreen = () => {
   const insets = useSafeAreaInsets();
 
   const filteredCategories = useMemo(() => {
-    return categories.filter((c) => c.type === activeTab);
+    return categories
+      .filter((c) => c.type === activeTab)
+      .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
   }, [categories, activeTab]);
 
   const renderItem = ({ item, drag, isActive }: RenderItemParams<Category>) => {
@@ -62,18 +64,27 @@ export const CategoriesScreen = () => {
             })
           }
           onLongPress={drag}
+          delayLongPress={200}
           disabled={isActive}
           mode="contained"
         >
           <View style={styles.cardInner}>
-            <View style={styles.dragHandle} pointerEvents="none">
+            <TouchableOpacity
+              onLongPress={drag}
+              delayLongPress={150}
+              style={styles.dragHandle}
+              activeOpacity={0.6}
+              accessibilityRole="button"
+              accessibilityLabel={t('holdAndDragToReorder')}
+              hitSlop={{ top: 8, bottom: 8, left: 10, right: 10 }}
+            >
               <Ionicons
                 name="reorder-two-outline"
-                size={18}
-                color={theme.colors.outline}
-                style={{ opacity: 0.35 }}
+                size={20}
+                color={isActive ? theme.colors.primary : theme.colors.outline}
+                style={{ opacity: isActive ? 1 : 0.6 }}
               />
-            </View>
+            </TouchableOpacity>
 
             <View
               style={[
@@ -110,26 +121,86 @@ export const CategoriesScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <View
-        style={[styles.headerSection, { paddingTop: Math.max(12, insets.top) }]}
-      >
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: t('categories'),
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.headerBtn}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={t('back')}
+            >
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={theme.colors.onSurface}
+              />
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => router.push('/add-category')}
+              style={styles.headerBtn}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={t('addCategory')}
+            >
+              <Ionicons name="add" size={26} color={theme.colors.primary} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
+      <View style={styles.topControlSection}>
         <SegmentedButtons
           value={activeTab}
-          onValueChange={(v) => setActiveTab(v as TransactionType)}
+          onValueChange={(value) => setActiveTab(value as TransactionType)}
           buttons={[
             {
               value: 'expense',
               label: t('expenses'),
-              icon: 'minus-circle-outline',
+              showSelectedCheck: true,
+              style: styles.segmentedBtn,
             },
             {
               value: 'income',
               label: t('income'),
-              icon: 'plus-circle-outline',
+              showSelectedCheck: true,
+              style: styles.segmentedBtn,
             },
           ]}
           style={styles.segmentedButtons}
         />
+
+        <View style={styles.categoryCountRow}>
+          <View
+            style={[
+              styles.countBadge,
+              { backgroundColor: theme.colors.surfaceVariant },
+            ]}
+          >
+            <Ionicons
+              name="shapes-outline"
+              size={12}
+              color={theme.colors.onSurfaceVariant}
+              style={{ marginRight: 4 }}
+            />
+            <Text
+              style={[
+                styles.countBadgeText,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              {filteredCategories.length}{' '}
+              {activeTab === 'expense' ? t('expenses') : t('income')}
+            </Text>
+          </View>
+        </View>
       </View>
 
       <DraggableFlatList
@@ -140,8 +211,17 @@ export const CategoriesScreen = () => {
           const otherCategories = categories.filter(
             (c) => c.type !== activeTab,
           );
-          updateCategoriesOrder([...data, ...otherCategories]);
+          const newCategoriesList =
+            activeTab === 'expense'
+              ? [...data, ...otherCategories]
+              : [...otherCategories, ...data];
+          updateCategoriesOrder(newCategoriesList);
         }}
+        containerStyle={styles.listContainer}
+        style={styles.list}
+        autoscrollThreshold={80}
+        autoscrollSpeed={150}
+        dragItemOverflow={true}
         contentContainerStyle={[
           styles.listContent,
           { paddingBottom: insets.bottom + 200 },
@@ -150,10 +230,10 @@ export const CategoriesScreen = () => {
           filteredCategories.length > 1 ? (
             <View style={styles.dragHelpRow}>
               <Ionicons
-                name="information-circle-outline"
-                size={13}
+                name="reorder-two-outline"
+                size={15}
                 color={theme.colors.outline}
-                style={{ marginRight: 4 }}
+                style={{ marginRight: 6 }}
               />
               <Text
                 style={[styles.dragHelpText, { color: theme.colors.outline }]}
@@ -216,14 +296,48 @@ const defaultStyles = (theme: AppTheme) =>
     container: {
       flex: 1,
     },
-    headerSection: {
+    headerBtn: {
+      padding: 8,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    topControlSection: {
       paddingHorizontal: 16,
-      paddingBottom: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.outlineVariant,
+      paddingTop: 12,
+      paddingBottom: 4,
+    },
+    segmentedBtn: {
+      flex: 1,
+    },
+    categoryCountRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: 10,
+      marginBottom: 4,
+    },
+    countBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 12,
+    },
+    countBadgeText: {
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     segmentedButtons: {
       borderRadius: 14,
+    },
+    listContainer: {
+      flex: 1,
+    },
+    list: {
+      flex: 1,
     },
     listContent: {
       paddingTop: 8,
@@ -242,11 +356,11 @@ const defaultStyles = (theme: AppTheme) =>
       paddingHorizontal: 12,
     },
     dragHandle: {
-      width: 24,
+      width: 36,
       height: 44,
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: 6,
+      marginRight: 4,
     },
     iconCircle: {
       width: 44,
@@ -270,46 +384,40 @@ const defaultStyles = (theme: AppTheme) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      marginTop: 16,
-      marginBottom: 8,
-      opacity: 0.8,
+      paddingVertical: 6,
+      marginBottom: 4,
     },
     dragHelpText: {
-      fontSize: fontScale(10),
+      fontSize: fontScale(11),
       fontFamily: 'Inter-Regular',
-      fontWeight: '400',
     },
     empty: {
-      padding: 40,
       alignItems: 'center',
-      marginTop: 60,
+      paddingTop: 48,
+      paddingHorizontal: 24,
     },
     emptyIconCircle: {
       width: 64,
       height: 64,
-      borderRadius: 20,
+      borderRadius: 32,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: 16,
     },
     emptyTitle: {
       fontSize: fontScale(16),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
       marginBottom: 6,
     },
     emptySubtitle: {
-      textAlign: 'center',
       fontSize: fontScale(13),
       fontFamily: 'Inter-Regular',
-      fontWeight: '400',
-      paddingHorizontal: 20,
-      lineHeight: 18,
+      textAlign: 'center',
     },
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 18,
-      elevation: 6,
+      borderRadius: 16,
     },
   });

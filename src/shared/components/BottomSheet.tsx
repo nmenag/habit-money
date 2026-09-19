@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
+import { useTranslation } from '../../store/useStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { fontScale } from '../../utils/responsive';
@@ -28,6 +29,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   return (
     <Modal
@@ -41,6 +43,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           style={styles.modalBackdrop}
           activeOpacity={1}
           onPress={onClose}
+          accessibilityLabel={t("close")}
+          accessibilityRole="button"
         />
         <View
           style={[
@@ -72,11 +76,11 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               style={[
                 styles.modalCloseBtn,
                 {
-                  backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
-                  borderColor: theme.colors.outline,
+                  backgroundColor: theme.dark ? theme.colors.elevation.level2 : theme.colors.surfaceVariant,
+                  borderColor: theme.colors.outlineVariant,
                 },
               ]}
-              accessibilityLabel="Close modal"
+              accessibilityLabel={t("close")}
               accessibilityRole="button"
             >
               <Ionicons

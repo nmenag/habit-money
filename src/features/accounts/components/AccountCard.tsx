@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Card, Text, useTheme } from 'react-native-paper';
 
 import { Account, useStore, useTranslation } from '../../../store/useStore';
@@ -58,6 +58,7 @@ export const AccountCard: React.FC<Props> = ({
       mode="contained"
       onPress={onPress}
       onLongPress={onLongPress}
+      delayLongPress={200}
       disabled={isActive}
       accessibilityLabel={`${translateName(account.name)}, ${t(account.type)}, ${formatCurrency(account.currentBalance, account.currency)}`}
       accessibilityRole="button"
@@ -65,14 +66,22 @@ export const AccountCard: React.FC<Props> = ({
       <Card.Content style={styles.cardContent}>
         <View style={styles.cardHeader}>
           {onLongPress && (
-            <View style={styles.dragHandle} pointerEvents="none">
+            <TouchableOpacity
+              onLongPress={onLongPress}
+              delayLongPress={150}
+              style={styles.dragHandle}
+              activeOpacity={0.6}
+              accessibilityRole="button"
+              accessibilityLabel={t('holdAndDragToReorder')}
+              hitSlop={{ top: 8, bottom: 8, left: 10, right: 10 }}
+            >
               <Ionicons
                 name="reorder-two-outline"
-                size={18}
-                color={theme.colors.outline}
-                style={{ opacity: 0.35 }}
+                size={20}
+                color={isActive ? theme.colors.primary : theme.colors.outline}
+                style={{ opacity: isActive ? 1 : 0.6 }}
               />
-            </View>
+            </TouchableOpacity>
           )}
 
           <View
@@ -150,6 +159,8 @@ const defaultStyles = (theme: AppTheme) =>
       alignItems: 'center',
     },
     dragHandle: {
+      width: 36,
+      height: 44,
       marginRight: 6,
       justifyContent: 'center',
       alignItems: 'center',
@@ -158,30 +169,29 @@ const defaultStyles = (theme: AppTheme) =>
       width: 44,
       height: 44,
       borderRadius: 14,
-      borderWidth: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      borderWidth: 1,
       marginRight: 12,
     },
     textContainer: {
-      flex: 1.2,
-      justifyContent: 'center',
+      flex: 1,
+      marginRight: 8,
     },
     name: {
-      fontSize: fontScale(14),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
-      letterSpacing: -0.1,
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      fontSize: fontScale(15),
+      marginBottom: 4,
     },
     badgeRow: {
       flexDirection: 'row',
-      marginTop: 4,
     },
     typeText: {
-      fontSize: fontScale(8),
+      fontSize: fontScale(11),
       fontFamily: 'Inter-Medium',
       fontWeight: '500',
-      letterSpacing: 1,
+      letterSpacing: 0.5,
       paddingHorizontal: 6,
       paddingVertical: 2,
       borderRadius: 6,
@@ -189,14 +199,10 @@ const defaultStyles = (theme: AppTheme) =>
     },
     balanceContainer: {
       alignItems: 'flex-end',
-      justifyContent: 'center',
-      flex: 1,
-      marginRight: 4,
     },
     balanceText: {
       fontSize: fontScale(15),
       fontFamily: 'Inter-SemiBold',
       fontWeight: '600',
-      letterSpacing: -0.2,
     },
   });

@@ -1,4 +1,5 @@
 import { createStore } from 'zustand';
+import * as Localization from 'expo-localization';
 import { createSettingsSlice, SettingsSlice } from '../settingsSlice';
 import { getDb, initDb } from '../../../db/schema';
 import { AppLockService } from '../../../services/AppLockService';
@@ -55,11 +56,13 @@ describe('settingsSlice', () => {
   let mockDb: any;
   let store: any;
   let mockLoadBudgets: jest.Mock;
-
   let settingsMap: Map<string, string>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+
     mockLoadBudgets = jest.fn();
     settingsMap = new Map<string, string>();
     settingsMap.set('currency', 'USD');
@@ -73,7 +76,7 @@ describe('settingsSlice', () => {
 
     mockDb = {
       getAllSync: jest.fn(() => []),
-      getFirstSync: jest.fn((query: string, params?: any[]) => {
+      getFirstSync: jest.fn((query: string) => {
         if (query.includes('COUNT(*)')) return { count: 10 };
         for (const [key, val] of settingsMap.entries()) {
           if (query.includes(`'${key}'`)) {
@@ -131,6 +134,35 @@ describe('settingsSlice', () => {
       expect(state.currencySymbol).toBe('$');
       expect(state.cycleStartDay).toBe(1);
     });
+
+    it('infers spanish language when language setting is missing and device locale is spanish', () => {
+      settingsMap.delete('language');
+      const getLocalesSpy = jest
+        .spyOn(Localization, 'getLocales')
+        .mockReturnValue([{ languageCode: 'es', languageTag: 'es-CO' }] as any);
+
+      store.getState().loadData();
+
+      expect(store.getState().language).toBe('es');
+      getLocalesSpy.mockRestore();
+    });
+
+    it('falls back to en and warns when Localization module fails', () => {
+      settingsMap.delete('language');
+      const getLocalesSpy = jest
+        .spyOn(Localization, 'getLocales')
+        .mockImplementation(() => {
+          throw new Error('Native module missing');
+        });
+
+      store.getState().loadData();
+
+      expect(store.getState().language).toBe('en');
+      expect(console.warn).toHaveBeenCalledWith(
+        'Localization native module not found, defaulting to en',
+      );
+      getLocalesSpy.mockRestore();
+    });
   });
 
   describe('setters', () => {
@@ -147,12 +179,41 @@ describe('settingsSlice', () => {
       }, 50);
     });
 
+    it('handles setLanguage DB error gracefully', (done) => {
+      mockDb.runSync.mockImplementationOnce(() => {
+        throw new Error('Write error');
+      });
+
+      store.getState().setLanguage('es');
+
+      setTimeout(() => {
+        expect(console.error).toHaveBeenCalledWith(
+          'setLanguage DB Error:',
+          expect.any(Error),
+        );
+        done();
+      }, 50);
+    });
+
     it('setThemePreference updates state and persists to database', () => {
       store.getState().setThemePreference('light');
       expect(store.getState().themePreference).toBe('light');
       expect(mockDb.runSync).toHaveBeenCalledWith(
         expect.stringContaining('settings'),
         ['themePreference', 'light'],
+      );
+    });
+
+    it('handles setThemePreference DB error gracefully', () => {
+      mockDb.runSync.mockImplementationOnce(() => {
+        throw new Error('Write error');
+      });
+
+      store.getState().setThemePreference('light');
+
+      expect(console.error).toHaveBeenCalledWith(
+        'setThemePreference DB Error:',
+        expect.any(Error),
       );
     });
 
@@ -169,6 +230,22 @@ describe('settingsSlice', () => {
       }, 50);
     });
 
+    it('handles setCycleStartDay DB error gracefully', (done) => {
+      mockDb.runSync.mockImplementationOnce(() => {
+        throw new Error('Write error');
+      });
+
+      store.getState().setCycleStartDay(10);
+
+      setTimeout(() => {
+        expect(console.error).toHaveBeenCalledWith(
+          'setCycleStartDay DB Error:',
+          expect.any(Error),
+        );
+        done();
+      }, 50);
+    });
+
     it('setNotificationsEnabled updates state and database', () => {
       store.getState().setNotificationsEnabled(false);
       expect(store.getState().notificationsEnabled).toBe(false);
@@ -178,12 +255,38 @@ describe('settingsSlice', () => {
       );
     });
 
+    it('handles setNotificationsEnabled DB error gracefully', () => {
+      mockDb.runSync.mockImplementationOnce(() => {
+        throw new Error('Write error');
+      });
+
+      store.getState().setNotificationsEnabled(false);
+
+      expect(console.error).toHaveBeenCalledWith(
+        'setNotificationsEnabled DB Error:',
+        expect.any(Error),
+      );
+    });
+
     it('setNotificationTime updates state and database', () => {
       store.getState().setNotificationTime('08:00');
       expect(store.getState().notificationTime).toBe('08:00');
       expect(mockDb.runSync).toHaveBeenCalledWith(
         expect.stringContaining('settings'),
         ['notificationTime', '08:00'],
+      );
+    });
+
+    it('handles setNotificationTime DB error gracefully', () => {
+      mockDb.runSync.mockImplementationOnce(() => {
+        throw new Error('Write error');
+      });
+
+      store.getState().setNotificationTime('08:00');
+
+      expect(console.error).toHaveBeenCalledWith(
+        'setNotificationTime DB Error:',
+        expect.any(Error),
       );
     });
 
@@ -201,12 +304,41 @@ describe('settingsSlice', () => {
       }, 50);
     });
 
+    it('handles setCurrency DB error gracefully', (done) => {
+      mockDb.runSync.mockImplementationOnce(() => {
+        throw new Error('Write error');
+      });
+
+      store.getState().setCurrency('EUR');
+
+      setTimeout(() => {
+        expect(console.error).toHaveBeenCalledWith(
+          'setCurrency DB Error:',
+          expect.any(Error),
+        );
+        done();
+      }, 50);
+    });
+
     it('setPremium updates state and persists', () => {
       store.getState().setPremium(false);
       expect(store.getState().isPremiumUser).toBe(false);
       expect(mockDb.runSync).toHaveBeenCalledWith(
         expect.stringContaining('settings'),
         ['premium', 'false'],
+      );
+    });
+
+    it('handles setPremium DB error gracefully', () => {
+      mockDb.runSync.mockImplementationOnce(() => {
+        throw new Error('Write error');
+      });
+
+      store.getState().setPremium(false);
+
+      expect(console.error).toHaveBeenCalledWith(
+        'setPremium DB Error:',
+        expect.any(Error),
       );
     });
 
@@ -227,6 +359,20 @@ describe('settingsSlice', () => {
       expect(mockDb.runSync).toHaveBeenCalledWith(
         'UPDATE accounts SET currency = ?',
         ['COP'],
+      );
+    });
+
+    it('throws and logs error on DB failure', () => {
+      mockDb.runSync.mockImplementationOnce(() => {
+        throw new Error('DB Error');
+      });
+
+      expect(() => {
+        store.getState().completeOnboarding('es', 'COP');
+      }).toThrow('DB Error');
+      expect(console.error).toHaveBeenCalledWith(
+        'completeOnboarding DB Error:',
+        expect.any(Error),
       );
     });
   });
@@ -267,6 +413,20 @@ describe('settingsSlice', () => {
         done();
       }, 50);
     });
+
+    it('throws and logs error on DB failure', () => {
+      mockDb.execSync.mockImplementationOnce(() => {
+        throw new Error('Delete failure');
+      });
+
+      expect(() => {
+        store.getState().resetData();
+      }).toThrow('Delete failure');
+      expect(console.error).toHaveBeenCalledWith(
+        'resetData DB Error:',
+        expect.any(Error),
+      );
+    });
   });
 
   describe('refreshAnalytics', () => {
@@ -285,6 +445,21 @@ describe('settingsSlice', () => {
 
       expect(AnalyticsManager.generateFullReport).toHaveBeenCalled();
       expect(triggerWidgetUpdate).toHaveBeenCalled();
+    });
+
+    it('handles refreshAnalytics error gracefully', async () => {
+      (AnalyticsManager.generateFullReport as jest.Mock).mockRejectedValueOnce(
+        new Error('Analytics failure'),
+      );
+
+      store.getState().refreshAnalytics();
+
+      await jest.advanceTimersByTimeAsync(500);
+
+      expect(console.error).toHaveBeenCalledWith(
+        'refreshAnalytics Error:',
+        expect.any(Error),
+      );
     });
   });
 });

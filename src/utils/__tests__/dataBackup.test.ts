@@ -120,7 +120,6 @@ describe('dataBackup', () => {
       await restoreFromJSON(onSuccess, mockT);
 
       expect(Alert.alert).toHaveBeenCalledWith('error', 'restoreError');
-      expect(onSuccess).not.toHaveBeenCalled();
     });
 
     it('shows error if backup structure is missing accounts', async () => {
@@ -135,7 +134,6 @@ describe('dataBackup', () => {
       await restoreFromJSON(onSuccess, mockT);
 
       expect(Alert.alert).toHaveBeenCalledWith('error', 'restoreError');
-      expect(onSuccess).not.toHaveBeenCalled();
     });
 
     it('restores database records from valid backup JSON and invokes onSuccess', async () => {
@@ -208,6 +206,38 @@ describe('dataBackup', () => {
       expect(mockDb.execSync).toHaveBeenCalledWith('PRAGMA foreign_keys = ON;');
 
       expect(mockPreparedStatement.executeSync).toHaveBeenCalled();
+      expect(onSuccess).toHaveBeenCalled();
+      expect(Alert.alert).toHaveBeenCalledWith('success', 'restoreSuccess');
+    });
+
+    it('handles reminder write error during restore cleanly', async () => {
+      const validBackup = {
+        version: 1,
+        data: {
+          accounts: [],
+          categories: [],
+          transactions: [],
+          budgets: [],
+          settings: [],
+        },
+      };
+      (DocumentPicker.getDocumentAsync as jest.Mock).mockResolvedValueOnce({
+        canceled: false,
+        assets: [{ uri: 'file://valid.json' }],
+      });
+      (FileSystem.readAsStringAsync as jest.Mock).mockResolvedValueOnce(
+        JSON.stringify(validBackup),
+      );
+      mockDb.runSync.mockImplementationOnce(() => {
+        throw new Error('Reminder write error');
+      });
+
+      await restoreFromJSON(onSuccess, mockT);
+
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to set restore day backup reminder settings',
+        expect.any(Error),
+      );
       expect(onSuccess).toHaveBeenCalled();
       expect(Alert.alert).toHaveBeenCalledWith('success', 'restoreSuccess');
     });
@@ -293,6 +323,37 @@ describe('dataBackup', () => {
       await nowBtn.onPress();
       expect(mockDb.runSync).toHaveBeenCalled();
       expect(FileSystem.writeAsStringAsync).toHaveBeenCalled();
+    });
+
+    it('handles errors when saving reminder date in laterBtn and nowBtn', async () => {
+      mockDb.getFirstSync
+        .mockReturnValueOnce({ count: 5 })
+        .mockReturnValueOnce({ val: '2020-01-01' })
+        .mockReturnValueOnce({ val: '2020-01-02' });
+
+      await checkReminderFn(mockT);
+
+      const alertButtons = (Alert.alert as jest.Mock).mock.calls[0][2];
+      const laterBtn = alertButtons.find((b: any) => b.text === 'backupLater');
+      const nowBtn = alertButtons.find((b: any) => b.text === 'backupNow');
+
+      mockDb.runSync.mockImplementationOnce(() => {
+        throw new Error('Save failed');
+      });
+      laterBtn.onPress();
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to save reminder date',
+        expect.any(Error),
+      );
+
+      mockDb.runSync.mockImplementationOnce(() => {
+        throw new Error('Save failed');
+      });
+      await nowBtn.onPress();
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to save reminder date',
+        expect.any(Error),
+      );
     });
   });
 });

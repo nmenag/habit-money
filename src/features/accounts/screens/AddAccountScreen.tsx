@@ -193,7 +193,7 @@ export const AddAccountScreen = () => {
               mode="outlined"
               style={styles.inputField}
               placeholder={t('accountNamePlaceholder')}
-              outlineColor={theme.dark ? '#11221D' : '#E2E8F0'}
+              outlineColor={theme.colors.outlineVariant}
               activeOutlineColor={theme.colors.primary}
               textColor={theme.colors.onSurface}
               placeholderTextColor={theme.colors.outline}
@@ -224,7 +224,7 @@ export const AddAccountScreen = () => {
                   styles.typeCard,
                   type === 'cash' && styles.typeCardActive,
                   {
-                    backgroundColor: theme.dark ? '#0A110F' : '#FFFFFF',
+                    backgroundColor: theme.colors.surface,
                     borderColor:
                       type === 'cash'
                         ? theme.colors.primary
@@ -263,7 +263,7 @@ export const AddAccountScreen = () => {
                   styles.typeCard,
                   type === 'bank' && styles.typeCardActive,
                   {
-                    backgroundColor: theme.dark ? '#0A110F' : '#FFFFFF',
+                    backgroundColor: theme.colors.surface,
                     borderColor:
                       type === 'bank'
                         ? theme.colors.primary
@@ -302,7 +302,7 @@ export const AddAccountScreen = () => {
                   styles.typeCard,
                   type === 'credit' && styles.typeCardActive,
                   {
-                    backgroundColor: theme.dark ? '#0A110F' : '#FFFFFF',
+                    backgroundColor: theme.colors.surface,
                     borderColor:
                       type === 'credit'
                         ? theme.colors.primary
@@ -349,7 +349,7 @@ export const AddAccountScreen = () => {
               mode="outlined"
               keyboardType="numeric"
               style={styles.inputField}
-              outlineColor={theme.dark ? '#11221D' : '#E2E8F0'}
+              outlineColor={theme.colors.outlineVariant}
               activeOutlineColor={theme.colors.primary}
               textColor={theme.colors.onSurface}
               placeholder="0"
@@ -455,7 +455,7 @@ const defaultStyles = (theme: AppTheme) =>
       paddingHorizontal: 12,
       paddingBottom: 16,
       borderBottomWidth: 1,
-      borderBottomColor: theme.dark ? '#11221D' : '#E2E8F0',
+      borderBottomColor: theme.colors.outlineVariant,
     },
     backBtn: {
       width: 40,
@@ -534,7 +534,7 @@ const defaultStyles = (theme: AppTheme) =>
     btnLabel: {
       fontSize: 15,
       fontWeight: '800',
-      color: '#fff',
+      color: theme.colors.onPrimary,
     },
     menuContainer: {
       paddingHorizontal: 16,

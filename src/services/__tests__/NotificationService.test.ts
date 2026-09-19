@@ -12,7 +12,8 @@ describe('NotificationService', () => {
   let notificationHandlerCallback: any;
 
   beforeAll(() => {
-    const setNotificationHandlerMock = Notifications.setNotificationHandler as jest.Mock;
+    const setNotificationHandlerMock =
+      Notifications.setNotificationHandler as jest.Mock;
     if (setNotificationHandlerMock.mock.calls.length > 0) {
       notificationHandlerCallback = setNotificationHandlerMock.mock.calls[0][0];
     }
@@ -25,6 +26,10 @@ describe('NotificationService', () => {
     };
     (getDb as jest.Mock).mockReturnValue(mockDb);
     jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  it('can be instantiated as a class', () => {
+    expect(new NotificationService()).toBeInstanceOf(NotificationService);
   });
 
   describe('Notification Handler', () => {
@@ -53,6 +58,15 @@ describe('NotificationService', () => {
           shouldShowBanner: true,
           shouldShowList: true,
         });
+      }
+    });
+
+    it('handles null row in transaction check', async () => {
+      mockDb.getFirstSync.mockReturnValueOnce(null);
+
+      if (notificationHandlerCallback) {
+        const result = await notificationHandlerCallback.handleNotification();
+        expect(result.shouldPlaySound).toBe(true);
       }
     });
 
@@ -103,12 +117,23 @@ describe('NotificationService', () => {
       expect(Notifications.requestPermissionsAsync).not.toHaveBeenCalled();
     });
 
+    it('uses granted boolean fallback when status is omitted', async () => {
+      (Notifications.getPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+        granted: true,
+      });
+
+      const granted = await NotificationService.requestPermissions();
+      expect(granted).toBe(true);
+    });
+
     it('requests permissions if not initially granted and returns true on approval', async () => {
       (Notifications.getPermissionsAsync as jest.Mock).mockResolvedValueOnce({
         status: 'undetermined',
         granted: false,
       });
-      (Notifications.requestPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+      (
+        Notifications.requestPermissionsAsync as jest.Mock
+      ).mockResolvedValueOnce({
         status: 'granted',
         granted: true,
       });
@@ -118,12 +143,30 @@ describe('NotificationService', () => {
       expect(Notifications.requestPermissionsAsync).toHaveBeenCalled();
     });
 
+    it('uses granted boolean on requestPermissionsAsync when status is omitted', async () => {
+      (Notifications.getPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+        status: undefined,
+        granted: false,
+      });
+      (
+        Notifications.requestPermissionsAsync as jest.Mock
+      ).mockResolvedValueOnce({
+        status: undefined,
+        granted: true,
+      });
+
+      const granted = await NotificationService.requestPermissions();
+      expect(granted).toBe(true);
+    });
+
     it('returns false if permissions are denied', async () => {
       (Notifications.getPermissionsAsync as jest.Mock).mockResolvedValueOnce({
         status: 'undetermined',
         granted: false,
       });
-      (Notifications.requestPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+      (
+        Notifications.requestPermissionsAsync as jest.Mock
+      ).mockResolvedValueOnce({
         status: 'denied',
         granted: false,
       });
@@ -159,12 +202,12 @@ describe('NotificationService', () => {
     });
 
     it('catches and logs errors without throwing', async () => {
-      (Notifications.scheduleNotificationAsync as jest.Mock).mockRejectedValueOnce(
-        new Error('Scheduling failed'),
-      );
+      (
+        Notifications.scheduleNotificationAsync as jest.Mock
+      ).mockRejectedValueOnce(new Error('Scheduling failed'));
 
       await expect(
-        NotificationService.scheduleDailyReminder(20, 0, 'Title', 'Body'),
+        NotificationService.scheduleDailyReminder(20, 30, 'Title', 'Body'),
       ).resolves.not.toThrow();
       expect(console.error).toHaveBeenCalled();
     });
@@ -172,34 +215,35 @@ describe('NotificationService', () => {
 
   describe('scheduleWeeklyReminder', () => {
     it('schedules notification for weekly repetition', async () => {
-      Platform.OS = 'ios';
       await NotificationService.scheduleWeeklyReminder(
         1,
-        18,
+        10,
         0,
         'Weekly Review',
         'Check your habits',
       );
 
-      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith({
-        content: expect.objectContaining({
-          title: 'Weekly Review',
-          body: 'Check your habits',
+      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: expect.objectContaining({
+            title: 'Weekly Review',
+            body: 'Check your habits',
+          }),
+          trigger: expect.objectContaining({
+            type: 'weekly',
+            weekday: 1,
+            hour: 10,
+            minute: 0,
+            repeats: true,
+          }),
         }),
-        trigger: expect.objectContaining({
-          type: 'weekly',
-          weekday: 1,
-          hour: 18,
-          minute: 0,
-          repeats: true,
-        }),
-      });
+      );
     });
 
     it('catches and logs errors without throwing', async () => {
-      (Notifications.scheduleNotificationAsync as jest.Mock).mockRejectedValueOnce(
-        new Error('Scheduling failed'),
-      );
+      (
+        Notifications.scheduleNotificationAsync as jest.Mock
+      ).mockRejectedValueOnce(new Error('Scheduling failed'));
 
       await expect(
         NotificationService.scheduleWeeklyReminder(1, 10, 0, 'T', 'B'),
