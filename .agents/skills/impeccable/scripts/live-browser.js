@@ -1043,7 +1043,6 @@
       display: 'none',
       opacity: '0',
       transform: 'translateY(6px)',
-      transition: 'opacity 0.25s ' + EASE + ', transform 0.3s ' + EASE,
       background: BP.surface,
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
@@ -1844,7 +1843,6 @@
   // ---------------------------------------------------------------------------
 
   let paramsPanelEl = null; // outer wrapper (overflow:hidden, clips the slide)
-  let paramsPanelInner = null; // translating content (carries bg, padding, knobs)
   let paramsPanelBody = null; // grid holding the knob cells
   let paramsCurrentValues = {}; // {paramId: value} — mirror of the visible variant's live values
   let tuneOpen = false; // whether the Tune popover is open right now
@@ -1906,7 +1904,6 @@
     // click-through) and 'auto' (open) on its own. Just silence the host's
     // outside-interaction listeners while the panel is open.
     defangOutsideHandlers(paramsPanelEl, { setPointerEvents: false });
-    paramsPanelInner = paramsPanelEl; // compatibility alias for the rest of the code
   }
 
   function getVisibleVariantEl() {
@@ -2289,6 +2286,7 @@
    * parse it, extract the variant wrapper, and inject it into the live DOM.
    * This works even when the dev server caches HTML (Bun, static servers).
    */
+  // eslint-disable-next-line no-unused-vars
   function injectVariantsFromSource(filePath, sessionId) {
     const url =
       'http://localhost:' +
@@ -3182,7 +3180,7 @@
     }
 
     // Arrow/Enter nav works in PICKING (hover) and CONFIGURING (selected, input empty)
-    var navEl =
+    let navEl =
       state === 'PICKING'
         ? hoveredElement
         : state === 'CONFIGURING'
@@ -4227,6 +4225,7 @@ void main() {
   }
 
   // Impeccable logo mark — matches the site-header SVG (rounded square + "/").
+  // eslint-disable-next-line no-unused-vars
   function brandMarkSvg(fill, ink, size = 18) {
     return `<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true">
       <rect width="32" height="32" rx="7" fill="${fill}"/>
@@ -4650,7 +4649,6 @@ void main() {
     if (paramsPanelEl) {
       paramsPanelEl.remove();
       paramsPanelEl = null;
-      paramsPanelInner = null;
       paramsPanelBody = null;
     }
     if (evtSource) {
@@ -5876,6 +5874,7 @@ void main() {
     return s;
   }
 
+  // eslint-disable-next-line no-unused-vars
   function highlightBold(text) {
     return inlineMd(text);
   }

@@ -164,14 +164,15 @@ Ingresa o pega aquí las notas de la versión para el idioma "en-US".
 
 ## 11. Use of Skills
 
-- **Skills Directory (`skills/`)**: All AI agent skills reside directly in the root `skills/` directory (e.g., `skills/<skill-name>/SKILL.md`).
-- **`.agents` is Deprecated**: The legacy `.agents/` folder (including `.agents/skills/` and `.agents/agents/`) is **deprecated and removed**. Agents must never create, reference, or expect skills or configurations under `.agents/`. All skill assets, scripts, references, and configurations live exclusively in `skills/`.
-- **Mandatory Skill Consultation**: Before executing tasks in specialized domains (such as ASO, UI/UX audits, or visual design overhauls), agents **must** check for matching skills in `skills/`, read their `SKILL.md`, and strictly follow their instructions and pre-flight gates.
+- **Skills Directory (`.agents/skills/`)**: All AI agent skills reside in `.agents/skills/` (e.g., `.agents/skills/<skill-name>/SKILL.md`).
+- **Mandatory Skill Consultation**: Before executing tasks in specialized domains (such as ASO, UI/UX audits, or visual design overhauls), agents **must** check for matching skills in `.agents/skills/`, read their `SKILL.md`, and strictly follow their instructions and pre-flight gates.
 - **Available Workspace Skills**:
-  - **`skills/aso`**: App Store Optimization for Google Play and Apple App Store. Covers ASO audits, keyword optimization, store listings, competitor benchmarking, and release note formatting.
-  - **`skills/find-skills`**: Skill discovery and installation from trusted repositories to extend agent capabilities.
-  - **`skills/frontend-design`**: Distinctive, intentional UI design principles, typography scale, palette curation, and avoiding generic UI patterns.
-  - **`skills/impeccable`**: Frontend design engineering suite. Covers UI/UX reviews, visual hierarchy, polish, accessibility, responsiveness, micro-interactions, animations, and design system refinement.
+  - **`.agents/skills/aso`**: App Store Optimization for Google Play and Apple App Store. Covers ASO audits, keyword optimization, store listings, competitor benchmarking, and release note formatting.
+  - **`.agents/skills/find-skills`**: Skill discovery and installation from trusted repositories to extend agent capabilities.
+  - **`.agents/skills/frontend-design`**: Distinctive, intentional UI design principles, typography scale, palette curation, and avoiding generic UI patterns.
+  - **`.agents/skills/impeccable`**: Frontend design engineering suite. Covers UI/UX reviews, visual hierarchy, polish, accessibility, responsiveness, micro-interactions, animations, and design system refinement.
+  - **`.agents/skills/mobile-developer-expert`**: Comprehensive expert guidance for modern mobile app engineering covering React Native, Expo, offline-first architecture, performance, and platform fidelity.
+  - **`.agents/skills/react-native-best-practices`**: React Native performance optimization guidelines for FPS, TTI, bundle size, memory leaks, re-renders, and animations.
 - **Managing Skills**:
-  - New skills must be installed or placed in `skills/<skill-name>/` with a valid `SKILL.md` file.
+  - New skills must be installed or placed in `.agents/skills/<skill-name>/` with a valid `SKILL.md` file.
   - Installed skills and their hashes are tracked in `skills-lock.json` at the root of the project.
