@@ -6,7 +6,6 @@ import {
   getMonthRange,
   getRangeForType,
 } from '../utils/dateFilters';
-import { useStore } from './useStore';
 
 interface FilterState {
   selectedRange: DateRange;
@@ -23,14 +22,23 @@ interface FilterState {
   updateCycleStartDay: (cycleStartDay: number) => void;
 }
 
+let cycleDayGetter: (() => number) | null = null;
+
+export const setCycleDayGetter = (getter: () => number) => {
+  cycleDayGetter = getter;
+};
+
 const getCycleDay = (override?: number): number => {
   if (override !== undefined) return override;
-  try {
-    const day = useStore.getState().cycleStartDay;
-    return typeof day === 'number' ? day : 1;
-  } catch {
-    return 1;
+  if (cycleDayGetter) {
+    try {
+      const day = cycleDayGetter();
+      return typeof day === 'number' ? day : 1;
+    } catch {
+      return 1;
+    }
   }
+  return 1;
 };
 
 export const useFilterStore = create<FilterState>((set, get) => ({

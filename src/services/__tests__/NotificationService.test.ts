@@ -12,7 +12,8 @@ describe('NotificationService', () => {
   let notificationHandlerCallback: any;
 
   beforeAll(() => {
-    const setNotificationHandlerMock = Notifications.setNotificationHandler as jest.Mock;
+    const setNotificationHandlerMock =
+      Notifications.setNotificationHandler as jest.Mock;
     if (setNotificationHandlerMock.mock.calls.length > 0) {
       notificationHandlerCallback = setNotificationHandlerMock.mock.calls[0][0];
     }
@@ -130,7 +131,9 @@ describe('NotificationService', () => {
         status: 'undetermined',
         granted: false,
       });
-      (Notifications.requestPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+      (
+        Notifications.requestPermissionsAsync as jest.Mock
+      ).mockResolvedValueOnce({
         status: 'granted',
         granted: true,
       });
@@ -145,7 +148,9 @@ describe('NotificationService', () => {
         status: undefined,
         granted: false,
       });
-      (Notifications.requestPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+      (
+        Notifications.requestPermissionsAsync as jest.Mock
+      ).mockResolvedValueOnce({
         status: undefined,
         granted: true,
       });
@@ -159,7 +164,9 @@ describe('NotificationService', () => {
         status: 'undetermined',
         granted: false,
       });
-      (Notifications.requestPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+      (
+        Notifications.requestPermissionsAsync as jest.Mock
+      ).mockResolvedValueOnce({
         status: 'denied',
         granted: false,
       });
@@ -195,9 +202,9 @@ describe('NotificationService', () => {
     });
 
     it('catches and logs errors without throwing', async () => {
-      (Notifications.scheduleNotificationAsync as jest.Mock).mockRejectedValueOnce(
-        new Error('Scheduling failed'),
-      );
+      (
+        Notifications.scheduleNotificationAsync as jest.Mock
+      ).mockRejectedValueOnce(new Error('Scheduling failed'));
 
       await expect(
         NotificationService.scheduleDailyReminder(20, 30, 'Title', 'Body'),
@@ -234,9 +241,9 @@ describe('NotificationService', () => {
     });
 
     it('catches and logs errors without throwing', async () => {
-      (Notifications.scheduleNotificationAsync as jest.Mock).mockRejectedValueOnce(
-        new Error('Scheduling failed'),
-      );
+      (
+        Notifications.scheduleNotificationAsync as jest.Mock
+      ).mockRejectedValueOnce(new Error('Scheduling failed'));
 
       await expect(
         NotificationService.scheduleWeeklyReminder(1, 10, 0, 'T', 'B'),

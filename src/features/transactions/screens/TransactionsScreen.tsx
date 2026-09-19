@@ -22,6 +22,7 @@ import { useStore, useTranslation } from '../../../store/useStore';
 import { isInRange } from '../../../utils/dateFilters';
 import { BottomSheet } from '../../../shared/components/BottomSheet';
 import { getValidCategoryIcon } from '../../../constants';
+import { AppTheme } from '../../../theme/theme';
 
 import { FlashList } from '@shopify/flash-list';
 
@@ -45,9 +46,10 @@ export const TransactionsScreen = () => {
   const categories = useStore((s) => s.categories);
   const language = useStore((s) => s.language);
   const loadFullData = useStore((s) => s.loadFullData);
+  const formatCurrency = useStore((s) => s.formatCurrency);
 
   const { t, translateName } = useTranslation();
-  const theme = useTheme();
+  const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const selectedRange = useFilterStore((s) => s.selectedRange);
   const insets = useSafeAreaInsets();
@@ -118,6 +120,45 @@ export const TransactionsScreen = () => {
     categories,
     accounts,
   ]);
+
+  const isFilteredByAccountOrCategory =
+    selectedAccountIds.length > 0 || selectedCategoryIds.length > 0;
+
+  const targetCurrency = useMemo(() => {
+    if (selectedAccountIds.length === 1) {
+      const acc = accounts.find((a) => a.id === selectedAccountIds[0]);
+      return acc?.currency;
+    }
+    return undefined;
+  }, [selectedAccountIds, accounts]);
+
+  const filterTotals = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    let transfer = 0;
+
+    filteredTransactions.forEach((tx) => {
+      if (tx.type === 'income') {
+        income += tx.amount;
+      } else if (tx.type === 'expense') {
+        expense += tx.amount;
+      } else if (tx.type === 'transfer') {
+        transfer += tx.amount;
+      }
+    });
+
+    const net = income - expense;
+    return {
+      income,
+      expense,
+      transfer,
+      net,
+      hasIncome: income > 0,
+      hasExpense: expense > 0,
+      hasTransfer: transfer > 0,
+      count: filteredTransactions.length,
+    };
+  }, [filteredTransactions]);
 
   const flattenedData = useMemo(() => {
     const dateMap: Record<string, typeof filteredTransactions> = {};
@@ -282,6 +323,269 @@ export const TransactionsScreen = () => {
             </Text>
           </View>
         </View>
+        {isFilteredByAccountOrCategory && (
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            style={[
+              styles.totalsBanner,
+              {
+                backgroundColor:
+                  theme.colors.elevation.level1 || theme.colors.surface,
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+            accessibilityRole="summary"
+          >
+            {filterTotals.hasIncome && filterTotals.hasExpense ? (
+              <View
+                style={styles.totalsSplitRow}
+                accessibilityLabel={`${t('income')}: ${formatCurrency(filterTotals.income, targetCurrency)}, ${t('expenses')}: ${formatCurrency(filterTotals.expense, targetCurrency)}, ${t('netTotal')}: ${formatCurrency(filterTotals.net, targetCurrency)}`}
+              >
+                <View style={styles.totalStatItem}>
+                  <Text
+                    style={[
+                      styles.totalStatLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('income')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.totalStatValue,
+                      { color: theme.colors.income || '#16A34A' },
+                    ]}
+                  >
+                    +{formatCurrency(filterTotals.income, targetCurrency)}
+                  </Text>
+                </View>
+
+                <View
+                  style={[
+                    styles.totalStatDivider,
+                    { backgroundColor: theme.colors.outlineVariant },
+                  ]}
+                />
+
+                <View style={styles.totalStatItem}>
+                  <Text
+                    style={[
+                      styles.totalStatLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('expenses')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.totalStatValue,
+                      { color: theme.colors.error || '#EF4444' },
+                    ]}
+                  >
+                    -{formatCurrency(filterTotals.expense, targetCurrency)}
+                  </Text>
+                </View>
+
+                <View
+                  style={[
+                    styles.totalStatDivider,
+                    { backgroundColor: theme.colors.outlineVariant },
+                  ]}
+                />
+
+                <View style={styles.totalStatItem}>
+                  <Text
+                    style={[
+                      styles.totalStatLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('netTotal')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.totalStatValue,
+                      {
+                        color:
+                          filterTotals.net >= 0
+                            ? theme.colors.income || '#16A34A'
+                            : theme.colors.error || '#EF4444',
+                      },
+                    ]}
+                  >
+                    {filterTotals.net >= 0 ? '+' : ''}
+                    {formatCurrency(filterTotals.net, targetCurrency)}
+                  </Text>
+                </View>
+              </View>
+            ) : filterTotals.hasIncome ? (
+              <View
+                style={styles.singleTotalRow}
+                accessibilityLabel={`${t('totalIncome')}: ${formatCurrency(filterTotals.income, targetCurrency)}, ${filterTotals.count} ${filterTotals.count === 1 ? t('transaction') : t('transactions')}`}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View
+                    style={[
+                      styles.totalIconCircle,
+                      {
+                        backgroundColor: addAlpha(
+                          theme.colors.income || '#16A34A',
+                          0.12,
+                        ),
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name="arrow-up"
+                      size={16}
+                      color={theme.colors.income || '#16A34A'}
+                    />
+                  </View>
+                  <View style={{ marginLeft: 10 }}>
+                    <Text
+                      style={[
+                        styles.singleTotalLabel,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {t('totalIncome')}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.singleTotalCount,
+                        { color: theme.colors.outline },
+                      ]}
+                    >
+                      {filterTotals.count}{' '}
+                      {filterTotals.count === 1
+                        ? t('transaction')
+                        : t('transactions')}
+                    </Text>
+                  </View>
+                </View>
+                <Text
+                  style={[
+                    styles.singleTotalAmount,
+                    { color: theme.colors.income || '#16A34A' },
+                  ]}
+                >
+                  +{formatCurrency(filterTotals.income, targetCurrency)}
+                </Text>
+              </View>
+            ) : filterTotals.hasTransfer && !filterTotals.hasExpense ? (
+              <View
+                style={styles.singleTotalRow}
+                accessibilityLabel={`${t('totalTransfers')}: ${formatCurrency(filterTotals.transfer, targetCurrency)}, ${filterTotals.count} ${filterTotals.count === 1 ? t('transaction') : t('transactions')}`}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View
+                    style={[
+                      styles.totalIconCircle,
+                      {
+                        backgroundColor: addAlpha(theme.colors.primary, 0.12),
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name="swap-horizontal"
+                      size={16}
+                      color={theme.colors.primary}
+                    />
+                  </View>
+                  <View style={{ marginLeft: 10 }}>
+                    <Text
+                      style={[
+                        styles.singleTotalLabel,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {t('totalTransfers')}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.singleTotalCount,
+                        { color: theme.colors.outline },
+                      ]}
+                    >
+                      {filterTotals.count}{' '}
+                      {filterTotals.count === 1
+                        ? t('transaction')
+                        : t('transactions')}
+                    </Text>
+                  </View>
+                </View>
+                <Text
+                  style={[
+                    styles.singleTotalAmount,
+                    { color: theme.colors.onSurface },
+                  ]}
+                >
+                  {formatCurrency(filterTotals.transfer, targetCurrency)}
+                </Text>
+              </View>
+            ) : (
+              <View
+                style={styles.singleTotalRow}
+                accessibilityLabel={`${t('totalSpent')}: ${formatCurrency(filterTotals.expense, targetCurrency)}, ${filterTotals.count} ${filterTotals.count === 1 ? t('transaction') : t('transactions')}`}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View
+                    style={[
+                      styles.totalIconCircle,
+                      {
+                        backgroundColor: addAlpha(
+                          theme.colors.error || '#EF4444',
+                          0.12,
+                        ),
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name="arrow-down"
+                      size={16}
+                      color={theme.colors.error || '#EF4444'}
+                    />
+                  </View>
+                  <View style={{ marginLeft: 10 }}>
+                    <Text
+                      style={[
+                        styles.singleTotalLabel,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {t('totalSpent')}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.singleTotalCount,
+                        { color: theme.colors.outline },
+                      ]}
+                    >
+                      {filterTotals.count}{' '}
+                      {filterTotals.count === 1
+                        ? t('transaction')
+                        : t('transactions')}
+                    </Text>
+                  </View>
+                </View>
+                <Text
+                  style={[
+                    styles.singleTotalAmount,
+                    {
+                      color:
+                        filterTotals.expense > 0
+                          ? theme.colors.error || '#EF4444'
+                          : theme.colors.outline,
+                    },
+                  ]}
+                >
+                  {filterTotals.expense > 0 ? '-' : ''}
+                  {formatCurrency(filterTotals.expense, targetCurrency)}
+                </Text>
+              </View>
+            )}
+          </Animated.View>
+        )}
       </Animated.View>
       <View style={{ flex: 1 }}>
         <FlashList
@@ -618,7 +922,7 @@ export const TransactionsScreen = () => {
   );
 };
 
-const defaultStyles = (theme: any) =>
+const defaultStyles = (theme: AppTheme) =>
   StyleSheet.create({
     container: { flex: 1 },
     searchRow: {
@@ -658,6 +962,67 @@ const defaultStyles = (theme: any) =>
     },
     filterChip: {
       height: 32,
+    },
+    totalsBanner: {
+      marginHorizontal: 16,
+      marginTop: 8,
+      marginBottom: 4,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderRadius: 14,
+      borderWidth: 1,
+    },
+    singleTotalRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    totalIconCircle: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    singleTotalLabel: {
+      fontSize: 12,
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+    },
+    singleTotalCount: {
+      fontSize: 11,
+      fontFamily: 'Inter-Regular',
+      marginTop: 1,
+    },
+    singleTotalAmount: {
+      fontSize: 18,
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+    },
+    totalsSplitRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    totalStatItem: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    totalStatLabel: {
+      fontSize: 11,
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      marginBottom: 3,
+    },
+    totalStatValue: {
+      fontSize: 14,
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+    },
+    totalStatDivider: {
+      width: 1,
+      height: 24,
+      opacity: 0.5,
     },
     countBadge: {
       paddingHorizontal: 10,

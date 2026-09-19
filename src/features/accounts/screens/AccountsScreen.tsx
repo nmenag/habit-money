@@ -50,12 +50,18 @@ export const AccountsScreen = () => {
     const monthTxs = transactions.filter((t) =>
       t.date.startsWith(currentMonthPrefix),
     );
-    const actualInc = inc !== null ? inc : monthTxs
-      .filter((t) => t.type === 'income')
-      .reduce((s, t) => s + t.amount, 0);
-    const actualExp = exp !== null ? exp : monthTxs
-      .filter((t) => t.type === 'expense')
-      .reduce((s, t) => s + t.amount, 0);
+    const actualInc =
+      inc !== null
+        ? inc
+        : monthTxs
+            .filter((t) => t.type === 'income')
+            .reduce((s, t) => s + t.amount, 0);
+    const actualExp =
+      exp !== null
+        ? exp
+        : monthTxs
+            .filter((t) => t.type === 'expense')
+            .reduce((s, t) => s + t.amount, 0);
 
     const dayOfMonth = now.getDate();
     const daysInMonth = new Date(
@@ -479,10 +485,7 @@ export const AccountsScreen = () => {
                 style={{ marginRight: 6 }}
               />
               <Text
-                style={[
-                  styles.emptyBtnText,
-                  { color: theme.colors.onPrimary },
-                ]}
+                style={[styles.emptyBtnText, { color: theme.colors.onPrimary }]}
               >
                 {t('addAccount')}
               </Text>

@@ -589,16 +589,26 @@ export const es = {
   transactionPlural: 'transacciones',
   offlineAndPrivate: '100% Fuera de línea y Privado',
   overBudgetAlert: 'Presupuesto Excedido',
-  accountsEmptyInsight: "Inicia tu mapa financiero agregando tu primera cuenta activa.",
-  netWorthNegativeInsight: "Los saldos totales están en negativo. Prioriza el pago de deudas para recuperar liquidez.",
-  highBurnRateInsight: "La velocidad de gasto es del {{velocity}}% del flujo de ingresos. Reduce salidas variables.",
-  healthySavingsInsight: "Ahorrando {{savingsRate}}% de ingresos en este ciclo. Mantén el impulso hacia tus metas.",
-  steadyCashFlowInsight: "El flujo de caja se mantiene estable entre tus cuentas configuradas.",
-  cashFlowHealth: "Salud de Flujo de Caja",
-  spendingVelocity: "Velocidad de Gasto",
-  monthlyBudget: "Presupuesto Mensual",
-  onTrack: "En Meta",
-  totalBudgeted: "Total Presupuestado",
-  totalSpent: "Total Gastado",
-  remainingBalance: "Saldo Restante",
+  accountsEmptyInsight:
+    'Inicia tu mapa financiero agregando tu primera cuenta activa.',
+  netWorthNegativeInsight:
+    'Los saldos totales están en negativo. Prioriza el pago de deudas para recuperar liquidez.',
+  highBurnRateInsight:
+    'La velocidad de gasto es del {{velocity}}% del flujo de ingresos. Reduce salidas variables.',
+  healthySavingsInsight:
+    'Ahorrando {{savingsRate}}% de ingresos en este ciclo. Mantén el impulso hacia tus metas.',
+  steadyCashFlowInsight:
+    'El flujo de caja se mantiene estable entre tus cuentas configuradas.',
+  cashFlowHealth: 'Salud de Flujo de Caja',
+  spendingVelocity: 'Velocidad de Gasto',
+  monthlyBudget: 'Presupuesto Mensual',
+  onTrack: 'En Meta',
+  totalBudgeted: 'Total Presupuestado',
+  totalSpent: 'Total Gastado',
+  remainingBalance: 'Saldo Restante',
+  transaction: 'Transacción',
+  totalAmount: 'Monto Total',
+  totalIncome: 'Total Ingresos',
+  netTotal: 'Total Neto',
+  totalTransfers: 'Total Transferencias',
 };

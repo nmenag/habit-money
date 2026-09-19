@@ -158,7 +158,7 @@ export class ProductAnalyticsService {
   }
 
   public static async logAppBackground(): Promise<void> {
-    await this.logEvent('app_background');
+    await this.logEvent('app_backgrounded');
   }
 
   public static async logAppForeground(): Promise<void> {

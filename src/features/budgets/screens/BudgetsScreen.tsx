@@ -184,7 +184,9 @@ export const BudgetsScreen = () => {
                   <Ionicons
                     name="reorder-two-outline"
                     size={20}
-                    color={isActive ? theme.colors.primary : theme.colors.outline}
+                    color={
+                      isActive ? theme.colors.primary : theme.colors.outline
+                    }
                     style={{ opacity: isActive ? 1 : 0.6 }}
                   />
                 </TouchableOpacity>
@@ -209,9 +211,7 @@ export const BudgetsScreen = () => {
 
               <View style={styles.textContainer}>
                 <Text style={styles.name} numberOfLines={1}>
-                  {category?.name
-                    ? translateName(category.name)
-                    : t('budgets')}
+                  {category?.name ? translateName(category.name) : t('budgets')}
                 </Text>
               </View>
 

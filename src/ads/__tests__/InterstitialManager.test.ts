@@ -1,4 +1,7 @@
-import { InterstitialManager, interstitialManager } from '../InterstitialManager';
+import {
+  InterstitialManager,
+  interstitialManager,
+} from '../InterstitialManager';
 import { InterstitialAd, AdEventType } from 'react-native-google-mobile-ads';
 import * as schema from '../../db/schema';
 
@@ -21,7 +24,9 @@ describe('InterstitialManager', () => {
       removeAllListeners: jest.fn(),
     };
 
-    (InterstitialAd.createForAdRequest as jest.Mock).mockReturnValue(mockAdInstance);
+    (InterstitialAd.createForAdRequest as jest.Mock).mockReturnValue(
+      mockAdInstance,
+    );
 
     mockDb = {
       getFirstSync: jest.fn(),
@@ -80,9 +85,11 @@ describe('InterstitialManager', () => {
   });
 
   it('handles initialization exceptions gracefully', () => {
-    (InterstitialAd.createForAdRequest as jest.Mock).mockImplementationOnce(() => {
-      throw new Error('Native ad request failure');
-    });
+    (InterstitialAd.createForAdRequest as jest.Mock).mockImplementationOnce(
+      () => {
+        throw new Error('Native ad request failure');
+      },
+    );
 
     const manager = new InterstitialManager();
     expect(() => manager.init()).not.toThrow();
@@ -147,12 +154,14 @@ describe('InterstitialManager', () => {
 
     it('enforces database cooldown when last ad was shown recently', async () => {
       const now = Date.now();
-      mockDb.getFirstSync.mockImplementation((_sql: string, params: string[]) => {
-        if (params[0] === 'last_interstitial_time') {
-          return { val: (now - 60000).toString() }; // 1 min ago (< 5 min)
-        }
-        return null;
-      });
+      mockDb.getFirstSync.mockImplementation(
+        (_sql: string, params: string[]) => {
+          if (params[0] === 'last_interstitial_time') {
+            return { val: (now - 60000).toString() }; // 1 min ago (< 5 min)
+          }
+          return null;
+        },
+      );
 
       const manager = new InterstitialManager();
       manager.init();
@@ -164,18 +173,20 @@ describe('InterstitialManager', () => {
 
     it('enforces daily cap of 3 ads per day', async () => {
       const todayDate = new Date().toISOString().split('T')[0];
-      mockDb.getFirstSync.mockImplementation((_sql: string, params: string[]) => {
-        if (params[0] === 'last_interstitial_time') {
-          return { val: (Date.now() - 600000).toString() }; // 10 mins ago (passed cooldown)
-        }
-        if (params[0] === 'daily_interstitial_count') {
-          return { val: '3' }; // Reached max per day
-        }
-        if (params[0] === 'last_interstitial_date') {
-          return { val: todayDate };
-        }
-        return null;
-      });
+      mockDb.getFirstSync.mockImplementation(
+        (_sql: string, params: string[]) => {
+          if (params[0] === 'last_interstitial_time') {
+            return { val: (Date.now() - 600000).toString() }; // 10 mins ago (passed cooldown)
+          }
+          if (params[0] === 'daily_interstitial_count') {
+            return { val: '3' }; // Reached max per day
+          }
+          if (params[0] === 'last_interstitial_date') {
+            return { val: todayDate };
+          }
+          return null;
+        },
+      );
 
       const manager = new InterstitialManager();
       manager.init();
@@ -187,18 +198,20 @@ describe('InterstitialManager', () => {
 
     it('resets daily count when date has rolled over', async () => {
       const yesterday = '2020-01-01';
-      mockDb.getFirstSync.mockImplementation((_sql: string, params: string[]) => {
-        if (params[0] === 'last_interstitial_time') {
-          return { val: (Date.now() - 600000).toString() };
-        }
-        if (params[0] === 'daily_interstitial_count') {
-          return { val: '3' };
-        }
-        if (params[0] === 'last_interstitial_date') {
-          return { val: yesterday };
-        }
-        return null;
-      });
+      mockDb.getFirstSync.mockImplementation(
+        (_sql: string, params: string[]) => {
+          if (params[0] === 'last_interstitial_time') {
+            return { val: (Date.now() - 600000).toString() };
+          }
+          if (params[0] === 'daily_interstitial_count') {
+            return { val: '3' };
+          }
+          if (params[0] === 'last_interstitial_date') {
+            return { val: yesterday };
+          }
+          return null;
+        },
+      );
 
       const manager = new InterstitialManager();
       manager.init();

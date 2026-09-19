@@ -1,6 +1,7 @@
 import { StateCreator } from 'zustand';
 import { getDb } from '../../db/schema';
-import { AppStore, Category } from '../useStore';
+import type { Category } from '../types';
+import type { AppStore } from '../useStore';
 
 export interface CategoriesSlice {
   categories: Category[];

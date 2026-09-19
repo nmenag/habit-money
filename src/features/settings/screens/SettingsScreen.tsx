@@ -300,7 +300,6 @@ export const SettingsScreen = () => {
           paddingHorizontal: spacing.md,
         }}
       >
-
         <View style={styles.section}>
           <Text
             style={[

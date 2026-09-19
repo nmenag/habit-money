@@ -579,16 +579,26 @@ export const en = {
   transactionPlural: 'transactions',
   offlineAndPrivate: '100% Offline & Private',
   overBudgetAlert: 'Over Budget',
-  accountsEmptyInsight: "Start your financial map by adding your first active account.",
-  netWorthNegativeInsight: "Total balances are in the negative. Prioritize debt repayment to regain positive liquidity.",
-  highBurnRateInsight: "Spending velocity is {{velocity}}% of incoming cash flow. Trim variable outflows.",
-  healthySavingsInsight: "Saving {{savingsRate}}% of income this cycle. Maintain momentum into savings goals.",
-  steadyCashFlowInsight: "Cash flow remains steady across your configured financial repositories.",
-  cashFlowHealth: "Cash Flow Health",
-  spendingVelocity: "Burn Velocity",
-  monthlyBudget: "Monthly Budget",
-  onTrack: "On Track",
-  totalBudgeted: "Total Budgeted",
-  totalSpent: "Total Spent",
-  remainingBalance: "Remaining Balance",
+  accountsEmptyInsight:
+    'Start your financial map by adding your first active account.',
+  netWorthNegativeInsight:
+    'Total balances are in the negative. Prioritize debt repayment to regain positive liquidity.',
+  highBurnRateInsight:
+    'Spending velocity is {{velocity}}% of incoming cash flow. Trim variable outflows.',
+  healthySavingsInsight:
+    'Saving {{savingsRate}}% of income this cycle. Maintain momentum into savings goals.',
+  steadyCashFlowInsight:
+    'Cash flow remains steady across your configured financial repositories.',
+  cashFlowHealth: 'Cash Flow Health',
+  spendingVelocity: 'Burn Velocity',
+  monthlyBudget: 'Monthly Budget',
+  onTrack: 'On Track',
+  totalBudgeted: 'Total Budgeted',
+  totalSpent: 'Total Spent',
+  remainingBalance: 'Remaining Balance',
+  transaction: 'Transaction',
+  totalAmount: 'Total Amount',
+  totalIncome: 'Total Income',
+  netTotal: 'Net Total',
+  totalTransfers: 'Total Transfers',
 };

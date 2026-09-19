@@ -375,11 +375,7 @@ export const DashboardScreen = React.memo(() => {
                     0.06,
                     '#16A34A',
                   ),
-                  borderColor: addAlpha(
-                    theme.colors.income,
-                    0.15,
-                    '#16A34A',
-                  ),
+                  borderColor: addAlpha(theme.colors.income, 0.15, '#16A34A'),
                 },
               ]}
             >
@@ -511,10 +507,7 @@ export const DashboardScreen = React.memo(() => {
               accessibilityRole="button"
             >
               <Text
-                style={[
-                  styles.actionLinkText,
-                  { color: theme.colors.primary },
-                ]}
+                style={[styles.actionLinkText, { color: theme.colors.primary }]}
               >
                 {t('viewAll')}
               </Text>
@@ -563,7 +556,10 @@ export const DashboardScreen = React.memo(() => {
                 />
                 <View style={{ marginLeft: 12, flex: 1 }}>
                   <Text
-                    style={[styles.accountName, { color: theme.colors.onSurface }]}
+                    style={[
+                      styles.accountName,
+                      { color: theme.colors.onSurface },
+                    ]}
                     numberOfLines={1}
                   >
                     {translateName(acc.name)}
@@ -703,11 +699,7 @@ export const DashboardScreen = React.memo(() => {
                       0.09,
                       '#22C55E',
                     ),
-                    borderColor: addAlpha(
-                      theme.colors.primary,
-                      0.2,
-                      '#22C55E',
-                    ),
+                    borderColor: addAlpha(theme.colors.primary, 0.2, '#22C55E'),
                   },
                 ]}
               >
@@ -854,10 +846,7 @@ export const DashboardScreen = React.memo(() => {
               accessibilityRole="button"
             >
               <Text
-                style={[
-                  styles.actionLinkText,
-                  { color: theme.colors.primary },
-                ]}
+                style={[styles.actionLinkText, { color: theme.colors.primary }]}
               >
                 {t('seeAll')}
               </Text>
