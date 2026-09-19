@@ -365,7 +365,7 @@ export const AddBudgetScreen = () => {
                 style={[
                   styles.chevronCircle,
                   {
-                    backgroundColor: theme.dark ? '#1A2421' : '#F0F4F2',
+                    backgroundColor: theme.dark ? theme.colors.elevation.level2 : theme.colors.surfaceVariant,
                     borderColor: theme.colors.outlineVariant,
                   },
                 ]}
@@ -615,7 +615,7 @@ const defaultStyles = (theme: AppTheme) =>
       fontSize: fontScale(15),
       fontFamily: 'Inter-SemiBold',
       fontWeight: '600',
-      color: '#fff',
+      color: theme.colors.onPrimary,
     },
     menuContainer: {
       paddingHorizontal: 16,

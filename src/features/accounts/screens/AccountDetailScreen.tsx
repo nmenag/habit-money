@@ -170,14 +170,13 @@ export const AccountDetailScreen = () => {
   }
 
   const accountColor = account.color || theme.colors.primary;
-  const isDarkColor = theme.dark;
 
   const cardBgColor = theme.colors.surface;
 
-  const inflowBg = isDarkColor ? '#052E16' : '#DCFCE7';
-  const inflowBorder = isDarkColor ? '#065F462B' : '#A7F3D0';
-  const outflowBg = isDarkColor ? '#450A0A' : '#FEE2E2';
-  const outflowBorder = isDarkColor ? '#991B1B2B' : '#FCA5A5';
+  const inflowBg = (theme.colors as any).incomeContainer;
+  const inflowBorder = (theme.colors as any).income ? ((theme.colors as any).income + "33") : theme.colors.outlineVariant;
+  const outflowBg = theme.colors.errorContainer;
+  const outflowBorder = theme.colors.error ? (theme.colors.error + "33") : theme.colors.outlineVariant;
 
   return (
     <View
@@ -321,10 +320,10 @@ export const AccountDetailScreen = () => {
             <View
               style={[
                 styles.flowIconBox,
-                { backgroundColor: isDarkColor ? '#065F46' : '#A7F3D0' },
+                { backgroundColor: (theme.colors as any).incomeContainer },
               ]}
             >
-              <Ionicons name="arrow-down" size={14} color="#10B981" />
+              <Ionicons name="arrow-down" size={14} color={(theme.colors as any).income || "#10B981"} />
             </View>
             <View style={styles.flowTextCol}>
               <Text
@@ -336,7 +335,7 @@ export const AccountDetailScreen = () => {
                 {t('inflowMonth')}
               </Text>
               <Text
-                style={[styles.flowAmount, { color: '#10B981' }]}
+                style={[styles.flowAmount, { color: (theme.colors as any).income || '#10B981' }]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
@@ -354,7 +353,7 @@ export const AccountDetailScreen = () => {
             <View
               style={[
                 styles.flowIconBox,
-                { backgroundColor: isDarkColor ? '#7F1D1D' : '#FCA5A5' },
+                { backgroundColor: theme.colors.errorContainer },
               ]}
             >
               <Ionicons name="arrow-up" size={14} color="#EF4444" />

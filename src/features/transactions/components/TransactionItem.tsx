@@ -15,6 +15,7 @@ import { getValidCategoryIcon } from '../../../constants';
 interface Props {
   transaction: Transaction;
   category?: Category;
+  onPress?: () => void;
 }
 
 const addAlpha = (
@@ -47,7 +48,7 @@ const addAlpha = (
 };
 
 export const TransactionItem: React.FC<Props> = memo(
-  ({ transaction, category }) => {
+  ({ transaction, category, onPress }) => {
     const accountCurrency = useStore(
       (state) =>
         state.accounts.find((a) => a.id === transaction.accountId)?.currency ||
@@ -197,6 +198,7 @@ export const TransactionItem: React.FC<Props> = memo(
         description={`${formattedDate}${transaction.note ? ` • ${transaction.note}` : ''}`}
         left={LeftContent}
         right={RightContent}
+        onPress={onPress}
         style={styles.listItem}
         titleStyle={styles.title}
         descriptionStyle={{

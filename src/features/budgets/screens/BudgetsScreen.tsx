@@ -114,14 +114,14 @@ export const BudgetsScreen = () => {
     } else if (percent <= 80) {
       return {
         text: t('moderatePaceTip', { percent }),
-        color: '#D97706',
-        bgColor: theme.dark ? '#332511' : '#FFF7E6',
+        color: (theme.colors as any).warning || '#D97706',
+        bgColor: (theme.colors as any).warningContainer,
       };
     } else {
       return {
         text: t('highDepletionTip'),
         color: theme.colors.error,
-        bgColor: theme.dark ? '#341F1C' : '#FBECE9',
+        bgColor: theme.colors.errorContainer,
       };
     }
   }, [averageProgress, budgets.length, theme, t]);
@@ -180,6 +180,7 @@ export const BudgetsScreen = () => {
                   activeOpacity={0.6}
                   accessibilityRole="button"
                   accessibilityLabel={t('holdAndDragToReorder')}
+                  hitSlop={{ top: 8, bottom: 8, left: 10, right: 10 }}
                 >
                   <Ionicons
                     name="reorder-two-outline"
@@ -311,7 +312,7 @@ export const BudgetsScreen = () => {
                 averageProgress > 0.9
                   ? theme.colors.error
                   : averageProgress > 0.75
-                    ? '#D97706'
+                    ? ((theme.colors as any).warning || '#D97706')
                     : theme.colors.primary
               }
               style={styles.mainProgressBar}
@@ -721,10 +722,11 @@ const defaultStyles = (theme: AppTheme) =>
       marginBottom: 12,
     },
     dragHandle: {
+      width: 36,
+      height: 44,
       marginRight: 6,
       justifyContent: 'center',
       alignItems: 'center',
-      padding: 2,
     },
     textContainer: {
       flex: 1.2,

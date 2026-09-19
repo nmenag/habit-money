@@ -76,6 +76,7 @@ export const CategoriesScreen = () => {
               activeOpacity={0.6}
               accessibilityRole="button"
               accessibilityLabel={t('holdAndDragToReorder')}
+              hitSlop={{ top: 8, bottom: 8, left: 10, right: 10 }}
             >
               <Ionicons
                 name="reorder-two-outline"
@@ -355,11 +356,11 @@ const defaultStyles = (theme: AppTheme) =>
       paddingHorizontal: 12,
     },
     dragHandle: {
-      width: 24,
+      width: 36,
       height: 44,
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: 6,
+      marginRight: 4,
     },
     iconCircle: {
       width: 44,

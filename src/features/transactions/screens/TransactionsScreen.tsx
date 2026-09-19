@@ -217,12 +217,11 @@ export const TransactionsScreen = () => {
 
       const category = categories.find((c) => c.id === item.categoryId);
       return (
-        <TouchableOpacity
+        <TransactionItem
+          transaction={item}
+          category={category}
           onPress={() => handleTransactionPress(item)}
-          activeOpacity={0.7}
-        >
-          <TransactionItem transaction={item} category={category} />
-        </TouchableOpacity>
+        />
       );
     },
     [categories, handleTransactionPress, theme, language, styles],
@@ -264,7 +263,7 @@ export const TransactionsScreen = () => {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.chipsScroll}
+            contentContainerStyle={[styles.chipsScroll, { paddingRight: 16 }]}
           >
             <Chip
               icon={selectedAccountIds.length > 0 ? 'check-circle' : 'bank'}
@@ -601,6 +600,8 @@ export const TransactionsScreen = () => {
                 name="search-outline"
                 size={56}
                 color={theme.colors.outlineVariant}
+                accessibilityElementsHidden={true}
+                importantForAccessibility="no"
               />
               <Text variant="bodyLarge" style={styles.emptyText}>
                 {t('noTransactions')}

@@ -97,6 +97,7 @@ export const en = {
   save: 'Save',
   update: 'Update',
   cancel: 'Cancel',
+  close: 'Close',
   delete: 'Delete',
   edit: 'Edit',
   add: 'Add',

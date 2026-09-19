@@ -100,6 +100,7 @@ export const es = {
   save: 'Guardar',
   update: 'Actualizar',
   cancel: 'Cancelar',
+  close: 'Cerrar',
   delete: 'Eliminar',
   edit: 'Editar',
   add: 'Añadir',

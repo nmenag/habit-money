@@ -73,6 +73,7 @@ export const AccountCard: React.FC<Props> = ({
               activeOpacity={0.6}
               accessibilityRole="button"
               accessibilityLabel={t('holdAndDragToReorder')}
+              hitSlop={{ top: 8, bottom: 8, left: 10, right: 10 }}
             >
               <Ionicons
                 name="reorder-two-outline"
@@ -158,10 +159,11 @@ const defaultStyles = (theme: AppTheme) =>
       alignItems: 'center',
     },
     dragHandle: {
-      marginRight: 8,
+      width: 36,
+      height: 44,
+      marginRight: 6,
       justifyContent: 'center',
       alignItems: 'center',
-      padding: 2,
     },
     iconContainer: {
       width: 44,
@@ -186,7 +188,7 @@ const defaultStyles = (theme: AppTheme) =>
       flexDirection: 'row',
     },
     typeText: {
-      fontSize: fontScale(10),
+      fontSize: fontScale(11),
       fontFamily: 'Inter-Medium',
       fontWeight: '500',
       letterSpacing: 0.5,

@@ -25,7 +25,7 @@ import {
   Text,
   useTheme,
 } from 'react-native-paper';
-import Animated, { FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getValidCategoryIcon } from '../../../constants';
 import { useStore, useTranslation } from '../../../store/useStore';
@@ -238,7 +238,7 @@ export const DashboardScreen = React.memo(() => {
 
   // Unified Financial Health Hero (Layout & Visual Anchor)
   const heroSection = (
-    <Animated.View entering={FadeInUp.duration(320)}>
+    <Animated.View entering={FadeIn.duration(180)}>
       <Card
         style={[
           styles.heroCard,
@@ -475,7 +475,7 @@ export const DashboardScreen = React.memo(() => {
 
   // Accounts Section with Modern Typographic Density
   const accountsSection = (
-    <Animated.View entering={FadeInUp.delay(80).duration(300)}>
+    <Animated.View entering={FadeIn.duration(180)}>
       <Card style={styles.sectionCard} mode="contained">
         <Card.Content>
           <View style={styles.sectionHeader}>
@@ -586,7 +586,7 @@ export const DashboardScreen = React.memo(() => {
 
   // Budget & Spending Health Section
   const spendingHealthSection = (
-    <Animated.View entering={FadeInUp.delay(160).duration(300)}>
+    <Animated.View entering={FadeIn.duration(180)}>
       <Card style={styles.sectionCard} mode="contained">
         <Card.Content>
           <View style={styles.sectionHeader}>
@@ -786,7 +786,7 @@ export const DashboardScreen = React.memo(() => {
 
   // Financial Insight Section
   const insightSection = (
-    <Animated.View entering={FadeInUp.delay(220).duration(300)}>
+    <Animated.View entering={FadeIn.duration(180)}>
       <Card
         style={[
           styles.sectionCard,
@@ -833,7 +833,7 @@ export const DashboardScreen = React.memo(() => {
 
   // Recent Transactions Section
   const recentTransactionsSection = (
-    <Animated.View entering={FadeInUp.delay(280).duration(300)}>
+    <Animated.View entering={FadeIn.duration(180)}>
       <Card style={styles.sectionCard} mode="contained">
         <Card.Content>
           <View style={[styles.sectionHeader, { marginBottom: 8 }]}>
