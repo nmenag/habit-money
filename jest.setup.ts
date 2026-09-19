@@ -39,8 +39,9 @@ jest.mock('react-native-google-mobile-ads', () => ({
   InterstitialAd: {
     createForAdRequest: jest.fn(() => ({
       load: jest.fn(),
-      show: jest.fn(),
+      show: jest.fn().mockResolvedValue(undefined),
       addAdEventListener: jest.fn(() => () => {}),
+      removeAllListeners: jest.fn(),
     })),
   },
   BannerAd: () => null,
@@ -104,11 +105,11 @@ jest.mock('@react-native-firebase/analytics', () => ({
 
 jest.mock('@react-native-firebase/crashlytics', () => ({
   getCrashlytics: jest.fn(() => ({})),
+  log: jest.fn().mockResolvedValue(undefined),
+  recordError: jest.fn().mockResolvedValue(undefined),
   setCrashlyticsCollectionEnabled: jest.fn().mockResolvedValue(undefined),
-  log: jest.fn(),
-  recordError: jest.fn(),
-  setAttributes: jest.fn(),
-  setAttribute: jest.fn(),
+  setAttributes: jest.fn().mockResolvedValue(undefined),
+  setAttribute: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('@react-native-firebase/app', () => ({

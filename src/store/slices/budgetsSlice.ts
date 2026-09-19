@@ -26,7 +26,7 @@ export const createBudgetsSlice: StateCreator<
     const budgets = db.getAllSync<Budget>(
       'SELECT id, name, amount, color, categoryId, displayOrder FROM budgets ORDER BY displayOrder ASC',
     );
-    set({ budgets });
+    set({ budgets: [...budgets] });
   },
 
   addBudget: (budget) => {

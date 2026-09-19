@@ -1,122 +1,138 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
 import React, { useCallback, useMemo } from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
 } from 'react-native-draggable-flatlist';
-import { FAB, Text, useTheme, Card, ProgressBar } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Card, Text, useTheme } from 'react-native-paper';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
 import { AccountCard } from '../components/AccountCard';
 import { Account, useStore, useTranslation } from '../../../store/useStore';
-import { AppTheme, spacing } from '../../../theme/theme';
-import { getLocalDateString } from '../../../utils/dateUtils';
+import { AppTheme } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
 
 export const AccountsScreen = () => {
   const accounts = useStore((s) => s.accounts);
   const transactions = useStore((s) => s.transactions);
+  const formatCurrency = useStore((s) => s.formatCurrency);
   const updateAccountsOrder = useStore((s) => s.updateAccountsOrder);
-  const { formatCurrency } = useStore();
+  const dashboardReport = useStore((s) => s.dashboardReport);
 
   const { t } = useTranslation();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
 
-  const handleAddAccount = useCallback(() => {
-    router.push('/add-account');
-  }, []);
+  const totalBalance = useMemo(() => {
+    return accounts.reduce((acc, a) => acc + (a.currentBalance || 0), 0);
+  }, [accounts]);
 
-  const handleAccountPress = useCallback((id: string) => {
+  const sortedAccounts = useMemo(() => {
+    return [...accounts].sort(
+      (a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0),
+    );
+  }, [accounts]);
+
+  const { monthlyIncome, monthlyExpenses, spendingVelocity } = useMemo(() => {
+    const inc = dashboardReport?.currentMonth
+      ? dashboardReport.currentMonth.income
+      : null;
+    const exp = dashboardReport?.currentMonth
+      ? dashboardReport.currentMonth.expenses
+      : null;
+    const now = new Date();
+    const currentMonthPrefix = now.toISOString().substring(0, 7);
+
+    const monthTxs = transactions.filter((t) =>
+      t.date.startsWith(currentMonthPrefix),
+    );
+    const actualInc = inc !== null ? inc : monthTxs
+      .filter((t) => t.type === 'income')
+      .reduce((s, t) => s + t.amount, 0);
+    const actualExp = exp !== null ? exp : monthTxs
+      .filter((t) => t.type === 'expense')
+      .reduce((s, t) => s + t.amount, 0);
+
+    const dayOfMonth = now.getDate();
+    const daysInMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+    ).getDate();
+    const elapsedRatio = dayOfMonth / daysInMonth;
+
+    let velocity = 0;
+    if (actualInc > 0 && elapsedRatio > 0) {
+      velocity = Math.round((actualExp / actualInc / elapsedRatio) * 100);
+    }
+
+    return {
+      monthlyIncome: actualInc,
+      monthlyExpenses: actualExp,
+      spendingVelocity: velocity,
+    };
+  }, [dashboardReport, transactions]);
+
+  const handleAccountPress = useCallback((accountId: string) => {
     router.push({
       pathname: '/account-detail',
-      params: { accountId: id },
+      params: { accountId },
     });
   }, []);
 
-  const { totalBalance, monthlyIncome, monthlyExpenses, spendingVelocity } =
-    useMemo(() => {
-      let balanceSum = 0;
-      accounts.forEach((a) => {
-        balanceSum += a.currentBalance;
-      });
-
-      const currentISO = getLocalDateString();
-      const currentMonthPrefix = currentISO.substring(0, 7);
-
-      let incomeSum = 0;
-      let expenseSum = 0;
-      const thisMonthExpenses: number[] = [];
-
-      transactions.forEach((tx) => {
-        if (tx.date.startsWith(currentMonthPrefix)) {
-          if (tx.type === 'income') {
-            incomeSum += tx.amount;
-          } else if (tx.type === 'expense') {
-            expenseSum += tx.amount;
-            thisMonthExpenses.push(tx.amount);
-          }
-        }
-      });
-
-      const elapsedDays = Math.max(
-        1,
-        parseInt(currentISO.substring(8, 10), 10),
-      );
-      const velocity = expenseSum / elapsedDays;
-
-      return {
-        totalBalance: balanceSum,
-        monthlyIncome: incomeSum,
-        monthlyExpenses: expenseSum,
-        spendingVelocity: velocity,
-      };
-    }, [accounts, transactions]);
+  const handleAddAccount = () => {
+    router.push('/add-account');
+  };
 
   const aiInsight = useMemo(() => {
-    const defaultCurrencyCode = accounts[0]?.currency || 'USD';
-    const formattedVelocity = formatCurrency(
-      spendingVelocity,
-      defaultCurrencyCode,
-    );
-
-    if (accounts.some((a) => a.currentBalance < 0)) {
+    if (accounts.length === 0) {
       return {
+        text: t('accountsEmptyInsight'),
+        icon: 'information-circle-outline',
+        color: theme.colors.outline,
+        bgColor: theme.colors.surfaceVariant,
+      };
+    }
+
+    if (totalBalance < 0) {
+      return {
+        text: t('netWorthNegativeInsight'),
         icon: 'warning-outline',
-        color: '#F59E0B',
-        bgColor: theme.dark ? '#332511' : '#FFF7E6',
-        text: t('insightNegativeBalance'),
+        color: theme.colors.error,
+        bgColor: theme.colors.errorContainer,
       };
     }
 
-    if (monthlyExpenses > monthlyIncome && monthlyIncome > 0) {
+    if (spendingVelocity > 100) {
       return {
-        icon: 'trending-down-outline',
-        color: '#EF4444',
-        bgColor: theme.dark ? '#3A1616' : '#FEF2F2',
-        text: t('insightOutpacingIncome', { velocity: formattedVelocity }),
+        text: t('highBurnRateInsight', { velocity: spendingVelocity }),
+        icon: 'alert-circle-outline',
+        color: theme.colors.error,
+        bgColor: theme.colors.errorContainer,
       };
     }
 
-    if (totalBalance > 10000) {
+    if (monthlyIncome > monthlyExpenses && monthlyExpenses > 0) {
+      const savingsRate = Math.round(
+        ((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100,
+      );
       return {
-        icon: 'sparkles-outline',
-        color: '#10B981',
+        text: t('healthySavingsInsight', { savingsRate }),
+        icon: 'checkmark-circle-outline',
+        color: theme.colors.primary,
         bgColor: theme.colors.incomeContainer,
-        text: t('insightSuperbLiquidity'),
       };
     }
 
     return {
-      icon: 'bulb-outline',
+      text: t('steadyCashFlowInsight'),
+      icon: 'shield-checkmark-outline',
       color: theme.colors.primary,
-      bgColor: theme.colors.incomeContainer,
-      text: t('insightDailyOutflowHabit', { velocity: formattedVelocity }),
+      bgColor: theme.colors.surfaceVariant,
     };
   }, [
     accounts,
@@ -124,7 +140,6 @@ export const AccountsScreen = () => {
     monthlyIncome,
     totalBalance,
     spendingVelocity,
-    formatCurrency,
     theme,
     t,
   ]);
@@ -132,14 +147,12 @@ export const AccountsScreen = () => {
   const renderItem = useCallback(
     ({ item, drag, isActive }: RenderItemParams<Account>) => (
       <ScaleDecorator>
-        <Animated.View entering={FadeInUp.duration(300)}>
-          <AccountCard
-            account={item}
-            onPress={() => handleAccountPress(item.id)}
-            onLongPress={drag}
-            isActive={isActive}
-          />
-        </Animated.View>
+        <AccountCard
+          account={item}
+          onPress={() => handleAccountPress(item.id)}
+          onLongPress={drag}
+          isActive={isActive}
+        />
       </ScaleDecorator>
     ),
     [handleAccountPress],
@@ -155,148 +168,159 @@ export const AccountsScreen = () => {
           ? 1
           : 0;
 
-    const velocityRatio = Math.min(1, spendingVelocity / 150);
-
     return (
-      <View style={styles.headerContainer}>
-        <Animated.View
-          entering={FadeIn.duration(400)}
-          style={[
-            styles.overviewCard,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: theme.colors.outlineVariant,
-            },
-          ]}
-        >
-          <View style={styles.overviewTopRow}>
-            <Text
-              style={[
-                styles.overviewLabel,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
-            >
-              {t('totalBalance')}
-            </Text>
-            <View
-              style={[
-                styles.countBadge,
-                { backgroundColor: theme.colors.surfaceVariant },
-              ]}
-            >
-              <Ionicons
-                name="wallet-outline"
-                size={12}
-                color={theme.colors.onSurfaceVariant}
-                style={{ marginRight: 4 }}
-              />
-              <Text
-                style={[
-                  styles.countBadgeText,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
-              >
-                {accounts.length} {t('accounts')}
-              </Text>
-            </View>
-          </View>
-          <Text
+      <View>
+        <Animated.View entering={FadeInUp.duration(300)}>
+          <Card
             style={[
-              styles.overviewValue,
+              styles.totalCard,
               {
-                color:
-                  totalBalance < 0
-                    ? theme.colors.error
-                    : theme.colors.onSurface,
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.outlineVariant,
               },
             ]}
-            numberOfLines={1}
-            adjustsFontSizeToFit
+            mode="contained"
           >
-            {formatCurrency(totalBalance, defaultCurrencyCode)}
-          </Text>
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeInUp.delay(100).duration(300)}
-          style={styles.analyticsRow}
-        >
-          <Card style={styles.analyticsCard} mode="contained">
-            <Card.Content style={styles.analyticsCardContent}>
-              <View style={styles.widgetHeader}>
-                <Ionicons
-                  name="swap-vertical-outline"
-                  size={14}
-                  color="#3B82F6"
-                />
-                <Text
+            <Card.Content style={styles.totalContent}>
+              <View style={styles.totalTopRow}>
+                <View
                   style={[
-                    styles.widgetTitle,
-                    { color: theme.colors.onSurfaceVariant },
+                    styles.totalIconCircle,
+                    {
+                      backgroundColor: `${theme.colors.primary}12`,
+                      borderColor: `${theme.colors.primary}2B`,
+                      borderWidth: 1,
+                    },
                   ]}
                 >
-                  {t('cashFlow')}
-                </Text>
+                  <Ionicons
+                    name="wallet-outline"
+                    size={22}
+                    color={theme.colors.primary}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={[
+                      styles.totalLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('totalBalance')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.totalAmount,
+                      {
+                        color:
+                          totalBalance < 0
+                            ? theme.colors.error
+                            : theme.colors.onSurface,
+                      },
+                    ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                  >
+                    {formatCurrency(totalBalance, defaultCurrencyCode)}
+                  </Text>
+                </View>
               </View>
-              <Text
-                style={[styles.widgetVal, { color: theme.colors.onSurface }]}
-              >
-                {formatCurrency(
-                  monthlyIncome - monthlyExpenses,
-                  defaultCurrencyCode,
-                )}
-              </Text>
-              <ProgressBar
-                progress={cashFlowRatio}
-                color={
-                  monthlyIncome - monthlyExpenses >= 0 ? '#10B981' : '#EF4444'
-                }
-                style={styles.widgetBar}
-              />
-              <Text
-                style={[styles.widgetDesc, { color: theme.colors.outline }]}
-              >
-                {cashFlowRatio >= 1
-                  ? '100%'
-                  : `${Math.round(cashFlowRatio * 100)}%`}{' '}
-                {t('ofIncomeSpent')}
-              </Text>
-            </Card.Content>
-          </Card>
 
-          <Card style={styles.analyticsCard} mode="contained">
-            <Card.Content style={styles.analyticsCardContent}>
-              <View style={styles.widgetHeader}>
-                <Ionicons
-                  name="speedometer-outline"
-                  size={14}
-                  color="#EC4899"
-                />
-                <Text
-                  style={[
-                    styles.widgetTitle,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  {t('velocity')}
-                </Text>
+              <View style={styles.financialMetricsRow}>
+                <View style={styles.metricItem}>
+                  <View style={styles.metricHeader}>
+                    <Text
+                      style={[
+                        styles.metricLabel,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {t('cashFlowHealth')}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.metricValue,
+                        {
+                          color:
+                            cashFlowRatio > 0.9
+                              ? theme.colors.error
+                              : theme.colors.primary,
+                        },
+                      ]}
+                    >
+                      {Math.round((1 - cashFlowRatio) * 100)}%
+                    </Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.progressBarTrack,
+                      { backgroundColor: theme.colors.surfaceVariant },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          width: `${Math.round((1 - cashFlowRatio) * 100)}%`,
+                          backgroundColor:
+                            cashFlowRatio > 0.9
+                              ? theme.colors.error
+                              : theme.colors.primary,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.metricItem}>
+                  <View style={styles.metricHeader}>
+                    <Text
+                      style={[
+                        styles.metricLabel,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {t('spendingVelocity')}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.metricValue,
+                        {
+                          color:
+                            spendingVelocity > 100
+                              ? theme.colors.error
+                              : spendingVelocity > 80
+                                ? '#D97706'
+                                : theme.colors.primary,
+                        },
+                      ]}
+                    >
+                      {spendingVelocity}%
+                    </Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.progressBarTrack,
+                      { backgroundColor: theme.colors.surfaceVariant },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          width: `${Math.min(spendingVelocity, 100)}%`,
+                          backgroundColor:
+                            spendingVelocity > 100
+                              ? theme.colors.error
+                              : spendingVelocity > 80
+                                ? '#D97706'
+                                : theme.colors.primary,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
               </View>
-              <Text
-                style={[styles.widgetVal, { color: theme.colors.onSurface }]}
-              >
-                {formatCurrency(spendingVelocity, defaultCurrencyCode)}
-                <Text style={styles.velocityUnit}>{t('perDay')}</Text>
-              </Text>
-              <ProgressBar
-                progress={velocityRatio}
-                color="#EC4899"
-                style={styles.widgetBar}
-              />
-              <Text
-                style={[styles.widgetDesc, { color: theme.colors.outline }]}
-              >
-                {t('avgSpendingOutflow')}
-              </Text>
             </Card.Content>
           </Card>
         </Animated.View>
@@ -328,7 +352,7 @@ export const AccountsScreen = () => {
           </View>
         </Animated.View>
 
-        {accounts.length > 1 && (
+        {sortedAccounts.length > 1 && (
           <View style={styles.dragHelpRow}>
             <Ionicons
               name="reorder-two-outline"
@@ -346,6 +370,7 @@ export const AccountsScreen = () => {
       </View>
     );
   }, [
+    sortedAccounts,
     accounts,
     monthlyIncome,
     monthlyExpenses,
@@ -397,9 +422,14 @@ export const AccountsScreen = () => {
         }}
       />
       <DraggableFlatList
-        data={accounts}
+        data={sortedAccounts}
         keyExtractor={(item) => item.id}
         onDragEnd={({ data }) => updateAccountsOrder(data)}
+        containerStyle={styles.listContainer}
+        style={styles.list}
+        autoscrollThreshold={80}
+        autoscrollSpeed={150}
+        dragItemOverflow={true}
         contentContainerStyle={[
           styles.listContent,
           { paddingBottom: insets.bottom + 200 },
@@ -423,33 +453,42 @@ export const AccountsScreen = () => {
               />
             </View>
             <Text
-              style={[styles.emptyTitle, { color: theme.colors.onSurface }]}
+              style={[
+                styles.emptyText,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
             >
-              No Accounts Defined
+              {t('noAccounts')}
             </Text>
-            <Text
-              style={[styles.emptySubtitle, { color: theme.colors.outline }]}
+            <TouchableOpacity
+              onPress={handleAddAccount}
+              style={[
+                styles.emptyBtn,
+                {
+                  backgroundColor: theme.colors.primary,
+                },
+              ]}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={t('addAccount')}
             >
-              Establish accounts such as bank deposits or emergency funds to
-              track assets at a glance.
-            </Text>
+              <Ionicons
+                name="add"
+                size={18}
+                color={theme.colors.onPrimary}
+                style={{ marginRight: 6 }}
+              />
+              <Text
+                style={[
+                  styles.emptyBtnText,
+                  { color: theme.colors.onPrimary },
+                ]}
+              >
+                {t('addAccount')}
+              </Text>
+            </TouchableOpacity>
           </Animated.View>
         }
-      />
-
-      <BannerAdComponent />
-
-      <FAB
-        icon="plus"
-        style={[
-          styles.fab,
-          {
-            bottom: (insets.bottom || 0) + 120,
-            backgroundColor: theme.colors.primary,
-          },
-        ]}
-        color="#fff"
-        onPress={handleAddAccount}
       />
     </View>
   );
@@ -460,166 +499,144 @@ const defaultStyles = (theme: AppTheme) =>
     container: {
       flex: 1,
     },
-    listContent: {
-      padding: 16,
-      paddingTop: spacing.xs,
-    },
-    headerContainer: {
-      marginBottom: 8,
-    },
     headerBtn: {
-      padding: 8,
-      minWidth: 44,
-      minHeight: 44,
+      padding: 6,
       justifyContent: 'center',
       alignItems: 'center',
     },
-    overviewCard: {
-      borderRadius: theme.roundness || 12,
-      borderWidth: 1,
-      padding: 16,
-      marginBottom: 16,
-      marginTop: 8,
+    listContainer: {
+      flex: 1,
     },
-    overviewTopRow: {
+    list: {
+      flex: 1,
+    },
+    listContent: {
+      paddingHorizontal: 16,
+      paddingTop: 16,
+    },
+    totalCard: {
+      borderRadius: theme.roundness ? theme.roundness * 1.5 : 20,
+      borderWidth: 1,
+      marginBottom: 12,
+      overflow: 'hidden',
+    },
+    totalContent: {
+      padding: 16,
+    },
+    totalTopRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    totalIconCircle: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 12,
+    },
+    totalLabel: {
+      fontSize: fontScale(12),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      marginBottom: 2,
+    },
+    totalAmount: {
+      fontSize: fontScale(24),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+    },
+    financialMetricsRow: {
+      flexDirection: 'row',
+      gap: 12,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.outlineVariant,
+    },
+    metricItem: {
+      flex: 1,
+    },
+    metricHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 8,
+      marginBottom: 4,
     },
-    countBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: 12,
-    },
-    countBadgeText: {
-      fontSize: fontScale(11),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
-    },
-    overviewLabel: {
+    metricLabel: {
       fontSize: fontScale(10),
       fontFamily: 'Inter-Medium',
       fontWeight: '500',
-      textTransform: 'uppercase',
-      letterSpacing: 1.2,
     },
-    overviewValue: {
-      fontSize: fontScale(26),
+    metricValue: {
+      fontSize: fontScale(10),
       fontFamily: 'Inter-SemiBold',
       fontWeight: '600',
-      letterSpacing: -0.2,
     },
-    analyticsRow: {
-      flexDirection: 'row',
-      gap: 12,
-      marginBottom: 16,
-    },
-    analyticsCard: {
-      flex: 1,
-      borderRadius: theme.roundness || 12,
-      backgroundColor: theme.colors.surface,
-      borderWidth: 1,
-      borderColor: theme.colors.outlineVariant,
-      elevation: 0,
-    },
-    analyticsCardContent: {
-      padding: 14,
-    },
-    widgetHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      marginBottom: 6,
-    },
-    widgetTitle: {
-      fontSize: fontScale(11),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
-      letterSpacing: -0.1,
-    },
-    widgetVal: {
-      fontSize: fontScale(16),
-      fontFamily: 'Inter-SemiBold',
-      fontWeight: '600',
-      letterSpacing: -0.2,
-      marginBottom: 8,
-    },
-    velocityUnit: {
-      fontSize: fontScale(11),
-      fontFamily: 'Inter-Regular',
-      fontWeight: '400',
-    },
-    widgetBar: {
+    progressBarTrack: {
       height: 4,
       borderRadius: 2,
-      marginBottom: 8,
+      overflow: 'hidden',
     },
-    widgetDesc: {
-      fontSize: fontScale(10),
-      fontFamily: 'Inter-Regular',
-      fontWeight: '400',
+    progressBarFill: {
+      height: '100%',
+      borderRadius: 2,
     },
     recommendationBox: {
-      borderWidth: 1,
-      borderRadius: theme.roundness || 12,
-      padding: 12,
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 20,
+      padding: 12,
+      borderRadius: theme.roundness || 12,
+      borderWidth: 1,
+      marginBottom: 12,
     },
     recommendationText: {
       flex: 1,
       fontSize: fontScale(12),
-      fontFamily: 'Inter-Regular',
-      fontWeight: '400',
-      lineHeight: 16,
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+      lineHeight: fontScale(16),
     },
     dragHelpRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 8,
-      opacity: 0.8,
+      marginBottom: 12,
     },
     dragHelpText: {
-      fontSize: fontScale(10),
+      fontSize: fontScale(11),
       fontFamily: 'Inter-Regular',
-      fontWeight: '400',
     },
     empty: {
-      padding: 40,
       alignItems: 'center',
-      marginTop: 40,
+      paddingTop: 48,
+      paddingHorizontal: 24,
     },
     emptyIconCircle: {
       width: 64,
       height: 64,
-      borderRadius: 20,
+      borderRadius: 32,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: 16,
     },
-    emptyTitle: {
-      fontSize: fontScale(16),
+    emptyText: {
+      fontSize: fontScale(15),
       fontFamily: 'Inter-Medium',
       fontWeight: '500',
-      marginBottom: 6,
-    },
-    emptySubtitle: {
       textAlign: 'center',
-      fontSize: fontScale(13),
-      fontFamily: 'Inter-Regular',
-      fontWeight: '400',
-      paddingHorizontal: 20,
-      lineHeight: 18,
+      marginBottom: 20,
     },
-    fab: {
-      position: 'absolute',
-      right: 16,
-      borderRadius: 18,
-      elevation: 6,
+    emptyBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 12,
+    },
+    emptyBtnText: {
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
     },
   });

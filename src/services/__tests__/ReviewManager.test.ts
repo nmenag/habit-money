@@ -1,4 +1,4 @@
-import { Linking } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import * as StoreReview from 'expo-store-review';
 import { ReviewManager } from '../ReviewManager';
 import { getDb } from '../../db/schema';
@@ -228,9 +228,35 @@ describe('ReviewManager', () => {
       expect(listener).toHaveBeenCalledWith(false);
     });
 
+    it('handles user dismiss error gracefully', async () => {
+      const listener = jest.fn(() => {
+        throw new Error('Dismiss error');
+      });
+      ReviewManager.setOnPrePromptListener(listener);
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await ReviewManager.handleUserDismiss();
+      expect(warnSpy).toHaveBeenCalledWith(
+        'ReviewManager: error handling user dismiss',
+        expect.any(Error),
+      );
+      warnSpy.mockRestore();
+    });
+
     it('allows manual review request', async () => {
       await ReviewManager.requestReviewManually();
       expect(settingsStore.get('review_hasCompletedReview')).toBe('true');
+    });
+
+    it('handles native review in production (!__DEV__)', async () => {
+      const originalDev = (global as any).__DEV__;
+      (global as any).__DEV__ = false;
+      (StoreReview.hasAction as jest.Mock).mockResolvedValueOnce(true);
+      (StoreReview.requestReview as jest.Mock).mockResolvedValueOnce(undefined);
+
+      await ReviewManager.requestReviewManually();
+      expect(StoreReview.requestReview).toHaveBeenCalled();
+      (global as any).__DEV__ = originalDev;
     });
 
     it('can be instantiated as a class', () => {
@@ -238,6 +264,8 @@ describe('ReviewManager', () => {
     });
 
     it('handles StoreReview failure and falls back to opening store URL on iOS and Android', async () => {
+      const origOS = Platform.OS;
+      Platform.OS = 'android';
       (StoreReview.hasAction as jest.Mock).mockRejectedValueOnce(
         new Error('Native error'),
       );
@@ -249,6 +277,28 @@ describe('ReviewManager', () => {
       await ReviewManager.requestReviewManually();
       expect(openSpy).toHaveBeenCalled();
       openSpy.mockRestore();
+      Platform.OS = origOS;
+    });
+
+    it('handles failure of both primary and web fallback URLs with warning', async () => {
+      const origOS = Platform.OS;
+      Platform.OS = 'ios';
+      (StoreReview.hasAction as jest.Mock).mockRejectedValueOnce(
+        new Error('Native error'),
+      );
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const openSpy = jest
+        .spyOn(Linking, 'openURL')
+        .mockRejectedValue(new Error('Cannot open URL'));
+
+      await ReviewManager.requestReviewManually();
+      expect(warnSpy).toHaveBeenCalledWith(
+        'ReviewManager: failed to open store fallback URL',
+        expect.any(Error),
+      );
+      warnSpy.mockRestore();
+      openSpy.mockRestore();
+      Platform.OS = origOS;
     });
   });
 });

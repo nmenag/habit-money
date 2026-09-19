@@ -142,6 +142,6 @@ export const createAccountsSlice: StateCreator<
         acc.displayOrder = index;
       });
     });
-    set({ accounts });
+    set({ accounts: [...accounts] });
   },
 });

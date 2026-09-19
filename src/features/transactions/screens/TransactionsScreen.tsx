@@ -13,6 +13,7 @@ import {
   Text,
   useTheme,
 } from 'react-native-paper';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FilterBar } from '../components/FilterBar';
 import { TransactionItem } from '../components/TransactionItem';
@@ -193,96 +194,95 @@ export const TransactionsScreen = () => {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <FilterBar />
-      <View
-        style={[styles.searchRow, { backgroundColor: theme.colors.surface }]}
-      >
-        <Searchbar
-          placeholder={t('searchTransactions' as any)}
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={[
-            styles.searchbar,
-            { backgroundColor: theme.colors.surfaceVariant },
-          ]}
-          inputStyle={styles.searchInput}
-          iconColor={theme.colors.onSurfaceVariant}
-          elevation={0}
-        />
-      </View>
-      <View
-        style={[
-          styles.secondaryFiltersRow,
-          {
-            backgroundColor: theme.colors.surface,
-            borderBottomColor: theme.colors.outlineVariant,
-          },
-        ]}
-      >
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipsScroll}
+      <Animated.View entering={FadeIn.duration(240)}>
+        <View
+          style={[styles.searchRow, { backgroundColor: theme.colors.surface }]}
         >
-          <Chip
-            icon={selectedAccountIds.length > 0 ? 'check-circle' : 'bank'}
-            onPress={() => setAccountSheetOpen(true)}
-            selected={selectedAccountIds.length > 0}
-            showSelectedOverlay
-            style={styles.filterChip}
-            compact
+          <Searchbar
+            placeholder={t('searchTransactions' as any)}
+            onChangeText={setSearchQuery}
+            value={searchQuery}
+            style={[
+              styles.searchbar,
+              { backgroundColor: theme.colors.surfaceVariant },
+            ]}
+            inputStyle={styles.searchInput}
+            iconColor={theme.colors.onSurfaceVariant}
+            elevation={0}
+          />
+        </View>
+        <View
+          style={[
+            styles.secondaryFiltersRow,
+            {
+              backgroundColor: theme.colors.surface,
+              borderBottomColor: theme.colors.outlineVariant,
+            },
+          ]}
+        >
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipsScroll}
           >
-            {selectedAccountIds.length === 0
-              ? t('filterByAccount' as any)
-              : selectedAccountIds.length === 1
-                ? translateName(
-                    accounts.find((a) => a.id === selectedAccountIds[0])
-                      ?.name || '',
-                  )
-                : `${selectedAccountIds.length} ${t('accounts' as any)}`}
-          </Chip>
-
-          <Chip
-            icon={selectedCategoryIds.length > 0 ? 'check-circle' : 'tag'}
-            onPress={() => setCategorySheetOpen(true)}
-            selected={selectedCategoryIds.length > 0}
-            showSelectedOverlay
-            style={styles.filterChip}
-            compact
-          >
-            {selectedCategoryIds.length === 0
-              ? t('filterByCategory' as any)
-              : selectedCategoryIds.length === 1
-                ? translateName(
-                    categories.find((c) => c.id === selectedCategoryIds[0])
-                      ?.name || '',
-                  )
-                : `${selectedCategoryIds.length} ${t('categories' as any)}`}
-          </Chip>
-
-          {hasActiveFilters && (
             <Chip
-              icon="close"
-              onPress={clearAllFilters}
-              style={[
-                styles.filterChip,
-                { backgroundColor: theme.colors.errorContainer },
-              ]}
-              textStyle={{ color: theme.colors.onErrorContainer }}
+              icon={selectedAccountIds.length > 0 ? 'check-circle' : 'bank'}
+              onPress={() => setAccountSheetOpen(true)}
+              selected={selectedAccountIds.length > 0}
+              showSelectedOverlay
+              style={styles.filterChip}
               compact
             >
-              {t('clearFilters' as any)}
+              {selectedAccountIds.length === 0
+                ? t('filterByAccount' as any)
+                : selectedAccountIds.length === 1
+                  ? translateName(
+                      accounts.find((a) => a.id === selectedAccountIds[0])
+                        ?.name || '',
+                    )
+                  : `${selectedAccountIds.length} ${t('accounts' as any)}`}
             </Chip>
-          )}
-        </ScrollView>
-        <View style={styles.countBadge}>
-          <Text
-            variant="labelSmall"
-            style={{ color: theme.colors.onSurfaceVariant }}
-          >
-            {filteredTransactions.length}
-          </Text>
+
+            <Chip
+              icon={selectedCategoryIds.length > 0 ? 'check-circle' : 'tag'}
+              onPress={() => setCategorySheetOpen(true)}
+              selected={selectedCategoryIds.length > 0}
+              showSelectedOverlay
+              style={styles.filterChip}
+              compact
+            >
+              {selectedCategoryIds.length === 0
+                ? t('filterByCategory' as any)
+                : selectedCategoryIds.length === 1
+                  ? translateName(
+                      categories.find((c) => c.id === selectedCategoryIds[0])
+                        ?.name || '',
+                    )
+                  : `${selectedCategoryIds.length} ${t('categories' as any)}`}
+            </Chip>
+
+            {hasActiveFilters && (
+              <Chip
+                icon="close"
+                onPress={clearAllFilters}
+                style={[
+                  styles.filterChip,
+                  { backgroundColor: theme.colors.errorContainer },
+                ]}
+                textStyle={{ color: theme.colors.onErrorContainer }}
+                compact
+              >
+                {t('clearFilters' as any)}
+              </Chip>
+            )}
+          </ScrollView>
+          <View style={styles.countBadge}>
+            <Text style={styles.countBadgeText}>
+              {filteredTransactions.length}
+            </Text>
+          </View>
         </View>
-      </View>
+      </Animated.View>
       <View style={{ flex: 1 }}>
         <FlashList
           data={flattenedData.data as any[]}
@@ -305,6 +305,7 @@ export const TransactionsScreen = () => {
                 <TouchableOpacity
                   onPress={clearAllFilters}
                   style={styles.clearLink}
+                  activeOpacity={0.7}
                 >
                   <Text
                     variant="labelMedium"
@@ -338,6 +339,8 @@ export const TransactionsScreen = () => {
             },
           })
         }
+        accessibilityLabel={t('addTransaction')}
+        accessibilityRole="button"
       />
 
       <BottomSheet
@@ -369,6 +372,7 @@ export const TransactionsScreen = () => {
             setSelectedAccountIds([]);
             setAccountSheetOpen(false);
           }}
+          activeOpacity={0.7}
           accessibilityRole="button"
           accessibilityState={{ selected: selectedAccountIds.length === 0 }}
         >
@@ -439,6 +443,7 @@ export const TransactionsScreen = () => {
                     : [...prev, acc.id],
                 );
               }}
+              activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityState={{ selected: isSelected }}
             >
@@ -503,6 +508,7 @@ export const TransactionsScreen = () => {
             setSelectedCategoryIds([]);
             setCategorySheetOpen(false);
           }}
+          activeOpacity={0.7}
           accessibilityRole="button"
           accessibilityState={{ selected: selectedCategoryIds.length === 0 }}
         >
@@ -568,6 +574,7 @@ export const TransactionsScreen = () => {
                     : [...prev, cat.id],
                 );
               }}
+              activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityState={{ selected: isSelected }}
             >
@@ -654,7 +661,18 @@ const defaultStyles = (theme: any) =>
     },
     countBadge: {
       paddingHorizontal: 10,
+      paddingVertical: 3,
+      borderRadius: 12,
+      backgroundColor: theme.colors.surfaceVariant,
+      marginRight: 16,
       justifyContent: 'center',
+      alignItems: 'center',
+    },
+    countBadgeText: {
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      fontSize: 11,
+      color: theme.colors.onSurfaceVariant,
     },
     sectionHeader: {
       paddingHorizontal: 16,

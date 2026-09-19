@@ -36,7 +36,9 @@ export const CategoriesScreen = () => {
   const insets = useSafeAreaInsets();
 
   const filteredCategories = useMemo(() => {
-    return categories.filter((c) => c.type === activeTab);
+    return categories
+      .filter((c) => c.type === activeTab)
+      .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
   }, [categories, activeTab]);
 
   const renderItem = ({ item, drag, isActive }: RenderItemParams<Category>) => {
@@ -62,18 +64,26 @@ export const CategoriesScreen = () => {
             })
           }
           onLongPress={drag}
+          delayLongPress={200}
           disabled={isActive}
           mode="contained"
         >
           <View style={styles.cardInner}>
-            <View style={styles.dragHandle} pointerEvents="none">
+            <TouchableOpacity
+              onLongPress={drag}
+              delayLongPress={150}
+              style={styles.dragHandle}
+              activeOpacity={0.6}
+              accessibilityRole="button"
+              accessibilityLabel={t('holdAndDragToReorder')}
+            >
               <Ionicons
                 name="reorder-two-outline"
-                size={18}
-                color={theme.colors.outline}
-                style={{ opacity: 0.35 }}
+                size={20}
+                color={isActive ? theme.colors.primary : theme.colors.outline}
+                style={{ opacity: isActive ? 1 : 0.6 }}
               />
-            </View>
+            </TouchableOpacity>
 
             <View
               style={[
@@ -144,25 +154,29 @@ export const CategoriesScreen = () => {
           ),
         }}
       />
-      <View style={styles.headerSection}>
+
+      <View style={styles.topControlSection}>
         <SegmentedButtons
           value={activeTab}
-          onValueChange={(v) => setActiveTab(v as TransactionType)}
+          onValueChange={(value) => setActiveTab(value as TransactionType)}
           buttons={[
             {
               value: 'expense',
               label: t('expenses'),
-              icon: 'minus-circle-outline',
+              showSelectedCheck: true,
+              style: styles.segmentedBtn,
             },
             {
               value: 'income',
               label: t('income'),
-              icon: 'plus-circle-outline',
+              showSelectedCheck: true,
+              style: styles.segmentedBtn,
             },
           ]}
           style={styles.segmentedButtons}
         />
-        <View style={styles.tabSummaryRow}>
+
+        <View style={styles.categoryCountRow}>
           <View
             style={[
               styles.countBadge,
@@ -170,7 +184,7 @@ export const CategoriesScreen = () => {
             ]}
           >
             <Ionicons
-              name="pricetags-outline"
+              name="shapes-outline"
               size={12}
               color={theme.colors.onSurfaceVariant}
               style={{ marginRight: 4 }}
@@ -196,8 +210,17 @@ export const CategoriesScreen = () => {
           const otherCategories = categories.filter(
             (c) => c.type !== activeTab,
           );
-          updateCategoriesOrder([...data, ...otherCategories]);
+          const newCategoriesList =
+            activeTab === 'expense'
+              ? [...data, ...otherCategories]
+              : [...otherCategories, ...data];
+          updateCategoriesOrder(newCategoriesList);
         }}
+        containerStyle={styles.listContainer}
+        style={styles.list}
+        autoscrollThreshold={80}
+        autoscrollSpeed={150}
+        dragItemOverflow={true}
         contentContainerStyle={[
           styles.listContent,
           { paddingBottom: insets.bottom + 200 },
@@ -279,18 +302,20 @@ const defaultStyles = (theme: AppTheme) =>
       justifyContent: 'center',
       alignItems: 'center',
     },
-    headerSection: {
+    topControlSection: {
       paddingHorizontal: 16,
       paddingTop: 12,
-      paddingBottom: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.outlineVariant,
+      paddingBottom: 4,
     },
-    tabSummaryRow: {
+    segmentedBtn: {
+      flex: 1,
+    },
+    categoryCountRow: {
       flexDirection: 'row',
-      justifyContent: 'flex-start',
       alignItems: 'center',
+      justifyContent: 'space-between',
       marginTop: 10,
+      marginBottom: 4,
     },
     countBadge: {
       flexDirection: 'row',
@@ -306,6 +331,12 @@ const defaultStyles = (theme: AppTheme) =>
     },
     segmentedButtons: {
       borderRadius: 14,
+    },
+    listContainer: {
+      flex: 1,
+    },
+    list: {
+      flex: 1,
     },
     listContent: {
       paddingTop: 8,
@@ -352,46 +383,40 @@ const defaultStyles = (theme: AppTheme) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      marginTop: 16,
-      marginBottom: 8,
-      opacity: 0.8,
+      paddingVertical: 6,
+      marginBottom: 4,
     },
     dragHelpText: {
-      fontSize: fontScale(10),
+      fontSize: fontScale(11),
       fontFamily: 'Inter-Regular',
-      fontWeight: '400',
     },
     empty: {
-      padding: 40,
       alignItems: 'center',
-      marginTop: 60,
+      paddingTop: 48,
+      paddingHorizontal: 24,
     },
     emptyIconCircle: {
       width: 64,
       height: 64,
-      borderRadius: 20,
+      borderRadius: 32,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: 16,
     },
     emptyTitle: {
       fontSize: fontScale(16),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
       marginBottom: 6,
     },
     emptySubtitle: {
-      textAlign: 'center',
       fontSize: fontScale(13),
       fontFamily: 'Inter-Regular',
-      fontWeight: '400',
-      paddingHorizontal: 20,
-      lineHeight: 18,
+      textAlign: 'center',
     },
     fab: {
       position: 'absolute',
       right: 16,
-      borderRadius: 18,
-      elevation: 6,
+      borderRadius: 16,
     },
   });
