@@ -127,6 +127,44 @@ describe('dateFilters', () => {
       expect(range.type).toBe('month');
     });
 
+    it('correctly handles cycleStartDay = 31 on months with 30 days (e.g. September)', () => {
+      // Sept 29: before Sept 30 (effective cycle start), so it belongs to Aug 31 - Sept 29 cycle
+      const sept29 = new Date(2026, 8, 29);
+      const range29 = getMonthRange(31, sept29);
+      expect(range29.startDate.getMonth()).toBe(7); // August
+      expect(range29.startDate.getDate()).toBe(31);
+      expect(range29.endDate.getMonth()).toBe(8); // September
+      expect(range29.endDate.getDate()).toBe(29);
+      expect(isInRange(sept29.toISOString(), range29)).toBe(true);
+
+      // Sept 30: exactly the effective cycle start day for September (clamped to 30)
+      const sept30 = new Date(2026, 8, 30);
+      const range30 = getMonthRange(31, sept30);
+      expect(range30.startDate.getMonth()).toBe(8); // September
+      expect(range30.startDate.getDate()).toBe(30);
+      expect(range30.endDate.getMonth()).toBe(9); // October
+      expect(range30.endDate.getDate()).toBe(30);
+      expect(isInRange(sept30.toISOString(), range30)).toBe(true);
+    });
+
+    it('correctly handles cycleStartDay = 31 across February', () => {
+      // Feb 27 in 2026 (non-leap year, 28 days): in Jan 31 - Feb 27 cycle
+      const feb27 = new Date(2026, 1, 27);
+      const rangeFeb27 = getMonthRange(31, feb27);
+      expect(rangeFeb27.startDate.getMonth()).toBe(0); // Jan
+      expect(rangeFeb27.startDate.getDate()).toBe(31);
+      expect(rangeFeb27.endDate.getMonth()).toBe(1); // Feb
+      expect(rangeFeb27.endDate.getDate()).toBe(27);
+
+      // Feb 28 in 2026: starts February cycle (clamped to 28)
+      const feb28 = new Date(2026, 1, 28);
+      const rangeFeb28 = getMonthRange(31, feb28);
+      expect(rangeFeb28.startDate.getMonth()).toBe(1); // Feb
+      expect(rangeFeb28.startDate.getDate()).toBe(28);
+      expect(rangeFeb28.endDate.getMonth()).toBe(2); // March
+      expect(rangeFeb28.endDate.getDate()).toBe(30);
+    });
+
     it('clamps cycleStartDay out of bounds (< 1 or > 31)', () => {
       const refDate = new Date(2026, 2, 10);
       const rangeLower = getMonthRange(-5, refDate);
