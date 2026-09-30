@@ -453,18 +453,6 @@ export const BudgetsScreen = () => {
               />
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => router.push('/add-budget')}
-              style={styles.headerBtn}
-              activeOpacity={0.7}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              accessibilityRole="button"
-              accessibilityLabel={t('addBudget')}
-            >
-              <Ionicons name="add" size={26} color={theme.colors.primary} />
-            </TouchableOpacity>
-          ),
         }}
       />
       <DraggableFlatList

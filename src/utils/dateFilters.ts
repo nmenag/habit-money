@@ -78,9 +78,11 @@ export function getMonthRange(
   referenceDate: Date = new Date(),
 ): DateRange {
   const safeCycleDay = Math.max(1, Math.min(31, cycleStartDay));
+  const year = referenceDate.getFullYear();
+  const month = referenceDate.getMonth();
+  const day = referenceDate.getDate();
+
   if (safeCycleDay === 1) {
-    const year = referenceDate.getFullYear();
-    const month = referenceDate.getMonth();
     const startDate = new Date(year, month, 1, 0, 0, 0, 0);
     const endDate = new Date(year, month + 1, 0, 23, 59, 59, 999);
     return {
@@ -90,36 +92,41 @@ export function getMonthRange(
     };
   }
 
-  const year = referenceDate.getFullYear();
-  const month = referenceDate.getMonth();
-  const day = referenceDate.getDate();
+  const currentMonthMaxDay = getDaysInMonth(year, month);
+  const currentEffectiveCycleDay = Math.min(safeCycleDay, currentMonthMaxDay);
 
   let startYear = year;
   let startMonth = month;
+  let startDay = currentEffectiveCycleDay;
+
   let endYear = year;
   let endMonth = month + 1;
 
-  if (day < safeCycleDay) {
+  if (day < currentEffectiveCycleDay) {
     startMonth = month - 1;
+    if (startMonth < 0) {
+      startMonth = 11;
+      startYear = year - 1;
+    }
+    const prevMonthMaxDay = getDaysInMonth(startYear, startMonth);
+    startDay = Math.min(safeCycleDay, prevMonthMaxDay);
+
+    endYear = year;
     endMonth = month;
   }
 
-  const startMaxDay = getDaysInMonth(startYear, startMonth);
-  const startDate = new Date(
-    startYear,
-    startMonth,
-    Math.min(safeCycleDay, startMaxDay),
-    0,
-    0,
-    0,
-    0,
-  );
+  const startDate = new Date(startYear, startMonth, startDay, 0, 0, 0, 0);
 
-  const endMaxDay = getDaysInMonth(endYear, endMonth);
+  if (endMonth > 11) {
+    endMonth = 0;
+    endYear = endYear + 1;
+  }
+  const endMonthMaxDay = getDaysInMonth(endYear, endMonth);
+  const nextCycleStartDay = Math.min(safeCycleDay, endMonthMaxDay);
   const nextCycleStart = new Date(
     endYear,
     endMonth,
-    Math.min(safeCycleDay, endMaxDay),
+    nextCycleStartDay,
     0,
     0,
     0,

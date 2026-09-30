@@ -486,6 +486,9 @@ export const es = {
   noGoalsDefined: 'Sin Metas Definidas',
   noGoalsSubtitleText:
     'Configura objetivos de ahorro para vacaciones, fondos de emergencia o inversiones para comenzar a acumular riqueza.',
+  noAccountsDefined: 'Sin Cuentas Definidas',
+  noAccountsSubtitleText:
+    'Establece cuentas como depósitos bancarios o fondos de emergencia para controlar tus activos.',
   noCategoriesDefined: 'Sin Categorías Definidas',
   noCategoriesSubtitleText:
     'Configura categorías de transacciones para organizar automáticamente tus presupuestos mensuales.',
