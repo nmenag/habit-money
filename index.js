@@ -1,5 +1,7 @@
 import { Platform } from 'react-native';
 
+import 'expo-router/entry';
+
 if (Platform.OS === 'android') {
   try {
     const {
@@ -11,5 +13,3 @@ if (Platform.OS === 'android') {
     console.error('Failed to register widget task handler:', error);
   }
 }
-
-import 'expo-router/entry';

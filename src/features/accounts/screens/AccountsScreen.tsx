@@ -6,11 +6,12 @@ import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
 } from 'react-native-draggable-flatlist';
-import { Card, Text, useTheme } from 'react-native-paper';
+import { Card, FAB, Text, useTheme } from 'react-native-paper';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountCard } from '../components/AccountCard';
+import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
 import { Account, useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
@@ -413,18 +414,6 @@ export const AccountsScreen = () => {
               />
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={handleAddAccount}
-              style={styles.headerBtn}
-              activeOpacity={0.7}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              accessibilityRole="button"
-              accessibilityLabel={t('addAccount')}
-            >
-              <Ionicons name="add" size={26} color={theme.colors.primary} />
-            </TouchableOpacity>
-          ),
         }}
       />
       <DraggableFlatList
@@ -459,39 +448,34 @@ export const AccountsScreen = () => {
               />
             </View>
             <Text
-              style={[
-                styles.emptyText,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
+              style={[styles.emptyTitle, { color: theme.colors.onSurface }]}
             >
-              {t('noAccounts')}
+              {t('noAccountsDefined')}
             </Text>
-            <TouchableOpacity
-              onPress={handleAddAccount}
-              style={[
-                styles.emptyBtn,
-                {
-                  backgroundColor: theme.colors.primary,
-                },
-              ]}
-              activeOpacity={0.8}
-              accessibilityRole="button"
-              accessibilityLabel={t('addAccount')}
+            <Text
+              style={[styles.emptySubtitle, { color: theme.colors.outline }]}
             >
-              <Ionicons
-                name="add"
-                size={18}
-                color={theme.colors.onPrimary}
-                style={{ marginRight: 6 }}
-              />
-              <Text
-                style={[styles.emptyBtnText, { color: theme.colors.onPrimary }]}
-              >
-                {t('addAccount')}
-              </Text>
-            </TouchableOpacity>
+              {t('noAccountsSubtitleText')}
+            </Text>
           </Animated.View>
         }
+      />
+
+      <BannerAdComponent />
+
+      <FAB
+        icon="plus"
+        style={[
+          styles.fab,
+          {
+            bottom: (insets.bottom || 0) + 120,
+            backgroundColor: theme.colors.primary,
+          },
+        ]}
+        color="#fff"
+        onPress={handleAddAccount}
+        accessibilityLabel={t('addAccount')}
+        accessibilityRole="button"
       />
     </View>
   );
@@ -503,7 +487,9 @@ const defaultStyles = (theme: AppTheme) =>
       flex: 1,
     },
     headerBtn: {
-      padding: 6,
+      padding: 8,
+      minWidth: 44,
+      minHeight: 44,
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -623,23 +609,20 @@ const defaultStyles = (theme: AppTheme) =>
       alignItems: 'center',
       marginBottom: 16,
     },
-    emptyText: {
-      fontSize: fontScale(15),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
-      textAlign: 'center',
-      marginBottom: 20,
-    },
-    emptyBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 12,
-    },
-    emptyBtnText: {
-      fontSize: fontScale(13),
+    emptyTitle: {
+      fontSize: fontScale(16),
       fontFamily: 'Inter-SemiBold',
       fontWeight: '600',
+      marginBottom: 6,
+    },
+    emptySubtitle: {
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-Regular',
+      textAlign: 'center',
+    },
+    fab: {
+      position: 'absolute',
+      right: 16,
+      borderRadius: 16,
     },
   });

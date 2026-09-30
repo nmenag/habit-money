@@ -1,18 +1,18 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { router, Stack } from 'expo-router';
-import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  LayoutAnimation,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
 } from 'react-native-draggable-flatlist';
-import {
-  Card,
-  FAB,
-  SegmentedButtons,
-  Text,
-  useTheme,
-} from 'react-native-paper';
+import { Card, FAB, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
@@ -35,11 +35,30 @@ export const CategoriesScreen = () => {
   const [activeTab, setActiveTab] = useState<TransactionType>('expense');
   const insets = useSafeAreaInsets();
 
+  const expenseCount = useMemo(
+    () => categories.filter((c) => c.type === 'expense').length,
+    [categories],
+  );
+  const incomeCount = useMemo(
+    () => categories.filter((c) => c.type === 'income').length,
+    [categories],
+  );
+
   const filteredCategories = useMemo(() => {
     return categories
       .filter((c) => c.type === activeTab)
       .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
   }, [categories, activeTab]);
+
+  const handleTabChange = useCallback(
+    (newTab: TransactionType) => {
+      if (newTab === activeTab) return;
+      Haptics.selectionAsync().catch(() => {});
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setActiveTab(newTab);
+    },
+    [activeTab],
+  );
 
   const renderItem = ({ item, drag, isActive }: RenderItemParams<Category>) => {
     const itemColor = item.color || theme.colors.primary;
@@ -141,66 +160,189 @@ export const CategoriesScreen = () => {
               />
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => router.push('/add-category')}
-              style={styles.headerBtn}
-              activeOpacity={0.7}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              accessibilityRole="button"
-              accessibilityLabel={t('addCategory')}
-            >
-              <Ionicons name="add" size={26} color={theme.colors.primary} />
-            </TouchableOpacity>
-          ),
         }}
       />
 
       <View style={styles.topControlSection}>
-        <SegmentedButtons
-          value={activeTab}
-          onValueChange={(value) => setActiveTab(value as TransactionType)}
-          buttons={[
+        <View
+          style={[
+            styles.menuTrack,
             {
-              value: 'expense',
-              label: t('expenses'),
-              showSelectedCheck: true,
-              style: styles.segmentedBtn,
-            },
-            {
-              value: 'income',
-              label: t('income'),
-              showSelectedCheck: true,
-              style: styles.segmentedBtn,
+              backgroundColor: theme.colors.surfaceVariant,
+              borderColor: theme.colors.outlineVariant,
             },
           ]}
-          style={styles.segmentedButtons}
-        />
-
-        <View style={styles.categoryCountRow}>
-          <View
+        >
+          {/* Expenses Tab */}
+          <TouchableOpacity
             style={[
-              styles.countBadge,
-              { backgroundColor: theme.colors.surfaceVariant },
+              styles.tabBtn,
+              activeTab === 'expense' && [
+                styles.tabBtnActive,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.outlineVariant,
+                  shadowOpacity: theme.dark ? 0.3 : 0.08,
+                },
+              ],
             ]}
+            onPress={() => handleTabChange('expense')}
+            activeOpacity={0.75}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeTab === 'expense' }}
+            accessibilityLabel={`${t('expenses')}, ${expenseCount} ${t('categories')}`}
           >
+            <View style={styles.tabContent}>
+              <Ionicons
+                name="arrow-down-circle"
+                size={18}
+                color={
+                  activeTab === 'expense'
+                    ? theme.colors.error || '#EF4444'
+                    : theme.colors.outline
+                }
+                style={{ marginRight: 6 }}
+              />
+              <Text
+                style={[
+                  styles.tabLabel,
+                  {
+                    color:
+                      activeTab === 'expense'
+                        ? theme.colors.onSurface
+                        : theme.colors.onSurfaceVariant,
+                    fontFamily:
+                      activeTab === 'expense'
+                        ? 'Inter-SemiBold'
+                        : 'Inter-Medium',
+                    fontWeight: activeTab === 'expense' ? '600' : '500',
+                  },
+                ]}
+              >
+                {t('expenses')}
+              </Text>
+              <View
+                style={[
+                  styles.tabCountBadge,
+                  {
+                    backgroundColor:
+                      activeTab === 'expense'
+                        ? theme.dark
+                          ? 'rgba(239, 68, 68, 0.16)'
+                          : '#FEE2E2'
+                        : 'transparent',
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.tabCountText,
+                    {
+                      color:
+                        activeTab === 'expense'
+                          ? theme.colors.error || '#EF4444'
+                          : theme.colors.outline,
+                    },
+                  ]}
+                >
+                  {expenseCount}
+                </Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+
+          {/* Income Tab */}
+          <TouchableOpacity
+            style={[
+              styles.tabBtn,
+              activeTab === 'income' && [
+                styles.tabBtnActive,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.outlineVariant,
+                  shadowOpacity: theme.dark ? 0.3 : 0.08,
+                },
+              ],
+            ]}
+            onPress={() => handleTabChange('income')}
+            activeOpacity={0.75}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeTab === 'income' }}
+            accessibilityLabel={`${t('income')}, ${incomeCount} ${t('categories')}`}
+          >
+            <View style={styles.tabContent}>
+              <Ionicons
+                name="arrow-up-circle"
+                size={18}
+                color={
+                  activeTab === 'income'
+                    ? (theme.colors as any).income || '#16A34A'
+                    : theme.colors.outline
+                }
+                style={{ marginRight: 6 }}
+              />
+              <Text
+                style={[
+                  styles.tabLabel,
+                  {
+                    color:
+                      activeTab === 'income'
+                        ? theme.colors.onSurface
+                        : theme.colors.onSurfaceVariant,
+                    fontFamily:
+                      activeTab === 'income'
+                        ? 'Inter-SemiBold'
+                        : 'Inter-Medium',
+                    fontWeight: activeTab === 'income' ? '600' : '500',
+                  },
+                ]}
+              >
+                {t('income')}
+              </Text>
+              <View
+                style={[
+                  styles.tabCountBadge,
+                  {
+                    backgroundColor:
+                      activeTab === 'income'
+                        ? theme.dark
+                          ? 'rgba(34, 197, 94, 0.16)'
+                          : '#DCFCE7'
+                        : 'transparent',
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.tabCountText,
+                    {
+                      color:
+                        activeTab === 'income'
+                          ? (theme.colors as any).income || '#16A34A'
+                          : theme.colors.outline,
+                    },
+                  ]}
+                >
+                  {incomeCount}
+                </Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {filteredCategories.length > 1 && (
+          <View style={styles.metaRow}>
             <Ionicons
-              name="shapes-outline"
-              size={12}
-              color={theme.colors.onSurfaceVariant}
-              style={{ marginRight: 4 }}
+              name="reorder-two-outline"
+              size={15}
+              color={theme.colors.outline}
+              style={{ marginRight: 6 }}
             />
-            <Text
-              style={[
-                styles.countBadgeText,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
-            >
-              {filteredCategories.length}{' '}
-              {activeTab === 'expense' ? t('expenses') : t('income')}
+            <Text style={[styles.metaText, { color: theme.colors.outline }]}>
+              {t('holdAndDragToReorder')}
             </Text>
           </View>
-        </View>
+        )}
       </View>
 
       <DraggableFlatList
@@ -226,23 +368,7 @@ export const CategoriesScreen = () => {
           styles.listContent,
           { paddingBottom: insets.bottom + 200 },
         ]}
-        ListHeaderComponent={
-          filteredCategories.length > 1 ? (
-            <View style={styles.dragHelpRow}>
-              <Ionicons
-                name="reorder-two-outline"
-                size={15}
-                color={theme.colors.outline}
-                style={{ marginRight: 6 }}
-              />
-              <Text
-                style={[styles.dragHelpText, { color: theme.colors.outline }]}
-              >
-                {t('holdAndDragToReorder')}
-              </Text>
-            </View>
-          ) : null
-        }
+        ListHeaderComponent={null}
         ListEmptyComponent={
           <Animated.View entering={FadeIn.duration(400)} style={styles.empty}>
             <View
@@ -308,30 +434,62 @@ const defaultStyles = (theme: AppTheme) =>
       paddingTop: 12,
       paddingBottom: 4,
     },
-    segmentedBtn: {
-      flex: 1,
-    },
-    categoryCountRow: {
+    menuTrack: {
       flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginTop: 10,
-      marginBottom: 4,
-    },
-    countBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: 12,
-    },
-    countBadgeText: {
-      fontSize: fontScale(11),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
-    },
-    segmentedButtons: {
       borderRadius: 14,
+      padding: 3,
+      borderWidth: 1,
+      gap: 4,
+    },
+    tabBtn: {
+      flex: 1,
+      height: 40,
+      borderRadius: 11,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    tabBtnActive: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1.5 },
+      shadowOpacity: 0.08,
+      shadowRadius: 2.5,
+      elevation: 2,
+    },
+    tabContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    tabLabel: {
+      fontSize: fontScale(13),
+      letterSpacing: -0.2,
+      marginRight: 8,
+    },
+    tabCountBadge: {
+      paddingHorizontal: 7,
+      paddingVertical: 2,
+      borderRadius: 10,
+      minWidth: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    tabCountText: {
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+    },
+    metaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 6,
+      marginTop: 4,
+    },
+    metaText: {
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Regular',
     },
     listContainer: {
       flex: 1,
@@ -379,17 +537,6 @@ const defaultStyles = (theme: AppTheme) =>
       fontWeight: '500',
       fontSize: fontScale(14),
       letterSpacing: -0.1,
-    },
-    dragHelpRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 6,
-      marginBottom: 4,
-    },
-    dragHelpText: {
-      fontSize: fontScale(11),
-      fontFamily: 'Inter-Regular',
     },
     empty: {
       alignItems: 'center',

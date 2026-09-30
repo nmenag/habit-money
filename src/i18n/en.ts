@@ -479,6 +479,9 @@ export const en = {
   noGoalsDefined: 'No Goals Defined',
   noGoalsSubtitleText:
     'Configure savings targets for vacation, emergency funds, or investments to start compounding wealth.',
+  noAccountsDefined: 'No Accounts Defined',
+  noAccountsSubtitleText:
+    'Establish accounts such as bank deposits or emergency funds to track assets at a glance.',
   noCategoriesDefined: 'No Categories Defined',
   noCategoriesSubtitleText:
     'Configure transaction categories to automatically organize your monthly budget categories.',
