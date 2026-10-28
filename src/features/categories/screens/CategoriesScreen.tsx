@@ -1,5 +1,4 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { router, Stack } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
@@ -53,7 +52,6 @@ export const CategoriesScreen = () => {
   const handleTabChange = useCallback(
     (newTab: TransactionType) => {
       if (newTab === activeTab) return;
-      Haptics.selectionAsync().catch(() => {});
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setActiveTab(newTab);
     },

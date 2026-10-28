@@ -593,8 +593,6 @@ export const en = {
     'Saving {{savingsRate}}% of income this cycle. Maintain momentum into savings goals.',
   steadyCashFlowInsight:
     'Cash flow remains steady across your configured financial repositories.',
-  cashFlowHealth: 'Cash Flow Health',
-  spendingVelocity: 'Burn Velocity',
   monthlyBudget: 'Monthly Budget',
   onTrack: 'On Track',
   totalBudgeted: 'Total Budgeted',

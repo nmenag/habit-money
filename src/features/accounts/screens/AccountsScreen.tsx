@@ -168,13 +168,6 @@ export const AccountsScreen = () => {
   const HeaderComponent = useMemo(() => {
     const defaultCurrencyCode = accounts[0]?.currency || 'USD';
 
-    const cashFlowRatio =
-      monthlyIncome > 0
-        ? Math.min(1, monthlyExpenses / monthlyIncome)
-        : monthlyExpenses > 0
-          ? 1
-          : 0;
-
     return (
       <View>
         <Animated.View entering={FadeInUp.duration(300)}>
@@ -232,102 +225,6 @@ export const AccountsScreen = () => {
                   </Text>
                 </View>
               </View>
-
-              <View style={styles.financialMetricsRow}>
-                <View style={styles.metricItem}>
-                  <View style={styles.metricHeader}>
-                    <Text
-                      style={[
-                        styles.metricLabel,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
-                    >
-                      {t('cashFlowHealth')}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.metricValue,
-                        {
-                          color:
-                            cashFlowRatio > 0.9
-                              ? theme.colors.error
-                              : theme.colors.primary,
-                        },
-                      ]}
-                    >
-                      {Math.round((1 - cashFlowRatio) * 100)}%
-                    </Text>
-                  </View>
-                  <View
-                    style={[
-                      styles.progressBarTrack,
-                      { backgroundColor: theme.colors.surfaceVariant },
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.progressBarFill,
-                        {
-                          width: `${Math.round((1 - cashFlowRatio) * 100)}%`,
-                          backgroundColor:
-                            cashFlowRatio > 0.9
-                              ? theme.colors.error
-                              : theme.colors.primary,
-                        },
-                      ]}
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.metricItem}>
-                  <View style={styles.metricHeader}>
-                    <Text
-                      style={[
-                        styles.metricLabel,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
-                    >
-                      {t('spendingVelocity')}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.metricValue,
-                        {
-                          color:
-                            spendingVelocity > 100
-                              ? theme.colors.error
-                              : spendingVelocity > 80
-                                ? '#D97706'
-                                : theme.colors.primary,
-                        },
-                      ]}
-                    >
-                      {spendingVelocity}%
-                    </Text>
-                  </View>
-                  <View
-                    style={[
-                      styles.progressBarTrack,
-                      { backgroundColor: theme.colors.surfaceVariant },
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.progressBarFill,
-                        {
-                          width: `${Math.min(spendingVelocity, 100)}%`,
-                          backgroundColor:
-                            spendingVelocity > 100
-                              ? theme.colors.error
-                              : spendingVelocity > 80
-                                ? '#D97706'
-                                : theme.colors.primary,
-                        },
-                      ]}
-                    />
-                  </View>
-                </View>
-              </View>
             </Card.Content>
           </Card>
         </Animated.View>
@@ -380,8 +277,6 @@ export const AccountsScreen = () => {
     sortedAccounts,
     accounts,
     monthlyIncome,
-    monthlyExpenses,
-    spendingVelocity,
     totalBalance,
     aiInsight,
     theme,
@@ -535,41 +430,6 @@ const defaultStyles = (theme: AppTheme) =>
       fontSize: fontScale(24),
       fontFamily: 'Inter-SemiBold',
       fontWeight: '600',
-    },
-    financialMetricsRow: {
-      flexDirection: 'row',
-      gap: 12,
-      paddingTop: 12,
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.outlineVariant,
-    },
-    metricItem: {
-      flex: 1,
-    },
-    metricHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 4,
-    },
-    metricLabel: {
-      fontSize: fontScale(10),
-      fontFamily: 'Inter-Medium',
-      fontWeight: '500',
-    },
-    metricValue: {
-      fontSize: fontScale(10),
-      fontFamily: 'Inter-SemiBold',
-      fontWeight: '600',
-    },
-    progressBarTrack: {
-      height: 4,
-      borderRadius: 2,
-      overflow: 'hidden',
-    },
-    progressBarFill: {
-      height: '100%',
-      borderRadius: 2,
     },
     recommendationBox: {
       flexDirection: 'row',

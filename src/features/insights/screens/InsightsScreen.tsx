@@ -1013,7 +1013,7 @@ export const InsightsScreen = () => {
         {renderInsightsContent()}
       </ScrollView>
       <View style={styles.adContainer}>
-        <BannerAdComponent />
+        <BannerAdComponent withinTabs />
       </View>
     </View>
   );

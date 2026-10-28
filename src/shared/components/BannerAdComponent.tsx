@@ -7,40 +7,48 @@ import { AdService } from '../../ads/AdService';
 
 interface BannerAdProps {
   offset?: number;
+  withinTabs?: boolean;
 }
 
-export const BannerAdComponent = React.memo(({ offset = 0 }: BannerAdProps) => {
-  const [showAd] = React.useState(true);
-  const [loadError] = React.useState(false);
-  const insets = useSafeAreaInsets();
-  const theme = useTheme();
-  const styles = defaultStyles(theme, insets, offset);
+export const BannerAdComponent = React.memo(
+  ({ offset = 0, withinTabs = false }: BannerAdProps) => {
+    const [showAd] = React.useState(true);
+    const [loadError] = React.useState(false);
+    const insets = useSafeAreaInsets();
+    const theme = useTheme();
+    const styles = defaultStyles(theme, insets, offset, withinTabs);
 
-  const adUnitId = AdService.getBannerId();
+    const adUnitId = AdService.getBannerId();
 
-  if (!showAd || !adUnitId || loadError) {
-    return null;
-  }
+    if (!showAd || !adUnitId || loadError) {
+      return null;
+    }
 
-  return (
-    <View style={styles.container}>
-      <BannerAd
-        unitId={adUnitId}
-        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        requestOptions={{
-          requestNonPersonalizedAdsOnly: true,
-        }}
-        onAdFailedToLoad={(error) => {
-          if (__DEV__) console.warn('Banner Ad failed to load: ', error);
-        }}
-      />
-    </View>
-  );
-});
+    return (
+      <View style={styles.container}>
+        <BannerAd
+          unitId={adUnitId}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: true,
+          }}
+          onAdFailedToLoad={(error) => {
+            if (__DEV__) console.warn('Banner Ad failed to load: ', error);
+          }}
+        />
+      </View>
+    );
+  },
+);
 
 BannerAdComponent.displayName = 'BannerAdComponent';
 
-const defaultStyles = (theme: any, insets: any, offset: number) =>
+const defaultStyles = (
+  theme: any,
+  insets: any,
+  offset: number,
+  withinTabs: boolean,
+) =>
   StyleSheet.create({
     container: {
       position: 'absolute',
@@ -51,7 +59,8 @@ const defaultStyles = (theme: any, insets: any, offset: number) =>
       backgroundColor: theme.colors.surface,
       borderTopWidth: 1,
       borderTopColor: theme.colors.outlineVariant,
-      paddingBottom: insets.bottom > 0 && offset === 0 ? insets.bottom : 0,
+      paddingBottom:
+        insets.bottom > 0 && offset === 0 && !withinTabs ? insets.bottom : 0,
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 1000,
