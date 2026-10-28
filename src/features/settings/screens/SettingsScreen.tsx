@@ -1186,7 +1186,7 @@ export const SettingsScreen = () => {
       </ScrollView>
 
       <View style={styles.adContainer}>
-        <BannerAdComponent />
+        <BannerAdComponent withinTabs />
       </View>
 
       <BottomSheet

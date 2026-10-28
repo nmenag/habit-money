@@ -603,8 +603,6 @@ export const es = {
     'Ahorrando {{savingsRate}}% de ingresos en este ciclo. Mantén el impulso hacia tus metas.',
   steadyCashFlowInsight:
     'El flujo de caja se mantiene estable entre tus cuentas configuradas.',
-  cashFlowHealth: 'Salud de Flujo de Caja',
-  spendingVelocity: 'Velocidad de Gasto',
   monthlyBudget: 'Presupuesto Mensual',
   onTrack: 'En Meta',
   totalBudgeted: 'Total Presupuestado',
