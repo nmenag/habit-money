@@ -55,10 +55,10 @@ Habit Money is a high-performance, offline-first personal finance tracker built 
 
 ## Building and Running
 
-- **Metro Bundler**: `npm start`
-- **Android**: `npm run android`
-- **iOS**: `npm run ios`
-- **Quality Control**: `npm run lint`, `npm run check-types`, `npm run doctor`
+- **Metro Bundler**: `pnpm start`
+- **Android**: `pnpm android`
+- **iOS**: `pnpm ios`
+- **Quality Control**: `pnpm lint`, `pnpm check-types`, `pnpm run doctor`
 - **Variants**: Use `APP_VARIANT=development`, `preview`, or `production`.
 
 ## Testing & Validation

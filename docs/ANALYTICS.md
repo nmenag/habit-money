@@ -192,7 +192,7 @@ adb shell setprop debug.firebase.analytics.app .none.
 
 ### iOS (Xcode Scheme)
 
-1. Open the native workspace in Xcode (`npx expo run:ios`).
+1. Open the native workspace in Xcode (`pnpm expo run:ios`).
 2. Go to **Product > Scheme > Edit Scheme...** from the top menu.
 3. Select **Run** in the left sidebar, and click the **Arguments** tab.
 4. Under **Arguments Passed On Launch**, add:

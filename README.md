@@ -66,7 +66,7 @@ Habit Money is a modern, high-performance personal finance tracker built with **
    ```bash
    git clone git@github.com:nmenag/habit-money.git
    cd habit-money
-   npm install
+   pnpm install
    ```
 
 2. **Environment Setup**
@@ -75,7 +75,14 @@ Habit Money is a modern, high-performance personal finance tracker built with **
 3. **Launch Development Server**
 
    ```bash
-   npx expo start
+   pnpm start
+   ```
+
+   Physical device connected via USB (localhost): forward the Metro port and start the server on localhost:
+
+   ```bash
+   adb reverse tcp:8081 tcp:8081
+   pnpm start:localhost
    ```
 
    Alternatively, you can run the development server via **Docker**:
@@ -111,7 +118,7 @@ To run and debug the app on a physical Android device:
 With your device connected or an emulator running, execute:
 
 ```bash
-npx expo run:android
+pnpm expo run:android
 ```
 
 This command compiles the native Android project (prebuild) and installs the development build directly onto your device.
@@ -139,9 +146,9 @@ cd android && ./gradlew clean && cd ..
 
 The app supports different configurations via the `APP_VARIANT` environment variable (defined in `app.config.js`):
 
-- **Development**: `APP_VARIANT=development npx expo run:android` (Package: `com.habitmoney.dev`)
-- **Preview**: `APP_VARIANT=preview npx expo run:android` (Package: `com.habitmoney.preview`)
-- **Production**: `npx expo run:android` (Package: `com.habitmoney`)
+- **Development**: `APP_VARIANT=development pnpm expo run:android` (Package: `com.habitmoney.dev`)
+- **Preview**: `APP_VARIANT=preview pnpm expo run:android` (Package: `com.habitmoney.preview`)
+- **Production**: `pnpm expo run:android` (Package: `com.habitmoney`)
 
 #### 📦 Build APK locally
 
@@ -174,8 +181,8 @@ Habit Money features a native Android home screen widget (`HabitMoneyWidget`).
 
 1. **Native Prebuild Requirements**: Because the widget runs as native `RemoteViews` layouts and requires a background headless task registered in the Android Manifest, you must run a native build to test it:
    ```bash
-   npx expo prebuild --platform android --clean
-   npx expo run:android
+   pnpm expo prebuild --platform android --clean
+   pnpm expo run:android
    ```
 2. **Dynamic Data Updates**: The widget synchronizes with the app's SQLite database. Changes in transactions dynamically trigger updates via `triggerWidgetUpdate()` within the analytics settings store slice.
 3. **Expo Go Fallback**: When testing inside Expo Go or an unlinked dev environment, widget updates will fail gracefully with a console warning instead of crashing the app.
@@ -189,13 +196,13 @@ Habit Money includes a comprehensive **unit test suite** powered by **Jest** and
 - **Run all tests**:
 
   ```bash
-  npm test
+  pnpm test
   ```
 
 - **Run with coverage report**:
 
   ```bash
-  npm run test:coverage
+  pnpm test:coverage
   ```
 
   This displays a summary table in the terminal and generates an interactive HTML report at:
@@ -209,12 +216,12 @@ Habit Money includes a comprehensive **unit test suite** powered by **Jest** and
 - **Run in watch mode (interactive development)**:
 
   ```bash
-  npm run test:watch
+  pnpm test:watch
   ```
 
 - **Run a specific test suite**:
   ```bash
-  npm test src/utils/__tests__/scoreCalculator.test.ts
+  pnpm test src/utils/__tests__/scoreCalculator.test.ts
   ```
 
 ## 🔄 CI/CD
@@ -223,12 +230,12 @@ Habit Money includes a comprehensive **unit test suite** powered by **Jest** and
   - **Continuous Integration**: Every Pull Request to `main` triggers a validation pipeline that runs `expo-doctor`, `lint`, and `type-check`.
   - **Automated Releases**: Pushes to `main` trigger a release workflow that automatically creates a GitHub Release tagged with the version from `package.json`.
 - **Quality Control**:
-  - `npm test`: Run the full unit test suite.
-  - `npm run test:coverage`: Run unit tests and generate coverage report.
-  - `npm run doctor`: Validate Expo configuration and dependency health.
-  - `npm run lint`: Maintain code quality and style consistency.
-  - `npm run lint:commit`: Validate commit messages (required for CI).
-  - `npm run check-types`: Ensure full TypeScript type safety.
+  - `pnpm test`: Run the full unit test suite.
+  - `pnpm test:coverage`: Run unit tests and generate coverage report.
+  - `pnpm run doctor`: Validate Expo configuration and dependency health.
+  - `pnpm lint`: Maintain code quality and style consistency.
+  - `pnpm lint:commit`: Validate commit messages (required for CI).
+  - `pnpm check-types`: Ensure full TypeScript type safety.
 
 ## ⚙️ Expo & EAS Configuration
 

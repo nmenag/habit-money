@@ -4,6 +4,7 @@
   "version": "3.1.10",
   "scripts": {
     "start": "expo start",
+    "start:localhost": "expo start --localhost",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -11,7 +12,7 @@
     "lint": "expo lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json}\" --ignore-path .gitignore",
     "check-types": "tsc --noEmit",
-    "doctor": "npx expo-doctor",
+    "doctor": "pnpm dlx expo-doctor",
     "routes": "expo export --platform android",
     "lint:commit": "commitlint --edit",
     "test": "jest",
@@ -91,6 +92,7 @@
     "jest-expo": "~55.0.22",
     "lint-staged": "^17.5.1",
     "prettier": "^3.5.3",
+    "react-test-renderer": "19.2.0",
     "typescript": "~5.9.2"
   },
   "private": true,
@@ -126,5 +128,6 @@
         "expo-web-browser"
       ]
     }
-  }
+  },
+  "packageManager": "pnpm@11.28.6"
 }
