@@ -212,6 +212,9 @@ importers:
       prettier:
         specifier: ^3.5.3
         version: 3.9.6
+      react-test-renderer:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
       typescript:
         specifier: ~5.9.2
         version: 5.9.3
