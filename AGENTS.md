@@ -123,7 +123,7 @@ Always cross-reference this file and the design guidelines in `DESIGN.md` before
     node_modules/.bin/prettier --write <file1> [file2 ...]
     ```
   - Always use the project's `.prettierrc` configuration.
-  - If `node_modules/.bin/prettier` is unavailable, notify the user to run `npm install`.
+  - If `node_modules/.bin/prettier` is unavailable, notify the user to run `pnpm install`.
 
 ---
 

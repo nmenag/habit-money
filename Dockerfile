@@ -12,10 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Copy package configuration files
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml .npmrc ./
 
-# Install dependencies (respecting package-lock.json)
-RUN npm ci
+# Install dependencies (respecting pnpm-lock.yaml)
+RUN corepack enable && pnpm install --frozen-lockfile
 
 # Copy the rest of the application code
 COPY . .
@@ -33,4 +33,4 @@ ENV PORT=8081
 ENV EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
 
 # Start Metro bundler by default
-CMD ["npm", "run", "start"]
+CMD ["pnpm", "start"]

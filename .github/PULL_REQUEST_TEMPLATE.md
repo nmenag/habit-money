@@ -12,7 +12,7 @@
 
 ## Testing Notes
 
-<!-- Describe how the changes were verified, commands run (e.g. npm run check-types), and edge cases tested. -->
+<!-- Describe how the changes were verified, commands run (e.g. pnpm check-types), and edge cases tested. -->
 
 ## Breaking Changes (if any)
 
