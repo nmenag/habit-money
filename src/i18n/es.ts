@@ -528,35 +528,7 @@ export const es = {
   growthLabelNoSpend: 'Sin gastos este mes',
   growthLabelOccasional: 'Gasto ocasional',
 
-  emergencyFund: 'Fondo de Emergencia',
-  emergencyFundDesc:
-    'Un colchón financiero para imprevistos basado en tus gastos reales.',
-  setupEmergencyFund: 'Configurar Fondo de Emergencia',
-  editEmergencyFund: 'Editar cálculo',
-  selectMonthsToCover: 'Selecciona los meses base',
-  monthsToCoverLabel: 'Meses a cubrir',
-  monthlyExpenseAverage: 'Gasto promedio mensual',
-  recommendedFund: 'Fondo recomendado',
-  emergencyFundTip:
-    'Basado en los {{count}} meses que elegiste, tu gasto mensual promedio es {{avg}}. Para cubrir {{months}} meses, tu fondo de emergencia recomendado es {{target}}.',
-  noExpenseDataForMonths: 'No hay gastos registrados en meses anteriores.',
-  saveEmergencyFund: 'Guardar Fondo de Emergencia',
-  updateEmergencyFund: 'Actualizar Fondo de Emergencia',
-  monthsCount: '{{count}} meses',
-  selectBasisMonthsHeader: 'Selecciona los meses base para tu cálculo:',
-  monthsToCoverSliderHeader: '¿Cuántos meses deseas cubrir?',
-  monthsUnit: 'meses',
-  invalidAmount: 'Monto inválido',
-  saved: 'Guardado',
-  addContribution: 'Abonar al Fondo',
   details: 'Detalles del Cálculo',
-  emergencyTargetMonths: 'Objetivo recomendado ({{months}} meses)',
-  targetReserve: 'Fondo Recomendado',
-  viewCalculationAndDetails: 'Ver cálculo y detalles',
-  emergencyTipMessage:
-    'Mantener guardados entre 3 y 6 meses de tus gastos fijos brinda tranquilidad ante imprevistos.',
-  emergencyTipRecommendation:
-    '🛡️ Revisa la calculadora de Fondo de Emergencia aquí en Análisis.',
   rule503020Title: 'Regla de Presupuesto 50/30/20',
   rule503020Message:
     'Destina un 50% a necesidades, 30% a gustos personales y 20% a ahorros o pago de deudas.',
@@ -569,13 +541,6 @@ export const es = {
     'Intenta pausar compras secundarias durante 2 días a la semana para frenar impulsos.',
   noSpendDaysRecommendation: '🎯 Planifica tus compras con anticipación.',
   challengeBadge: 'RETO',
-  whatIsEmergencyFundTitle: '¿Qué es?',
-  whatIsEmergencyFundBody:
-    'Un fondo de emergencia es un colchón financiero que te protege ante gastos inesperados: desempleo, gastos médicos, reparaciones urgentes. Tenerlo te da tranquilidad y evita endeudarte.',
-  howMuchDoINeedTitle: '¿Cuánto necesito?',
-  howMuchDoINeedBody:
-    'Los expertos recomiendan ahorrar entre 3 y 6 meses de gastos mensuales. Si tienes ingresos variables o dependientes, apunta a 9–12 meses.',
-  personalEstimateTitle: 'Tu estimación personal',
   basedOnRecordedExpenses:
     'Basado en tus últimos {{count}} meses de gastos registrados:',
   recommendedFundMonths: 'Fondo recomendado ({{months}} meses)',
@@ -597,12 +562,8 @@ export const es = {
     'Inicia tu mapa financiero agregando tu primera cuenta activa.',
   netWorthNegativeInsight:
     'Los saldos totales están en negativo. Prioriza el pago de deudas para recuperar liquidez.',
-  highBurnRateInsight:
-    'La velocidad de gasto es del {{velocity}}% del flujo de ingresos. Reduce salidas variables.',
   healthySavingsInsight:
     'Ahorrando {{savingsRate}}% de ingresos en este ciclo. Mantén el impulso hacia tus metas.',
-  steadyCashFlowInsight:
-    'El flujo de caja se mantiene estable entre tus cuentas configuradas.',
   monthlyBudget: 'Presupuesto Mensual',
   onTrack: 'En Meta',
   totalBudgeted: 'Total Presupuestado',

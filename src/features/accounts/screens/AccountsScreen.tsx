@@ -38,7 +38,7 @@ export const AccountsScreen = () => {
     );
   }, [accounts]);
 
-  const { monthlyIncome, monthlyExpenses, spendingVelocity } = useMemo(() => {
+  const { monthlyIncome, monthlyExpenses } = useMemo(() => {
     const inc = dashboardReport?.currentMonth
       ? dashboardReport.currentMonth.income
       : null;
@@ -64,23 +64,9 @@ export const AccountsScreen = () => {
             .filter((t) => t.type === 'expense')
             .reduce((s, t) => s + t.amount, 0);
 
-    const dayOfMonth = now.getDate();
-    const daysInMonth = new Date(
-      now.getFullYear(),
-      now.getMonth() + 1,
-      0,
-    ).getDate();
-    const elapsedRatio = dayOfMonth / daysInMonth;
-
-    let velocity = 0;
-    if (actualInc > 0 && elapsedRatio > 0) {
-      velocity = Math.round((actualExp / actualInc / elapsedRatio) * 100);
-    }
-
     return {
       monthlyIncome: actualInc,
       monthlyExpenses: actualExp,
-      spendingVelocity: velocity,
     };
   }, [dashboardReport, transactions]);
 
@@ -114,15 +100,6 @@ export const AccountsScreen = () => {
       };
     }
 
-    if (spendingVelocity > 100) {
-      return {
-        text: t('highBurnRateInsight', { velocity: spendingVelocity }),
-        icon: 'alert-circle-outline',
-        color: theme.colors.error,
-        bgColor: theme.colors.errorContainer,
-      };
-    }
-
     if (monthlyIncome > monthlyExpenses && monthlyExpenses > 0) {
       const savingsRate = Math.round(
         ((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100,
@@ -135,21 +112,8 @@ export const AccountsScreen = () => {
       };
     }
 
-    return {
-      text: t('steadyCashFlowInsight'),
-      icon: 'shield-checkmark-outline',
-      color: theme.colors.primary,
-      bgColor: theme.colors.surfaceVariant,
-    };
-  }, [
-    accounts,
-    monthlyExpenses,
-    monthlyIncome,
-    totalBalance,
-    spendingVelocity,
-    theme,
-    t,
-  ]);
+    return null;
+  }, [accounts, monthlyExpenses, monthlyIncome, totalBalance, theme, t]);
 
   const renderItem = useCallback(
     ({ item, drag, isActive }: RenderItemParams<Account>) => (
@@ -229,32 +193,34 @@ export const AccountsScreen = () => {
           </Card>
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(150).duration(300)}>
-          <View
-            style={[
-              styles.recommendationBox,
-              {
-                backgroundColor: aiInsight.bgColor,
-                borderColor: `${aiInsight.color}2B`,
-              },
-            ]}
-          >
-            <Ionicons
-              name={aiInsight.icon as any}
-              size={16}
-              color={aiInsight.color}
-              style={{ marginRight: 10 }}
-            />
-            <Text
+        {aiInsight && (
+          <Animated.View entering={FadeInUp.delay(150).duration(300)}>
+            <View
               style={[
-                styles.recommendationText,
-                { color: theme.colors.onSurface },
+                styles.recommendationBox,
+                {
+                  backgroundColor: aiInsight.bgColor,
+                  borderColor: `${aiInsight.color}2B`,
+                },
               ]}
             >
-              {aiInsight.text}
-            </Text>
-          </View>
-        </Animated.View>
+              <Ionicons
+                name={aiInsight.icon as any}
+                size={16}
+                color={aiInsight.color}
+                style={{ marginRight: 10 }}
+              />
+              <Text
+                style={[
+                  styles.recommendationText,
+                  { color: theme.colors.onSurface },
+                ]}
+              >
+                {aiInsight.text}
+              </Text>
+            </View>
+          </Animated.View>
+        )}
 
         {sortedAccounts.length > 1 && (
           <View style={styles.dragHelpRow}>

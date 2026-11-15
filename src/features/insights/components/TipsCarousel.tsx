@@ -89,19 +89,6 @@ export const TipsCarousel: React.FC<TipsCarouselProps> = ({ insights }) => {
         iconName: 'pie-chart-outline',
       },
       {
-        id: 'emergency-cushion',
-        title: isEs ? 'Fondo de Emergencia' : 'Emergency Reserve',
-        message: isEs
-          ? 'Mantener guardados entre 3 y 6 meses de tus gastos fijos brinda tranquilidad ante imprevistos.'
-          : 'Keeping 3 to 6 months of fixed expenses in reserve ensures financial stability.',
-        recommendation: isEs
-          ? '🛡️ Revisa la calculadora de Fondo de Emergencia en Metas.'
-          : '🛡️ Check out Emergency Reserve setup under Goals.',
-        level: 'positive',
-        badgeLabel: isEs ? 'AHORRO' : 'SAVINGS',
-        iconName: 'shield-checkmark-outline',
-      },
-      {
         id: 'no-spend-days',
         title: isEs ? 'Días Sin Gasto' : 'No-Spend Challenge',
         message: isEs

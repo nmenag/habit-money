@@ -21,7 +21,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fontScale, moderateScale } from '../../../utils/responsive';
 import { calculateCategoryGrowth } from '../../../utils/categoryGrowth';
 import { TipsCarousel } from '../components/TipsCarousel';
-import { EmergencyFundCard } from '../components/EmergencyFundCard';
 
 const addAlpha = (
   color: string | undefined,
@@ -963,12 +962,7 @@ export const InsightsScreen = () => {
 
   const renderInsightsContent = () => {
     if (filtered.txCount === 0) {
-      return (
-        <View style={styles.singleColumn}>
-          {emptySection}
-          <EmergencyFundCard />
-        </View>
-      );
+      return <View style={styles.singleColumn}>{emptySection}</View>;
     }
     if (isTablet) {
       return (
@@ -976,7 +970,6 @@ export const InsightsScreen = () => {
           <View style={styles.gridColumn}>
             {summarySection}
             {pieChartCard}
-            <EmergencyFundCard />
           </View>
           <View style={styles.gridColumn}>
             {barChartCard}
@@ -990,7 +983,6 @@ export const InsightsScreen = () => {
         {summarySection}
         {pieChartCard}
         {barChartCard}
-        <EmergencyFundCard />
         {insightsSection}
       </View>
     );

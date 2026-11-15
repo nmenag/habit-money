@@ -281,13 +281,6 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="emergency-fund"
-              options={{
-                headerShown: true,
-                title: t('emergencyFund'),
-              }}
-            />
-            <Stack.Screen
               name="about"
               options={{
                 headerShown: true,
