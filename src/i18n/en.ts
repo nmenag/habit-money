@@ -519,35 +519,7 @@ export const en = {
   growthLabelNoSpend: 'No spend this month',
   growthLabelOccasional: 'Occasional spend',
 
-  emergencyFund: 'Emergency Fund',
-  emergencyFundDesc:
-    'A financial safety net for unexpected events based on your real expenses.',
-  setupEmergencyFund: 'Set up Emergency Fund',
-  editEmergencyFund: 'Edit calculation',
-  selectMonthsToCover: 'Select basis months',
-  monthsToCoverLabel: 'Months to cover',
-  monthlyExpenseAverage: 'Average monthly expense',
-  recommendedFund: 'Recommended fund',
-  emergencyFundTip:
-    'Based on the {{count}} months you chose, your average monthly expense is {{avg}}. To cover {{months}} months, your recommended emergency fund is {{target}}.',
-  noExpenseDataForMonths: 'No expenses registered in past months.',
-  saveEmergencyFund: 'Save Emergency Fund',
-  updateEmergencyFund: 'Update Emergency Fund',
-  monthsCount: '{{count}} months',
-  selectBasisMonthsHeader: 'Select basis months for your calculation:',
-  monthsToCoverSliderHeader: 'How many months do you want to cover?',
-  monthsUnit: 'months',
-  invalidAmount: 'Invalid amount',
-  saved: 'Saved',
-  addContribution: 'Add Contribution',
   details: 'Calculation Details',
-  emergencyTargetMonths: 'Recommended target ({{months}} months)',
-  targetReserve: 'Target Reserve',
-  viewCalculationAndDetails: 'View calculation & details',
-  emergencyTipMessage:
-    'Keeping 3 to 6 months of fixed expenses in reserve ensures financial stability.',
-  emergencyTipRecommendation:
-    '🛡️ Check out Emergency Reserve setup here in Insights.',
   rule503020Title: '50/30/20 Budgeting Rule',
   rule503020Message:
     'Allocate 50% to needs, 30% to wants, and 20% to savings or debt payoff.',
@@ -560,13 +532,6 @@ export const en = {
     'Pause non-essential buying 2 days a week to build mindful spending habits.',
   noSpendDaysRecommendation: '🎯 Plan purchases ahead to prevent impulse buys.',
   challengeBadge: 'CHALLENGE',
-  whatIsEmergencyFundTitle: 'What is it?',
-  whatIsEmergencyFundBody:
-    'An emergency fund is a financial buffer that protects you from unexpected expenses: job loss, medical bills, urgent repairs. Having one gives you peace of mind and keeps you out of debt.',
-  howMuchDoINeedTitle: 'How much do I need?',
-  howMuchDoINeedBody:
-    'Experts recommend saving 3–6 months of monthly expenses. If you have variable income or dependents, aim for 9–12 months.',
-  personalEstimateTitle: 'Your personal estimate',
   basedOnRecordedExpenses:
     'Based on your last {{count}} months of recorded expenses:',
   recommendedFundMonths: 'Recommended fund ({{months}} months)',
@@ -587,12 +552,8 @@ export const en = {
     'Start your financial map by adding your first active account.',
   netWorthNegativeInsight:
     'Total balances are in the negative. Prioritize debt repayment to regain positive liquidity.',
-  highBurnRateInsight:
-    'Spending velocity is {{velocity}}% of incoming cash flow. Trim variable outflows.',
   healthySavingsInsight:
     'Saving {{savingsRate}}% of income this cycle. Maintain momentum into savings goals.',
-  steadyCashFlowInsight:
-    'Cash flow remains steady across your configured financial repositories.',
   monthlyBudget: 'Monthly Budget',
   onTrack: 'On Track',
   totalBudgeted: 'Total Budgeted',

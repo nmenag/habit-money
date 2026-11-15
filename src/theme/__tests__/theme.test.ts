@@ -39,7 +39,6 @@ describe('theme', () => {
     expect(featureColors.categories).toBeDefined();
     expect(featureColors.budgets).toBeDefined();
     expect(featureColors.goals).toBeDefined();
-    expect(featureColors.emergencyFund).toBeDefined();
     expect(featureColors.calendar).toBeDefined();
     expect(featureColors.analytics).toBeDefined();
   });
