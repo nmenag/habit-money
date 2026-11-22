@@ -54,6 +54,27 @@ describe('AnalyticsService', () => {
       expect(metrics.month).toBe('2026-03');
     });
 
+    it('includes converted adjustments in income and expenses while excluding unclassified adjustments', async () => {
+      mockDb.getAllAsync.mockResolvedValueOnce([
+        { type: 'income', amount: 3000, note: 'Salary' },
+        { type: 'income', amount: 500, note: 'Converted bonus' },
+        { type: 'expense', amount: 400, note: 'Converted groceries' },
+        { type: 'adjustment', amount: -250, note: 'Balance Adjustment' },
+      ]);
+      mockDb.getFirstAsync.mockResolvedValueOnce({
+        id: 'cat-food',
+        name: 'Food',
+        amount: 400,
+      });
+
+      const metrics = await AnalyticsService.getMonthlyMetrics(mockRange);
+
+      expect(metrics.income).toBe(3500);
+      expect(metrics.expenses).toBe(400);
+      expect(metrics.adjustments).toBe(0);
+      expect(metrics.savings).toBe(3100);
+    });
+
     it('handles zero income safely with 0 savings rate and undefined topCategory', async () => {
       mockDb.getAllAsync.mockResolvedValueOnce([]);
       mockDb.getFirstAsync.mockResolvedValueOnce(null);

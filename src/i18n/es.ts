@@ -166,6 +166,14 @@ export const es = {
   noBalanceChangeError: 'El nuevo saldo debe ser diferente al saldo actual.',
   reconcileBalanceDesc:
     'Ingresa el monto real que tienes actualmente en esta cuenta.',
+  convertToExpense: 'Convertir a Gasto',
+  convertToIncome: 'Convertir a Ingreso',
+  keepAsAdjustment: 'Mantener como Ajuste',
+  convertAdjustmentTitle: 'Clasificar Ajuste',
+  convertAdjustmentLockedHint:
+    'La cuenta y el monto se conservan del ajuste original.',
+  invalidAdjustmentConversionError:
+    'Solo los ajustes negativos pueden convertirse en gastos y los positivos en ingresos.',
   adjustments: 'Ajustes',
   combinedTotal: 'Total Combinado',
   realIncome: 'Ingreso Real',

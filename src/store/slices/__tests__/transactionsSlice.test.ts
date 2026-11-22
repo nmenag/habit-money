@@ -388,4 +388,157 @@ describe('transactionsSlice', () => {
       expect(store.getState().transactions).toHaveLength(0);
     });
   });
+
+  describe('convertAdjustmentTransaction', () => {
+    it('converts a negative adjustment to an expense without changing the account balance', () => {
+      const negAdj: Transaction = {
+        id: 'tx_adj_neg',
+        type: 'adjustment',
+        amount: -300,
+        categoryId: null,
+        accountId: 'acc1',
+        date: '2026-05-10T10:00:00.000',
+        note: 'Balance Adjustment',
+      };
+      store.setState({
+        transactions: [negAdj],
+        accounts: [
+          { id: 'acc1', name: 'Checking', currentBalance: 700 } as any,
+          { id: 'acc2', name: 'Savings', currentBalance: 500 } as any,
+        ],
+      });
+
+      const converted = store.getState().convertAdjustmentTransaction({
+        id: 'tx_adj_neg',
+        targetType: 'expense',
+        categoryId: 'cat-food',
+        budgetId: 'bud-food',
+        date: '2026-05-12T10:00:00.000',
+        note: 'Groceries',
+      });
+
+      expect(converted).not.toBeNull();
+      expect(converted?.id).toBe('tx_adj_neg');
+      expect(converted?.type).toBe('expense');
+      expect(converted?.amount).toBe(300);
+      expect(converted?.accountId).toBe('acc1');
+      expect(converted?.categoryId).toBe('cat-food');
+      expect(converted?.budgetId).toBe('bud-food');
+      expect(converted?.date).toBe('2026-05-12T10:00:00.000');
+      expect(converted?.note).toBe('Groceries');
+
+      expect(store.getState().transactions).toHaveLength(1);
+      expect(store.getState().transactions[0].type).toBe('expense');
+      expect(store.getState().accounts[0].currentBalance).toBe(700);
+      expect(mockRefreshAnalytics).toHaveBeenCalled();
+
+      const accountUpdateCalls = mockDb.runSync.mock.calls.filter(
+        (call: unknown[]) => (call[0] as string).includes('UPDATE accounts'),
+      );
+      expect(accountUpdateCalls).toHaveLength(0);
+    });
+
+    it('converts a positive adjustment to an income without changing the account balance', () => {
+      const posAdj: Transaction = {
+        id: 'tx_adj_pos',
+        type: 'adjustment',
+        amount: 500,
+        categoryId: null,
+        accountId: 'acc1',
+        date: '2026-05-10T10:00:00.000',
+        note: 'Balance Adjustment',
+      };
+      store.setState({
+        transactions: [posAdj],
+        accounts: [
+          { id: 'acc1', name: 'Checking', currentBalance: 1500 } as any,
+        ],
+      });
+
+      const converted = store.getState().convertAdjustmentTransaction({
+        id: 'tx_adj_pos',
+        targetType: 'income',
+        categoryId: 'cat-salary',
+        date: '2026-05-11T10:00:00.000',
+        note: 'Freelance payout',
+      });
+
+      expect(converted).not.toBeNull();
+      expect(converted?.id).toBe('tx_adj_pos');
+      expect(converted?.type).toBe('income');
+      expect(converted?.amount).toBe(500);
+      expect(converted?.accountId).toBe('acc1');
+      expect(converted?.categoryId).toBe('cat-salary');
+      expect(converted?.note).toBe('Freelance payout');
+      expect(store.getState().accounts[0].currentBalance).toBe(1500);
+      expect(store.getState().transactions).toHaveLength(1);
+    });
+
+    it('rejects invalid conversion directions and missing or non-adjustment transactions', () => {
+      const errorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+      const negAdj: Transaction = {
+        id: 'tx_adj_neg',
+        type: 'adjustment',
+        amount: -300,
+        categoryId: null,
+        accountId: 'acc1',
+        date: '2026-05-10T10:00:00.000',
+      };
+      const posAdj: Transaction = {
+        id: 'tx_adj_pos',
+        type: 'adjustment',
+        amount: 400,
+        categoryId: null,
+        accountId: 'acc1',
+        date: '2026-05-10T10:00:00.000',
+      };
+      const normalExp: Transaction = {
+        id: 'tx_exp',
+        type: 'expense',
+        amount: 100,
+        categoryId: 'cat-1',
+        accountId: 'acc1',
+        date: '2026-05-10T10:00:00.000',
+      };
+
+      store.setState({ transactions: [negAdj, posAdj, normalExp] });
+
+      expect(
+        store.getState().convertAdjustmentTransaction({
+          id: 'tx_adj_neg',
+          targetType: 'income',
+          categoryId: 'cat-salary',
+        }),
+      ).toBeNull();
+
+      expect(
+        store.getState().convertAdjustmentTransaction({
+          id: 'tx_adj_pos',
+          targetType: 'expense',
+          categoryId: 'cat-food',
+        }),
+      ).toBeNull();
+
+      expect(
+        store.getState().convertAdjustmentTransaction({
+          id: 'tx_exp',
+          targetType: 'expense',
+          categoryId: 'cat-food',
+        }),
+      ).toBeNull();
+
+      expect(
+        store.getState().convertAdjustmentTransaction({
+          id: 'does_not_exist',
+          targetType: 'expense',
+          categoryId: 'cat-food',
+        }),
+      ).toBeNull();
+
+      expect(mockDb.withTransactionSync).not.toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
+  });
 });

@@ -1,11 +1,15 @@
 import {
+  buildConvertedAdjustmentTransaction,
   calculateAdjustmentDifference,
+  canConvertAdjustmentTo,
   getAdjustmentSignedAmount,
+  getAllowedConversionType,
   getTransactionBalanceModifier,
   isAdjustmentTransaction,
   isLegacyAdjustment,
   normalizeLegacyAdjustmentTransaction,
   roundCurrency,
+  sanitizeConvertedNote,
 } from '../transactionUtils';
 
 describe('transactionUtils', () => {
@@ -161,6 +165,101 @@ describe('transactionUtils', () => {
         note: 'Coffee',
       };
       expect(normalizeLegacyAdjustmentTransaction(standard)).toEqual(standard);
+    });
+  });
+
+  describe('conversion helpers', () => {
+    it('allows converting negative adjustments only to expense and positive adjustments only to income', () => {
+      const negAdj = { type: 'adjustment', amount: -300 };
+      const posAdj = { type: 'adjustment', amount: 500 };
+      const normalExp = { type: 'expense', amount: 100 };
+
+      expect(getAllowedConversionType(negAdj)).toBe('expense');
+      expect(canConvertAdjustmentTo(negAdj, 'expense')).toBe(true);
+      expect(canConvertAdjustmentTo(negAdj, 'income')).toBe(false);
+
+      expect(getAllowedConversionType(posAdj)).toBe('income');
+      expect(canConvertAdjustmentTo(posAdj, 'income')).toBe(true);
+      expect(canConvertAdjustmentTo(posAdj, 'expense')).toBe(false);
+
+      expect(getAllowedConversionType(normalExp)).toBeNull();
+      expect(canConvertAdjustmentTo(normalExp, 'expense')).toBe(false);
+    });
+
+    it('sanitizes legacy adjustment notes when converting so converted transactions are not excluded from stats', () => {
+      expect(sanitizeConvertedNote('Balance Adjustment')).toBeNull();
+      expect(sanitizeConvertedNote('Ajuste de Saldo')).toBeNull();
+      expect(sanitizeConvertedNote('   ')).toBeNull();
+      expect(sanitizeConvertedNote('Supermarket')).toBe('Supermarket');
+    });
+
+    it('builds converted transaction preserving id, accountId, and magnitude of amount', () => {
+      const negAdj = {
+        id: 'tx-adj-neg',
+        type: 'adjustment' as const,
+        amount: -250,
+        categoryId: null,
+        accountId: 'acc-1',
+        date: '2026-05-10T10:00:00.000',
+        note: 'Balance Adjustment',
+      };
+
+      const converted = buildConvertedAdjustmentTransaction(negAdj, {
+        id: 'tx-adj-neg',
+        targetType: 'expense',
+        categoryId: 'cat-food',
+        budgetId: 'bud-food',
+        date: '2026-05-11T10:00:00.000',
+        note: 'Dinner with friends',
+      });
+
+      expect(converted).toEqual({
+        id: 'tx-adj-neg',
+        type: 'expense',
+        amount: 250,
+        categoryId: 'cat-food',
+        accountId: 'acc-1',
+        budgetId: 'bud-food',
+        date: '2026-05-11T10:00:00.000',
+        note: 'Dinner with friends',
+        toAccountId: null,
+      });
+      expect(isAdjustmentTransaction(converted)).toBe(false);
+    });
+
+    it('throws error when attempting an invalid conversion direction or converting a non-adjustment', () => {
+      const negAdj = {
+        id: 'tx-adj-neg',
+        type: 'adjustment' as const,
+        amount: -250,
+        categoryId: null,
+        accountId: 'acc-1',
+        date: '2026-05-10T10:00:00.000',
+      };
+      const normalTx = {
+        id: 'tx-exp',
+        type: 'expense' as const,
+        amount: 100,
+        categoryId: 'cat-1',
+        accountId: 'acc-1',
+        date: '2026-05-10T10:00:00.000',
+      };
+
+      expect(() =>
+        buildConvertedAdjustmentTransaction(negAdj, {
+          id: 'tx-adj-neg',
+          targetType: 'income',
+          categoryId: 'cat-salary',
+        }),
+      ).toThrow('Invalid conversion');
+
+      expect(() =>
+        buildConvertedAdjustmentTransaction(normalTx, {
+          id: 'tx-exp',
+          targetType: 'expense',
+          categoryId: 'cat-1',
+        }),
+      ).toThrow('Transaction is not an adjustment');
     });
   });
 });

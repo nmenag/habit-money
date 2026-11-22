@@ -164,6 +164,14 @@ export const en = {
     'The new balance must be different from the current balance.',
   reconcileBalanceDesc:
     'Enter the actual amount you currently have in this account.',
+  convertToExpense: 'Convert to Expense',
+  convertToIncome: 'Convert to Income',
+  keepAsAdjustment: 'Keep as Adjustment',
+  convertAdjustmentTitle: 'Classify Adjustment',
+  convertAdjustmentLockedHint:
+    'Account and amount are preserved from the original adjustment.',
+  invalidAdjustmentConversionError:
+    'Only negative adjustments can be converted to expenses and positive adjustments to income.',
   adjustments: 'Adjustments',
   combinedTotal: 'Combined Total',
   realIncome: 'Real Income',

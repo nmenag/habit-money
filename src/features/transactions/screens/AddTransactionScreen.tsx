@@ -38,8 +38,10 @@ import { getValidCategoryIcon } from '../../../constants';
 import { getMonthRange, isInRange } from '../../../utils/dateFilters';
 import {
   calculateAdjustmentDifference,
+  canConvertAdjustmentTo,
   getAdjustmentSignedAmount,
   isAdjustmentTransaction,
+  LEGACY_ADJUSTMENT_NOTES,
   roundCurrency,
 } from '../../../utils/transactionUtils';
 import { BottomSheet } from '../../../shared/components';
@@ -49,11 +51,14 @@ import { TransferFormFields } from '../components/TransferFormFields';
 
 const addAlpha = (color: string, opacity: number): string => {
   if (!color) return 'transparent';
-  if (color.startsWith('rgba') || color.startsWith('hsla')) {
-    return color;
-  }
   if (color.startsWith('rgb')) {
-    return color.replace('rgb', 'rgba').replace(')', `, ${opacity})`);
+    const match = color.match(/\d+/g);
+    if (match && match.length >= 3) {
+      return `rgba(${match[0]}, ${match[1]}, ${match[2]}, ${opacity})`;
+    }
+  }
+  if (color.startsWith('hsla')) {
+    return color;
   }
   let hex = color.replace('#', '');
   if (hex.length === 3) {
@@ -265,6 +270,7 @@ export const AddTransactionScreen = () => {
     transactions,
     addTransaction,
     editTransaction,
+    convertAdjustmentTransaction,
     deleteTransaction,
     formatCurrency,
     currency,
@@ -275,12 +281,26 @@ export const AddTransactionScreen = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
+  const isOriginalAdjustment = useMemo(
+    () =>
+      Boolean(
+        isEditing &&
+        editingTransaction &&
+        isAdjustmentTransaction(editingTransaction),
+      ),
+    [isEditing, editingTransaction],
+  );
+
   const [type, setType] = useState<TransactionType>(() => {
     if (editingTransaction && isAdjustmentTransaction(editingTransaction)) {
       return 'adjustment';
     }
     return editingTransaction?.type || 'expense';
   });
+
+  const isConvertingAdjustment =
+    isOriginalAdjustment && (type === 'expense' || type === 'income');
+
   const [adjustmentSign, setAdjustmentSign] = useState<'positive' | 'negative'>(
     () => {
       if (editingTransaction && isAdjustmentTransaction(editingTransaction)) {
@@ -291,20 +311,28 @@ export const AddTransactionScreen = () => {
       return 'positive';
     },
   );
-  const [amount, setAmount] = useState(
-    editingTransaction ? Math.abs(editingTransaction.amount) : 0,
+
+  const canConvertToExpense = useMemo(
+    () => Boolean(isOriginalAdjustment),
+    [isOriginalAdjustment],
   );
-  const [displayAmount, setDisplayAmount] = useState(() => {
-    if (!editingTransaction) return '';
-    const absVal = Math.abs(editingTransaction.amount);
-    const isDecimal =
-      currency !== 'COP' &&
-      currency !== 'CLP' &&
-      currency !== 'PYG' &&
-      currency !== 'XAF';
-    if (!isDecimal) {
-      return formatNumber(absVal, language);
-    } else {
+
+  const canConvertToIncome = useMemo(
+    () => Boolean(isOriginalAdjustment),
+    [isOriginalAdjustment],
+  );
+  const isDecimalCurrency =
+    currency !== 'COP' &&
+    currency !== 'CLP' &&
+    currency !== 'PYG' &&
+    currency !== 'XAF';
+
+  const formatNumericValueForInput = useCallback(
+    (val: number, isDecimal: boolean) => {
+      const absVal = Math.abs(val);
+      if (!isDecimal) {
+        return formatNumber(absVal, language);
+      }
       const decimalSep = language === 'es' ? ',' : '.';
       const thousandSep = language === 'es' ? '.' : ',';
       const parts = absVal.toString().split('.');
@@ -317,7 +345,19 @@ export const AddTransactionScreen = () => {
       return decimalPart
         ? formattedInt + decimalSep + decimalPart
         : formattedInt;
-    }
+    },
+    [language],
+  );
+
+  const [amount, setAmount] = useState(
+    editingTransaction ? Math.abs(Number(editingTransaction.amount)) : 0,
+  );
+  const [displayAmount, setDisplayAmount] = useState(() => {
+    if (!editingTransaction) return '';
+    return formatNumericValueForInput(
+      Math.abs(Number(editingTransaction.amount)),
+      isDecimalCurrency,
+    );
   });
   const [note, setNote] = useState(editingTransaction?.note || '');
   const [selectedAccount, setSelectedAccount] = useState(
@@ -343,6 +383,36 @@ export const AddTransactionScreen = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(
     editingTransaction ? new Date(editingTransaction.date) : new Date(),
   );
+
+  useEffect(() => {
+    if (!editingTransaction) return;
+    const isAdj = isAdjustmentTransaction(editingTransaction);
+    const nextType: TransactionType = isAdj
+      ? 'adjustment'
+      : editingTransaction.type || 'expense';
+    setType(nextType);
+
+    const signedAmt = isAdj
+      ? getAdjustmentSignedAmount(editingTransaction)
+      : Number(editingTransaction.amount);
+    setAdjustmentSign(signedAmt < 0 ? 'negative' : 'positive');
+
+    const absAmt = Math.abs(Number(editingTransaction.amount));
+    setAmount(absAmt);
+    setDisplayAmount(formatNumericValueForInput(absAmt, isDecimalCurrency));
+    setNote(editingTransaction.note || '');
+    setSelectedAccount(
+      editingTransaction.accountId || params.accountId || accounts[0]?.id || '',
+    );
+    setSelectedCategory(editingTransaction.categoryId || '');
+    setSelectedBudget(editingTransaction.budgetId ?? '');
+    setSelectedToAccount(
+      editingTransaction.toAccountId ||
+        accounts.find((a) => a.id !== editingTransaction.accountId)?.id ||
+        '',
+    );
+    setSelectedDate(new Date(editingTransaction.date));
+  }, [params.transaction]);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
@@ -443,6 +513,54 @@ export const AddTransactionScreen = () => {
     setAccountSheetOpen(true);
   };
 
+  const handleSelectConversionAction = useCallback(
+    (action: 'adjustment' | 'expense' | 'income') => {
+      if (!isOriginalAdjustment || !editingTransaction) return;
+
+      if (action === 'adjustment') {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setType('adjustment');
+        return;
+      }
+
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setType(action);
+      setAdjustmentSign(action === 'expense' ? 'negative' : 'positive');
+      setSelectedAccount(editingTransaction.accountId);
+      if (amount <= 0) {
+        const preservedAbs = Math.abs(
+          getAdjustmentSignedAmount(editingTransaction),
+        );
+        setAmount(preservedAbs);
+        setDisplayAmount(
+          formatNumericValueForInput(preservedAbs, isDecimalCurrency),
+        );
+      }
+
+      const matchingCats = categories.filter((c) => c.type === action);
+      if (
+        !selectedCategory ||
+        !matchingCats.some((c) => c.id === selectedCategory)
+      ) {
+        setSelectedCategory(matchingCats[0]?.id || '');
+      }
+
+      if (note && LEGACY_ADJUSTMENT_NOTES.includes(note.trim())) {
+        setNote('');
+      }
+    },
+    [
+      isOriginalAdjustment,
+      editingTransaction,
+      amount,
+      categories,
+      selectedCategory,
+      note,
+      formatNumericValueForInput,
+      isDecimalCurrency,
+    ],
+  );
+
   useEffect(() => {
     if (type === 'expense' && selectedCategory) {
       const matchingBudget = budgets.find(
@@ -484,6 +602,43 @@ export const AddTransactionScreen = () => {
     }
     if (type === 'transfer' && selectedAccount === selectedToAccount) {
       Alert.alert(t('error'), t('selectDifferentAccountForTransfer'));
+      return;
+    }
+
+    if (isConvertingAdjustment && editingTransaction) {
+      const targetType = type as 'income' | 'expense';
+      if (!selectedCategory) {
+        Alert.alert(t('error'), t('selectCategory'));
+        return;
+      }
+
+      const currentSignedAmount =
+        targetType === 'expense' ? -Math.abs(amount) : Math.abs(amount);
+      const originalSignedAmount =
+        getAdjustmentSignedAmount(editingTransaction);
+
+      if (
+        currentSignedAmount !== originalSignedAmount ||
+        selectedAccount !== editingTransaction.accountId
+      ) {
+        editTransaction({
+          ...editingTransaction,
+          type: 'adjustment',
+          accountId: selectedAccount,
+          amount: currentSignedAmount,
+        });
+      }
+
+      convertAdjustmentTransaction({
+        id: editingTransaction.id,
+        targetType,
+        categoryId: selectedCategory,
+        budgetId: targetType === 'expense' ? selectedBudget || null : null,
+        date: getLocalISOString(selectedDate),
+        note,
+      });
+
+      handleGoBack();
       return;
     }
 
@@ -781,18 +936,24 @@ export const AddTransactionScreen = () => {
     return roundCurrency(baseBalanceBeforeAdjustment + signedDiff);
   }, [adjustmentSign, amount, baseBalanceBeforeAdjustment]);
 
+  const [displayReconcileBalance, setDisplayReconcileBalance] = useState(() =>
+    formatNumericValueForInput(resultingAdjustedBalance, isDecimalCurrency),
+  );
+
+  useEffect(() => {
+    setDisplayReconcileBalance(
+      formatNumericValueForInput(resultingAdjustedBalance, isDecimalCurrency),
+    );
+  }, [params.transaction, selectedAccount]);
+
   const handleNewBalanceReconcileChange = useCallback(
     (text: string) => {
-      const isDecimal =
-        currency !== 'COP' &&
-        currency !== 'CLP' &&
-        currency !== 'PYG' &&
-        currency !== 'XAF';
       const hasMinus = text.trim().startsWith('-');
-      const parsedAbs = parseAmountText(
-        formatAmountInput(text, isDecimal),
-        isDecimal,
+      const formattedInput = formatAmountInput(text, isDecimalCurrency);
+      setDisplayReconcileBalance(
+        hasMinus && formattedInput ? `-${formattedInput}` : formattedInput,
       );
+      const parsedAbs = parseAmountText(formattedInput, isDecimalCurrency);
       const newBal = hasMinus ? -parsedAbs : parsedAbs;
       const diff = calculateAdjustmentDifference(
         newBal,
@@ -802,10 +963,18 @@ export const AddTransactionScreen = () => {
       const absDiff = Math.abs(diff);
       setAmount(absDiff);
       setDisplayAmount(
-        absDiff === 0 ? '' : formatAmountInput(absDiff.toString(), isDecimal),
+        absDiff === 0
+          ? ''
+          : formatNumericValueForInput(absDiff, isDecimalCurrency),
       );
     },
-    [baseBalanceBeforeAdjustment, currency, formatAmountInput, parseAmountText],
+    [
+      baseBalanceBeforeAdjustment,
+      isDecimalCurrency,
+      formatAmountInput,
+      formatNumericValueForInput,
+      parseAmountText,
+    ],
   );
 
   return (
@@ -882,14 +1051,188 @@ export const AddTransactionScreen = () => {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        {type !== 'adjustment' ? (
+        {isOriginalAdjustment && (
+          <View
+            style={[
+              styles.compactRowCard,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.outlineVariant,
+                borderWidth: 1,
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                gap: 10,
+                marginBottom: 16,
+              },
+            ]}
+          >
+            <Text
+              variant="labelSmall"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                fontFamily: 'Inter-SemiBold',
+                fontWeight: '600',
+                letterSpacing: 1.2,
+                textTransform: 'uppercase',
+              }}
+            >
+              {t('convertAdjustmentTitle')}
+            </Text>
+
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              <TouchableOpacity
+                style={[
+                  {
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor:
+                      type === 'adjustment'
+                        ? theme.colors.primary
+                        : theme.colors.outlineVariant,
+                    backgroundColor:
+                      type === 'adjustment'
+                        ? theme.dark
+                          ? '#1A3324'
+                          : '#DCFCE7'
+                        : theme.colors.elevation.level1,
+                  },
+                ]}
+                onPress={() => handleSelectConversionAction('adjustment')}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityState={{ selected: type === 'adjustment' }}
+                accessibilityLabel={t('keepAsAdjustment')}
+              >
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                    color:
+                      type === 'adjustment'
+                        ? (theme.colors as any).income || theme.colors.primary
+                        : theme.colors.onSurface,
+                  }}
+                >
+                  {t('keepAsAdjustment')}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  {
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    opacity: canConvertToExpense ? 1 : 0.4,
+                    borderColor:
+                      type === 'expense'
+                        ? theme.colors.error
+                        : theme.colors.outlineVariant,
+                    backgroundColor:
+                      type === 'expense'
+                        ? theme.dark
+                          ? '#3A1E1E'
+                          : '#FEE2E2'
+                        : theme.colors.elevation.level1,
+                  },
+                ]}
+                disabled={!canConvertToExpense}
+                onPress={() => handleSelectConversionAction('expense')}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityState={{
+                  selected: type === 'expense',
+                  disabled: !canConvertToExpense,
+                }}
+                accessibilityLabel={t('convertToExpense')}
+              >
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                    color:
+                      type === 'expense'
+                        ? theme.colors.error
+                        : theme.colors.onSurface,
+                  }}
+                >
+                  {t('convertToExpense')}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  {
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    opacity: canConvertToIncome ? 1 : 0.4,
+                    borderColor:
+                      type === 'income'
+                        ? (theme.colors as any).income || '#16A34A'
+                        : theme.colors.outlineVariant,
+                    backgroundColor:
+                      type === 'income'
+                        ? theme.dark
+                          ? '#1A3324'
+                          : '#DCFCE7'
+                        : theme.colors.elevation.level1,
+                  },
+                ]}
+                disabled={!canConvertToIncome}
+                onPress={() => handleSelectConversionAction('income')}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityState={{
+                  selected: type === 'income',
+                  disabled: !canConvertToIncome,
+                }}
+                accessibilityLabel={t('convertToIncome')}
+              >
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                    color:
+                      type === 'income'
+                        ? (theme.colors as any).income || '#16A34A'
+                        : theme.colors.onSurface,
+                  }}
+                >
+                  {t('convertToIncome')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {isConvertingAdjustment && (
+              <Text
+                variant="bodySmall"
+                style={{
+                  color: theme.colors.onSurfaceVariant,
+                  fontSize: 11,
+                }}
+              >
+                {t('convertAdjustmentLockedHint')}
+              </Text>
+            )}
+          </View>
+        )}
+
+        {!isOriginalAdjustment ? (
           <CustomSegmentedControl
             type={type}
             setType={setType}
             categories={categories}
             setSelectedCategory={setSelectedCategory}
           />
-        ) : (
+        ) : type === 'adjustment' ? (
           <View
             style={[
               styles.tabContainer,
@@ -907,7 +1250,15 @@ export const AddTransactionScreen = () => {
                       : 'transparent',
                 },
               ]}
-              onPress={() => setAdjustmentSign('positive')}
+              onPress={() => {
+                setAdjustmentSign('positive');
+                const nextBal = roundCurrency(
+                  baseBalanceBeforeAdjustment + Math.abs(amount),
+                );
+                setDisplayReconcileBalance(
+                  formatNumericValueForInput(nextBal, isDecimalCurrency),
+                );
+              }}
               activeOpacity={0.8}
               accessibilityRole="tab"
               accessibilityState={{ selected: adjustmentSign === 'positive' }}
@@ -938,7 +1289,19 @@ export const AddTransactionScreen = () => {
                       : 'transparent',
                 },
               ]}
-              onPress={() => setAdjustmentSign('negative')}
+              onPress={() => {
+                setAdjustmentSign('negative');
+                const nextBal = roundCurrency(
+                  baseBalanceBeforeAdjustment - Math.abs(amount),
+                );
+                const formattedBal = formatNumericValueForInput(
+                  Math.abs(nextBal),
+                  isDecimalCurrency,
+                );
+                setDisplayReconcileBalance(
+                  nextBal < 0 ? `-${formattedBal}` : formattedBal,
+                );
+              }}
               activeOpacity={0.8}
               accessibilityRole="tab"
               accessibilityState={{ selected: adjustmentSign === 'negative' }}
@@ -959,7 +1322,7 @@ export const AddTransactionScreen = () => {
               </Text>
             </TouchableOpacity>
           </View>
-        )}
+        ) : null}
 
         <View
           style={[
@@ -984,7 +1347,10 @@ export const AddTransactionScreen = () => {
               },
             ]}
           >
-            {t('amount').toUpperCase()}
+            {(type === 'adjustment'
+              ? t('adjustmentDifference')
+              : t('amount')
+            ).toUpperCase()}
           </Text>
 
           <View style={styles.amountInputContainer}>
@@ -999,14 +1365,41 @@ export const AddTransactionScreen = () => {
               ]}
             >
               <Text style={[styles.currencyText, { color: activeColors.text }]}>
-                {currency}
+                {type === 'adjustment'
+                  ? `${adjustmentSign === 'negative' ? '-' : '+'}${currency}`
+                  : currency}
               </Text>
             </View>
 
             <View style={styles.amountInputWrapper}>
               <RNTextInput
                 value={displayAmount}
-                onChangeText={handleAmountChange}
+                onChangeText={(text) => {
+                  handleAmountChange(text);
+                  if (type === 'adjustment') {
+                    const formatted = formatAmountInput(
+                      text,
+                      isDecimalCurrency,
+                    );
+                    const parsed = parseAmountText(
+                      formatted,
+                      isDecimalCurrency,
+                    );
+                    const signedDiff =
+                      adjustmentSign === 'negative' ? -parsed : parsed;
+                    const nextBal = roundCurrency(
+                      baseBalanceBeforeAdjustment + signedDiff,
+                    );
+                    const formattedBal = formatNumericValueForInput(
+                      Math.abs(nextBal),
+                      isDecimalCurrency,
+                    );
+                    setDisplayReconcileBalance(
+                      nextBal < 0 ? `-${formattedBal}` : formattedBal,
+                    );
+                  }
+                }}
+                editable={true}
                 keyboardType="decimal-pad"
                 placeholder={isAmountFocused ? '' : '0'}
                 placeholderTextColor={theme.colors.outlineVariant}
@@ -1035,6 +1428,17 @@ export const AddTransactionScreen = () => {
                 onPress={() => {
                   setDisplayAmount('');
                   setAmount(0);
+                  if (type === 'adjustment') {
+                    const formattedBal = formatNumericValueForInput(
+                      Math.abs(baseBalanceBeforeAdjustment),
+                      isDecimalCurrency,
+                    );
+                    setDisplayReconcileBalance(
+                      baseBalanceBeforeAdjustment < 0
+                        ? `-${formattedBal}`
+                        : formattedBal,
+                    );
+                  }
                 }}
                 style={styles.amountClearBtn}
                 accessibilityRole="button"
@@ -1225,7 +1629,7 @@ export const AddTransactionScreen = () => {
                   {t('newActualBalance')}
                 </Text>
                 <RNTextInput
-                  defaultValue={String(resultingAdjustedBalance)}
+                  value={displayReconcileBalance}
                   onChangeText={handleNewBalanceReconcileChange}
                   keyboardType="decimal-pad"
                   accessibilityLabel={t('newActualBalance')}
@@ -1814,7 +2218,15 @@ export const AddTransactionScreen = () => {
             onPress={handleSave}
             activeOpacity={0.85}
             accessibilityRole="button"
-            accessibilityLabel={isEditing ? t('update') : t('saveTransaction')}
+            accessibilityLabel={
+              isConvertingAdjustment
+                ? type === 'expense'
+                  ? t('convertToExpense')
+                  : t('convertToIncome')
+                : isEditing
+                  ? t('update')
+                  : t('saveTransaction')
+            }
             accessibilityHint={
               t('saveTransactionHint' as any) ||
               'Saves changes and records transaction'
@@ -1827,7 +2239,13 @@ export const AddTransactionScreen = () => {
                 { color: theme.colors.onPrimary },
               ]}
             >
-              {isEditing ? t('update') : t('saveTransaction')}
+              {isConvertingAdjustment
+                ? type === 'expense'
+                  ? t('convertToExpense')
+                  : t('convertToIncome')
+                : isEditing
+                  ? t('update')
+                  : t('saveTransaction')}
             </Text>
           </TouchableOpacity>
         </View>

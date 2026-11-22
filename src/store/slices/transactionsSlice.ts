@@ -4,8 +4,13 @@ import { Budget, Transaction, TransactionType } from '../types';
 import type { AppStore } from '../useStore';
 import { ProductAnalyticsService } from '../../services/ProductAnalyticsService';
 import {
+  buildConvertedAdjustmentTransaction,
+  canConvertAdjustmentTo,
+  ConvertAdjustmentInput,
   getTransactionBalanceModifier,
+  isAdjustmentTransaction,
   roundCurrency,
+  sanitizeConvertedNote,
 } from '../../utils/transactionUtils';
 
 export interface TransactionsSlice {
@@ -14,6 +19,9 @@ export interface TransactionsSlice {
   loadFullData: () => void;
   addTransaction: (transaction: Transaction) => void;
   editTransaction: (transaction: Transaction) => void;
+  convertAdjustmentTransaction: (
+    input: ConvertAdjustmentInput,
+  ) => Transaction | null;
   deleteTransaction: (
     id: string,
     accountId: string,
@@ -149,8 +157,36 @@ export const createTransactionsSlice: StateCreator<
       return;
     }
 
+    const isConvertingFromAdjustment =
+      isAdjustmentTransaction(oldTransaction) &&
+      (transaction.type === 'income' || transaction.type === 'expense') &&
+      !isAdjustmentTransaction(transaction);
+
+    if (
+      isConvertingFromAdjustment &&
+      (transaction.type === 'income' || transaction.type === 'expense')
+    ) {
+      if (!canConvertAdjustmentTo(oldTransaction, transaction.type)) {
+        console.error(
+          'editTransaction: Invalid adjustment conversion direction',
+          oldTransaction.id,
+        );
+        return;
+      }
+    }
+
+    const normalizedTransaction: Transaction = isConvertingFromAdjustment
+      ? {
+          ...transaction,
+          accountId: oldTransaction.accountId,
+          amount: Math.abs(oldTransaction.amount),
+          note: sanitizeConvertedNote(transaction.note),
+          toAccountId: null,
+        }
+      : transaction;
+
     ProductAnalyticsService.logTransactionUpdated(
-      transaction.type || 'expense',
+      normalizedTransaction.type || 'expense',
     ).catch(() => {});
 
     try {
@@ -159,119 +195,151 @@ export const createTransactionsSlice: StateCreator<
         oldTransaction.amount,
       );
       const newModifier = getTransactionBalanceModifier(
-        transaction.type,
-        transaction.amount,
+        normalizedTransaction.type,
+        normalizedTransaction.amount,
       );
 
       db.withTransactionSync(() => {
-        if (oldTransaction.type === 'transfer' && oldTransaction.toAccountId) {
-          db.runSync(
-            'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-            [oldTransaction.amount ?? 0, oldTransaction.accountId ?? ''],
-          );
-          db.runSync(
-            'UPDATE accounts SET currentBalance = currentBalance - ? WHERE id = ?',
-            [oldTransaction.amount ?? 0, oldTransaction.toAccountId ?? ''],
-          );
-        } else {
-          db.runSync(
-            'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-            [oldModifier ?? 0, oldTransaction.accountId ?? ''],
-          );
-        }
+        if (!isConvertingFromAdjustment) {
+          if (
+            oldTransaction.type === 'transfer' &&
+            oldTransaction.toAccountId
+          ) {
+            db.runSync(
+              'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+              [oldTransaction.amount ?? 0, oldTransaction.accountId ?? ''],
+            );
+            db.runSync(
+              'UPDATE accounts SET currentBalance = currentBalance - ? WHERE id = ?',
+              [oldTransaction.amount ?? 0, oldTransaction.toAccountId ?? ''],
+            );
+          } else {
+            db.runSync(
+              'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+              [oldModifier ?? 0, oldTransaction.accountId ?? ''],
+            );
+          }
 
-        if (transaction.type === 'transfer' && transaction.toAccountId) {
-          db.runSync(
-            'UPDATE accounts SET currentBalance = currentBalance - ? WHERE id = ?',
-            [transaction.amount ?? 0, transaction.accountId ?? ''],
-          );
-          db.runSync(
-            'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-            [transaction.amount ?? 0, transaction.toAccountId ?? ''],
-          );
-        } else {
-          db.runSync(
-            'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-            [newModifier ?? 0, transaction.accountId ?? ''],
-          );
+          if (
+            normalizedTransaction.type === 'transfer' &&
+            normalizedTransaction.toAccountId
+          ) {
+            db.runSync(
+              'UPDATE accounts SET currentBalance = currentBalance - ? WHERE id = ?',
+              [
+                normalizedTransaction.amount ?? 0,
+                normalizedTransaction.accountId ?? '',
+              ],
+            );
+            db.runSync(
+              'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+              [
+                normalizedTransaction.amount ?? 0,
+                normalizedTransaction.toAccountId ?? '',
+              ],
+            );
+          } else {
+            db.runSync(
+              'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
+              [newModifier ?? 0, normalizedTransaction.accountId ?? ''],
+            );
+          }
         }
 
         db.runSync(
           'UPDATE transactions SET type = ?, amount = ?, categoryId = ?, accountId = ?, budgetId = ?, date = ?, note = ?, toAccountId = ? WHERE id = ?',
           [
-            transaction.type ?? '',
-            transaction.amount ?? 0,
-            transaction.categoryId ?? null,
-            transaction.accountId ?? '',
-            transaction.budgetId ?? null,
-            transaction.date ?? '',
-            transaction.note ?? null,
-            transaction.toAccountId ?? null,
-            transaction.id ?? '',
+            normalizedTransaction.type ?? '',
+            normalizedTransaction.amount ?? 0,
+            normalizedTransaction.categoryId ?? null,
+            normalizedTransaction.accountId ?? '',
+            normalizedTransaction.budgetId ?? null,
+            normalizedTransaction.date ?? '',
+            normalizedTransaction.note ?? null,
+            normalizedTransaction.toAccountId ?? null,
+            normalizedTransaction.id ?? '',
           ],
         );
       });
 
+      const prevAccounts = get().accounts;
+      const prevTransactions = get().transactions;
+
+      get().loadData();
+
       set((state) => {
-        const revertedAccounts = state.accounts.map((acc) => {
-          if (
-            oldTransaction.type === 'transfer' &&
-            oldTransaction.toAccountId
-          ) {
-            if (acc.id === oldTransaction.accountId) {
-              return {
-                ...acc,
-                currentBalance: roundCurrency(
-                  acc.currentBalance + oldTransaction.amount,
-                ),
-              };
-            }
-            if (acc.id === oldTransaction.toAccountId) {
-              return {
-                ...acc,
-                currentBalance: roundCurrency(
-                  acc.currentBalance - oldTransaction.amount,
-                ),
-              };
-            }
-          } else if (acc.id === oldTransaction.accountId) {
-            return {
-              ...acc,
-              currentBalance: roundCurrency(acc.currentBalance + oldModifier),
-            };
-          }
-          return acc;
-        });
+        const baseAccounts =
+          state.accounts.length > 0 ? state.accounts : prevAccounts;
+        const baseTransactions =
+          state.transactions.length > 0 ? state.transactions : prevTransactions;
 
-        const updatedAccounts = revertedAccounts.map((acc) => {
-          if (transaction.type === 'transfer' && transaction.toAccountId) {
-            if (acc.id === transaction.accountId) {
+        let updatedAccounts = baseAccounts;
+        if (!isConvertingFromAdjustment) {
+          const revertedAccounts = baseAccounts.map((acc) => {
+            if (
+              oldTransaction.type === 'transfer' &&
+              oldTransaction.toAccountId
+            ) {
+              if (acc.id === oldTransaction.accountId) {
+                return {
+                  ...acc,
+                  currentBalance: roundCurrency(
+                    acc.currentBalance + oldTransaction.amount,
+                  ),
+                };
+              }
+              if (acc.id === oldTransaction.toAccountId) {
+                return {
+                  ...acc,
+                  currentBalance: roundCurrency(
+                    acc.currentBalance - oldTransaction.amount,
+                  ),
+                };
+              }
+            } else if (acc.id === oldTransaction.accountId) {
               return {
                 ...acc,
-                currentBalance: roundCurrency(
-                  acc.currentBalance - transaction.amount,
-                ),
+                currentBalance: roundCurrency(acc.currentBalance + oldModifier),
               };
             }
-            if (acc.id === transaction.toAccountId) {
-              return {
-                ...acc,
-                currentBalance: roundCurrency(
-                  acc.currentBalance + transaction.amount,
-                ),
-              };
-            }
-          } else if (acc.id === transaction.accountId) {
-            return {
-              ...acc,
-              currentBalance: roundCurrency(acc.currentBalance + newModifier),
-            };
-          }
-          return acc;
-        });
+            return acc;
+          });
 
-        const updatedTransactions = state.transactions
-          .map((t) => (t.id === transaction.id ? transaction : t))
+          updatedAccounts = revertedAccounts.map((acc) => {
+            if (
+              normalizedTransaction.type === 'transfer' &&
+              normalizedTransaction.toAccountId
+            ) {
+              if (acc.id === normalizedTransaction.accountId) {
+                return {
+                  ...acc,
+                  currentBalance: roundCurrency(
+                    acc.currentBalance - normalizedTransaction.amount,
+                  ),
+                };
+              }
+              if (acc.id === normalizedTransaction.toAccountId) {
+                return {
+                  ...acc,
+                  currentBalance: roundCurrency(
+                    acc.currentBalance + normalizedTransaction.amount,
+                  ),
+                };
+              }
+            } else if (acc.id === normalizedTransaction.accountId) {
+              return {
+                ...acc,
+                currentBalance: roundCurrency(acc.currentBalance + newModifier),
+              };
+            }
+            return acc;
+          });
+        }
+
+        const updatedTransactions = baseTransactions
+          .map((t) =>
+            t.id === normalizedTransaction.id ? normalizedTransaction : t,
+          )
           .sort(
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
           );
@@ -282,12 +350,73 @@ export const createTransactionsSlice: StateCreator<
         };
       });
 
-      get().loadData();
       get().refreshAnalytics();
     } catch (error) {
       console.error('editTransaction Error:', error);
       throw error;
     }
+  },
+
+  convertAdjustmentTransaction: (input) => {
+    const db = getDb();
+    const existingTx = get().transactions.find((t) => t.id === input.id);
+    if (!existingTx) {
+      console.error(
+        'convertAdjustmentTransaction: Transaction not found',
+        input.id,
+      );
+      return null;
+    }
+
+    if (!isAdjustmentTransaction(existingTx)) {
+      console.error(
+        'convertAdjustmentTransaction: Transaction is not an adjustment',
+        input.id,
+      );
+      return null;
+    }
+
+    if (!canConvertAdjustmentTo(existingTx, input.targetType)) {
+      console.error(
+        'convertAdjustmentTransaction: Invalid conversion target type',
+        input.targetType,
+      );
+      return null;
+    }
+
+    const convertedTx = buildConvertedAdjustmentTransaction(existingTx, input);
+
+    ProductAnalyticsService.logTransactionUpdated(convertedTx.type).catch(
+      () => {},
+    );
+
+    db.withTransactionSync(() => {
+      db.runSync(
+        'UPDATE transactions SET type = ?, amount = ?, categoryId = ?, accountId = ?, budgetId = ?, date = ?, note = ?, toAccountId = ? WHERE id = ?',
+        [
+          convertedTx.type,
+          convertedTx.amount,
+          convertedTx.categoryId ?? null,
+          convertedTx.accountId,
+          convertedTx.budgetId ?? null,
+          convertedTx.date,
+          convertedTx.note ?? null,
+          null,
+          convertedTx.id,
+        ],
+      );
+    });
+
+    set((state) => ({
+      transactions: state.transactions
+        .map((t) => (t.id === convertedTx.id ? convertedTx : t))
+        .sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        ),
+    }));
+
+    get().refreshAnalytics();
+    return convertedTx;
   },
 
   deleteTransaction: (id, accountId, amount, type) => {
