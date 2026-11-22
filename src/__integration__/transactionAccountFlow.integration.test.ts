@@ -477,26 +477,36 @@ describe('Integration: Balance adjustment via editAccount', () => {
     jest.clearAllMocks();
   });
 
-  it('creates an income adjustment transaction when balance is increased', () => {
+  it('creates a positive adjustment transaction when balance is increased', () => {
     const updated: Account = { ...account, currentBalance: 1500 };
 
     store.getState().editAccount(updated);
 
     expect(mockDb.runSync).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO transactions'),
-      expect.arrayContaining(['income', 500, 'acc-adj', 'Balance Adjustment']),
+      expect.arrayContaining([
+        'adjustment',
+        500,
+        'acc-adj',
+        'Balance Adjustment',
+      ]),
     );
     expect(store.getState().accounts[0].currentBalance).toBe(1500);
   });
 
-  it('creates an expense adjustment transaction when balance is decreased', () => {
+  it('creates a negative adjustment transaction when balance is decreased', () => {
     const updated: Account = { ...account, currentBalance: 700 };
 
     store.getState().editAccount(updated);
 
     expect(mockDb.runSync).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO transactions'),
-      expect.arrayContaining(['expense', 300, 'acc-adj', 'Balance Adjustment']),
+      expect.arrayContaining([
+        'adjustment',
+        -300,
+        'acc-adj',
+        'Balance Adjustment',
+      ]),
     );
     expect(store.getState().accounts[0].currentBalance).toBe(700);
   });
@@ -510,6 +520,27 @@ describe('Integration: Balance adjustment via editAccount', () => {
       (call[0] as string).includes('INSERT INTO transactions'),
     );
     expect(insertCalls).toHaveLength(0);
+  });
+
+  it('reconciles balance via adjustAccountBalance and supports editing and deleting the adjustment', () => {
+    const created = store
+      .getState()
+      .adjustAccountBalance('acc-adj', 1800, 'Reconciliation');
+    expect(created).not.toBeNull();
+    expect(created?.type).toBe('adjustment');
+    expect(created?.amount).toBe(800);
+    expect(store.getState().accounts[0].currentBalance).toBe(1800);
+    expect(store.getState().transactions).toHaveLength(1);
+
+    store
+      .getState()
+      .deleteTransaction(created!.id, 'acc-adj', created!.amount, 'adjustment');
+    expect(store.getState().accounts[0].currentBalance).toBe(1000);
+    expect(store.getState().transactions).toHaveLength(0);
+
+    const negAdj = store.getState().adjustAccountBalance('acc-adj', 650);
+    expect(negAdj?.amount).toBe(-350);
+    expect(store.getState().accounts[0].currentBalance).toBe(650);
   });
 });
 

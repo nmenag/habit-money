@@ -137,6 +137,40 @@ describe('transactionsSlice', () => {
       expect(store.getState().accounts[0].currentBalance).toBe(850);
       expect(store.getState().accounts[1].currentBalance).toBe(650);
     });
+
+    it('adds positive adjustment transaction and increases account balance', () => {
+      const tx: Transaction = {
+        id: 'tx_adj_pos',
+        type: 'adjustment',
+        amount: 250,
+        categoryId: null,
+        accountId: 'acc1',
+        date: '2026-05-18T12:00:00.000',
+        note: 'Balance Adjustment',
+      };
+
+      store.getState().addTransaction(tx);
+
+      expect(store.getState().accounts[0].currentBalance).toBe(1250);
+      expect(store.getState().transactions[0].type).toBe('adjustment');
+    });
+
+    it('adds negative adjustment transaction and decreases account balance', () => {
+      const tx: Transaction = {
+        id: 'tx_adj_neg',
+        type: 'adjustment',
+        amount: -350,
+        categoryId: null,
+        accountId: 'acc1',
+        date: '2026-05-18T12:00:00.000',
+        note: 'Balance Adjustment',
+      };
+
+      store.getState().addTransaction(tx);
+
+      expect(store.getState().accounts[0].currentBalance).toBe(650);
+      expect(store.getState().transactions[0].amount).toBe(-350);
+    });
   });
 
   describe('editTransaction', () => {
@@ -219,6 +253,35 @@ describe('transactionsSlice', () => {
       expect(mockDb.runSync).toHaveBeenCalled();
     });
 
+    it('edits adjustment transaction and recalculates account balance', () => {
+      const oldTx: Transaction = {
+        id: 'tx_adj',
+        type: 'adjustment',
+        amount: 200,
+        categoryId: null,
+        accountId: 'acc1',
+        date: '2026-05-10T00:00:00.000',
+        note: 'Balance Adjustment',
+      };
+      store.setState({
+        transactions: [oldTx],
+        accounts: [
+          { id: 'acc1', name: 'Checking', currentBalance: 1200 } as any,
+          { id: 'acc2', name: 'Savings', currentBalance: 500 } as any,
+        ],
+      });
+
+      const updatedTx: Transaction = {
+        ...oldTx,
+        amount: -100,
+      };
+
+      store.getState().editTransaction(updatedTx);
+
+      expect(store.getState().accounts[0].currentBalance).toBe(900);
+      expect(store.getState().transactions[0].amount).toBe(-100);
+    });
+
     it('throws error and logs when database transaction fails during edit', () => {
       const tx: Transaction = {
         id: 'tx1',
@@ -288,6 +351,41 @@ describe('transactionsSlice', () => {
       // acc1: 1000 + 300 = 1300, acc2: 500 - 300 = 200
       expect(store.getState().accounts[0].currentBalance).toBe(1300);
       expect(store.getState().accounts[1].currentBalance).toBe(200);
+    });
+
+    it('deletes positive and negative adjustment transactions and reverses account balance', () => {
+      const posAdj: Transaction = {
+        id: 'tx_adj_1',
+        type: 'adjustment',
+        amount: 400,
+        categoryId: null,
+        accountId: 'acc1',
+        date: '2026-05-10T00:00:00.000',
+      };
+      const negAdj: Transaction = {
+        id: 'tx_adj_2',
+        type: 'adjustment',
+        amount: -150,
+        categoryId: null,
+        accountId: 'acc2',
+        date: '2026-05-10T00:00:00.000',
+      };
+      store.setState({
+        transactions: [posAdj, negAdj],
+        accounts: [
+          { id: 'acc1', name: 'Checking', currentBalance: 1400 } as any,
+          { id: 'acc2', name: 'Savings', currentBalance: 350 } as any,
+        ],
+      });
+
+      store.getState().deleteTransaction('tx_adj_1', 'acc1', 400, 'adjustment');
+      expect(store.getState().accounts[0].currentBalance).toBe(1000);
+
+      store
+        .getState()
+        .deleteTransaction('tx_adj_2', 'acc2', -150, 'adjustment');
+      expect(store.getState().accounts[1].currentBalance).toBe(500);
+      expect(store.getState().transactions).toHaveLength(0);
     });
   });
 });

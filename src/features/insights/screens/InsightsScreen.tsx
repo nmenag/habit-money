@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { fontScale, moderateScale } from '../../../utils/responsive';
 import { calculateCategoryGrowth } from '../../../utils/categoryGrowth';
+import { isAdjustmentTransaction } from '../../../utils/transactionUtils';
 import { TipsCarousel } from '../components/TipsCarousel';
 
 const addAlpha = (
@@ -94,23 +95,16 @@ export const InsightsScreen = () => {
   }, [selectedRange, refreshAnalytics]);
 
   const filtered = useMemo(() => {
-    const inRange = transactions.filter((tx) =>
-      isInRange(tx.date, selectedRange),
+    const inRange = transactions.filter(
+      (tx) => isInRange(tx.date, selectedRange) && !isAdjustmentTransaction(tx),
     );
 
     let totalIncome = 0;
     let totalExpenses = 0;
-    let totalAdjustments = 0;
-    let hasAdjustments = false;
     const catExpMap: Record<string, number> = {};
 
     inRange.forEach((tx) => {
-      const isAdjustment =
-        tx.note && translateName(tx.note) === t('balanceAdjustment');
-      if (isAdjustment) {
-        totalAdjustments += tx.type === 'income' ? tx.amount : -tx.amount;
-        hasAdjustments = true;
-      } else if (tx.type === 'income') {
+      if (tx.type === 'income') {
         totalIncome += tx.amount;
       } else if (tx.type === 'expense') {
         totalExpenses += tx.amount;
@@ -121,8 +115,7 @@ export const InsightsScreen = () => {
       }
     });
 
-    const combinedIncome = totalIncome + totalAdjustments;
-    const savings = combinedIncome - totalExpenses;
+    const savings = totalIncome - totalExpenses;
     const savingsRate =
       totalIncome > 0
         ? Math.max(-100, ((totalIncome - totalExpenses) / totalIncome) * 100)
@@ -152,20 +145,13 @@ export const InsightsScreen = () => {
     const txCount = inRange.length;
     const spendingDays = new Set(
       inRange
-        .filter((tx) => {
-          const isAdjustment =
-            tx.note && translateName(tx.note) === t('balanceAdjustment');
-          return tx.type === 'expense' && !isAdjustment;
-        })
+        .filter((tx) => tx.type === 'expense')
         .map((tx) => tx.date.substring(0, 10)),
     ).size;
 
     return {
       totalIncome,
       totalExpenses,
-      totalAdjustments,
-      hasAdjustments,
-      combinedIncome,
       savings,
       savingsRate,
       rawSavingsRate,
@@ -537,66 +523,6 @@ export const InsightsScreen = () => {
           </Card.Content>
         </Card>
 
-        {filtered.hasAdjustments && (
-          <Card
-            style={[
-              styles.miniCard,
-              {
-                backgroundColor: addAlpha(
-                  theme.colors.onSurfaceVariant,
-                  0.08,
-                  '#64748B',
-                ),
-                borderColor: addAlpha(
-                  theme.colors.onSurfaceVariant,
-                  0.17,
-                  '#64748B',
-                ),
-                borderWidth: 1,
-              },
-            ]}
-            mode="contained"
-            accessible={true}
-            accessibilityLabel={`${t('adjustments')}: ${formatCurrency(filtered.totalAdjustments)}`}
-          >
-            <Card.Content style={styles.miniCardContent}>
-              <Ionicons
-                name="options-outline"
-                size={20}
-                color={theme.colors.onSurfaceVariant}
-              />
-              <Text
-                style={[
-                  styles.miniLabel,
-                  {
-                    color: theme.colors.onSurfaceVariant,
-                    fontFamily: 'Inter-Medium',
-                    fontWeight: '500',
-                  },
-                ]}
-                numberOfLines={1}
-              >
-                {t('adjustments')}
-              </Text>
-              <Text
-                style={[
-                  styles.miniValue,
-                  {
-                    color: theme.colors.onSurfaceVariant,
-                    fontFamily: 'Inter-SemiBold',
-                    fontWeight: '600',
-                    fontSize: fontScale(14),
-                  },
-                ]}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                {formatCurrency(filtered.totalAdjustments)}
-              </Text>
-            </Card.Content>
-          </Card>
-        )}
-
         <Card
           style={[
             styles.miniCard,
@@ -647,21 +573,6 @@ export const InsightsScreen = () => {
           </Card.Content>
         </Card>
       </View>
-
-      {filtered.hasAdjustments && filtered.totalAdjustments !== 0 && (
-        <View style={{ marginBottom: 12, alignItems: 'center' }}>
-          <Text
-            style={{
-              fontFamily: 'Inter-Regular',
-              fontWeight: '400',
-              fontSize: 11,
-              color: theme.colors.outline,
-            }}
-          >
-            {t('combinedTotal')}: {formatCurrency(filtered.combinedIncome)}
-          </Text>
-        </View>
-      )}
 
       <Card
         style={[

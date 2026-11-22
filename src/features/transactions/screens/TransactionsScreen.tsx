@@ -23,6 +23,7 @@ import { isInRange } from '../../../utils/dateFilters';
 import { BottomSheet } from '../../../shared/components/BottomSheet';
 import { getValidCategoryIcon } from '../../../constants';
 import { AppTheme } from '../../../theme/theme';
+import { isAdjustmentTransaction } from '../../../utils/transactionUtils';
 
 import { FlashList } from '@shopify/flash-list';
 
@@ -99,13 +100,17 @@ export const TransactionsScreen = () => {
         const note = (tx.note || '').toLowerCase();
         const catName = (cat?.name || '').toLowerCase();
         const accName = (acc?.name || '').toLowerCase();
-        const amt = String(tx.amount);
+        const amt = String(Math.abs(tx.amount));
+        const adjLabel = isAdjustmentTransaction(tx)
+          ? t('balanceAdjustment').toLowerCase()
+          : '';
 
         return (
           note.includes(query) ||
           catName.includes(query) ||
           accName.includes(query) ||
-          amt.includes(query)
+          amt.includes(query) ||
+          adjLabel.includes(query)
         );
       }
 
@@ -119,6 +124,7 @@ export const TransactionsScreen = () => {
     searchQuery,
     categories,
     accounts,
+    t,
   ]);
 
   const isFilteredByAccountOrCategory =
@@ -138,6 +144,9 @@ export const TransactionsScreen = () => {
     let transfer = 0;
 
     filteredTransactions.forEach((tx) => {
+      if (isAdjustmentTransaction(tx)) {
+        return;
+      }
       if (tx.type === 'income') {
         income += tx.amount;
       } else if (tx.type === 'expense') {

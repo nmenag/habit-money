@@ -134,7 +134,12 @@ describe('accountsSlice', () => {
 
       expect(mockDb.runSync).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO transactions'),
-        expect.arrayContaining(['income', 500, 'acc1', 'Balance Adjustment']),
+        expect.arrayContaining([
+          'adjustment',
+          500,
+          'acc1',
+          'Balance Adjustment',
+        ]),
       );
       expect(store.getState().accounts[0].currentBalance).toBe(1500);
     });
@@ -160,9 +165,69 @@ describe('accountsSlice', () => {
 
       expect(mockDb.runSync).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO transactions'),
-        expect.arrayContaining(['expense', 200, 'acc1', 'Balance Adjustment']),
+        expect.arrayContaining([
+          'adjustment',
+          -200,
+          'acc1',
+          'Balance Adjustment',
+        ]),
       );
       expect(store.getState().accounts[0].currentBalance).toBe(800);
+    });
+  });
+
+  describe('adjustAccountBalance', () => {
+    let mockAddTransaction: jest.Mock;
+
+    beforeEach(() => {
+      mockAddTransaction = jest.fn();
+      store = createStore<AccountsSlice>()((set, get, api) => ({
+        transactions: [] as any[],
+        addTransaction: mockAddTransaction,
+        ...createAccountsSlice(set as any, get as any, api as any),
+      }));
+      store.setState({
+        accounts: [
+          {
+            id: 'acc1',
+            name: 'Checking',
+            type: 'bank',
+            initialBalance: 1000,
+            currentBalance: 1000,
+            currency: 'COP',
+            displayOrder: 1,
+          },
+        ],
+      });
+    });
+
+    it('creates a positive adjustment transaction when newBalance > currentBalance', () => {
+      const tx = store
+        .getState()
+        .adjustAccountBalance('acc1', 1450, 'Reconcile wallet');
+
+      expect(tx).not.toBeNull();
+      expect(tx?.type).toBe('adjustment');
+      expect(tx?.amount).toBe(450);
+      expect(tx?.accountId).toBe('acc1');
+      expect(tx?.note).toBe('Reconcile wallet');
+      expect(mockAddTransaction).toHaveBeenCalledWith(tx);
+    });
+
+    it('creates a negative adjustment transaction when newBalance < currentBalance', () => {
+      const tx = store.getState().adjustAccountBalance('acc1', 600);
+
+      expect(tx).not.toBeNull();
+      expect(tx?.type).toBe('adjustment');
+      expect(tx?.amount).toBe(-400);
+      expect(tx?.note).toBe('Balance Adjustment');
+      expect(mockAddTransaction).toHaveBeenCalledWith(tx);
+    });
+
+    it('returns null and does not add transaction when newBalance equals currentBalance or account is missing', () => {
+      expect(store.getState().adjustAccountBalance('acc1', 1000)).toBeNull();
+      expect(store.getState().adjustAccountBalance('missing', 500)).toBeNull();
+      expect(mockAddTransaction).not.toHaveBeenCalled();
     });
   });
 

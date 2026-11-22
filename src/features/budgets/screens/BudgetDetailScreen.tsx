@@ -20,6 +20,7 @@ import { useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
 import { getMonthRange, isInRange } from '../../../utils/dateFilters';
+import { isAdjustmentTransaction } from '../../../utils/transactionUtils';
 
 export const BudgetDetailScreen = () => {
   const params = useLocalSearchParams<{ budgetId: string }>();
@@ -55,6 +56,7 @@ export const BudgetDetailScreen = () => {
         return (
           (matchesBudget || matchesCategory) &&
           tx.type === 'expense' &&
+          !isAdjustmentTransaction(tx) &&
           isCurrentMonth
         );
       })

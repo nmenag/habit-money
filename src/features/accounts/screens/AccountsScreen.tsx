@@ -15,6 +15,7 @@ import { BannerAdComponent } from '../../../shared/components/BannerAdComponent'
 import { Account, useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
+import { isAdjustmentTransaction } from '../../../utils/transactionUtils';
 
 export const AccountsScreen = () => {
   const accounts = useStore((s) => s.accounts);
@@ -55,13 +56,13 @@ export const AccountsScreen = () => {
       inc !== null
         ? inc
         : monthTxs
-            .filter((t) => t.type === 'income')
+            .filter((t) => t.type === 'income' && !isAdjustmentTransaction(t))
             .reduce((s, t) => s + t.amount, 0);
     const actualExp =
       exp !== null
         ? exp
         : monthTxs
-            .filter((t) => t.type === 'expense')
+            .filter((t) => t.type === 'expense' && !isAdjustmentTransaction(t))
             .reduce((s, t) => s + t.amount, 0);
 
     return {

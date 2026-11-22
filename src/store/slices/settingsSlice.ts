@@ -13,6 +13,7 @@ import { useFilterStore } from '../useFilterStore';
 import type { AppStore } from '../useStore';
 import { triggerWidgetUpdate } from '../../utils/widgetUpdater';
 import { AppLockService } from '../../services/AppLockService';
+import { isAdjustmentTransaction } from '../../utils/transactionUtils';
 
 let analyticsDebounceTimer: any = null;
 
@@ -413,7 +414,10 @@ export const createSettingsSlice: StateCreator<
           getMonthRange(cycleStartDay, now).startDate,
         );
         const hasCurrentMonthData = get().transactions.some(
-          (t) => t.date >= currentMonthStart && t.type !== 'transfer',
+          (t) =>
+            t.date >= currentMonthStart &&
+            t.type !== 'transfer' &&
+            !isAdjustmentTransaction(t),
         );
 
         let activeRange = useFilterStore.getState().selectedRange;

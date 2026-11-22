@@ -1,14 +1,21 @@
 import { StateCreator } from 'zustand';
 import { getDb } from '../../db/schema';
-import { Account } from '../types';
+import { Account, Transaction } from '../types';
 import type { AppStore } from '../useStore';
 import { ProductAnalyticsService } from '../../services/ProductAnalyticsService';
-import { getLocalDateString } from '../../utils/dateUtils';
+import { getLocalDateString, getLocalISOString } from '../../utils/dateUtils';
+import { calculateAdjustmentDifference } from '../../utils/transactionUtils';
 
 export interface AccountsSlice {
   accounts: Account[];
   addAccount: (account: Account) => void;
   editAccount: (account: Account) => void;
+  adjustAccountBalance: (
+    accountId: string,
+    newBalance: number,
+    note?: string,
+    date?: string,
+  ) => Transaction | null;
   deleteAccount: (id: string) => void;
   updateAccountsOrder: (accounts: Account[]) => void;
 }
@@ -59,8 +66,13 @@ export const createAccountsSlice: StateCreator<
     const db = getDb();
     const oldAccount = get().accounts.find((a) => a.id === account.id);
     const balanceDiff = oldAccount
-      ? (account.currentBalance ?? 0) - (oldAccount.currentBalance ?? 0)
+      ? calculateAdjustmentDifference(
+          account.currentBalance ?? 0,
+          oldAccount.currentBalance ?? 0,
+        )
       : 0;
+
+    let createdAdjustmentTx: Transaction | null = null;
 
     db.withTransactionSync(() => {
       db.runSync(
@@ -77,13 +89,12 @@ export const createAccountsSlice: StateCreator<
       );
 
       if (balanceDiff !== 0 && oldAccount) {
-        const isPositive = balanceDiff > 0;
-        const adjustmentTx = {
+        createdAdjustmentTx = {
           id:
             Math.random().toString(36).substring(2, 9) +
             Date.now().toString(36),
-          type: (isPositive ? 'income' : 'expense') as 'income' | 'expense',
-          amount: Math.abs(balanceDiff),
+          type: 'adjustment',
+          amount: balanceDiff,
           categoryId: null,
           accountId: account.id,
           date: getLocalDateString(new Date()),
@@ -93,14 +104,14 @@ export const createAccountsSlice: StateCreator<
         db.runSync(
           'INSERT INTO transactions (id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
           [
-            adjustmentTx.id,
-            adjustmentTx.type,
-            adjustmentTx.amount,
+            createdAdjustmentTx.id,
+            createdAdjustmentTx.type,
+            createdAdjustmentTx.amount,
             null,
-            adjustmentTx.accountId,
+            createdAdjustmentTx.accountId,
             null,
-            adjustmentTx.date,
-            adjustmentTx.note,
+            createdAdjustmentTx.date,
+            createdAdjustmentTx.note ?? null,
             null,
           ],
         );
@@ -113,7 +124,40 @@ export const createAccountsSlice: StateCreator<
 
     set((state) => ({
       accounts: state.accounts.map((a) => (a.id === account.id ? account : a)),
+      transactions: createdAdjustmentTx
+        ? [createdAdjustmentTx, ...(state.transactions || [])]
+        : state.transactions,
     }));
+  },
+
+  adjustAccountBalance: (accountId, newBalance, note, date) => {
+    const account = get().accounts.find((a) => a.id === accountId);
+    if (!account) {
+      return null;
+    }
+
+    const difference = calculateAdjustmentDifference(
+      newBalance,
+      account.currentBalance,
+    );
+    if (difference === 0) {
+      return null;
+    }
+
+    const adjustmentTx: Transaction = {
+      id: Math.random().toString(36).substring(2, 9) + Date.now().toString(36),
+      type: 'adjustment',
+      amount: difference,
+      categoryId: null,
+      accountId: account.id,
+      budgetId: null,
+      date: date || getLocalISOString(),
+      note: note?.trim() || 'Balance Adjustment',
+      toAccountId: null,
+    };
+
+    get().addTransaction(adjustmentTx);
+    return adjustmentTx;
   },
 
   deleteAccount: (id) => {

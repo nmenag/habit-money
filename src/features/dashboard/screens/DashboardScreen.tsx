@@ -31,6 +31,10 @@ import { getValidCategoryIcon } from '../../../constants';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme, spacing } from '../../../theme/theme';
 import { fontScale, moderateScale } from '../../../utils/responsive';
+import {
+  getAdjustmentSignedAmount,
+  isAdjustmentTransaction,
+} from '../../../utils/transactionUtils';
 
 const addAlpha = (
   color: string | undefined,
@@ -101,8 +105,7 @@ export const DashboardScreen = React.memo(() => {
 
     const monthlyIncome = activeMetrics.income;
     const monthlyExpenses = activeMetrics.expenses;
-    const monthlyAdjustments = activeMetrics.adjustments;
-    const remainingBalance = activeMetrics.savings;
+    const remainingBalance = monthlyIncome - monthlyExpenses;
 
     const calendarExpenses = monthlyExpenses;
     const calendarIncome = monthlyIncome;
@@ -115,11 +118,7 @@ export const DashboardScreen = React.memo(() => {
       : getLast30DaysRange();
 
     const activeExpenses = transactions.filter((t) => {
-      if (t.type !== 'expense') return false;
-      const isAdjustment =
-        t.note &&
-        (t.note === 'Balance Adjustment' || t.note === 'Ajuste de Saldo');
-      if (isAdjustment) return false;
+      if (t.type !== 'expense' || isAdjustmentTransaction(t)) return false;
       return isInRange(t.date, activeRange);
     });
 
@@ -152,7 +151,6 @@ export const DashboardScreen = React.memo(() => {
       monthlyIncome,
       monthlyExpenses,
       calendarExpenses,
-      monthlyAdjustments,
       remainingBalance,
       topCategory,
       topCatAmount,
@@ -342,26 +340,6 @@ export const DashboardScreen = React.memo(() => {
             >
               {formatCurrency(data.remainingBalance)}
             </Text>
-
-            {data.monthlyAdjustments !== 0 && (
-              <View style={styles.adjustmentsRow}>
-                <Ionicons
-                  name="information-circle-outline"
-                  size={14}
-                  color={theme.colors.onSurfaceVariant}
-                />
-                <Text
-                  variant="bodySmall"
-                  style={[
-                    styles.adjustmentsText,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  {t('adjustments')}: {data.monthlyAdjustments > 0 ? '+' : ''}
-                  {formatCurrency(data.monthlyAdjustments)}
-                </Text>
-              </View>
-            )}
           </View>
 
           {/* Integrated Cash Flow Split */}
@@ -856,8 +834,14 @@ export const DashboardScreen = React.memo(() => {
           {data.recentTransactions.length > 0 ? (
             data.recentTransactions.map((tr, index) => {
               const cat = categories.find((c) => c.id === tr.categoryId);
-              const isAdjustment =
-                tr.note && translateName(tr.note) === t('balanceAdjustment');
+              const isAdjustment = isAdjustmentTransaction(tr);
+              const signedAdjAmount = isAdjustment
+                ? getAdjustmentSignedAmount(tr)
+                : 0;
+              const isPositiveTx = isAdjustment
+                ? signedAdjAmount >= 0
+                : tr.type === 'income';
+              const displayAmount = Math.abs(tr.amount);
               const accentColor =
                 tr.type === 'transfer'
                   ? theme.dark
@@ -875,7 +859,7 @@ export const DashboardScreen = React.memo(() => {
                     onPress={() => router.push('/transactions')}
                     activeOpacity={0.7}
                     style={[styles.transactionRow, { paddingVertical: 12 }]}
-                    accessibilityLabel={`${tr.note || translateName(cat?.name || 'Other')}, ${tr.type === 'income' ? '+' : '-'}${formatCurrency(tr.amount)}, ${format(parseISO(tr.date), 'MMM dd', { locale: language === 'es' ? esLocale : enUS })}`}
+                    accessibilityLabel={`${isAdjustment ? t('balanceAdjustment') : tr.note || translateName(cat?.name || 'Other')}, ${tr.type === 'transfer' ? '' : isPositiveTx ? '+' : '-'}${formatCurrency(displayAmount)}, ${format(parseISO(tr.date), 'MMM dd', { locale: language === 'es' ? esLocale : enUS })}`}
                     accessibilityRole="button"
                   >
                     <Avatar.Icon
@@ -919,8 +903,7 @@ export const DashboardScreen = React.memo(() => {
                         ]}
                         numberOfLines={1}
                       >
-                        {tr.note &&
-                        translateName(tr.note) === t('balanceAdjustment')
+                        {isAdjustment
                           ? t('balanceAdjustment')
                           : tr.note ||
                             (tr.type === 'transfer'
@@ -945,7 +928,7 @@ export const DashboardScreen = React.memo(() => {
                           color:
                             tr.type === 'transfer'
                               ? theme.colors.onSurface
-                              : tr.type === 'income'
+                              : isPositiveTx
                                 ? theme.colors.income
                                 : theme.colors.error,
                         },
@@ -953,12 +936,8 @@ export const DashboardScreen = React.memo(() => {
                       numberOfLines={1}
                       adjustsFontSizeToFit
                     >
-                      {tr.type === 'transfer'
-                        ? ''
-                        : tr.type === 'income'
-                          ? '+'
-                          : '-'}
-                      {formatCurrency(tr.amount)}
+                      {tr.type === 'transfer' ? '' : isPositiveTx ? '+' : '-'}
+                      {formatCurrency(displayAmount)}
                     </Text>
                   </TouchableOpacity>
                   {index < data.recentTransactions.length - 1 && <Divider />}

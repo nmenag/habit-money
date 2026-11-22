@@ -1,30 +1,188 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { format, parseISO, subDays } from 'date-fns';
 import { enUS, es } from 'date-fns/locale';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
-import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Card, IconButton, Text, useTheme } from 'react-native-paper';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {
+  Button,
+  Card,
+  IconButton,
+  Text,
+  TextInput,
+  useTheme,
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 
 import { BannerAdComponent } from '../../../shared/components/BannerAdComponent';
+import { BottomSheet } from '../../../shared/components/BottomSheet';
 import { TransactionItem } from '../../transactions/components/TransactionItem';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { AppTheme } from '../../../theme/theme';
 import { getLocalDateString } from '../../../utils/dateUtils';
 import { fontScale } from '../../../utils/responsive';
+import {
+  calculateAdjustmentDifference,
+  isAdjustmentTransaction,
+} from '../../../utils/transactionUtils';
 
 export const AccountDetailScreen = () => {
   const params = useLocalSearchParams<{ accountId: string }>();
   const { accountId } = params;
-  const { accounts, transactions, categories, formatCurrency } = useStore();
+  const {
+    accounts,
+    transactions,
+    categories,
+    formatCurrency,
+    adjustAccountBalance,
+  } = useStore();
   const { t, translateName, language } = useTranslation();
   const theme = useTheme<AppTheme>();
   const styles = defaultStyles(theme);
   const insets = useSafeAreaInsets();
 
   const account = accounts.find((a) => a.id === accountId);
+
+  const [adjustModalVisible, setAdjustModalVisible] = useState(false);
+  const [displayNewBalance, setDisplayNewBalance] = useState('');
+  const [newBalanceValue, setNewBalanceValue] = useState<number | null>(null);
+  const [isNegativeBalance, setIsNegativeBalance] = useState(false);
+  const [adjustNote, setAdjustNote] = useState('');
+
+  const handleOpenAdjustModal = useCallback(() => {
+    setDisplayNewBalance('');
+    setNewBalanceValue(null);
+    setIsNegativeBalance(false);
+    setAdjustNote('');
+    setAdjustModalVisible(true);
+  }, []);
+
+  const handleNewBalanceChange = useCallback(
+    (text: string) => {
+      const hasLeadingMinus = text.trim().startsWith('-');
+      const isDecimal =
+        account?.currency !== 'COP' &&
+        account?.currency !== 'CLP' &&
+        account?.currency !== 'PYG' &&
+        account?.currency !== 'XAF';
+      const thousandSep = language === 'es' ? '.' : ',';
+      const decimalSep = language === 'es' ? ',' : '.';
+
+      if (!isDecimal) {
+        const onlyDigits = text.replace(/\D/g, '');
+        if (onlyDigits === '') {
+          setDisplayNewBalance('');
+          setNewBalanceValue(null);
+          if (!hasLeadingMinus) setIsNegativeBalance(false);
+          return;
+        }
+        const parsed = parseInt(onlyDigits, 10);
+        const signed = hasLeadingMinus || isNegativeBalance ? -parsed : parsed;
+        if (hasLeadingMinus) setIsNegativeBalance(true);
+        setNewBalanceValue(signed);
+        setDisplayNewBalance(
+          onlyDigits.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSep),
+        );
+      } else {
+        let processed = text;
+        if (language === 'es') {
+          if (/\.\d{1,2}$/.test(processed)) {
+            processed = processed.replace(/\.(\d{1,2})$/, ',$1');
+          } else if (processed.endsWith('.')) {
+            processed = processed.slice(0, -1) + ',';
+          }
+        }
+        const cleanText = processed.replace(/[^0-9.,]/g, '');
+        if (cleanText === '') {
+          setDisplayNewBalance('');
+          setNewBalanceValue(null);
+          if (!hasLeadingMinus) setIsNegativeBalance(false);
+          return;
+        }
+        if (hasLeadingMinus) setIsNegativeBalance(true);
+        const firstSepIdx = cleanText.indexOf(decimalSep);
+        let formatted = '';
+        let rawNumericStr = '';
+        if (firstSepIdx === -1) {
+          const digits = cleanText.replace(/\D/g, '');
+          rawNumericStr = digits;
+          formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSep);
+        } else {
+          const intPart = cleanText
+            .substring(0, firstSepIdx)
+            .replace(/\D/g, '');
+          const decPart = cleanText
+            .substring(firstSepIdx + 1)
+            .replace(/\D/g, '')
+            .substring(0, 2);
+          rawNumericStr = `${intPart || '0'}.${decPart}`;
+          const formattedInt = (intPart || '0').replace(
+            /\B(?=(\d{3})+(?!\d))/g,
+            thousandSep,
+          );
+          formatted = formattedInt + decimalSep + decPart;
+        }
+        const parsed = parseFloat(rawNumericStr);
+        const numericVal = isNaN(parsed) ? 0 : parsed;
+        const signed =
+          hasLeadingMinus || isNegativeBalance ? -numericVal : numericVal;
+        setDisplayNewBalance(formatted);
+        setNewBalanceValue(signed);
+      }
+    },
+    [account?.currency, isNegativeBalance, language],
+  );
+
+  const toggleNegativeNewBalance = useCallback(() => {
+    setIsNegativeBalance((prev) => {
+      const next = !prev;
+      if (newBalanceValue !== null && newBalanceValue !== 0) {
+        setNewBalanceValue(
+          next ? -Math.abs(newBalanceValue) : Math.abs(newBalanceValue),
+        );
+      }
+      return next;
+    });
+  }, [newBalanceValue]);
+
+  const adjustmentDifference = useMemo(() => {
+    if (!account || newBalanceValue === null) {
+      return 0;
+    }
+    return calculateAdjustmentDifference(
+      newBalanceValue,
+      account.currentBalance,
+    );
+  }, [account, newBalanceValue]);
+
+  const handleConfirmAdjustment = useCallback(() => {
+    if (!account) return;
+    if (newBalanceValue === null || adjustmentDifference === 0) {
+      Alert.alert(t('error'), t('noBalanceChangeError'));
+      return;
+    }
+
+    adjustAccountBalance(
+      account.id,
+      newBalanceValue,
+      adjustNote.trim() || t('balanceAdjustment'),
+    );
+    setAdjustModalVisible(false);
+  }, [
+    account,
+    adjustAccountBalance,
+    adjustNote,
+    adjustmentDifference,
+    newBalanceValue,
+    t,
+  ]);
 
   const accountTransactions = useMemo(() => {
     return transactions
@@ -50,7 +208,11 @@ export const AccountDetailScreen = () => {
 
       let dayExpenseSum = 0;
       accountTransactions.forEach((tx) => {
-        if (tx.date.startsWith(dayStr) && tx.type === 'expense') {
+        if (
+          tx.date.startsWith(dayStr) &&
+          tx.type === 'expense' &&
+          !isAdjustmentTransaction(tx)
+        ) {
           dayExpenseSum += tx.amount;
         }
       });
@@ -88,6 +250,9 @@ export const AccountDetailScreen = () => {
     let outflow = 0;
 
     accountTransactions.forEach((tx) => {
+      if (isAdjustmentTransaction(tx)) {
+        return;
+      }
       if (tx.date.startsWith(currentMonthPrefix)) {
         if (tx.type === 'income') {
           inflow += tx.amount;
@@ -228,14 +393,43 @@ export const AccountDetailScreen = () => {
           >
             <Card.Content style={styles.creditCardContent}>
               <View style={styles.cardMidRow}>
-                <Text
-                  style={[
-                    styles.cardBalanceLabel,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  {t('currentBalanceLabel').toUpperCase()}
-                </Text>
+                <View style={styles.cardBalanceTopRow}>
+                  <Text
+                    style={[
+                      styles.cardBalanceLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('currentBalanceLabel').toUpperCase()}
+                  </Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.adjustBalancePill,
+                      {
+                        backgroundColor: theme.colors.elevation.level1,
+                        borderColor: theme.colors.outlineVariant,
+                      },
+                    ]}
+                    onPress={handleOpenAdjustModal}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('adjustBalance')}
+                  >
+                    <MaterialCommunityIcons
+                      name="scale-balance"
+                      size={14}
+                      color={theme.colors.primary}
+                    />
+                    <Text
+                      style={[
+                        styles.adjustBalancePillText,
+                        { color: theme.colors.onSurface },
+                      ]}
+                    >
+                      {t('adjustBalance')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
                 <Text
                   style={[
                     styles.cardBalance,
@@ -389,7 +583,9 @@ export const AccountDetailScreen = () => {
           </View>
         </Animated.View>
 
-        {accountTransactions.some((t) => t.type === 'expense') && (
+        {accountTransactions.some(
+          (tx) => tx.type === 'expense' && !isAdjustmentTransaction(tx),
+        ) && (
           <Animated.View
             entering={FadeInUp.delay(150).duration(300)}
             style={styles.chartSection}
@@ -561,6 +757,202 @@ export const AccountDetailScreen = () => {
         </Animated.View>
       </ScrollView>
       <BannerAdComponent />
+
+      <BottomSheet
+        visible={adjustModalVisible}
+        onClose={() => setAdjustModalVisible(false)}
+        title={t('adjustBalance')}
+        footer={
+          <Button
+            mode="contained"
+            onPress={handleConfirmAdjustment}
+            disabled={newBalanceValue === null || adjustmentDifference === 0}
+            style={[
+              styles.saveAdjustBtn,
+              {
+                backgroundColor:
+                  newBalanceValue !== null && adjustmentDifference !== 0
+                    ? theme.colors.primary
+                    : theme.colors.outlineVariant,
+              },
+            ]}
+            contentStyle={{ height: 48 }}
+            labelStyle={{
+              fontFamily: 'Inter-SemiBold',
+              fontWeight: '600',
+              fontSize: 15,
+              color: theme.colors.onPrimary,
+            }}
+            accessibilityLabel={t('save')}
+          >
+            {t('save')}
+          </Button>
+        }
+      >
+        <View style={styles.adjustModalBody}>
+          <Text
+            style={[
+              styles.adjustDescText,
+              { color: theme.colors.onSurfaceVariant },
+            ]}
+          >
+            {t('reconcileBalanceDesc')}
+          </Text>
+
+          <View
+            style={[
+              styles.adjustSummaryCard,
+              {
+                backgroundColor: theme.colors.elevation.level1,
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            <View style={styles.adjustSummaryRow}>
+              <Text
+                style={[
+                  styles.adjustSummaryLabel,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {t('currentBalanceLabel')}
+              </Text>
+              <Text
+                style={[
+                  styles.adjustSummaryValue,
+                  { color: theme.colors.onSurface },
+                ]}
+              >
+                {formatCurrency(account.currentBalance, account.currency)}
+              </Text>
+            </View>
+
+            <View
+              style={[
+                styles.adjustDivider,
+                { backgroundColor: theme.colors.outlineVariant },
+              ]}
+            />
+
+            <View style={styles.adjustSummaryRow}>
+              <Text
+                style={[
+                  styles.adjustSummaryLabel,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {t('adjustmentDifference')}
+              </Text>
+              <Text
+                style={[
+                  styles.adjustSummaryValue,
+                  {
+                    color:
+                      adjustmentDifference > 0
+                        ? (theme.colors as any).income || '#16A34A'
+                        : adjustmentDifference < 0
+                          ? theme.colors.error
+                          : theme.colors.onSurfaceVariant,
+                  },
+                ]}
+              >
+                {adjustmentDifference > 0
+                  ? `+${formatCurrency(adjustmentDifference, account.currency)}`
+                  : adjustmentDifference < 0
+                    ? `-${formatCurrency(Math.abs(adjustmentDifference), account.currency)}`
+                    : formatCurrency(0, account.currency)}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.adjustFieldGroup}>
+            <View style={styles.adjustFieldHeaderRow}>
+              <Text
+                style={[
+                  styles.adjustFieldLabel,
+                  { color: theme.colors.outline },
+                ]}
+              >
+                {t('newActualBalance').toUpperCase()}
+              </Text>
+              {account.type === 'credit' && (
+                <TouchableOpacity
+                  onPress={toggleNegativeNewBalance}
+                  style={[
+                    styles.signToggleChip,
+                    {
+                      backgroundColor: isNegativeBalance
+                        ? theme.colors.errorContainer
+                        : theme.colors.elevation.level1,
+                      borderColor: isNegativeBalance
+                        ? theme.colors.error
+                        : theme.colors.outlineVariant,
+                    },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    isNegativeBalance
+                      ? t('negativeAdjustment')
+                      : t('positiveAdjustment')
+                  }
+                >
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      fontFamily: 'Inter-SemiBold',
+                      fontWeight: '600',
+                      color: isNegativeBalance
+                        ? theme.colors.error
+                        : theme.colors.onSurfaceVariant,
+                    }}
+                  >
+                    {isNegativeBalance ? '- Negative' : '+ Positive'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <TextInput
+              value={displayNewBalance}
+              onChangeText={handleNewBalanceChange}
+              mode="outlined"
+              keyboardType="decimal-pad"
+              placeholder="0"
+              accessibilityLabel={t('newActualBalance')}
+              outlineColor={theme.colors.outlineVariant}
+              activeOutlineColor={theme.colors.primary}
+              textColor={theme.colors.onSurface}
+              placeholderTextColor={theme.colors.outline}
+              style={styles.adjustTextInput}
+              left={
+                <TextInput.Affix
+                  text={`${isNegativeBalance ? '-' : ''}${account.currency} `}
+                />
+              }
+            />
+          </View>
+
+          <View style={styles.adjustFieldGroup}>
+            <Text
+              style={[styles.adjustFieldLabel, { color: theme.colors.outline }]}
+            >
+              {t('note').toUpperCase()} ({t('optional').toUpperCase()})
+            </Text>
+            <TextInput
+              value={adjustNote}
+              onChangeText={setAdjustNote}
+              mode="outlined"
+              placeholder={t('balanceAdjustment')}
+              accessibilityLabel={t('note')}
+              outlineColor={theme.colors.outlineVariant}
+              activeOutlineColor={theme.colors.primary}
+              textColor={theme.colors.onSurface}
+              placeholderTextColor={theme.colors.outline}
+              style={styles.adjustTextInput}
+              maxLength={150}
+            />
+          </View>
+        </View>
+      </BottomSheet>
     </View>
   );
 };
@@ -591,13 +983,32 @@ const defaultStyles = (theme: AppTheme) =>
     cardMidRow: {
       marginBottom: 20,
     },
+    cardBalanceTopRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 6,
+    },
     cardBalanceLabel: {
       fontSize: fontScale(10),
       fontFamily: 'Inter-Medium',
       fontWeight: '500',
       textTransform: 'uppercase',
       letterSpacing: 1.5,
-      marginBottom: 4,
+    },
+    adjustBalancePill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 10,
+      borderWidth: 1,
+      gap: 6,
+    },
+    adjustBalancePillText: {
+      fontSize: fontScale(11),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
     },
     cardBalance: {
       fontSize: fontScale(24),
@@ -807,5 +1218,69 @@ const defaultStyles = (theme: AppTheme) =>
       fontFamily: 'Inter-Medium',
       fontWeight: '500',
       marginTop: 10,
+    },
+    adjustModalBody: {
+      gap: 16,
+      paddingTop: 4,
+    },
+    adjustDescText: {
+      fontSize: fontScale(13),
+      fontFamily: 'Inter-Regular',
+      lineHeight: 18,
+    },
+    adjustSummaryCard: {
+      borderRadius: 14,
+      borderWidth: 1,
+      padding: 14,
+      gap: 10,
+    },
+    adjustSummaryRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    adjustSummaryLabel: {
+      fontSize: fontScale(12),
+      fontFamily: 'Inter-Medium',
+      fontWeight: '500',
+    },
+    adjustSummaryValue: {
+      fontSize: fontScale(14),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+    },
+    adjustDivider: {
+      height: 1,
+      width: '100%',
+    },
+    adjustFieldGroup: {
+      gap: 6,
+    },
+    adjustFieldHeaderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    adjustFieldLabel: {
+      fontSize: fontScale(10),
+      fontFamily: 'Inter-SemiBold',
+      fontWeight: '600',
+      letterSpacing: 1.2,
+      paddingLeft: 4,
+    },
+    signToggleChip: {
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 8,
+      borderWidth: 1,
+    },
+    adjustTextInput: {
+      backgroundColor: 'transparent',
+      fontSize: 15,
+      fontFamily: 'Inter-Medium',
+    },
+    saveAdjustBtn: {
+      borderRadius: 14,
+      width: '100%',
     },
   });

@@ -3,6 +3,10 @@ import { getDb } from '../../db/schema';
 import { Budget, Transaction, TransactionType } from '../types';
 import type { AppStore } from '../useStore';
 import { ProductAnalyticsService } from '../../services/ProductAnalyticsService';
+import {
+  getTransactionBalanceModifier,
+  roundCurrency,
+} from '../../utils/transactionUtils';
 
 export interface TransactionsSlice {
   transactions: Transaction[];
@@ -48,8 +52,10 @@ export const createTransactionsSlice: StateCreator<
 
   addTransaction: (transaction) => {
     const db = getDb();
-    const isIncome = transaction.type === 'income';
-    const amountModifier = isIncome ? transaction.amount : -transaction.amount;
+    const amountModifier = getTransactionBalanceModifier(
+      transaction.type,
+      transaction.amount,
+    );
 
     const isFirstTransaction = get().transactions.length === 0;
     if (isFirstTransaction) {
@@ -98,19 +104,23 @@ export const createTransactionsSlice: StateCreator<
           if (acc.id === transaction.accountId) {
             return {
               ...acc,
-              currentBalance: acc.currentBalance - transaction.amount,
+              currentBalance: roundCurrency(
+                acc.currentBalance - transaction.amount,
+              ),
             };
           }
           if (acc.id === transaction.toAccountId) {
             return {
               ...acc,
-              currentBalance: acc.currentBalance + transaction.amount,
+              currentBalance: roundCurrency(
+                acc.currentBalance + transaction.amount,
+              ),
             };
           }
         } else if (acc.id === transaction.accountId) {
           return {
             ...acc,
-            currentBalance: acc.currentBalance + amountModifier,
+            currentBalance: roundCurrency(acc.currentBalance + amountModifier),
           };
         }
         return acc;
@@ -144,6 +154,15 @@ export const createTransactionsSlice: StateCreator<
     ).catch(() => {});
 
     try {
+      const oldModifier = -getTransactionBalanceModifier(
+        oldTransaction.type,
+        oldTransaction.amount,
+      );
+      const newModifier = getTransactionBalanceModifier(
+        transaction.type,
+        transaction.amount,
+      );
+
       db.withTransactionSync(() => {
         if (oldTransaction.type === 'transfer' && oldTransaction.toAccountId) {
           db.runSync(
@@ -155,10 +174,6 @@ export const createTransactionsSlice: StateCreator<
             [oldTransaction.amount ?? 0, oldTransaction.toAccountId ?? ''],
           );
         } else {
-          const oldModifier =
-            oldTransaction.type === 'income'
-              ? -oldTransaction.amount
-              : oldTransaction.amount;
           db.runSync(
             'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
             [oldModifier ?? 0, oldTransaction.accountId ?? ''],
@@ -175,10 +190,6 @@ export const createTransactionsSlice: StateCreator<
             [transaction.amount ?? 0, transaction.toAccountId ?? ''],
           );
         } else {
-          const newModifier =
-            transaction.type === 'income'
-              ? transaction.amount
-              : -transaction.amount;
           db.runSync(
             'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
             [newModifier ?? 0, transaction.accountId ?? ''],
@@ -201,6 +212,76 @@ export const createTransactionsSlice: StateCreator<
         );
       });
 
+      set((state) => {
+        const revertedAccounts = state.accounts.map((acc) => {
+          if (
+            oldTransaction.type === 'transfer' &&
+            oldTransaction.toAccountId
+          ) {
+            if (acc.id === oldTransaction.accountId) {
+              return {
+                ...acc,
+                currentBalance: roundCurrency(
+                  acc.currentBalance + oldTransaction.amount,
+                ),
+              };
+            }
+            if (acc.id === oldTransaction.toAccountId) {
+              return {
+                ...acc,
+                currentBalance: roundCurrency(
+                  acc.currentBalance - oldTransaction.amount,
+                ),
+              };
+            }
+          } else if (acc.id === oldTransaction.accountId) {
+            return {
+              ...acc,
+              currentBalance: roundCurrency(acc.currentBalance + oldModifier),
+            };
+          }
+          return acc;
+        });
+
+        const updatedAccounts = revertedAccounts.map((acc) => {
+          if (transaction.type === 'transfer' && transaction.toAccountId) {
+            if (acc.id === transaction.accountId) {
+              return {
+                ...acc,
+                currentBalance: roundCurrency(
+                  acc.currentBalance - transaction.amount,
+                ),
+              };
+            }
+            if (acc.id === transaction.toAccountId) {
+              return {
+                ...acc,
+                currentBalance: roundCurrency(
+                  acc.currentBalance + transaction.amount,
+                ),
+              };
+            }
+          } else if (acc.id === transaction.accountId) {
+            return {
+              ...acc,
+              currentBalance: roundCurrency(acc.currentBalance + newModifier),
+            };
+          }
+          return acc;
+        });
+
+        const updatedTransactions = state.transactions
+          .map((t) => (t.id === transaction.id ? transaction : t))
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+          );
+
+        return {
+          accounts: updatedAccounts,
+          transactions: updatedTransactions,
+        };
+      });
+
       get().loadData();
       get().refreshAnalytics();
     } catch (error) {
@@ -211,14 +292,17 @@ export const createTransactionsSlice: StateCreator<
 
   deleteTransaction: (id, accountId, amount, type) => {
     const db = getDb();
-    const isIncome = type === 'income';
-    const amountModifier = isIncome ? -amount : amount;
-
-    ProductAnalyticsService.logTransactionDeleted(type || 'expense').catch(
-      () => {},
+    const oldTransaction = get().transactions.find((t) => t.id === id);
+    const effectiveType = oldTransaction?.type || type;
+    const effectiveAmount = oldTransaction?.amount ?? amount;
+    const amountModifier = -getTransactionBalanceModifier(
+      effectiveType,
+      effectiveAmount,
     );
 
-    const oldTransaction = get().transactions.find((t) => t.id === id);
+    ProductAnalyticsService.logTransactionDeleted(
+      effectiveType || 'expense',
+    ).catch(() => {});
 
     db.withTransactionSync(() => {
       db.runSync('DELETE FROM transactions WHERE id = ?', [id ?? null]);
@@ -226,11 +310,11 @@ export const createTransactionsSlice: StateCreator<
       if (oldTransaction?.type === 'transfer' && oldTransaction.toAccountId) {
         db.runSync(
           'UPDATE accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-          [amount ?? 0, accountId ?? null],
+          [effectiveAmount ?? 0, accountId ?? null],
         );
         db.runSync(
           'UPDATE accounts SET currentBalance = currentBalance - ? WHERE id = ?',
-          [amount ?? 0, oldTransaction.toAccountId ?? null],
+          [effectiveAmount ?? 0, oldTransaction.toAccountId ?? null],
         );
       } else {
         db.runSync(
@@ -246,19 +330,23 @@ export const createTransactionsSlice: StateCreator<
           if (acc.id === accountId) {
             return {
               ...acc,
-              currentBalance: acc.currentBalance + amount,
+              currentBalance: roundCurrency(
+                acc.currentBalance + effectiveAmount,
+              ),
             };
           }
           if (acc.id === oldTransaction.toAccountId) {
             return {
               ...acc,
-              currentBalance: acc.currentBalance - amount,
+              currentBalance: roundCurrency(
+                acc.currentBalance - effectiveAmount,
+              ),
             };
           }
         } else if (acc.id === accountId) {
           return {
             ...acc,
-            currentBalance: acc.currentBalance + amountModifier,
+            currentBalance: roundCurrency(acc.currentBalance + amountModifier),
           };
         }
         return acc;

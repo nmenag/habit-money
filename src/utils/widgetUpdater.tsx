@@ -8,6 +8,7 @@ import { HabitMoneyWidget } from '../widgets/HabitMoneyWidget';
 import { getDb } from '../db/schema';
 import { getLast30DaysRange, getMonthRange } from './dateFilters';
 import { getLocalISOString } from './dateUtils';
+import { isAdjustmentTransaction } from './transactionUtils';
 
 export function triggerWidgetUpdate() {
   if (Platform.OS !== 'android') return;
@@ -56,15 +57,13 @@ export function triggerWidgetUpdate() {
         [calStartStr, calEndStr],
       );
 
-      const adjustmentNotes = [
-        translations.en.balanceAdjustment,
-        translations.es.balanceAdjustment,
-      ];
-
       let hasCalData = false;
       calTransactions.forEach((t) => {
-        const isAdjustment = t.note && adjustmentNotes.includes(t.note);
-        if (!isAdjustment && t.amount > 0) {
+        if (
+          !isAdjustmentTransaction(t) &&
+          t.type !== 'transfer' &&
+          t.amount > 0
+        ) {
           hasCalData = true;
         }
       });
@@ -86,8 +85,7 @@ export function triggerWidgetUpdate() {
 
       transactions.forEach(
         (t: { type: string; amount: number; note: string }) => {
-          const isAdjustment = t.note && adjustmentNotes.includes(t.note);
-          if (!isAdjustment) {
+          if (!isAdjustmentTransaction(t)) {
             if (t.type === 'income') {
               income += t.amount;
             } else if (t.type === 'expense') {

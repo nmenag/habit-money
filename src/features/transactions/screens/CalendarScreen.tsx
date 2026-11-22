@@ -11,6 +11,7 @@ import { TransactionItem } from '../components/TransactionItem';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { Transaction } from '../../../store/types';
 import { getLocalISOString } from '../../../utils/dateUtils';
+import { isAdjustmentTransaction } from '../../../utils/transactionUtils';
 
 const formatAmount = (
   amount: number,
@@ -25,7 +26,7 @@ export const CalendarScreen = () => {
   const transactions = useStore((s) => s.transactions);
   const categories = useStore((s) => s.categories);
   const formatCurrency = useStore((s) => s.formatCurrency);
-  const { t, language, translateName } = useTranslation();
+  const { t, language } = useTranslation();
   const theme = useTheme();
   const styles = defaultStyles(theme);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -38,21 +39,20 @@ export const CalendarScreen = () => {
 
   const dayTotals = dayTransactions.reduce(
     (acc, curr) => {
-      const isAdjustment =
-        curr.note && translateName(curr.note) === t('balanceAdjustment');
-      if (isAdjustment) {
-        acc.adjustments += curr.type === 'income' ? curr.amount : -curr.amount;
-      } else if (curr.type === 'income') {
+      if (isAdjustmentTransaction(curr)) {
+        return acc;
+      }
+      if (curr.type === 'income') {
         acc.income += curr.amount;
       } else if (curr.type === 'expense') {
         acc.expense += curr.amount;
       }
       return acc;
     },
-    { income: 0, expense: 0, adjustments: 0 },
+    { income: 0, expense: 0 },
   );
 
-  const dailyNet = dayTotals.income - dayTotals.expense + dayTotals.adjustments;
+  const dailyNet = dayTotals.income - dayTotals.expense;
 
   const handleTransactionPress = (transaction: Transaction) => {
     router.push({
@@ -97,15 +97,6 @@ export const CalendarScreen = () => {
                 {dayTotals.expense > 0 && (
                   <Text variant="labelLarge" style={styles.expenseTotal}>
                     -{formatAmount(dayTotals.expense, formatCurrency)}
-                  </Text>
-                )}
-                {dayTotals.adjustments !== 0 && (
-                  <Text
-                    variant="labelSmall"
-                    style={{ color: theme.colors.outline }}
-                  >
-                    {dayTotals.adjustments > 0 ? '+' : ''}
-                    {formatAmount(dayTotals.adjustments, formatCurrency)} (adj)
                   </Text>
                 )}
                 <Text

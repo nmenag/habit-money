@@ -36,6 +36,12 @@ import { getLocalISOString } from '../../../utils/dateUtils';
 import { formatNumber } from '../../../utils/formatters';
 import { getValidCategoryIcon } from '../../../constants';
 import { getMonthRange, isInRange } from '../../../utils/dateFilters';
+import {
+  calculateAdjustmentDifference,
+  getAdjustmentSignedAmount,
+  isAdjustmentTransaction,
+  roundCurrency,
+} from '../../../utils/transactionUtils';
 import { BottomSheet } from '../../../shared/components';
 import { ExpenseFormFields } from '../components/ExpenseFormFields';
 import { IncomeFormFields } from '../components/IncomeFormFields';
@@ -97,6 +103,11 @@ const CustomSegmentedControl: React.FC<CustomSegmentedControlProps> =
           return {
             bg: theme.dark ? '#1E293B' : '#E0F2FE',
             text: theme.colors.primary,
+          };
+        default:
+          return {
+            bg: theme.dark ? '#1E293B' : '#F1F5F9',
+            text: theme.colors.onSurface,
           };
       }
     };
@@ -264,8 +275,21 @@ export const AddTransactionScreen = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const [type, setType] = useState<TransactionType>(
-    editingTransaction?.type || 'expense',
+  const [type, setType] = useState<TransactionType>(() => {
+    if (editingTransaction && isAdjustmentTransaction(editingTransaction)) {
+      return 'adjustment';
+    }
+    return editingTransaction?.type || 'expense';
+  });
+  const [adjustmentSign, setAdjustmentSign] = useState<'positive' | 'negative'>(
+    () => {
+      if (editingTransaction && isAdjustmentTransaction(editingTransaction)) {
+        return getAdjustmentSignedAmount(editingTransaction) < 0
+          ? 'negative'
+          : 'positive';
+      }
+      return 'positive';
+    },
   );
   const [amount, setAmount] = useState(
     editingTransaction ? Math.abs(editingTransaction.amount) : 0,
@@ -395,8 +419,24 @@ export const AddTransactionScreen = () => {
           text: theme.colors.primary,
           badgeText: theme.colors.primary,
         };
+      case 'adjustment':
+        return adjustmentSign === 'negative'
+          ? {
+              bg: theme.dark ? '#2A1818' : '#FFF5F5',
+              border: theme.dark ? '#5E2727' : '#FEE2E2',
+              badgeBg: theme.dark ? '#3A1E1E' : '#FEE2E2',
+              text: theme.colors.error,
+              badgeText: theme.colors.error,
+            }
+          : {
+              bg: theme.dark ? '#0E1F15' : '#F0FDF4',
+              border: theme.dark ? '#1E462E' : '#DCFCE7',
+              badgeBg: theme.dark ? '#1A3324' : '#DCFCE7',
+              text: (theme.colors as any).income || '#15803D',
+              badgeText: (theme.colors as any).income || '#15803D',
+            };
     }
-  }, [type, theme]);
+  }, [type, adjustmentSign, theme]);
 
   const openAccountSheet = (targetType: 'from' | 'to') => {
     setTargetAccountType(targetType);
@@ -447,28 +487,38 @@ export const AddTransactionScreen = () => {
       return;
     }
 
+    const isSpecialType = type === 'transfer' || type === 'adjustment';
+    const finalAmount =
+      type === 'adjustment'
+        ? adjustmentSign === 'negative'
+          ? -Math.abs(amount)
+          : Math.abs(amount)
+        : amount;
+    const finalNote =
+      type === 'adjustment' ? note.trim() || t('balanceAdjustment') : note;
+
     if (isEditing && editingTransaction) {
       editTransaction({
         id: editingTransaction.id,
         type,
-        amount,
-        categoryId: type === 'transfer' ? null : selectedCategory || null,
+        amount: finalAmount,
+        categoryId: isSpecialType ? null : selectedCategory || null,
         accountId: selectedAccount,
-        budgetId: type === 'transfer' ? null : selectedBudget || null,
+        budgetId: isSpecialType ? null : selectedBudget || null,
         date: getLocalISOString(selectedDate),
-        note,
+        note: finalNote,
         toAccountId: type === 'transfer' ? selectedToAccount : null,
       });
     } else {
       addTransaction({
         id: Date.now().toString(),
         type,
-        amount,
-        categoryId: type === 'transfer' ? null : selectedCategory || null,
+        amount: finalAmount,
+        categoryId: isSpecialType ? null : selectedCategory || null,
         accountId: selectedAccount,
-        budgetId: type === 'transfer' ? null : selectedBudget || null,
+        budgetId: isSpecialType ? null : selectedBudget || null,
         date: getLocalISOString(selectedDate),
-        note,
+        note: finalNote,
         toAccountId: type === 'transfer' ? selectedToAccount : null,
       });
     }
@@ -507,13 +557,21 @@ export const AddTransactionScreen = () => {
       return;
     }
 
+    const isSpecialType = type === 'transfer' || type === 'adjustment';
+    const finalAmount =
+      type === 'adjustment'
+        ? adjustmentSign === 'negative'
+          ? -Math.abs(amount)
+          : Math.abs(amount)
+        : amount;
+
     addTransaction({
       id: Date.now().toString(),
       type,
-      amount,
-      categoryId: type === 'transfer' ? null : selectedCategory || null,
+      amount: finalAmount,
+      categoryId: isSpecialType ? null : selectedCategory || null,
       accountId: selectedAccount,
-      budgetId: type === 'transfer' ? null : selectedBudget || null,
+      budgetId: isSpecialType ? null : selectedBudget || null,
       date: getLocalISOString(),
       note: note ? `${note} (${t('duplicate')})` : t('duplicate'),
       toAccountId: type === 'transfer' ? selectedToAccount : null,
@@ -649,7 +707,9 @@ export const AddTransactionScreen = () => {
     > = {};
 
     const currentMonthRange = getMonthRange(cycleStartDay);
-    const expenses = transactions.filter((t) => t.type === 'expense');
+    const expenses = transactions.filter(
+      (t) => t.type === 'expense' && !isAdjustmentTransaction(t),
+    );
 
     for (const bud of budgets) {
       const spent = expenses
@@ -700,6 +760,54 @@ export const AddTransactionScreen = () => {
     return { spent: 0, progress: 0, remaining: 0 };
   }, [selectedBudgetObj, getBudgetUsage]);
 
+  const baseBalanceBeforeAdjustment = useMemo(() => {
+    const currBal = selectedAccountObj?.currentBalance ?? 0;
+    if (
+      isEditing &&
+      editingTransaction &&
+      isAdjustmentTransaction(editingTransaction) &&
+      selectedAccount === editingTransaction.accountId
+    ) {
+      return roundCurrency(
+        currBal - getAdjustmentSignedAmount(editingTransaction),
+      );
+    }
+    return currBal;
+  }, [isEditing, editingTransaction, selectedAccount, selectedAccountObj]);
+
+  const resultingAdjustedBalance = useMemo(() => {
+    const signedDiff =
+      adjustmentSign === 'negative' ? -Math.abs(amount) : Math.abs(amount);
+    return roundCurrency(baseBalanceBeforeAdjustment + signedDiff);
+  }, [adjustmentSign, amount, baseBalanceBeforeAdjustment]);
+
+  const handleNewBalanceReconcileChange = useCallback(
+    (text: string) => {
+      const isDecimal =
+        currency !== 'COP' &&
+        currency !== 'CLP' &&
+        currency !== 'PYG' &&
+        currency !== 'XAF';
+      const hasMinus = text.trim().startsWith('-');
+      const parsedAbs = parseAmountText(
+        formatAmountInput(text, isDecimal),
+        isDecimal,
+      );
+      const newBal = hasMinus ? -parsedAbs : parsedAbs;
+      const diff = calculateAdjustmentDifference(
+        newBal,
+        baseBalanceBeforeAdjustment,
+      );
+      setAdjustmentSign(diff < 0 ? 'negative' : 'positive');
+      const absDiff = Math.abs(diff);
+      setAmount(absDiff);
+      setDisplayAmount(
+        absDiff === 0 ? '' : formatAmountInput(absDiff.toString(), isDecimal),
+      );
+    },
+    [baseBalanceBeforeAdjustment, currency, formatAmountInput, parseAmountText],
+  );
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -708,7 +816,14 @@ export const AddTransactionScreen = () => {
     >
       <Stack.Screen
         options={{
-          title: isEditing ? t('editTransaction') : t('addTransaction'),
+          title:
+            type === 'adjustment'
+              ? isEditing
+                ? t('editAdjustment')
+                : t('adjustBalance')
+              : isEditing
+                ? t('editTransaction')
+                : t('addTransaction'),
           headerLeft: !router.canGoBack()
             ? () => (
                 <TouchableOpacity
@@ -767,12 +882,84 @@ export const AddTransactionScreen = () => {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        <CustomSegmentedControl
-          type={type}
-          setType={setType}
-          categories={categories}
-          setSelectedCategory={setSelectedCategory}
-        />
+        {type !== 'adjustment' ? (
+          <CustomSegmentedControl
+            type={type}
+            setType={setType}
+            categories={categories}
+            setSelectedCategory={setSelectedCategory}
+          />
+        ) : (
+          <View
+            style={[
+              styles.tabContainer,
+              { backgroundColor: theme.colors.surfaceVariant },
+            ]}
+          >
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                {
+                  borderRadius: 20,
+                  backgroundColor:
+                    adjustmentSign === 'positive'
+                      ? activeColors.badgeBg
+                      : 'transparent',
+                },
+              ]}
+              onPress={() => setAdjustmentSign('positive')}
+              activeOpacity={0.8}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: adjustmentSign === 'positive' }}
+              accessibilityLabel={t('positiveAdjustment')}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  {
+                    color:
+                      adjustmentSign === 'positive'
+                        ? activeColors.text
+                        : theme.colors.onSurfaceVariant,
+                  },
+                ]}
+              >
+                + {t('positiveAdjustment')}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                {
+                  borderRadius: 20,
+                  backgroundColor:
+                    adjustmentSign === 'negative'
+                      ? activeColors.badgeBg
+                      : 'transparent',
+                },
+              ]}
+              onPress={() => setAdjustmentSign('negative')}
+              activeOpacity={0.8}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: adjustmentSign === 'negative' }}
+              accessibilityLabel={t('negativeAdjustment')}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  {
+                    color:
+                      adjustmentSign === 'negative'
+                        ? activeColors.text
+                        : theme.colors.onSurfaceVariant,
+                  },
+                ]}
+              >
+                - {t('negativeAdjustment')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <View
           style={[
@@ -920,6 +1107,141 @@ export const AddTransactionScreen = () => {
               setSelectedToAccount(prev);
             }}
           />
+        )}
+
+        {type === 'adjustment' && (
+          <View style={{ gap: 12 }}>
+            <TouchableOpacity
+              style={[
+                styles.compactRowCard,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.outlineVariant,
+                  borderWidth: 1,
+                },
+              ]}
+              onPress={() => openAccountSheet('from')}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={`${t('accounts')}: ${selectedAccountObj ? translateName(selectedAccountObj.name) : ''}`}
+            >
+              <View style={styles.selectorCardLeft}>
+                <View
+                  style={[
+                    styles.selectorIconBg,
+                    {
+                      backgroundColor:
+                        selectedAccountObj?.color || theme.colors.primary,
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name={getAccountIcon(selectedAccountObj?.type)}
+                    size={20}
+                    color="#fff"
+                  />
+                </View>
+                <View style={styles.selectorCardTextCol}>
+                  <Text
+                    variant="labelSmall"
+                    style={[
+                      styles.selectorCardLabel,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    {t('accounts').toUpperCase()}
+                  </Text>
+                  <Text
+                    variant="bodyMedium"
+                    style={[
+                      styles.selectorCardValue,
+                      { color: theme.colors.onSurface },
+                    ]}
+                  >
+                    {selectedAccountObj
+                      ? translateName(selectedAccountObj.name)
+                      : t('selectAccount')}
+                  </Text>
+                </View>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={18}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </TouchableOpacity>
+
+            <View
+              style={[
+                styles.compactRowCard,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.outlineVariant,
+                  borderWidth: 1,
+                  flexDirection: 'column',
+                  alignItems: 'stretch',
+                  gap: 10,
+                },
+              ]}
+            >
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Text
+                  variant="labelSmall"
+                  style={{ color: theme.colors.onSurfaceVariant }}
+                >
+                  {t('currentBalanceLabel')}
+                </Text>
+                <Text
+                  variant="bodyMedium"
+                  style={{
+                    color: theme.colors.onSurface,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                  }}
+                >
+                  {formatCurrency(
+                    baseBalanceBeforeAdjustment,
+                    selectedAccountObj?.currency,
+                  )}
+                </Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Text
+                  variant="labelSmall"
+                  style={{ color: theme.colors.onSurfaceVariant }}
+                >
+                  {t('newActualBalance')}
+                </Text>
+                <RNTextInput
+                  defaultValue={String(resultingAdjustedBalance)}
+                  onChangeText={handleNewBalanceReconcileChange}
+                  keyboardType="decimal-pad"
+                  accessibilityLabel={t('newActualBalance')}
+                  style={{
+                    color: theme.colors.primary,
+                    fontFamily: 'Inter-SemiBold',
+                    fontWeight: '600',
+                    fontSize: 15,
+                    textAlign: 'right',
+                    minWidth: 100,
+                    paddingVertical: 4,
+                  }}
+                />
+              </View>
+            </View>
+          </View>
         )}
 
         <TouchableOpacity

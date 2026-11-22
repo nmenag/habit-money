@@ -153,6 +153,17 @@ export const en = {
   updateBudget: 'Update Budget',
   saveBudget: 'Save Budget',
   balanceAdjustment: 'Balance Adjustment',
+  adjustBalance: 'Adjust Balance',
+  newActualBalance: 'New Actual Balance',
+  adjustmentDifference: 'Adjustment Difference',
+  adjustment: 'Adjustment',
+  editAdjustment: 'Edit Adjustment',
+  positiveAdjustment: 'Positive Adjustment',
+  negativeAdjustment: 'Negative Adjustment',
+  noBalanceChangeError:
+    'The new balance must be different from the current balance.',
+  reconcileBalanceDesc:
+    'Enter the actual amount you currently have in this account.',
   adjustments: 'Adjustments',
   combinedTotal: 'Combined Total',
   realIncome: 'Real Income',
