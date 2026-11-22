@@ -174,19 +174,19 @@ export class ProductAnalyticsService {
   }
 
   public static async logTransactionCreated(
-    type: 'expense' | 'income' | 'transfer',
+    type: 'expense' | 'income' | 'transfer' | 'adjustment',
   ): Promise<void> {
     await this.logEvent('transaction_created', { transaction_type: type });
   }
 
   public static async logTransactionUpdated(
-    type: 'expense' | 'income' | 'transfer',
+    type: 'expense' | 'income' | 'transfer' | 'adjustment',
   ): Promise<void> {
     await this.logEvent('transaction_updated', { transaction_type: type });
   }
 
   public static async logTransactionDeleted(
-    type: 'expense' | 'income' | 'transfer',
+    type: 'expense' | 'income' | 'transfer' | 'adjustment',
   ): Promise<void> {
     await this.logEvent('transaction_deleted', { transaction_type: type });
   }

@@ -477,26 +477,36 @@ describe('Integration: Balance adjustment via editAccount', () => {
     jest.clearAllMocks();
   });
 
-  it('creates an income adjustment transaction when balance is increased', () => {
+  it('creates a positive adjustment transaction when balance is increased', () => {
     const updated: Account = { ...account, currentBalance: 1500 };
 
     store.getState().editAccount(updated);
 
     expect(mockDb.runSync).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO transactions'),
-      expect.arrayContaining(['income', 500, 'acc-adj', 'Balance Adjustment']),
+      expect.arrayContaining([
+        'adjustment',
+        500,
+        'acc-adj',
+        'Balance Adjustment',
+      ]),
     );
     expect(store.getState().accounts[0].currentBalance).toBe(1500);
   });
 
-  it('creates an expense adjustment transaction when balance is decreased', () => {
+  it('creates a negative adjustment transaction when balance is decreased', () => {
     const updated: Account = { ...account, currentBalance: 700 };
 
     store.getState().editAccount(updated);
 
     expect(mockDb.runSync).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO transactions'),
-      expect.arrayContaining(['expense', 300, 'acc-adj', 'Balance Adjustment']),
+      expect.arrayContaining([
+        'adjustment',
+        -300,
+        'acc-adj',
+        'Balance Adjustment',
+      ]),
     );
     expect(store.getState().accounts[0].currentBalance).toBe(700);
   });
@@ -510,6 +520,99 @@ describe('Integration: Balance adjustment via editAccount', () => {
       (call[0] as string).includes('INSERT INTO transactions'),
     );
     expect(insertCalls).toHaveLength(0);
+  });
+
+  it('reconciles balance via adjustAccountBalance and supports editing and deleting the adjustment', () => {
+    const created = store
+      .getState()
+      .adjustAccountBalance('acc-adj', 1800, 'Reconciliation');
+    expect(created).not.toBeNull();
+    expect(created?.type).toBe('adjustment');
+    expect(created?.amount).toBe(800);
+    expect(store.getState().accounts[0].currentBalance).toBe(1800);
+    expect(store.getState().transactions).toHaveLength(1);
+
+    store
+      .getState()
+      .deleteTransaction(created!.id, 'acc-adj', created!.amount, 'adjustment');
+    expect(store.getState().accounts[0].currentBalance).toBe(1000);
+    expect(store.getState().transactions).toHaveLength(0);
+
+    const negAdj = store.getState().adjustAccountBalance('acc-adj', 650);
+    expect(negAdj?.amount).toBe(-350);
+    expect(store.getState().accounts[0].currentBalance).toBe(650);
+  });
+
+  it('converts positive adjustment to income and negative adjustment to expense while preserving balance and supporting subsequent edit/delete', () => {
+    const posAdj = store.getState().adjustAccountBalance('acc-adj', 1600);
+    expect(posAdj?.type).toBe('adjustment');
+    expect(posAdj?.amount).toBe(600);
+    expect(store.getState().accounts[0].currentBalance).toBe(1600);
+
+    const blockedExp = store.getState().convertAdjustmentTransaction({
+      id: posAdj!.id,
+      targetType: 'expense',
+      categoryId: 'cat-food',
+    });
+    expect(blockedExp).toBeNull();
+    expect(store.getState().transactions[0].type).toBe('adjustment');
+
+    const convertedInc = store.getState().convertAdjustmentTransaction({
+      id: posAdj!.id,
+      targetType: 'income',
+      categoryId: 'cat-salary',
+      date: '2026-05-20T10:00:00.000',
+      note: 'Bonus paycheck',
+    });
+    expect(convertedInc).not.toBeNull();
+    expect(convertedInc?.id).toBe(posAdj!.id);
+    expect(convertedInc?.type).toBe('income');
+    expect(convertedInc?.amount).toBe(600);
+    expect(convertedInc?.accountId).toBe('acc-adj');
+    expect(convertedInc?.categoryId).toBe('cat-salary');
+    expect(convertedInc?.note).toBe('Bonus paycheck');
+    expect(store.getState().accounts[0].currentBalance).toBe(1600);
+    expect(store.getState().transactions).toHaveLength(1);
+
+    const negAdj = store.getState().adjustAccountBalance('acc-adj', 1200);
+    expect(negAdj?.type).toBe('adjustment');
+    expect(negAdj?.amount).toBe(-400);
+    expect(store.getState().accounts[0].currentBalance).toBe(1200);
+
+    const blockedInc = store.getState().convertAdjustmentTransaction({
+      id: negAdj!.id,
+      targetType: 'income',
+      categoryId: 'cat-salary',
+    });
+    expect(blockedInc).toBeNull();
+
+    const convertedExp = store.getState().convertAdjustmentTransaction({
+      id: negAdj!.id,
+      targetType: 'expense',
+      categoryId: 'cat-food',
+      date: '2026-05-21T12:00:00.000',
+      note: 'Weekly groceries',
+    });
+    expect(convertedExp).not.toBeNull();
+    expect(convertedExp?.id).toBe(negAdj!.id);
+    expect(convertedExp?.type).toBe('expense');
+    expect(convertedExp?.amount).toBe(400);
+    expect(convertedExp?.categoryId).toBe('cat-food');
+    expect(convertedExp?.note).toBe('Weekly groceries');
+    expect(store.getState().accounts[0].currentBalance).toBe(1200);
+    expect(store.getState().transactions).toHaveLength(2);
+
+    store.getState().editTransaction({
+      ...convertedExp!,
+      amount: 500,
+    });
+    expect(store.getState().accounts[0].currentBalance).toBe(1100);
+
+    store
+      .getState()
+      .deleteTransaction(convertedExp!.id, 'acc-adj', 500, 'expense');
+    expect(store.getState().accounts[0].currentBalance).toBe(1600);
+    expect(store.getState().transactions).toHaveLength(1);
   });
 });
 

@@ -171,6 +171,28 @@ describe('dataBackup', () => {
               note: 'Lunch',
               toAccountId: null,
             },
+            {
+              id: 't2',
+              type: 'adjustment',
+              amount: -150,
+              categoryId: null,
+              accountId: 'a1',
+              budgetId: null,
+              date: '2026-03-02T12:00:00.000',
+              note: 'Balance Adjustment',
+              toAccountId: null,
+            },
+            {
+              id: 't3',
+              type: 'expense',
+              amount: 75,
+              categoryId: null,
+              accountId: 'a1',
+              budgetId: null,
+              date: '2026-03-03T12:00:00.000',
+              note: 'Ajuste de Saldo',
+              toAccountId: null,
+            },
           ],
           budgets: [
             {
@@ -206,6 +228,28 @@ describe('dataBackup', () => {
       expect(mockDb.execSync).toHaveBeenCalledWith('PRAGMA foreign_keys = ON;');
 
       expect(mockPreparedStatement.executeSync).toHaveBeenCalled();
+      expect(mockPreparedStatement.executeSync).toHaveBeenCalledWith([
+        't2',
+        'adjustment',
+        -150,
+        null,
+        'a1',
+        null,
+        '2026-03-02T12:00:00.000',
+        'Balance Adjustment',
+        null,
+      ]);
+      expect(mockPreparedStatement.executeSync).toHaveBeenCalledWith([
+        't3',
+        'adjustment',
+        -75,
+        null,
+        'a1',
+        null,
+        '2026-03-03T12:00:00.000',
+        'Ajuste de Saldo',
+        null,
+      ]);
       expect(onSuccess).toHaveBeenCalled();
       expect(Alert.alert).toHaveBeenCalledWith('success', 'restoreSuccess');
     });

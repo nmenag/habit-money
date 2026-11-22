@@ -17,6 +17,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { IconButton, Text, useTheme } from 'react-native-paper';
 import { useStore, useTranslation } from '../../../store/useStore';
 import { getLocalDateString } from '../../../utils/dateUtils';
+import { isAdjustmentTransaction } from '../../../utils/transactionUtils';
 
 const formatAmount = (amount: number, formatCurrency: any) => {
   if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M';
@@ -69,8 +70,11 @@ export const CalendarView = ({
         dateStr = current.date.split('T')[0];
       }
       if (!acc[dateStr]) acc[dateStr] = { income: 0, expense: 0 };
-      if (current.type === 'income') acc[dateStr].income += current.amount;
-      else acc[dateStr].expense += current.amount;
+      if (!isAdjustmentTransaction(current)) {
+        if (current.type === 'income') acc[dateStr].income += current.amount;
+        else if (current.type === 'expense')
+          acc[dateStr].expense += current.amount;
+      }
       return acc;
     },
     {} as Record<string, { income: number; expense: number }>,

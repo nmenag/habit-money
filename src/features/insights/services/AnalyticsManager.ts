@@ -86,7 +86,7 @@ export class AnalyticsManager {
 
     const db = getDb();
     const oldestTx = await db.getFirstAsync<{ date: string }>(
-      'SELECT date FROM transactions ORDER BY date ASC LIMIT 1',
+      "SELECT date FROM transactions WHERE type IN ('income', 'expense') AND (note IS NULL OR note NOT IN ('Balance Adjustment', 'Ajuste de Saldo')) ORDER BY date ASC LIMIT 1",
     );
     let hasEnoughHistory = false;
     if (oldestTx && oldestTx.date) {

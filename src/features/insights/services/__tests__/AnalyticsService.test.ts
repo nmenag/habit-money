@@ -24,10 +24,12 @@ describe('AnalyticsService', () => {
   });
 
   describe('getMonthlyMetrics', () => {
-    it('aggregates income, expenses, adjustments, and calculates savings rate', async () => {
+    it('aggregates income and expenses, excludes dedicated and legacy adjustments, and calculates savings rate', async () => {
       mockDb.getAllAsync.mockResolvedValueOnce([
         { type: 'income', amount: 5000, note: 'Salary' },
         { type: 'expense', amount: 1200, note: 'Groceries' },
+        { type: 'adjustment', amount: 400, note: 'Balance Adjustment' },
+        { type: 'adjustment', amount: -150, note: 'Reconcile' },
         { type: 'income', amount: 200, note: 'Balance Adjustment' },
         { type: 'expense', amount: 50, note: 'Ajuste de Saldo' },
       ]);
@@ -41,11 +43,8 @@ describe('AnalyticsService', () => {
 
       expect(metrics.income).toBe(5000);
       expect(metrics.expenses).toBe(1200);
-      // adjustments = +200 - 50 = +150
-      expect(metrics.adjustments).toBe(150);
-      // savings = income - expenses + adjustments = 5000 - 1200 + 150 = 3950
-      expect(metrics.savings).toBe(3950);
-      // savingsRate = (5000 - 1200) / 5000 = 0.76
+      expect(metrics.adjustments).toBe(0);
+      expect(metrics.savings).toBe(3800);
       expect(metrics.savingsRate).toBeCloseTo(0.76);
       expect(metrics.topCategory).toEqual({
         id: 'cat-groceries',
@@ -53,6 +52,27 @@ describe('AnalyticsService', () => {
         amount: 1200,
       });
       expect(metrics.month).toBe('2026-03');
+    });
+
+    it('includes converted adjustments in income and expenses while excluding unclassified adjustments', async () => {
+      mockDb.getAllAsync.mockResolvedValueOnce([
+        { type: 'income', amount: 3000, note: 'Salary' },
+        { type: 'income', amount: 500, note: 'Converted bonus' },
+        { type: 'expense', amount: 400, note: 'Converted groceries' },
+        { type: 'adjustment', amount: -250, note: 'Balance Adjustment' },
+      ]);
+      mockDb.getFirstAsync.mockResolvedValueOnce({
+        id: 'cat-food',
+        name: 'Food',
+        amount: 400,
+      });
+
+      const metrics = await AnalyticsService.getMonthlyMetrics(mockRange);
+
+      expect(metrics.income).toBe(3500);
+      expect(metrics.expenses).toBe(400);
+      expect(metrics.adjustments).toBe(0);
+      expect(metrics.savings).toBe(3100);
     });
 
     it('handles zero income safely with 0 savings rate and undefined topCategory', async () => {

@@ -103,6 +103,15 @@ export const initDb = () => {
       CREATE INDEX IF NOT EXISTS idx_transactions_accountId ON transactions(accountId);
       CREATE INDEX IF NOT EXISTS idx_transactions_categoryId ON transactions(categoryId);
     `);
+    try {
+      db.execSync(`
+        UPDATE transactions
+        SET amount = CASE WHEN type = 'expense' THEN -ABS(amount) ELSE ABS(amount) END,
+            type = 'adjustment'
+        WHERE type IN ('income', 'expense')
+          AND note IN ('Balance Adjustment', 'Ajuste de Saldo');
+      `);
+    } catch {}
   } catch (e) {
     console.error('Error creating transactions table:', e);
   }

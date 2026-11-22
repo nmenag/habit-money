@@ -28,6 +28,7 @@ export const exportTransactionsToCSV = async (
       if (tX.type === 'income') type = t('income');
       else if (tX.type === 'expense') type = t('expense');
       else if (tX.type === 'transfer') type = t('transfer');
+      else if (tX.type === 'adjustment') type = t('balanceAdjustment');
 
       const amount = tX.amount;
       const currency = account?.currency || 'COP';
@@ -39,6 +40,8 @@ export const exportTransactionsToCSV = async (
       let destinationName = '';
       if (tX.type === 'transfer' && toAccount) {
         destinationName = translateName(toAccount.name);
+      } else if (tX.type === 'adjustment') {
+        destinationName = t('balanceAdjustment');
       } else if (category) {
         destinationName = translateName(category.name);
       } else {

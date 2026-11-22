@@ -2,7 +2,7 @@ import { AnalyticsReport } from '../features/insights/services/types';
 export type { AnalyticsReport };
 
 export type AccountType = 'cash' | 'bank' | 'credit';
-export type TransactionType = 'income' | 'expense' | 'transfer';
+export type TransactionType = 'income' | 'expense' | 'transfer' | 'adjustment';
 
 export interface Account {
   id: string;

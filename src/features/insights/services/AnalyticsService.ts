@@ -1,5 +1,6 @@
 import { getDb } from '../../../db/schema';
 import { DateRange } from '../../../utils/dateFilters';
+import { isAdjustmentTransaction } from '../../../utils/transactionUtils';
 import { CategoryExpense, MonthlyMetrics } from './types';
 
 export class AnalyticsService {
@@ -35,15 +36,12 @@ export class AnalyticsService {
 
     let income = 0;
     let expenses = 0;
-    let adjustments = 0;
-
-    const adjustmentNotes = ['Balance Adjustment', 'Ajuste de Saldo'];
 
     transactions.forEach((t) => {
-      const isAdjustment = t.note && adjustmentNotes.includes(t.note);
-      if (isAdjustment) {
-        adjustments += t.type === 'income' ? t.amount : -t.amount;
-      } else if (t.type === 'income') {
+      if (isAdjustmentTransaction(t)) {
+        return;
+      }
+      if (t.type === 'income') {
         income += t.amount;
       } else if (t.type === 'expense') {
         expenses += t.amount;
@@ -60,7 +58,7 @@ export class AnalyticsService {
       FROM transactions t
       JOIN categories c ON t.categoryId = c.id
       WHERE t.type = 'expense'
-        AND t.note NOT IN ('Balance Adjustment', 'Ajuste de Saldo')
+        AND (t.note IS NULL OR t.note NOT IN ('Balance Adjustment', 'Ajuste de Saldo'))
         AND t.date >= ? AND t.date <= ?
       GROUP BY c.id
       ORDER BY amount DESC
@@ -69,14 +67,14 @@ export class AnalyticsService {
       [start, end],
     );
 
-    const savings = income - expenses + adjustments;
+    const savings = income - expenses;
     const savingsRate = income > 0 ? (income - expenses) / income : 0;
 
     return {
       month,
       income,
       expenses,
-      adjustments,
+      adjustments: 0,
       savings,
       savingsRate,
       topCategory: topCategory || undefined,
@@ -104,7 +102,7 @@ export class AnalyticsService {
       FROM transactions t
       JOIN categories c ON t.categoryId = c.id
       WHERE t.type = 'expense'
-        AND t.note NOT IN ('Balance Adjustment', 'Ajuste de Saldo')
+        AND (t.note IS NULL OR t.note NOT IN ('Balance Adjustment', 'Ajuste de Saldo'))
         AND t.date >= ? AND t.date <= ?
       GROUP BY c.id
       ORDER BY amount DESC
@@ -129,7 +127,7 @@ export class AnalyticsService {
       SELECT COUNT(DISTINCT substr(date, 1, 10)) as count
       FROM transactions
       WHERE type = 'expense'
-        AND note NOT IN ('Balance Adjustment', 'Ajuste de Saldo')
+        AND (note IS NULL OR note NOT IN ('Balance Adjustment', 'Ajuste de Saldo'))
         AND date >= ? AND date <= ?
     `,
       [start, end],
@@ -158,6 +156,7 @@ export class AnalyticsService {
       JOIN categories c ON b.categoryId = c.id
       LEFT JOIN transactions t ON t.categoryId = b.categoryId
         AND t.type = 'expense'
+        AND (t.note IS NULL OR t.note NOT IN ('Balance Adjustment', 'Ajuste de Saldo'))
         AND t.date >= ? AND t.date <= ?
       GROUP BY b.categoryId
     `,

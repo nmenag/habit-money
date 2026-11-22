@@ -9,6 +9,7 @@ import * as Sharing from 'expo-sharing';
 import { Alert } from 'react-native';
 import { getDb } from '../db/schema';
 import { getLocalDateString, getLocalISOString } from './dateUtils';
+import { isLegacyAdjustment } from './transactionUtils';
 
 let isBackupInProgress = false;
 let isRestoreInProgress = false;
@@ -138,19 +139,26 @@ export const restoreFromJSON = async (
       'INSERT INTO transactions (id, type, amount, categoryId, accountId, budgetId, date, note, toAccountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
     );
     try {
-      transactions.forEach((t: any) =>
+      (transactions || []).forEach((t: any) => {
+        const legacyAdj = isLegacyAdjustment(t);
+        const normalizedType = legacyAdj ? 'adjustment' : t.type;
+        const normalizedAmount = legacyAdj
+          ? t.type === 'expense'
+            ? -Math.abs(t.amount)
+            : Math.abs(t.amount)
+          : t.amount;
         insertTransaction.executeSync([
           t.id,
-          t.type,
-          t.amount,
+          normalizedType,
+          normalizedAmount,
           t.categoryId,
           t.accountId,
           t.budgetId,
           t.date,
           t.note,
           t.toAccountId || null,
-        ]),
-      );
+        ]);
+      });
     } finally {
       insertTransaction.finalizeSync();
     }

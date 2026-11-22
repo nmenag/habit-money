@@ -91,6 +91,15 @@ describe('exportTransactionsToCSV', () => {
         toAccountId: 'missing_acc',
         categoryId: null,
       },
+      {
+        id: '6',
+        type: 'adjustment',
+        amount: -120,
+        date: '2026-05-20T18:00:00.000',
+        accountId: 'acc1',
+        categoryId: null,
+        note: 'Balance Adjustment',
+      },
     ];
 
     await exportTransactionsToCSV(

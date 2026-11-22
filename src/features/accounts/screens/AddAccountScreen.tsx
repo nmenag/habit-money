@@ -42,8 +42,8 @@ export const AddAccountScreen = () => {
   const {
     addAccount,
     editAccount,
+    adjustAccountBalance,
     deleteAccount,
-    addTransaction,
     currency,
     accounts,
   } = useStore();
@@ -84,18 +84,12 @@ export const AddAccountScreen = () => {
       });
 
       if (finalBalance !== editingAccount.currentBalance) {
-        const difference = finalBalance - editingAccount.currentBalance;
-        const txType = difference > 0 ? 'income' : 'expense';
-
-        addTransaction({
-          id: Date.now().toString(),
-          type: txType,
-          amount: Math.abs(difference),
-          categoryId: null,
-          accountId: editingAccount.id,
-          date: getLocalISOString(),
-          note: t('balanceAdjustment'),
-        });
+        adjustAccountBalance(
+          editingAccount.id,
+          finalBalance,
+          t('balanceAdjustment'),
+          getLocalISOString(),
+        );
       }
     } else {
       addAccount({

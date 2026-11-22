@@ -11,6 +11,10 @@ import {
 } from '../../../store/useStore';
 import { spacing, AppTheme } from '../../../theme/theme';
 import { getValidCategoryIcon } from '../../../constants';
+import {
+  getAdjustmentSignedAmount,
+  isAdjustmentTransaction,
+} from '../../../utils/transactionUtils';
 
 interface Props {
   transaction: Transaction;
@@ -69,10 +73,23 @@ export const TransactionItem: React.FC<Props> = memo(
 
     const isAdjustment = useMemo(
       () =>
-        transaction.note &&
-        translateName(transaction.note) === t('balanceAdjustment'),
-      [transaction.note, translateName, t],
+        isAdjustmentTransaction(transaction) ||
+        Boolean(
+          transaction.note &&
+          translateName(transaction.note) === t('balanceAdjustment'),
+        ),
+      [transaction, translateName, t],
     );
+
+    const signedAdjustmentAmount = useMemo(
+      () => (isAdjustment ? getAdjustmentSignedAmount(transaction) : 0),
+      [isAdjustment, transaction],
+    );
+
+    const isPositiveAmount = isAdjustment
+      ? signedAdjustmentAmount >= 0
+      : isIncome;
+    const displayNumericAmount = Math.abs(transaction.amount);
 
     const isTransfer = transaction.type === 'transfer';
 
@@ -151,7 +168,7 @@ export const TransactionItem: React.FC<Props> = memo(
               {
                 color: isTransfer
                   ? theme.colors.onSurface
-                  : isIncome
+                  : isPositiveAmount
                     ? theme.colors.income
                     : theme.colors.error,
                 fontFamily: 'Inter-Medium',
@@ -162,15 +179,15 @@ export const TransactionItem: React.FC<Props> = memo(
             numberOfLines={1}
             adjustsFontSizeToFit
           >
-            {isTransfer ? '' : isIncome ? '+' : '-'}
-            {formatCurrency(transaction.amount, accountCurrency)}
+            {isTransfer ? '' : isPositiveAmount ? '+' : '-'}
+            {formatCurrency(displayNumericAmount, accountCurrency)}
           </Text>
         </View>
       );
     }, [
       isTransfer,
-      isIncome,
-      transaction.amount,
+      isPositiveAmount,
+      displayNumericAmount,
       accountCurrency,
       formatCurrency,
       theme,
@@ -195,7 +212,7 @@ export const TransactionItem: React.FC<Props> = memo(
     return (
       <List.Item
         title={displayTitle}
-        description={`${formattedDate}${transaction.note ? ` • ${transaction.note}` : ''}`}
+        description={`${formattedDate}${transaction.note ? ` • ${translateName(transaction.note)}` : ''}`}
         left={LeftContent}
         right={RightContent}
         onPress={onPress}
@@ -207,7 +224,7 @@ export const TransactionItem: React.FC<Props> = memo(
           fontSize: 12,
           color: theme.colors.onSurfaceVariant,
         }}
-        accessibilityLabel={`${displayTitle}, ${isTransfer ? t('transfer') : formatCurrency(transaction.amount, accountCurrency)}, ${formattedDate}`}
+        accessibilityLabel={`${displayTitle}, ${isTransfer ? t('transfer') : `${isPositiveAmount ? '+' : '-'}${formatCurrency(displayNumericAmount, accountCurrency)}`}, ${formattedDate}`}
         accessibilityRole="button"
       />
     );

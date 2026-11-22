@@ -7,6 +7,7 @@ import { translations } from '../i18n/translations';
 import { getDb, initDb } from '../db/schema';
 import { getLast30DaysRange, getMonthRange } from '../utils/dateFilters';
 import { getLocalISOString } from '../utils/dateUtils';
+import { isAdjustmentTransaction } from '../utils/transactionUtils';
 
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
   const { widgetAction, renderWidget } = props;
@@ -59,15 +60,13 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
       [calStartStr, calEndStr],
     );
 
-    const adjustmentNotes = [
-      translations.en.balanceAdjustment,
-      translations.es.balanceAdjustment,
-    ];
-
     let hasCalData = false;
     calTransactions.forEach((t) => {
-      const isAdjustment = t.note && adjustmentNotes.includes(t.note);
-      if (!isAdjustment && t.amount > 0) {
+      if (
+        !isAdjustmentTransaction(t) &&
+        t.type !== 'transfer' &&
+        t.amount > 0
+      ) {
         hasCalData = true;
       }
     });
@@ -88,8 +87,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
         );
 
     transactions.forEach((t) => {
-      const isAdjustment = t.note && adjustmentNotes.includes(t.note);
-      if (!isAdjustment) {
+      if (!isAdjustmentTransaction(t)) {
         if (t.type === 'income') {
           income += t.amount;
         } else if (t.type === 'expense') {

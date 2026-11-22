@@ -16,6 +16,7 @@ import { AppTheme, spacing } from '../../../theme/theme';
 import { fontScale } from '../../../utils/responsive';
 import { getValidCategoryIcon } from '../../../constants';
 import { getMonthRange, isInRange } from '../../../utils/dateFilters';
+import { isAdjustmentTransaction } from '../../../utils/transactionUtils';
 import { format } from 'date-fns';
 import { enUS, es } from 'date-fns/locale';
 
@@ -68,6 +69,7 @@ export const BudgetsScreen = () => {
             return (
               (matchesBudget || matchesCategory) &&
               tx.type === 'expense' &&
+              !isAdjustmentTransaction(tx) &&
               isCurrentMonth
             );
           })
@@ -86,6 +88,7 @@ export const BudgetsScreen = () => {
             return (
               (matchesBudget || matchesCategory) &&
               tx.type === 'expense' &&
+              !isAdjustmentTransaction(tx) &&
               isCurrentMonth
             );
           })
@@ -136,6 +139,7 @@ export const BudgetsScreen = () => {
         return (
           (matchesBudget || matchesCategory) &&
           t.type === 'expense' &&
+          !isAdjustmentTransaction(t) &&
           isCurrentMonth
         );
       })
