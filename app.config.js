@@ -1,4 +1,30 @@
+const { withAndroidManifest } = require('expo/config-plugins');
 const packageJson = require('./package.json');
+
+const withOptionalWifiFeature = (config) => {
+  return withAndroidManifest(config, (manifestConfig) => {
+    const manifest = manifestConfig.modResults.manifest;
+    const usesFeatures = manifest['uses-feature'] || [];
+    const wifiFeatureName = 'android.hardware.wifi';
+    const existingFeature = usesFeatures.find(
+      (item) => item.$?.['android:name'] === wifiFeatureName,
+    );
+
+    if (existingFeature) {
+      existingFeature.$['android:required'] = 'false';
+    } else {
+      usesFeatures.push({
+        $: {
+          'android:name': wifiFeatureName,
+          'android:required': 'false',
+        },
+      });
+    }
+
+    manifest['uses-feature'] = usesFeatures;
+    return manifestConfig;
+  });
+};
 
 const getAppVariant = () => {
   return process.env.APP_VARIANT || 'production';
@@ -68,6 +94,7 @@ module.exports = {
       favicon: './assets/images/favicon.png',
     },
     plugins: [
+      withOptionalWifiFeature,
       '@react-native-firebase/app',
       '@react-native-firebase/crashlytics',
       [
